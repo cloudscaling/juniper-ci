@@ -1,4 +1,4 @@
-#!/bin/bash
+# /bin/bash
 
 function juju-status() {
   juju status --format yaml $@

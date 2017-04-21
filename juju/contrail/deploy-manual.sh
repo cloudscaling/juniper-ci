@@ -161,6 +161,7 @@ juju-status-tabular
 
 echo "INFO: Wait for services start: $(date)"
 wait_absence_status_for_services "executing|blocked|waiting"
+sleep 30
 echo "INFO: Wait for services end: $(date)"
 
 juju-status-tabular
@@ -175,8 +176,8 @@ juju-ssh $m3 "sudo docker exec -it contrail-agent service contrail-vrouter-agent
 #juju-ssh $m2 "sudo iptables -t nat -A POSTROUTING -o vhost0 -j MASQUERADE"
 #juju-ssh $m3 "sudo iptables -t nat -A POSTROUTING -o vhost0 -j MASQUERADE"
 # and provision vgw
-juju-ssh $m2 "sudo docker exec contrail-agent /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public:public"
-juju-ssh $m3 "sudo docker exec contrail-agent /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public:public"
+#juju-ssh $m2 "sudo docker exec contrail-agent /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public:public"
+#juju-ssh $m3 "sudo docker exec contrail-agent /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public:public"
 
 # linklocal?
 # contrail-provision-linklocal --api_server_ip 172.31.32.53 --api_server_port 8082 --linklocal_service_name metadata --linklocal_service_ip 169.254.169.254 --linklocal_service_port 80 --ipfabric_service_ip 127.0.0.1 --ipfabric_service_port 8775 --oper del --admin_user admin --admin_password password

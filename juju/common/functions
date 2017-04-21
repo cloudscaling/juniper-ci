@@ -1,4 +1,4 @@
-#!/bin/bash
+# /bin/bash
 
 fmy_file="${BASH_SOURCE[0]}"
 fmy_dir="$(dirname $fmy_file)"
@@ -128,7 +128,7 @@ function cleanup_environment() {
 
   # sometime Juju couldn't delete amazon environment and volumes - try to do it manually
   juju-destroy-environment || /bin/true
-  for volid in `aws ec2 describe-volumes --filters Name=tag-value,Values="juju-amazon-volume*" Name=status,Values=available --query 'Volumes[*].{ID:VolumeId}' --output text` ; do
+  for volid in `aws ec2 describe-volumes --filters Name=tag-value,Values="juju-*-machine-*" Name=status,Values=available --query 'Volumes[*].{ID:VolumeId}' --output text` ; do
     aws ec2 delete-volume --volume-id "$volid"
     sleep 3
   done

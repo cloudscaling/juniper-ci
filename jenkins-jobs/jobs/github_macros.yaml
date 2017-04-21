@@ -14,7 +14,7 @@
           wipe-workspace: true
           skip-tag: true
 
-# Open repository in specified organization
+# Private repository in specified organization at branch
 - scm:
     name: github-private
     scm:
@@ -22,7 +22,7 @@
           url: 'git@github.com:{organization}/{repo}.git'
           basedir: '{repo}'
           branches:
-            - '*/master'
+            - '*/{branch}'
           clean:
               after: true
               before: true
@@ -65,6 +65,7 @@
       - github-private:
           organization: Juniper
           repo: contrail-charms
+          branch: cloudscaling
 
 
 # temporary definition while we use unreleased OpenStack charms

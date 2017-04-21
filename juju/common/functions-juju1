@@ -1,4 +1,4 @@
-#!/bin/bash
+# /bin/bash
 
 fjmy_file="${BASH_SOURCE[0]}"
 fjmy_dir="$(dirname $fjmy_file)"
@@ -14,9 +14,9 @@ function juju-bootstrap() {
     return 1
   fi
 
-  juju bootstrap
-  juju-deploy juju-gui --to 0
-  juju-expose juju-gui
+  if ! juju bootstrap ; then
+    return 1
+  fi
   juju-status
 }
 

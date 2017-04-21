@@ -1,4 +1,4 @@
-#!/bin/bash
+# /bin/bash
 
 MAX_FAIL=30
 
