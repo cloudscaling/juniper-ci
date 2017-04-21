@@ -117,7 +117,6 @@ function create_machine() {
     az_opts="zone=$AZ"
   fi
 
-  local disks=''
   juju-add-machine $az_opts --constraints "$additional_constraints instance-type=$instance_type root-disk=40G" 2>&1 | tail -1 | awk '{print $3}'
   # NOTE: 'tail -1' is needed here for enabled debug mode. in this mode there are several lines in output but we need only last.
 }

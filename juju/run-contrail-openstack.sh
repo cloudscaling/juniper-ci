@@ -13,6 +13,11 @@ mkdir $log_dir
 
 source $my_dir/common/functions
 
+if [[ "$jver" == 1 ]] ; then
+  echo "ERROR: only juju 2.0 and higher supports resources. Please install and use juju 2.0 or higher."
+  exit 1
+fi
+
 SERIES=${SERIES:-trusty}
 export SERIES
 VERSION=${VERSION:-"cloud:$SERIES-mitaka"}

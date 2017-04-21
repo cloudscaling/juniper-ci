@@ -5,32 +5,39 @@ if [ ! -d $HOME/docker ] ; then
   exit 1
 fi
 
-my_file="${BASH_SOURCE[0]}"
+my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 source "$my_dir/../common/functions"
 
-if [[ "$jver" == 1 ]] ; then
-  echo "ERROR: only juju 2.0 and higher supports resources. please install juju 2.0 or higher."
-  exit 1
+jver="$(juju-version)"
+deploy_from=${1:-github}   # Place where to get charms - github or charmstore
+if [[ "$deploy_from" == github ]] ; then
+  if [[ "$jver" == 1 ]] ; then
+    exit 1
+  else
+    # version 2
+    PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
+  fi
 else
-  # version 2
-  PLACE="--series=$SERIES $HOME/contrail-charms"
+  # deploy_from=charmstore
+  echo "ERROR: Deploy from charmstore is not supported yet"
+  exit 1
 fi
 
+echo "---------------------------------------------------- From: $deploy_from  Version: $VERSION"
 
-m1=`juju-add-machine zone=$AZ --series=$SERIES --constraints "instance-type=r3.large root-disk=60G"  2>&1 | tail -1 | awk '{print $3}'`
-echo "Machine $m1 created."
-m2=`juju-add-machine zone=$AZ --series=$SERIES --constraints "instance-type=c4.large root-disk=40G"  2>&1 | tail -1 | awk '{print $3}'`
-echo "Machine $m2 created."
-m3=`juju-add-machine zone=$AZ --series=$SERIES --constraints "instance-type=c4.large root-disk=40G"  2>&1 | tail -1 | awk '{print $3}'`
-echo "Machine $m3 created."
-m4=`juju-add-machine zone=$AZ --series=$SERIES --constraints "instance-type=t2.medium root-disk=40G" 2>&1 | tail -1 | awk '{print $3}'`
-echo "Machine $m4 created."
-m5=`juju-add-machine zone=$AZ --series=$SERIES --constraints "instance-type=t2.medium root-disk=40G" 2>&1 | tail -1 | awk '{print $3}'`
-echo "Machine $m5 created."
-m6=`juju-add-machine zone=$AZ --series=$SERIES --constraints "instance-type=r3.large root-disk=40G"  2>&1 | tail -1 | awk '{print $3}'`
-echo "Machine $m6 created."
-
+m1=$(create_machine 2)
+echo "INFO: Machine created: $m1"
+m2=$(create_machine 1)
+echo "INFO: Machine created: $m2"
+m3=$(create_machine 1)
+echo "INFO: Machine created: $m3"
+m4=$(create_machine 0)
+echo "INFO: Machine created: $m4"
+m5=$(create_machine 0)
+echo "INFO: Machine created: $m5"
+m6=$(create_machine 2)
+echo "INFO: Machine created: $m6"
 wait_for_machines $m1 $m2 $m3 $m4 $m5 $m6
 
 
@@ -56,7 +63,6 @@ juju-add-unit ubuntu --to $m6
 juju-deploy cs:$SERIES/ntp
 
 juju-deploy cs:$SERIES/rabbitmq-server --to $m1
-#juju-set rabbitmq-server "source=$VERSION"
 juju-deploy cs:$SERIES/percona-cluster mysql --to $m1
 juju-set mysql "root-password=password" "max-connections=1500"
 
