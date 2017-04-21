@@ -117,15 +117,18 @@ function create_network() {
   local netsfx=$1
   activate_venv
 
+  echo "INFO: Create public network and subnet"
   openstack network create --external public-$netsfx
   local public_net_id=`openstack network show public-$netsfx -f value -c id`
   openstack subnet create --no-dhcp --network $public_net_id --subnet-range 10.5.0.0/24 --gateway 0.0.0.0 public-$netsfx
 
+  echo "INFO: Create private network and subnet"
   openstack network create --internal private-$netsfx
   local private_net_id=`openstack network show private-$netsfx -f value -c id`
-  openstack subnet create --network $public_net_id --subnet-range 10.10.0.0/24 private-$netsfx
-  local private_subnet_id=`openstack subnet list --network d541cc50-9547-4613-b648-4fbbba6b2b73 -f value -c ID`
+  openstack subnet create --network $private_net_id --subnet-range 10.10.0.0/24 private-$netsfx
+  local private_subnet_id=`openstack subnet list --network $private_net_id -f value -c ID`
 
+  echo "INFO: Create router"
   openstack router create p-ext-$netsfx
   local router_id=`openstack router show p-ext-$netsfx -f value -c id`
   openstack router set --external-gateway $public_net_id $router_id

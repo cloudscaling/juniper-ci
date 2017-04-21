@@ -161,9 +161,25 @@ juju-status-tabular
 
 echo "INFO: Wait for services start: $(date)"
 wait_absence_status_for_services "executing|blocked|waiting"
-sleep 30
 echo "INFO: Wait for services end: $(date)"
 
+if [[ "$jver" == 2 ]] ; then
+  # Juju 2.0 registers services with private ips (using new modern tool 'network-get public')
+  echo "INFO: HACK: Reconfigure public endpoints for OpenStack $(date)"
+  ip=`get-machine-ip-by-number $m4`
+  juju-set nova-cloud-controller os-public-hostname=$ip
+  ip=`get-machine-ip-by-number $m5`
+  juju-set neutron-api os-public-hostname=$ip
+  ip=`get-machine-ip-by-number $m2`
+  juju-set glance os-public-hostname=$ip
+  ip=`get-machine-ip-by-number $m3`
+  juju-set keystone os-public-hostname=$ip
+  echo "INFO: Wait for services start: $(date)"
+  wait_absence_status_for_services "executing|blocked|waiting|allocating" 10
+  echo "INFO: Wait for services end: $(date)"
+fi
+
+sleep 30
 juju-status-tabular
 
 # 1. change hypervisor type to kvm
