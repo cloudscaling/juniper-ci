@@ -21,8 +21,8 @@
           name: DEPLOY_TYPE
           description: "A method of deployment"
           choices:
-            - bundle
             - manual
+            - bundle
     scm:
       - juniper-contrail-charms
       - juniper-ci
