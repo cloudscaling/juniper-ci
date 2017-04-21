@@ -16,7 +16,7 @@
 
 # Open repository in specified organization
 - scm:
-    name: github
+    name: github-private
     scm:
       - git:
           url: 'git@github.com:{organization}/{repo}.git'
@@ -62,7 +62,7 @@
 - scm:
     name: juniper-contrail-charms
     scm:
-      - github:
+      - github-private:
           organization: Juniper
           repo: contrail-charms
 
