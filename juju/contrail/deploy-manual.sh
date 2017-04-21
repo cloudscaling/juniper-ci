@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 if [ ! -d $HOME/docker ] ; then
   echo "ERROR: Please provide container images for deployment in $HOME/docker/"
