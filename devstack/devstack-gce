@@ -1,0 +1,61 @@
+ENABLED_SERVICES=key,n-api,n-crt,n-obj,n-cond,n-cpu,n-sch,mysql,rabbit,dstat,cinder,c-api,c-vol,c-sch,c-bak,g-api,g-reg,placement-api
+ENABLED_SERVICES+=,tempest
+ENABLED_SERVICES+=,horizon
+
+ENABLED_SERVICES+=,neutron,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-vpn
+#ENABLED_SERVICES+=,q-fwaas,q-lbaas,q-metering
+#ENABLED_SERVICES+=,n-net
+
+ENABLED_SERVICES+=,s-proxy,s-object,s-container,s-account,swift3
+
+enable_plugin gce-api https://github.com/openstack/gce-api
+enable_plugin neutron-vpnaas git://git.openstack.org/openstack/neutron-vpnaas
+
+OPENSTACK_PASSWORD=password
+DATABASE_PASSWORD=password
+MYSQL_PASSWORD=password
+ADMIN_PASSWORD=$OPENSTACK_PASSWORD
+SERVICE_PASSWORD=$OPENSTACK_PASSWORD
+SERVICE_TOKEN=$OPENSTACK_PASSWORD
+RABBIT_PASSWORD=$OPENSTACK_PASSWORD
+SWIFT_HASH=$OPENSTACK_PASSWORD
+
+USE_SCREEN=False
+LOGFILE=/opt/stack/logs/stack.sh.log
+VERBOSE=True
+LOG_COLOR=False
+SCREEN_LOGDIR=/opt/stack/logs
+SYSLOG=False
+VIRT_DRIVER=libvirt
+LIBVIRT_TYPE=qemu
+
+# from gating
+Q_USE_DEBUG_COMMAND=True
+NETWORK_GATEWAY=10.1.0.1
+FIXED_RANGE=10.1.0.0/20
+FLOATING_RANGE=172.24.5.0/24
+IPV4_ADDRS_SAFE_TO_USE=10.1.0.0/20
+PUBLIC_NETWORK_GATEWAY=172.24.5.1
+FIXED_NETWORK_SIZE=4096
+SERVICE_HOST=
+
+SWIFT_REPLICAS=1
+CINDER_PERIODIC_INTERVAL=10
+CINDER_SECURE_DELETE=False
+CINDER_VOLUME_CLEAR=none
+export OS_NO_CACHE=True
+CEILOMETER_BACKEND=mysql
+LIBS_FROM_GIT=
+DATABASE_QUERY_LOGGING=True
+# Screen console logs will capture service logs.
+# set this until all testing platforms have libvirt >= 1.2.11
+# see bug #1501558
+EBTABLES_RACE_FIX=True
+VOLUME_BACKING_FILE_SIZE=24G
+TEMPEST_HTTP_IMAGE=http://git.openstack.org/static/openstack.png
+FORCE_CONFIG_DRIVE=True
+SKIP_EXERCISES=boot_from_volume,bundle,client-env,euca
+ROOTSLEEP=0
+NOVNC_FROM_PACKAGE=True
+UNDO_REQUIREMENTS=False
+

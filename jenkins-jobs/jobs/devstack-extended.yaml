@@ -1,0 +1,26 @@
+- job-template:
+    name: devstack-{project}
+    description: "Deploys devstack with {project} and run projects' tests"
+    defaults: global
+    properties:
+      - build-discarder
+    scm:
+      - juniper-ci
+    triggers:
+      - timed: "{time}"
+    builders:
+      - shell: |
+          #!/bin/bash -e
+          ./juniper-ci/devstack/run.sh devstack-{project} {project}api.tests.functional {concurrency}
+    publishers:
+      - junit:
+          results: test_result.xml
+
+- project:
+   name: devstack-extended
+   project:
+    - ec2:
+       concurrency: 2
+       time: "0 5 * * 1"
+   jobs:
+    - 'devstack-{project}'

@@ -1,0 +1,66 @@
+# Open repository in specified organization
+- scm:
+    name: github
+    scm:
+      - git:
+          url: 'https://github.com/{organization}/{repo}.git'
+          basedir: '{repo}'
+          branches:
+            - '*/master'
+          clean:
+              after: true
+              before: true
+          prune: true
+          wipe-workspace: true
+          skip-tag: true
+
+# Repository in Cloudscaling github
+- scm:
+    name: cspgithub
+    scm:
+      - git:
+          url: 'https://github.com/cloudscaling/{repo}.git'
+          basedir: '{repo}'
+          branches:
+            - '*/master'
+          clean:
+              after: true
+              before: true
+          prune: true
+          wipe-workspace: true
+          skip-tag: true
+
+- scm:
+    name: juniper-ci
+    scm:
+      - cspgithub:
+          repo: "juniper-ci"
+
+- scm:
+    name: tempest
+    scm:
+      - github:
+          organization: openstack
+          repo: tempest
+
+
+# temporary definition while we use unreleased OpenStack charms
+#- scm:
+#    name: github-tmp
+#    scm:
+#      - git:
+#          url: 'https://github.com/openstack/charm-{charm}.git'
+#          basedir: 'juju-scaleio-tmp/trusty/{charm}'
+#          branches:
+#            - '*/master'
+#          clean:
+#              after: true
+#              before: true
+#          prune: true
+#          wipe-workspace: true
+#          skip-tag: true
+#- scm:
+#    name: charm-glance
+#    scm:
+#      - github-tmp:
+#          charm: glance
