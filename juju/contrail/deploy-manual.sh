@@ -94,14 +94,14 @@ juju-set nova-cloud-controller "network-manager=Neutron" "neutron-external-netwo
 juju-expose neutron-api
 
 # Contrail
-juju-deploy $PLACE/contrail-controller --to $m6 --resource contrail-controller="./docker/contrail-controller-u14.04-4.0.0.0-3046.tar.gz"
+juju-deploy $PLACE/contrail-controller --to $m6 --resource contrail-controller="$HOME/docker/contrail-controller-u14.04-4.0.0.0-3046.tar.gz"
 juju-expose contrail-controller
 
-juju-deploy $PLACE/contrail-analyticsdb --to $m6 --resource contrail-analyticsdb="./docker/contrail-analyticsdb-u14.04-4.0.0.0-3046.tar.gz"
+juju-deploy $PLACE/contrail-analyticsdb --to $m6 --resource contrail-analyticsdb="$HOME/docker/contrail-analyticsdb-u14.04-4.0.0.0-3046.tar.gz"
 
-juju-deploy $PLACE/contrail-analytics --to $m6 --resource contrail-analytics="./docker/contrail-analytics-u14.04-4.0.0.0-3046.tar.gz"
+juju-deploy $PLACE/contrail-analytics --to $m6 --resource contrail-analytics="$HOME/docker/contrail-analytics-u14.04-4.0.0.0-3046.tar.gz"
 
-juju-deploy $PLACE/contrail-agent --to $m2 --resource contrail-agent="./docker/contrail-agent-u14.04-4.0.0.0-3046.tar.gz"
+juju-deploy $PLACE/contrail-agent --to $m2 --resource contrail-agent="$HOME/docker/contrail-agent-u14.04-4.0.0.0-3046.tar.gz"
 juju-add-unit contrail-agent --to $m3
 
 juju-deploy $PLACE/neutron-api-contrail
