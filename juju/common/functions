@@ -1,0 +1,145 @@
+#!/bin/bash
+
+fmy_file="${BASH_SOURCE[0]}"
+fmy_dir="$(dirname $fmy_file)"
+jver="$(juju --version | cut -d . -f 1)"
+source $fmy_dir/functions-juju$jver
+
+function wait_absence_status_for_services() {
+  sleep 10
+  check_str=$1
+  local max_iter=${2:-30}
+  # waiting for services
+  local iter=0
+  while juju-status | grep -P $check_str &>/dev/null
+  do
+    echo "Waiting for all service to be active - $iter/$max_iter"
+    if ((iter >= max_iter)); then
+      echo "ERROR: Services didn't up."
+      juju-status-tabular
+      return 1
+    fi
+    if juju-status | grep "current" | grep error ; then
+      echo "ERROR: Some services went to error state"
+      juju-status-tabular
+      return 1
+    fi
+    sleep 30
+    ((++iter))
+  done
+}
+
+function wait_for_removed() {
+  sleep 10
+  check_str=$1
+  local max_iter=${2:-5}
+  # waiting for services
+  local iter=0
+  while juju-status | grep "$check_str/" &>/dev/null
+  do
+    echo "Waiting for all units to be removed - $iter/$max_iter"
+    if ((iter >= max_iter)); then
+      echo "ERROR: Units didn't removed."
+      juju-status-tabular
+      return 1
+    fi
+    if juju-status | grep "current" | grep error ; then
+      echo "ERROR: Some services went to error state"
+      juju-status-tabular
+      return 1
+    fi
+    sleep 30
+    ((++iter))
+  done
+}
+
+function wait_for_machines() {
+  # wait for machines
+  sleep 30
+  for machine in $@ ; do
+    echo "Waiting for machine: $machine"
+    local fail=0
+    while ! output=`juju-ssh $machine "sudo apt-get install -fy joe mc" 2>/dev/null` ; do
+      if ((fail >= 60)); then
+        echo "ERROR: Machine $machine did not up."
+        echo $output
+        exit 1
+      fi
+      sleep 10
+      ((++fail))
+    done
+    while ! juju-ssh $machine uname -a 2>/dev/null ; do
+      echo "WARNING: Machine $machine isn't accessible"
+      sleep 2
+    done
+  done
+}
+
+function wait_status() {
+  wait_absence_status_for_services "executing|blocked|waiting|allocating"
+
+  # check for errors
+  if juju-status | grep "current" | grep -q error ; then
+    echo "ERROR: Some services went to error state"
+    juju-ssh 0 sudo grep Error /var/log/juju/all-machines.log 2>/dev/null
+    echo "---------------------------------------------------------------------------"
+    juju-status-tabular
+    echo "---------------------------------------------------------------------------"
+    return 2
+  fi
+}
+
+function create_machine() {
+  # 0: general machine for parameters testing
+  # 1: compute machine for OpenStack
+  # 2: machine for controller of OpenStack services
+  local type="$1"
+  shift
+  local additional_constraints="$@"
+
+  case "$type" in
+  "0")
+    local instance_type="t2.medium"
+    ;;
+  "1")
+    local instance_type="c4.large"
+    ;;
+  "2")
+    local instance_type="r3.large"
+    ;;
+  *)
+    return 1
+    ;;
+  esac
+
+  local az_opts=""
+  if [ -n "$AZ" ] ; then
+    az_opts="zone=$AZ"
+  fi
+
+  local disks=''
+  juju-add-machine $az_opts --constraints "$additional_constraints instance-type=$instance_type root-disk=40G" 2>&1 | tail -1 | awk '{print $3}'
+  # NOTE: 'tail -1' is needed here for enabled debug mode. in this mode there are several lines in output but we need only last.
+}
+
+function cleanup_environment() {
+  if juju-destroy-environment ; then
+    return 0
+  fi
+
+  # sometime Juju couldn't delete amazon environment and volumes - try to do it manually
+  juju-destroy-environment || /bin/true
+  for volid in `aws ec2 describe-volumes --filters Name=tag-value,Values="juju-amazon-volume*" Name=status,Values=available --query 'Volumes[*].{ID:VolumeId}' --output text` ; do
+    aws ec2 delete-volume --volume-id "$volid"
+    sleep 3
+  done
+}
+
+function create_stackrc() {
+  auth_ip=`get_machine_ip keystone`
+  echo "export OS_AUTH_URL=http://$auth_ip:5000/v2.0" > $WORKSPACE/stackrc
+  echo "export OS_USERNAME=admin" >> $WORKSPACE/stackrc
+  echo "export OS_TENANT_NAME=admin" >> $WORKSPACE/stackrc
+  echo "export OS_PROJECT_NAME=admin" >> $WORKSPACE/stackrc
+  echo "export OS_PASSWORD=password" >> $WORKSPACE/stackrc
+}

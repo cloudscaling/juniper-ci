@@ -1,0 +1,40 @@
+- job:
+    name: Contrail-Juju-OpenStack-dev
+    description: "Deploys cluster(manual) with OpenStack/Contrail and checks it. Can be used for debug purposes."
+    defaults: global
+    parameters:
+      - bool:
+          name: CLEAN_ENV
+          default: true
+      - choice:
+          name: VERSION
+          description: "Version of the OpenStack"
+          choices:
+            - cloud:trusty-mitaka
+      - choice:
+          name: DEPLOY_FROM
+          description: "A place where to get charms"
+          choices:
+            - github
+            - charmstore
+      - choice:
+          name: DEPLOY_TYPE
+          description: "A method of deployment"
+          choices:
+            - bundle
+            - manual
+    scm:
+      - juniper-contrail-charms
+      - jenkins-scripts
+    builders:
+      - shell: |
+          #!/bin/bash -e
+          export SERIES='trusty'
+          ./juniper-ci/juju/run-contrail-openstack.sh deploy-$DEPLOY_TYPE.sh $DEPLOY_FROM
+    publishers:
+      - junit:
+          results: tempest/test_result.xml
+          allow-empty-results: true
+      - archive:
+          artifacts: 'logs/**'
+          allow-empty: true

@@ -1,0 +1,263 @@
+#!/bin/bash
+
+MAX_FAIL=30
+
+instance_status() { openstack server show $1 | awk '/ status / {print $4}'; }
+function image_status() { openstack image show $1 | awk '/ status / {print $4}'; }
+
+function wait_instance() {
+  local instance_id=$1
+  local max_fail=$2
+  local wait_status=${3:-ACTIVE}
+  echo "INFO: Wait for status '$wait_status' of instance '$instance_id'"
+  local fail=0
+  local timeout=10
+  while [[ true ]] ; do
+    if ((fail >= max_fail)); then
+      echo '' >> errors
+      echo "ERROR: Instance status wait timeout occured" >> errors
+      openstack server show $instance_id >> errors
+      return 1
+    fi
+    echo "attempt $fail of $max_fail"
+    status=$(instance_status $instance_id)
+    if [[ "$status" == "$wait_status" ]]; then
+      break
+    fi
+    if [[ "$status" == "ERROR" || -z "$status" ]]; then
+      echo '' >> errors
+      echo 'ERROR: Instance booting error' >> errors
+      openstack server show $instance_id >> errors
+      return 1
+    fi
+    sleep $timeout
+    ((timeout+=5))
+    ((++fail))
+  done
+}
+
+function wait_image() {
+  local image_id=$1
+  local max_fail=$2
+  local wait_status=$3
+  echo "INFO: Wait for image: $image_id"
+  local fail=0
+  local timeout=10
+  while [[ true ]] ; do
+    if ((fail >= max_fail)); then
+      echo '' >> errors
+      echo "ERROR: Image status wait timeout occured" >> errors
+      openstack image show $image_id >> errors
+      return 1
+    fi
+    echo "attempt $fail of $max_fail"
+    status=$(image_status $image_id)
+    if [[ "$status" == "$wait_status" || "$status" == 'active' ]]; then
+      break
+    fi
+    if [[ "$status" == "error" || "$status" == "deleted" || -z "$status" ]]; then
+      echo '' >> errors
+      echo 'ERROR: Image creation error' >> errors
+      openstack image show $image_id >> errors
+      return 1
+    fi
+    sleep $timeout
+    ((timeout+=5))
+    ((++fail))
+  done
+}
+
+function activate_venv() {
+  if [ -d .venv ]; then
+    source .venv/bin/activate
+  fi
+}
+
+function deactivate_venv() {
+  if [ -d .venv ]; then
+    deactivate
+  fi
+}
+
+function create_virtualenv() {
+  rm -rf .venv
+  virtualenv .venv
+  source .venv/bin/activate
+  pip install -q python-openstackclient 2>/dev/null
+  deactivate
+}
+
+function create_image() {
+  image_name=${1:-cirros}
+
+  activate_venv
+
+  if ! output=`openstack image show $image_name 2>/dev/null` ; then
+    rm -f cirros-0.3.4-x86_64-disk.img
+    wget -t 2 -T 60 -q http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+    if ! output=`openstack image create --public --file cirros-0.3.4-x86_64-disk.img $image_name` ; then
+      return 1
+    fi
+  fi
+  image_id=`echo "$output" | awk '/ id /{print $4}'`
+
+  deactivate_venv
+  echo $image_id
+}
+
+function create_flavors() {
+  activate_venv
+  if ! openstack flavor show 51 &>/dev/null ; then
+    openstack flavor create --disk 1 --vcpus 1 --ram 128 --id 51 test_flavor >/dev/null
+  fi
+  deactivate_venv
+}
+
+function create_network() {
+  local netsfx=$1
+  activate_venv
+
+  openstack network create --external public-$netsfx
+  local public_net_id=`openstack network show public-$netsfx -f value -c id`
+  openstack subnet create --no-dhcp --network $public_net_id --subnet-range 10.5.0.0/24 --gateway 0.0.0.0 public-$netsfx
+
+  openstack network create --internal private-$netsfx
+  local private_net_id=`openstack network show private-$netsfx -f value -c id`
+  openstack subnet create --network $public_net_id --subnet-range 10.10.0.0/24 private-$netsfx
+  local private_subnet_id=`openstack subnet list --network d541cc50-9547-4613-b648-4fbbba6b2b73 -f value -c ID`
+
+  openstack router create p-ext-$netsfx
+  local router_id=`openstack router show p-ext-$netsfx -f value -c id`
+  openstack router set --external-gateway $public_net_id $router_id
+  openstack router add subnet $router_id $private_subnet_id
+
+  for mch in `juju-status-tabular nova-compute | grep -A 6 "^Machine " | tail -n +2 | grep -B 6 "^$" | head -n -1 | awk '{print $1}'` ; do
+    juju ssh $mch sudo docker exec contrail-agent /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx
+  done
+
+  deactivate_venv
+}
+
+function run_os_checks() {
+  host_attr='OS-EXT-SRV-ATTR:hypervisor_hostname '
+
+  # check installed cloud
+  activate_venv
+
+  echo "INFO: Check CLI versions:"
+  set -x
+  openstack --version
+  set +x
+
+  echo "INFO: Check OpenStack catalog first"
+  openstack catalog list || keystone catalog || /bin/true
+  deactivate_venv
+
+  if ! image_id=`create_image` ; then
+    return 1
+  fi
+  create_flavors
+
+  netsfx=$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 4)
+  create_network $netsfx
+
+  activate_venv
+  public_net_id=`openstack network show public-$netsfx -f value -c id`
+  private_net_id=`openstack network show private-$netsfx -f value -c id`
+  openstack floating ip create --floating-ip-address 10.5.0.10 $public_net_id
+  openstack floating ip create --floating-ip-address 10.5.0.11 $public_net_id
+  deactivate_venv
+
+  # next checks will handle return code manually
+  set +e
+
+  activate_venv
+  echo "INFO: Cirros image information"
+  openstack image show $image_id
+  local ret=0
+  check_instance_simple $private_net_id 10.5.0.10 || ret=1
+  echo ''
+
+  set -x
+  openstack server list
+  set +x
+
+  deactivate_venv
+
+  return $ret
+}
+
+function _check_instance_log() {
+  local id=$1
+  # wait for console-log
+  echo "INFO: Check that console log is not empty"
+  sleep 10
+  local log_lines=`openstack console log show $id | wc -l`
+  if (( log_lines == 0 )) ; then
+    echo "ERROR: console log is empty for instance $instance_id"
+    return 1
+  fi
+  return 0
+}
+
+function _get_instance_machine() {
+  local id=$1
+  local host=`openstack server show $id | grep "$host_attr" | awk '{print $4}'`
+  local ip=`openstack hypervisor show -f value -c host_ip $host`
+  local mch=`get_machine_by_ip $ip`
+  echo $mch
+}
+
+function _check_new_route() {
+  local mch=$1
+  local route=$2
+  if ! juju-ssh $mch ip route 2>/dev/null | grep "$route" ; then
+    echo "ERROR: Route $route is absent on host:"
+    juju-ssh $mch ip route
+    return 1
+  fi
+  return 0
+}
+
+function _check_instance_ping() {
+  local mch=$1
+  local fip=$2
+  if ! juju-ssh $mch ping -c 2 $fip 2>/dev/null ; then
+    echo "ERROR: Can't ping instance by floating ip $fip"
+    return 1
+  fi
+  echo "INFO: Can ping instance by ip $fip"
+  return 0
+}
+
+function check_instance_simple() {
+  echo "INFO: Check instance with simple flavor"
+  local flavor=51
+  local net_id=$1
+  local fip=$2
+
+  local iname="instance_$flavor"
+  if ! output=`openstack server create --flavor $flavor --nic net-id=$net_id --image cirros $iname` ; then
+    echo "ERROR: Couldn't boot instance"
+    echo "$output"
+    return 1
+  fi
+  local instance_id=`echo "$output" | awk '/ id /{print $4}'`
+  local ret=0
+  wait_instance $instance_id $((3*MAX_FAIL)) || ret=1
+  openstack server add floating ip $instance_id $fip
+  if [[ $ret == 0 ]] ; then
+    _check_instance_log $instance_id || ret=1
+    mch=`_get_instance_machine $instance_id`
+    echo "INFO: Instance is on machine $mch"
+    # TODO: detect new route instead of hard-code
+    _check_new_route $mch 169.254.0.3 || ret=1
+    _check_instance_ping $mch 169.254.0.3 || ret=1
+    _check_instance_ping $mch $fip || ret=1
+    #_check_instance_ssh $instance_id || ret=1
+  fi
+
+  openstack server show $instance_id
+  openstack server delete $instance_id
+  return $ret
+}

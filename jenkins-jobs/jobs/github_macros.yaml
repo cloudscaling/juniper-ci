@@ -14,6 +14,22 @@
           wipe-workspace: true
           skip-tag: true
 
+# Open repository in specified organization
+- scm:
+    name: github
+    scm:
+      - git:
+          url: 'git@github.com:{organization}/{repo}.git'
+          basedir: '{repo}'
+          branches:
+            - '*/master'
+          clean:
+              after: true
+              before: true
+          prune: true
+          wipe-workspace: true
+          skip-tag: true
+
 # Repository in Cloudscaling github
 - scm:
     name: cspgithub
@@ -42,6 +58,13 @@
       - github:
           organization: openstack
           repo: tempest
+
+- scm:
+    name: juniper-contrail-charms
+    scm:
+      - github:
+          organization: Juniper
+          repo: contrail-charms
 
 
 # temporary definition while we use unreleased OpenStack charms

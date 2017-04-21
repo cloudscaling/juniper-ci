@@ -1,6 +1,6 @@
 - job:
     name: juju-destroy-environment
-    description: "Destroys existing Juju environment"
+    description: "Destroys existing default Juju environment"
     defaults: global
     properties:
       - build-discarder:
@@ -8,51 +8,4 @@
     builders:
       - shell: |
           #!/bin/bash -e
-          juju destroy-environment -y amazon
-
-- job:
-    name: juju-cleanup-old-environment
-    description: "Checks for old existing Juju environment (more than 24h) and destroys it."
-    defaults: global
-    properties:
-      - build-discarder:
-          num-to-keep: 16
-    triggers:
-      - timed: "0 */6 * * *"
-    builders:
-      - shell: |
-          #!/bin/bash -e
-
-          # check environment file
-          if find ~/.juju/environments/ -mmin +1440 | grep jenv ; then
-            echo "Found old environment - delete it"
-            juju destroy-environment -y amazon
-          fi
-
-          echo "Current date is $(date)"
-          csec=$(date +"%s")
-          ((delta = 24*60*60))
-
-          function check_object() {
-            echo "Check object: $1 with creation time: $2"
-            volsec=$(date -d "$2" +"%s")
-            if (( csec > volsec && csec-volsec > delta )) ; then
-              (( cdelta = csec-volsec ))
-              (( hours = cdelta/60/60 ))
-              echo "    This object created more than day ago (about $hours hours ago). Delete it."
-              return 1
-            fi
-            return 0
-          }
-
-          voltime=''
-          volid=''
-          for cline in `aws ec2 describe-volumes --filters Name=tag-value,Values="juju-amazon-volume*" --query 'Volumes[*].{ID:VolumeId,CreateTime:CreateTime}' --output text | sort` ; do
-            if [ -z "$voltime" ] ; then voltime="$cline" ; continue ; fi
-            volid="$cline"
-            if ! check_object "$volid" "$voltime" ; then
-              aws ec2 delete-volume --volume-id "$volid"
-            fi
-            voltime=''
-          done
-
+          juju destroy-controller -y --destroy-all-models amazon
