@@ -190,6 +190,11 @@ function run_os_checks() {
   return $ret
 }
 
+function _get_current_routes() {
+  local mch=$1
+  juju ssh $mch ip route | awk '/169.254/{print $1}'
+}
+
 function _check_instance_log() {
   local id=$1
   # wait for console-log
@@ -226,7 +231,7 @@ function _check_instance_ping() {
   local mch=$1
   local fip=$2
   if ! juju-ssh $mch ping -c 2 $fip 2>/dev/null ; then
-    echo "ERROR: Can't ping instance by floating ip $fip"
+    echo "ERROR: Can't ping instance by ip $fip"
     return 1
   fi
   echo "INFO: Can ping instance by ip $fip"
@@ -238,6 +243,11 @@ function check_instance_simple() {
   local flavor=51
   local net_id=$1
   local fip=$2
+
+  declare -a rts
+  for mch in `juju-status-tabular nova-compute | grep -A 6 "^Machine " | tail -n +2 | grep -B 6 "^$" | head -n -1 | awk '{print $1}'` ; do
+    rts[$mch]=`_get_current_routes $mch`
+  done
 
   local iname="instance_$flavor"
   if ! output=`openstack server create --flavor $flavor --nic net-id=$net_id --image cirros $iname` ; then
@@ -253,9 +263,18 @@ function check_instance_simple() {
     _check_instance_log $instance_id || ret=1
     mch=`_get_instance_machine $instance_id`
     echo "INFO: Instance is on machine $mch"
-    # TODO: detect new route instead of hard-code
-    _check_new_route $mch 169.254.0.3 || ret=1
-    _check_instance_ping $mch 169.254.0.3 || ret=1
+
+    local routes_to_skip="${rts[mch}"
+    local rt=`_get_current_routes $mch`
+    for r in $rt ; do
+      echo "$routes_to_skip" | grep -q "$r" && continue
+      local new_route="$r"
+      break
+    done
+    echo "INFO: Instance's new route is $new_route"
+
+    _check_new_route $mch $new_route || ret=1
+    _check_instance_ping $mch $new_route || ret=1
     _check_instance_ping $mch $fip || ret=1
     #_check_instance_ssh $instance_id || ret=1
   fi

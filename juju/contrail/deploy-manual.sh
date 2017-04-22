@@ -155,14 +155,6 @@ juju-add-relation "contrail-analytics" "contrail-analyticsdb:contrail-analyticsd
 #juju-add-relation "neutron-contrail:contrail-controller" "contrail-controller:contrail-controller"
 #juju-add-relation "neutron-contrail" "contrail-analytics"
 
-sleep 30
-
-juju-status-tabular
-
-echo "INFO: Wait for services start: $(date)"
-wait_absence_status_for_services "executing|blocked|waiting"
-echo "INFO: Wait for services end: $(date)"
-
 if [[ "$jver" == 2 ]] ; then
   # Juju 2.0 registers services with private ips (using new modern tool 'network-get public')
   echo "INFO: HACK: Reconfigure public endpoints for OpenStack $(date)"
@@ -178,6 +170,14 @@ if [[ "$jver" == 2 ]] ; then
   wait_absence_status_for_services "executing|blocked|waiting|allocating" 10
   echo "INFO: Wait for services end: $(date)"
 fi
+
+sleep 30
+juju-status-tabular
+
+echo "INFO: Wait for services start: $(date)"
+wait_absence_status_for_services "executing|blocked|waiting"
+echo "INFO: Wait for services end: $(date)"
+
 
 sleep 30
 juju-status-tabular
