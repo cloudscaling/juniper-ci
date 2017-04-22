@@ -178,6 +178,8 @@ echo "INFO: Wait for services start: $(date)"
 wait_absence_status_for_services "executing|blocked|waiting"
 echo "INFO: Wait for services end: $(date)"
 
+# open port for vnc console
+open_port $m4 6080
 
 sleep 30
 juju-status-tabular
