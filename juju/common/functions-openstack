@@ -192,7 +192,7 @@ function run_os_checks() {
 
 function _get_current_routes() {
   local mch=$1
-  juju ssh $mch ip route | awk '/169.254/{print $1}'
+  juju ssh $mch ip route | awk '/169.254/{print $1} 2>/dev/null'
 }
 
 function _check_instance_log() {
@@ -264,7 +264,7 @@ function check_instance_simple() {
     mch=`_get_instance_machine $instance_id`
     echo "INFO: Instance is on machine $mch"
 
-    local routes_to_skip="${rts[mch}"
+    local routes_to_skip="${rts[mch]}"
     local rt=`_get_current_routes $mch`
     for r in $rt ; do
       echo "$routes_to_skip" | grep -q "$r" && continue
