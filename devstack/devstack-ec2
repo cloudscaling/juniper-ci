@@ -9,7 +9,6 @@ ENABLED_SERVICES+=,neutron,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-vpn
 ENABLED_SERVICES+=,s-proxy,s-object,s-container,s-account,swift3
 
 enable_plugin ec2-api https://github.com/openstack/ec2-api
-enable_plugin neutron-vpnaas git://git.openstack.org/openstack/neutron-vpnaas
 
 OPENSTACK_PASSWORD=password
 DATABASE_PASSWORD=password
