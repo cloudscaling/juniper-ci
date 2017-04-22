@@ -16,7 +16,7 @@ done
 echo -------------------------------------------------------------------------- $(date)
 $SSH "sudo apt-get -qq update"
 $SSH "sudo DEBIAN_FRONTEND=noninteractive apt-get -fqy -o Dpkg::Options::=\"--force-confnew\" upgrade"
-$SSH "sudo reboot"
+$SSH "sudo reboot" || /bin/true
 
 sleep 30
 while [ $($SSH 'pwd > /dev/null' ; echo $?) != 0 ]; do
