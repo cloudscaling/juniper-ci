@@ -9,6 +9,8 @@ my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 source "$my_dir/../common/functions"
 
+VROUTER_AS_CONTAINER=0
+
 jver="$(juju-version)"
 deploy_from=${1:-github}   # Place where to get charms - github or charmstore
 if [[ "$deploy_from" == github ]] ; then
@@ -47,8 +49,12 @@ function add_packages() {
   juju-ssh $mch "sudo dpkg -i contrail-install-packages_4.0.0.0-3046~mitaka_all.deb"
   juju-ssh $mch "sudo /opt/contrail/contrail_packages/setup.sh"
 }
-# add packages only to machine with neutron-api
+# add packages only to machine with neutron-api and nova-compute if needed
 add_packages $m5
+if [[ $VROUTER_AS_CONTAINER == '0' ]] ; then
+  add_packages $m2
+  add_packages $m3
+fi
 
 juju-status-tabular
 
@@ -101,14 +107,18 @@ juju-deploy $PLACE/contrail-analyticsdb --to $m6 --resource contrail-analyticsdb
 
 juju-deploy $PLACE/contrail-analytics --to $m6 --resource contrail-analytics="$HOME/docker/contrail-analytics-u14.04-4.0.0.0-3046.tar.gz"
 
-juju-deploy $PLACE/contrail-agent --to $m2 --resource contrail-agent="$HOME/docker/contrail-agent-u14.04-4.0.0.0-3046.tar.gz"
-juju-add-unit contrail-agent --to $m3
+if [[ $VROUTER_AS_CONTAINER != '0' ]] ; then
+  juju-deploy $PLACE/contrail-agent --to $m2 --resource contrail-agent="$HOME/docker/contrail-agent-u14.04-4.0.0.0-3046.tar.gz"
+  juju-add-unit contrail-agent --to $m3
+fi
 
 juju-deploy $PLACE/neutron-api-contrail
 juju-set neutron-api-contrail "install-sources="
 
-#juju-deploy $PLACE/neutron-contrail
-#juju-set neutron-contrail "install-sources=" "vhost-interface=eth0" "virtual-gateways=[ { project: admin, network: public, interface: vgw, subnets: [ 10.5.0.0/24 ], routes: [ 0.0.0.0/0 ] } ]"
+if [[ $VROUTER_AS_CONTAINER == '0' ]] ; then
+  juju-deploy $PLACE/neutron-contrail
+  juju-set neutron-contrail "install-sources=" "vhost-interface=eth0"
+fi
 
 sleep 30
 
@@ -138,9 +148,12 @@ juju-add-relation "neutron-api-contrail" "keystone"
 juju-add-relation "contrail-controller" "keystone"
 juju-add-relation "contrail-analytics" "keystone"
 juju-add-relation "contrail-analyticsdb" "keystone"
-juju-add-relation "contrail-agent" "keystone"
 
-juju-add-relation "contrail-agent" "contrail-controller"
+if [[ $VROUTER_AS_CONTAINER != '0' ]] ; then
+  juju-add-relation "contrail-agent" "keystone"
+  juju-add-relation "contrail-agent" "contrail-controller"
+fi
+
 juju-add-relation "neutron-api-contrail" "contrail-controller"
 
 juju-add-relation "contrail-controller:contrail-controller" "contrail-analytics:contrail-controller"
@@ -149,11 +162,12 @@ juju-add-relation "contrail-controller" "contrail-analyticsdb:contrail-controlle
 juju-add-relation "contrail-analytics" "contrail-analyticsdb:contrail-analytics"
 juju-add-relation "contrail-analytics" "contrail-analyticsdb:contrail-analyticsdb"
 
-
-#juju-add-relation "nova-compute" "neutron-contrail"
-#juju-add-relation "neutron-contrail" "keystone"
-#juju-add-relation "neutron-contrail:contrail-controller" "contrail-controller:contrail-controller"
-#juju-add-relation "neutron-contrail" "contrail-analytics"
+if [[ $VROUTER_AS_CONTAINER == '0' ]] ; then
+  juju-add-relation "nova-compute" "neutron-contrail"
+  juju-add-relation "neutron-contrail" "keystone"
+  juju-add-relation "neutron-contrail" "contrail-controller"
+  juju-add-relation "neutron-contrail" "contrail-analytics"
+fi
 
 sleep 30
 echo "INFO: Wait for services start: $(date)"
@@ -181,20 +195,10 @@ open_port $m4 6080
 
 juju-status-tabular
 
-# 1. change hypervisor type to kvm
-juju-ssh $m2 "sudo docker exec -it contrail-agent sed -i 's/^# type=.*/type=kvm/g' /etc/contrail/contrail-vrouter-agent.conf"
-juju-ssh $m2 "sudo docker exec -it contrail-agent service contrail-vrouter-agent restart"
-juju-ssh $m3 "sudo docker exec -it contrail-agent sed -i 's/^# type=.*/type=kvm/g' /etc/contrail/contrail-vrouter-agent.conf"
-juju-ssh $m3 "sudo docker exec -it contrail-agent service contrail-vrouter-agent restart"
-
-# 0. for simple setup you can setup MASQUERADING on compute hosts
-#juju-ssh $m2 "sudo iptables -t nat -A POSTROUTING -o vhost0 -j MASQUERADE"
-#juju-ssh $m3 "sudo iptables -t nat -A POSTROUTING -o vhost0 -j MASQUERADE"
-# and provision vgw
-#juju-ssh $m2 "sudo docker exec contrail-agent /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public:public"
-#juju-ssh $m3 "sudo docker exec contrail-agent /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public:public"
-
-# linklocal?
-# contrail-provision-linklocal --api_server_ip 172.31.32.53 --api_server_port 8082 --linklocal_service_name metadata --linklocal_service_ip 169.254.169.254 --linklocal_service_port 80 --ipfabric_service_ip 127.0.0.1 --ipfabric_service_port 8775 --oper del --admin_user admin --admin_password password
-# add metadata secret to vrouter.conf and to nova.conf
-# restart vrouter-agent and nova (creating vgw must be the last operation or you need to re-create it after restart service)
+if [[ $VROUTER_AS_CONTAINER != '0' ]] ; then
+  # 1. change hypervisor type to kvm
+  juju-ssh $m2 "sudo docker exec -it contrail-agent sed -i 's/^# type=.*/type=kvm/g' /etc/contrail/contrail-vrouter-agent.conf"
+  juju-ssh $m2 "sudo docker exec -it contrail-agent service contrail-vrouter-agent restart"
+  juju-ssh $m3 "sudo docker exec -it contrail-agent sed -i 's/^# type=.*/type=kvm/g' /etc/contrail/contrail-vrouter-agent.conf"
+  juju-ssh $m3 "sudo docker exec -it contrail-agent service contrail-vrouter-agent restart"
+fi
