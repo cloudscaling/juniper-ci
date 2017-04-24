@@ -9,8 +9,6 @@ my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 source "$my_dir/../common/functions"
 
-VROUTER_AS_CONTAINER=0
-
 jver="$(juju-version)"
 deploy_from=${1:-github}   # Place where to get charms - github or charmstore
 if [[ "$deploy_from" == github ]] ; then

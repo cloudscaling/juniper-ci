@@ -148,11 +148,11 @@ function open_port() {
   local port=$2
 
   if [[ "$jver" == 1 ]] ; then
-    m_index=`juju status --format tabular | grep -A 7 "\[Machines\]" | grep "$mch  " | awk '{print $1}'`
-    m_id=`juju status --format tabular | grep -A 7 "\[Machines\]" | grep "$mch  " | awk '{print $5}'`
+    m_index=`juju-status-tabular | grep -A 7 "\[Machines\]" | grep "$mch  " | awk '{print $1}'`
+    m_id=`juju-status-tabular | grep -A 7 "\[Machines\]" | grep "$mch  " | awk '{print $5}'`
   else
     m_index="$mch"
-    m_id=`juju status --format tabular | grep -A 7 "^Machine" | grep "^$mch" | awk '{print $4}'`
+    m_id=`juju-status-tabular | grep -A 7 "^Machine" | grep "^$mch" | awk '{print $4}'`
   fi
   sg_id=`aws ec2 describe-instances | grep -C 2 "\-$m_index\"" | awk  '/GroupId/{print $2}' | head -1 | xargs`
   if echo $sg_id | grep ',' ; then

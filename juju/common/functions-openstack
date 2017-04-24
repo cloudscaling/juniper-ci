@@ -134,8 +134,13 @@ function create_network() {
   openstack router set --external-gateway $public_net_id $router_id
   openstack router add subnet $router_id $private_subnet_id
 
+  local cmd=''
+  if [[ $VROUTER_AS_CONTAINER != '0' ]] ; then
+    cmd='docker exec contrail-agent'
+  fi
+
   for mch in `juju-status-tabular nova-compute | grep -A 6 "^Machine " | tail -n +2 | grep -B 6 "^$" | head -n -1 | awk '{print $1}'` ; do
-    juju ssh $mch sudo docker exec contrail-agent /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx
+    juju-ssh $mch sudo $cmd /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx
   done
 
   deactivate_venv
@@ -192,7 +197,7 @@ function run_os_checks() {
 
 function _get_current_routes() {
   local mch=$1
-  juju ssh $mch ip route | awk '/169.254/{print $1} 2>/dev/null'
+  juju-ssh $mch ip route | awk '/169.254/{print $1} 2>/dev/null'
 }
 
 function _check_instance_log() {
