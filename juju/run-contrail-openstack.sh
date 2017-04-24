@@ -26,7 +26,12 @@ if ! juju-bootstrap ; then
   echo "Bootstrap error. exiting..."
   exit 1
 fi
-AZ=`juju-status | grep -Po " availability-zone=.*[ $]*" | cut -d '=' -f 2`
+
+# this code is only for juju 2.0
+iid=`juju show-controller amazon --format yaml | awk '/instance-id/{print $2}'`
+if [ -n "$iid" ] ; then
+  AZ=`aws ec2 describe-instances --instance-id "$iid" --query 'Reservations[*].Instances[*].Placement.AvailabilityZone' --output text`
+fi
 echo "INFO: Availability zone of this deployment is $AZ"
 export AZ
 
