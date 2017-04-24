@@ -156,9 +156,8 @@ juju-add-relation "neutron-api-contrail" "contrail-controller"
 
 juju-add-relation "contrail-controller:contrail-controller" "contrail-analytics:contrail-controller"
 juju-add-relation "contrail-controller:contrail-analytics" "contrail-analytics:contrail-analytics"
-juju-add-relation "contrail-controller" "contrail-analyticsdb:contrail-controller"
-juju-add-relation "contrail-analytics" "contrail-analyticsdb:contrail-analytics"
-juju-add-relation "contrail-analytics" "contrail-analyticsdb:contrail-analyticsdb"
+juju-add-relation "contrail-controller" "contrail-analyticsdb"
+juju-add-relation "contrail-analytics" "contrail-analyticsdb"
 
 if [[ $VROUTER_AS_CONTAINER == '0' ]] ; then
   juju-add-relation "nova-compute" "neutron-contrail"
