@@ -154,8 +154,7 @@ fi
 
 juju-add-relation "neutron-api-contrail" "contrail-controller"
 
-juju-add-relation "contrail-controller:contrail-controller" "contrail-analytics:contrail-controller"
-juju-add-relation "contrail-controller:contrail-analytics" "contrail-analytics:contrail-analytics"
+juju-add-relation "contrail-controller" "contrail-analytics"
 juju-add-relation "contrail-controller" "contrail-analyticsdb"
 juju-add-relation "contrail-analytics" "contrail-analyticsdb"
 
