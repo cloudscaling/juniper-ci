@@ -160,7 +160,6 @@ if [[ $VROUTER_AS_CONTAINER == '0' ]] ; then
   juju-add-relation "nova-compute" "neutron-contrail"
   juju-add-relation "neutron-contrail" "keystone"
   juju-add-relation "neutron-contrail" "contrail-controller"
-  juju-add-relation "neutron-contrail" "contrail-analytics"
 fi
 
 sleep 30
