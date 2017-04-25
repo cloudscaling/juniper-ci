@@ -144,8 +144,6 @@ juju-add-relation "neutron-api-contrail" "neutron-api"
 juju-add-relation "neutron-api-contrail" "keystone"
 
 juju-add-relation "contrail-controller" "keystone"
-juju-add-relation "contrail-analytics" "keystone"
-juju-add-relation "contrail-analyticsdb" "keystone"
 
 if [[ $VROUTER_AS_CONTAINER != '0' ]] ; then
   juju-add-relation "contrail-agent" "keystone"
