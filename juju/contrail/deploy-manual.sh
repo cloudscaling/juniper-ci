@@ -110,12 +110,12 @@ if [[ $VROUTER_AS_CONTAINER != '0' ]] ; then
   juju-add-unit contrail-agent --to $m3
 fi
 
-juju-deploy $PLACE/neutron-api-contrail
-juju-set neutron-api-contrail "install-sources="
+juju-deploy $PLACE/contrail-openstack-neutron-api
+juju-set contrail-openstack-neutron-api "install-sources="
 
 if [[ $VROUTER_AS_CONTAINER == '0' ]] ; then
-  juju-deploy $PLACE/neutron-contrail
-  juju-set neutron-contrail "install-sources=" "vhost-interface=eth0"
+  juju-deploy $PLACE/contrail-openstack-compute
+  juju-set contrail-openstack-compute "install-sources=" "vhost-interface=eth0"
 fi
 
 sleep 30
@@ -140,8 +140,8 @@ juju-add-relation "neutron-api:neutron-api" "nova-cloud-controller:neutron-api"
 juju-add-relation "neutron-api:identity-service" "keystone:identity-service"
 juju-add-relation "neutron-api:amqp" "rabbitmq-server:amqp"
 
-juju-add-relation "neutron-api-contrail" "neutron-api"
-juju-add-relation "neutron-api-contrail" "keystone"
+juju-add-relation "contrail-openstack-neutron-api" "neutron-api"
+juju-add-relation "contrail-openstack-neutron-api" "keystone"
 
 juju-add-relation "contrail-controller" "keystone"
 
@@ -150,16 +150,16 @@ if [[ $VROUTER_AS_CONTAINER != '0' ]] ; then
   juju-add-relation "contrail-agent" "contrail-controller"
 fi
 
-juju-add-relation "neutron-api-contrail" "contrail-controller"
+juju-add-relation "contrail-openstack-neutron-api" "contrail-controller"
 
 juju-add-relation "contrail-controller" "contrail-analytics"
 juju-add-relation "contrail-controller" "contrail-analyticsdb"
 juju-add-relation "contrail-analytics" "contrail-analyticsdb"
 
 if [[ $VROUTER_AS_CONTAINER == '0' ]] ; then
-  juju-add-relation "nova-compute" "neutron-contrail"
-  juju-add-relation "neutron-contrail" "keystone"
-  juju-add-relation "neutron-contrail" "contrail-controller"
+  juju-add-relation "nova-compute" "contrail-openstack-compute"
+  juju-add-relation "contrail-openstack-compute" "keystone"
+  juju-add-relation "contrail-openstack-compute" "contrail-controller"
 fi
 
 sleep 30
