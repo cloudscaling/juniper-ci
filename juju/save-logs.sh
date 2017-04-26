@@ -14,7 +14,7 @@ juju-status-tabular > $log_dir/juju_status_tabular.log
 
 truncate -s 0 $log_dir/juju_unit_statuses.log
 for unit in `juju status --format oneline | awk '{print $2}' | sed 's/://g'` ; do
-  if [ -z "$unit" || "$unit" =~ "ubuntu/" || "$unit" =~ "ntp/" ] ; then
+  if [[ -z "$unit" || "$unit" =~ "ubuntu/" || "$unit" =~ "ntp/" ]] ; then
     continue
   fi
   echo "--------------------------------- $unit statuses log" >> $log_dir/juju_unit_statuses.log
