@@ -140,21 +140,18 @@ juju-add-relation "neutron-api:neutron-api" "nova-cloud-controller:neutron-api"
 juju-add-relation "neutron-api:identity-service" "keystone:identity-service"
 juju-add-relation "neutron-api:amqp" "rabbitmq-server:amqp"
 
-juju-add-relation "contrail-openstack-neutron-api" "neutron-api"
-juju-add-relation "contrail-openstack-neutron-api" "keystone"
-
 juju-add-relation "contrail-controller" "keystone"
+juju-add-relation "contrail-controller" "contrail-analytics"
+juju-add-relation "contrail-controller" "contrail-analyticsdb"
+juju-add-relation "contrail-analytics" "contrail-analyticsdb"
+
+juju-add-relation "contrail-openstack-neutron-api" "neutron-api"
+juju-add-relation "contrail-openstack-neutron-api" "contrail-controller"
 
 if [[ $VROUTER_AS_CONTAINER != '0' ]] ; then
   juju-add-relation "contrail-agent" "keystone"
   juju-add-relation "contrail-agent" "contrail-controller"
 fi
-
-juju-add-relation "contrail-openstack-neutron-api" "contrail-controller"
-
-juju-add-relation "contrail-controller" "contrail-analytics"
-juju-add-relation "contrail-controller" "contrail-analyticsdb"
-juju-add-relation "contrail-analytics" "contrail-analyticsdb"
 
 if [[ $VROUTER_AS_CONTAINER == '0' ]] ; then
   juju-add-relation "nova-compute" "contrail-openstack-compute"
