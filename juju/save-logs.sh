@@ -22,7 +22,8 @@ for unit in `juju status --format oneline | awk '{print $2}' | sed 's/://g'` ; d
 done
 
 for mch in $(juju-get-machines) ; do
-  juju-ssh $mch "rm -f logs.* ; sudo tar -cf logs.tar /var/log/juju ; if -d /etc/contrail ; then tar -rf logs.tar /etc/contrail ; fi ; gzip logs.tar" 2>/dev/null
+  juju-scp "$my_dir/__save-logs.sh" $mch:save_logs.sh
+  juju-ssh $mch "save_logs.sh" 2>/dev/null
   rm -f logs.tar.gz
   juju-scp $mch:logs.tar.gz logs.tar.gz
   cdir=`pwd`
