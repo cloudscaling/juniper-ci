@@ -15,7 +15,7 @@ if docker ps | grep -q contrail ; then
     if docker ps | grep -qw "contrail-$cnt" ; then
       ldir="$DL/contrail-$cnt"
       mkdir -p "$ldir"
-      docker logs "contrail-$cnt" &>"./$ldir/$cnt.log" ; then
+      docker logs "contrail-$cnt" &>"./$ldir/$cnt.log"
       docker cp "contrail-$cnt:/var/log/contrail" "./$ldir"
       mv "$ldir/contrail" "$ldir/contrail-logs"
       docker cp "contrail-$cnt:/etc/contrail" "./$ldir"
@@ -26,4 +26,4 @@ if docker ps | grep -q contrail ; then
   done
 fi
 
-gzip logs.tar" 2>/dev/null
+gzip logs.tar
