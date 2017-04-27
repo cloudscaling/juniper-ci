@@ -23,6 +23,8 @@ VERSION=${VERSION:-"cloud:$SERIES-mitaka"}
 export VERSION
 VROUTER_AS_CONTAINER=0
 export VROUTER_AS_CONTAINER
+BUILD=3062
+export BUILD
 
 if ! juju-bootstrap ; then
   echo "Bootstrap error. exiting..."

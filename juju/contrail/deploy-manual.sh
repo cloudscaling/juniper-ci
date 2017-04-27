@@ -1,9 +1,25 @@
 #!/bin/bash -e
 
-if [ ! -d $HOME/docker ] ; then
-  echo "ERROR: Please provide container images for deployment in $HOME/docker/"
+if [ ! -d "$HOME/docker" ] ; then
+  echo "ERROR: Please provide container images for deployment in $HOME/docker/ for build $BUILD"
   exit 1
 fi
+packages="contrail-install-packages_4.0.0.0-$BUILD~mitaka_all.deb"
+image_controller="contrail-controller-u14.04-4.0.0.0-$BUILD.tar.gz"
+image_analytics="contrail-analytics-u14.04-4.0.0.0-$BUILD.tar.gz"
+image_analyticsdb="contrail-analyticsdb-u14.04-4.0.0.0-$BUILD.tar.gz"
+image_agent="contrail-agent-u14.04-4.0.0.0-$BUILD.tar.gz"
+for ff in "$packages" "$image_controller"  "$image_analytics" "$image_analyticsdb" ; do
+  if [ ! -f "$HOME/docker/$ff" ] ; then
+    echo "ERROR: There is no file $ff which is needed for deployment."
+    exit 1
+  fi
+done
+if [[ $VROUTER_AS_CONTAINER != '0' && ! -f "$HOME/docker/$image_agent" ]] ; then
+  echo "ERROR: There is no file $HOME/docker/$image_agent which is needed for deployment."
+  exit 1
+fi
+
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -43,8 +59,8 @@ wait_for_machines $m1 $m2 $m3 $m4 $m5 $m6
 
 function add_packages() {
   mch=$1
-  juju-scp "$HOME/docker/contrail-install-packages_4.0.0.0-3046~mitaka_all.deb" "$mch:contrail-install-packages_4.0.0.0-3046~mitaka_all.deb"
-  juju-ssh $mch "sudo dpkg -i contrail-install-packages_4.0.0.0-3046~mitaka_all.deb"
+  juju-scp "$HOME/docker/$packages" "$mch:$packages"
+  juju-ssh $mch "sudo dpkg -i $packages"
   juju-ssh $mch "sudo /opt/contrail/contrail_packages/setup.sh"
 }
 # add packages only to machine with neutron-api and nova-compute if needed
@@ -99,15 +115,15 @@ juju-expose neutron-api
 
 # Contrail
 juju-deploy $PLACE/contrail-keystone-auth --to $m6
-juju-deploy $PLACE/contrail-controller --to $m6 --resource contrail-controller="$HOME/docker/contrail-controller-u14.04-4.0.0.0-3046.tar.gz"
+juju-deploy $PLACE/contrail-controller --to $m6 --resource contrail-controller="$HOME/docker/$image_controller"
 juju-expose contrail-controller
 
-juju-deploy $PLACE/contrail-analyticsdb --to $m6 --resource contrail-analyticsdb="$HOME/docker/contrail-analyticsdb-u14.04-4.0.0.0-3046.tar.gz"
+juju-deploy $PLACE/contrail-analyticsdb --to $m6 --resource contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
 
-juju-deploy $PLACE/contrail-analytics --to $m6 --resource contrail-analytics="$HOME/docker/contrail-analytics-u14.04-4.0.0.0-3046.tar.gz"
+juju-deploy $PLACE/contrail-analytics --to $m6 --resource contrail-analytics="$HOME/docker/$image_analytics"
 
 if [[ $VROUTER_AS_CONTAINER != '0' ]] ; then
-  juju-deploy $PLACE/contrail-agent --to $m2 --resource contrail-agent="$HOME/docker/contrail-agent-u14.04-4.0.0.0-3046.tar.gz"
+  juju-deploy $PLACE/contrail-agent --to $m2 --resource contrail-agent="$HOME/docker/$image_agent"
   juju-add-unit contrail-agent --to $m3
 fi
 
