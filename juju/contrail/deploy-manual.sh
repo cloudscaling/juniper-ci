@@ -155,7 +155,6 @@ fi
 
 if [[ $VROUTER_AS_CONTAINER == '0' ]] ; then
   juju-add-relation "nova-compute" "contrail-openstack-compute"
-  juju-add-relation "contrail-openstack-compute" "keystone"
   juju-add-relation "contrail-openstack-compute" "contrail-controller"
 fi
 
