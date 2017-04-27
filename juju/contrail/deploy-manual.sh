@@ -98,6 +98,7 @@ juju-set nova-cloud-controller "network-manager=Neutron" "neutron-external-netwo
 juju-expose neutron-api
 
 # Contrail
+juju-deploy $PLACE/contrail-keystone-auth --to $m6
 juju-deploy $PLACE/contrail-controller --to $m6 --resource contrail-controller="$HOME/docker/contrail-controller-u14.04-4.0.0.0-3046.tar.gz"
 juju-expose contrail-controller
 
