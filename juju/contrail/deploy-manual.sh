@@ -149,7 +149,6 @@ juju-add-relation "contrail-openstack-neutron-api" "neutron-api"
 juju-add-relation "contrail-openstack-neutron-api" "contrail-controller"
 
 if [[ $VROUTER_AS_CONTAINER != '0' ]] ; then
-  juju-add-relation "contrail-agent" "keystone"
   juju-add-relation "contrail-agent" "contrail-controller"
 fi
 
