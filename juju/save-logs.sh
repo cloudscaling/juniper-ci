@@ -18,7 +18,7 @@ for unit in `juju status --format oneline | awk '{print $2}' | sed 's/://g'` ; d
     continue
   fi
   echo "--------------------------------- $unit statuses log" >> $log_dir/juju_unit_statuses.log
-  juju show-status-log $unit >> $log_dir/juju_unit_statuses.log
+  juju show-status-log --days 1 $unit >> $log_dir/juju_unit_statuses.log
 done
 
 for mch in $(juju-get-machines) ; do
