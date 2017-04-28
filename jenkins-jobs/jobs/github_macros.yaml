@@ -14,12 +14,12 @@
           wipe-workspace: true
           skip-tag: true
 
-# Private repository in specified organization at branch
+# Open repository in specified organization at branch
 - scm:
-    name: github-private
+    name: github-branch
     scm:
       - git:
-          url: 'git@github.com:{organization}/{repo}.git'
+          url: 'https://github.com/{organization}/{repo}.git'
           basedir: '{repo}'
           branches:
             - '*/{branch}'
@@ -62,7 +62,7 @@
 - scm:
     name: juniper-contrail-charms
     scm:
-      - github-private:
+      - github-branch:
           organization: Juniper
           repo: contrail-charms
           branch: cloudscaling
