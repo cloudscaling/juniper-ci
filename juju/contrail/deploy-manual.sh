@@ -42,7 +42,7 @@ fi
 
 echo "---------------------------------------------------- From: $deploy_from  Version: $VERSION"
 
-m1=$(create_machine 2)
+m1=$(create_machine 0)
 echo "INFO: Machine created: $m1"
 m2=$(create_machine 1)
 echo "INFO: Machine created: $m2"
