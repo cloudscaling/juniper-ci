@@ -25,6 +25,8 @@ VROUTER_AS_CONTAINER=0
 export VROUTER_AS_CONTAINER
 BUILD=3062
 export BUILD
+DEPLOY_AS_HA_MODE=${DEPLOY_AS_HA_MODE:-false}
+export DEPLOY_AS_HA_MODE
 
 if ! juju-bootstrap ; then
   echo "Bootstrap error. exiting..."

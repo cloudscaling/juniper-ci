@@ -23,6 +23,10 @@
           choices:
             - manual
             - bundle
+      - bool:
+          name: DEPLOY_AS_HA_MODE
+          description: "Deploy 3 controllers instead of 1"
+          default: false
     scm:
       - juniper-contrail-charms
       - juniper-ci

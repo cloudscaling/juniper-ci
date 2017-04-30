@@ -54,8 +54,15 @@ m5=$(create_machine 0)
 echo "INFO: Machine created: $m5"
 m6=$(create_machine 2)
 echo "INFO: Machine created: $m6"
-wait_for_machines $m1 $m2 $m3 $m4 $m5 $m6
-
+if [ "$DEPLOY_AS_HA_MODE" != 'false' ] ; then
+  m7=$(create_machine 2)
+  echo "INFO: Machine created: $m7"
+  m8=$(create_machine 2)
+  echo "INFO: Machine created: $m8"
+  wait_for_machines $m1 $m2 $m3 $m4 $m5 $m6 $m7 $m8
+else
+  wait_for_machines $m1 $m2 $m3 $m4 $m5 $m6
+fi
 
 function add_packages() {
   mch=$1
@@ -80,6 +87,10 @@ juju-add-unit ubuntu --to $m3
 juju-add-unit ubuntu --to $m4
 juju-add-unit ubuntu --to $m5
 juju-add-unit ubuntu --to $m6
+if [ "$DEPLOY_AS_HA_MODE" != 'false' ] ; then
+  juju-add-unit ubuntu --to $m7
+  juju-add-unit ubuntu --to $m8
+fi
 juju-deploy cs:$SERIES/ntp
 
 juju-deploy cs:$SERIES/rabbitmq-server --to $m1
@@ -115,12 +126,20 @@ juju-expose neutron-api
 
 # Contrail
 juju-deploy $PLACE/contrail-keystone-auth --to lxd:$m6
+
 juju-deploy $PLACE/contrail-controller --to $m6 --resource contrail-controller="$HOME/docker/$image_controller"
 juju-expose contrail-controller
-
 juju-deploy $PLACE/contrail-analyticsdb --to $m6 --resource contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
-
 juju-deploy $PLACE/contrail-analytics --to $m6 --resource contrail-analytics="$HOME/docker/$image_analytics"
+
+if [ "$DEPLOY_AS_HA_MODE" != 'false' ] ; then
+  juju-add-unit contrail-controller --to $m7
+  juju-add-unit contrail-controller --to $m8
+  juju-add-unit contrail-analytics --to $m7
+  juju-add-unit contrail-analytics --to $m8
+  juju-add-unit contrail-analyticsdb --to $m7
+  juju-add-unit contrail-analyticsdb --to $m8
+fi
 
 if [[ $VROUTER_AS_CONTAINER != '0' ]] ; then
   juju-deploy $PLACE/contrail-agent --to $m2 --resource contrail-agent="$HOME/docker/$image_agent"
