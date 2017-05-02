@@ -28,7 +28,7 @@ echo "---------------------------------------------------- From: $deploy_from  V
 prepare_repo
 repo_ip=`get-machine-ip-by-number $m0`
 repo_key=`curl http://$repo_ip/repo.key`
-repo_key=`echo "$repo_key" | awk '{printf("      %s\n", $0)}'`
+repo_key=`echo "$repo_key" | awk '{printf("      %s\r", $0)}'`
 # it sets machines variables
 prepare_machines
 
@@ -87,11 +87,13 @@ fi
 cp "$my_dir/repo_config.yaml.tmpl" "/tmp/repo_config_na.yaml"
 sed -i -e "s|{{repo_ip}}|$repo_ip|m" "/tmp/repo_config_na.yaml"
 sed -i -e "s|{{REPO_KEY}}|$repo_key|m" "/tmp/repo_config_na.yaml"
+sed -i "s/\r/\n/g" "/tmp/repo_config_na.yaml"
 juju-deploy $PLACE/contrail-openstack-neutron-api --config repo_config_na.yaml
 
 cp "$my_dir/repo_config.yaml.tmpl" "/tmp/repo_config_c.yaml"
 sed -i -e "s|{{repo_ip}}|$repo_ip|m" "/tmp/repo_config_c.yaml"
 sed -i -e "s|{{REPO_KEY}}|$repo_key|m" "/tmp/repo_config_c.yaml"
+sed -i "s/\r/\n/g" "/tmp/repo_config_c.yaml"
 juju-deploy $PLACE/contrail-openstack-compute --config repo_config_c.yaml
 juju-set contrail-openstack-compute "vhost-interface=eth0"
 
