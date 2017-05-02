@@ -1,14 +1,13 @@
 #!/bin/bash -e
 
-sudo apt-get install -fy reprepro apache2 rng-tools
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy reprepro apache2 rng-tools
 
 # prepare packages
 cdir=$(pwd)
-sudo dpkg -i contrail.deb
 mkdir -p /tmp/pkgs
 cd /tmp/pkgs
-tar xf /opt/contrail/contrail_packages/contrail_debs.tgz
-cd $cdir
+tar xf "$cdir/contrail_debs.tgz"
+cd "$cdir"
 
 # create gpg key for repository
 cat >key.cfg <<EOF
