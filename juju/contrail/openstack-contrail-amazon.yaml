@@ -5,16 +5,6 @@
 
 series: %SERIES%
 services:
-  ubuntu:
-    charm: "cs:%SERIES%/ubuntu"
-    num_units: 6
-    to:
-      - "0"
-      - "1"
-      - "2"
-      - "3"
-      - "4"
-      - "5"
   ntp:
     charm: "cs:%SERIES%/ntp"
   rabbitmq-server:
@@ -34,7 +24,7 @@ services:
     charm: "cs:%SERIES%/openstack-dashboard"
     num_units: 1
     options:
-      debug: true
+      debug: "true"
       openstack-origin: "%OPENSTACK_ORIGIN%"
     expose: true
     to:
@@ -44,7 +34,7 @@ services:
     num_units: 1
     options:
       console-access-protocol: "novnc"
-      debug: true
+      debug: "true"
       openstack-origin: "%OPENSTACK_ORIGIN%"
       network-manager: "Neutron"
     expose: true
@@ -54,11 +44,11 @@ services:
     charm: "cs:%SERIES%/nova-compute"
     num_units: 2
     options:
-      debug: true
+      debug: "true"
       openstack-origin: "%OPENSTACK_ORIGIN%"
       virt-type: "qemu"
-      enable-resize: true
-      enable-live-migration: true
+      enable-resize: "true"
+      enable-live-migration: "true"
       migration-auth-type: "ssh"
     to:
       - "1"
@@ -67,7 +57,7 @@ services:
     charm: "cs:%SERIES%/glance"
     num_units: 1
     options:
-      debug: true
+      debug: "true"
       openstack-origin: "%OPENSTACK_ORIGIN%"
     expose: true
     to:
@@ -77,7 +67,7 @@ services:
     num_units: 1
     options:
       admin-password: "password"
-      debug: true
+      debug: "true"
       openstack-origin: "%OPENSTACK_ORIGIN%"
     expose: true
     to:
@@ -86,10 +76,10 @@ services:
     charm: "cs:%SERIES%/neutron-api"
     num_units: 1
     options:
-      debug: true
+      debug: "true"
       openstack-origin: "%OPENSTACK_ORIGIN%"
       manage-neutron-plugin-legacy-mode: false
-      neutron-security-groups: true
+      neutron-security-groups: "true"
     expose: true
     to:
       - "4"
@@ -128,7 +118,6 @@ services:
 
 relations:
   # openstack
-  - [ "ubuntu", "ntp" ]
   - [ "nova-cloud-controller", "mysql" ]
   - [ "nova-compute:shared-db", "mysql:shared-db" ]
   - [ "keystone", "mysql" ]
@@ -148,6 +137,8 @@ relations:
   - [ "neutron-api", "keystone" ]
 
   #contrail
+  - [ "contrail-controller", "ntp" ]
+  - [ "contrail-openstack-compute", "ntp" ]
   - [ "contrail-controller", "contrail-keystone-auth" ]
   - [ "contrail-keystone-auth", "keystone" ]
   - [ "contrail-controller", "contrail-analytics" ]

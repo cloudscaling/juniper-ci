@@ -30,16 +30,6 @@ prepare_machines
 
 # OpenStack base
 
-juju-deploy cs:$SERIES/ubuntu --to $m1
-juju-add-unit ubuntu --to $m2
-juju-add-unit ubuntu --to $m3
-juju-add-unit ubuntu --to $m4
-juju-add-unit ubuntu --to $m5
-juju-add-unit ubuntu --to $m6
-if [ "$DEPLOY_AS_HA_MODE" != 'false' ] ; then
-  juju-add-unit ubuntu --to $m7
-  juju-add-unit ubuntu --to $m8
-fi
 juju-deploy cs:$SERIES/ntp
 
 juju-deploy cs:$SERIES/rabbitmq-server --to $m1
@@ -98,8 +88,6 @@ juju-set contrail-openstack-compute "install-sources=" "vhost-interface=eth0"
 
 sleep 30
 
-juju-add-relation "ubuntu" "ntp"
-
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
 juju-add-relation "keystone:shared-db" "mysql:shared-db"
 juju-add-relation "glance:shared-db" "mysql:shared-db"
@@ -117,6 +105,9 @@ juju-add-relation "neutron-api:shared-db" "mysql:shared-db"
 juju-add-relation "neutron-api:neutron-api" "nova-cloud-controller:neutron-api"
 juju-add-relation "neutron-api:identity-service" "keystone:identity-service"
 juju-add-relation "neutron-api:amqp" "rabbitmq-server:amqp"
+
+juju-add-relation "contrail-controller" "ntp"
+juju-add-relation "contrail-openstack-compute" "ntp"
 
 juju-add-relation "contrail-controller" "contrail-keystone-auth"
 juju-add-relation "contrail-keystone-auth" "keystone"
