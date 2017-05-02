@@ -62,10 +62,9 @@
 - scm:
     name: juniper-contrail-charms
     scm:
-      - github-branch:
+      - github:
           organization: Juniper
           repo: contrail-charms
-          branch: cloudscaling
 
 
 # temporary definition while we use unreleased OpenStack charms

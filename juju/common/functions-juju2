@@ -62,3 +62,7 @@ function juju-get-machines() {
 function get-machine-ip-by-number() {
   juju machines | awk "\$1 == \"$1\" {print \$3}"
 }
+
+function juju-attach() {
+  juju attach "$@"
+}
