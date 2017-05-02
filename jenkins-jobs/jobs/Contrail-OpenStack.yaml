@@ -10,7 +10,7 @@
           name: VERSION
           description: "Version of the OpenStack"
           choices:
-            - cloud:trusty-mitaka
+            - mitaka
       - choice:
           name: DEPLOY_FROM
           description: "A place where to get charms"

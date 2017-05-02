@@ -35,7 +35,7 @@ services:
     num_units: 1
     options:
       debug: true
-      openstack-origin: "%VERSION%"
+      openstack-origin: "%OPENSTACK_ORIGIN%"
     expose: true
     to:
       - "0"
@@ -45,7 +45,7 @@ services:
     options:
       console-access-protocol: "novnc"
       debug: true
-      openstack-origin: "%VERSION%"
+      openstack-origin: "%OPENSTACK_ORIGIN%"
       network-manager: "Neutron"
     expose: true
     to:
@@ -55,7 +55,7 @@ services:
     num_units: 2
     options:
       debug: true
-      openstack-origin: "%VERSION%"
+      openstack-origin: "%OPENSTACK_ORIGIN%"
       virt-type: "qemu"
       enable-resize: true
       enable-live-migration: true
@@ -68,7 +68,7 @@ services:
     num_units: 1
     options:
       debug: true
-      openstack-origin: "%VERSION%"
+      openstack-origin: "%OPENSTACK_ORIGIN%"
     expose: true
     to:
       - "1"
@@ -78,7 +78,7 @@ services:
     options:
       admin-password: "password"
       debug: true
-      openstack-origin: "%VERSION%"
+      openstack-origin: "%OPENSTACK_ORIGIN%"
     expose: true
     to:
       - "2"
@@ -87,7 +87,7 @@ services:
     num_units: 1
     options:
       debug: true
-      openstack-origin: "%VERSION%"
+      openstack-origin: "%OPENSTACK_ORIGIN%"
       manage-neutron-plugin-legacy-mode: false
       neutron-security-groups: true
     expose: true

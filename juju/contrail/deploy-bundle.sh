@@ -45,7 +45,7 @@ rm -f "$BUNDLE.tmp"
 cp "$BUNDLE" "$BUNDLE.tmp"
 BUNDLE="$BUNDLE.tmp"
 sed -i -e "s/%SERIES%/$SERIES/m" $BUNDLE
-sed -i -e "s/%VERSION%/$VERSION/m" $BUNDLE
+sed -i -e "s/%OPENSTACK_ORIGIN%/$OPENSTACK_ORIGIN/m" $BUNDLE
 sed -i -e "s|%JUJU_REPO%|$JUJU_REPO|m" $BUNDLE
 
 # script needs to change directory to local charms repository

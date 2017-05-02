@@ -47,29 +47,29 @@ juju-deploy cs:$SERIES/percona-cluster mysql --to $m1
 juju-set mysql "root-password=password" "max-connections=1500"
 
 juju-deploy cs:$SERIES/openstack-dashboard --to $m1
-juju-set openstack-dashboard "debug=true" "openstack-origin=$VERSION"
+juju-set openstack-dashboard "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose openstack-dashboard
 
 juju-deploy cs:$SERIES/nova-cloud-controller --to $m4
-juju-set nova-cloud-controller "console-access-protocol=novnc" "debug=true" "openstack-origin=$VERSION"
+juju-set nova-cloud-controller "console-access-protocol=novnc" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose nova-cloud-controller
 
 juju-deploy cs:$SERIES/glance --to $m2
-juju-set glance "debug=true" "openstack-origin=$VERSION"
+juju-set glance "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose glance
 
 juju-deploy cs:$SERIES/keystone --to $m3
-juju-set keystone "admin-password=password" "debug=true" "openstack-origin=$VERSION"
+juju-set keystone "admin-password=password" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose keystone
 
 juju-deploy cs:$SERIES/nova-compute --to $m2
 juju-add-unit nova-compute --to $m3
-juju-set nova-compute "debug=true" "openstack-origin=$VERSION" "virt-type=qemu" "enable-resize=True" "enable-live-migration=True" "migration-auth-type=ssh"
+juju-set nova-compute "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "virt-type=qemu" "enable-resize=True" "enable-live-migration=True" "migration-auth-type=ssh"
 
 # Neutron
 
 juju-deploy cs:$SERIES/neutron-api --to $m5
-juju-set neutron-api "debug=true" "manage-neutron-plugin-legacy-mode=false" "openstack-origin=$VERSION" "neutron-security-groups=true"
+juju-set neutron-api "debug=true" "manage-neutron-plugin-legacy-mode=false" "openstack-origin=$OPENSTACK_ORIGIN" "neutron-security-groups=true"
 juju-set nova-cloud-controller "network-manager=Neutron"
 juju-expose neutron-api
 
