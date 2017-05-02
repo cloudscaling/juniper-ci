@@ -84,16 +84,16 @@ if [ "$DEPLOY_AS_HA_MODE" != 'false' ] ; then
   juju-add-unit contrail-analyticsdb --to $m8
 fi
 
-cp "$my_dir/repo_config.yaml.tmpl" "/tmp/repo_config_na.yaml"
-sed -i -e "s|{{repo_ip}}|$repo_ip|m" "/tmp/repo_config_na.yaml"
-sed -i -e "s|{{REPO_KEY}}|$repo_key|m" "/tmp/repo_config_na.yaml"
-sed -i "s/\r/\n/g" "/tmp/repo_config_na.yaml"
+cp "$my_dir/repo_config.yaml.tmpl" "repo_config_na.yaml"
+sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_na.yaml"
+sed -i -e "s|{{REPO_KEY}}|$repo_key|m" "repo_config_na.yaml"
+sed -i "s/\r/\n/g" "repo_config_na.yaml"
 juju-deploy $PLACE/contrail-openstack-neutron-api --config repo_config_na.yaml
 
-cp "$my_dir/repo_config.yaml.tmpl" "/tmp/repo_config_c.yaml"
-sed -i -e "s|{{repo_ip}}|$repo_ip|m" "/tmp/repo_config_c.yaml"
-sed -i -e "s|{{REPO_KEY}}|$repo_key|m" "/tmp/repo_config_c.yaml"
-sed -i "s/\r/\n/g" "/tmp/repo_config_c.yaml"
+cp "$my_dir/repo_config.yaml.tmpl" "repo_config_c.yaml"
+sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_c.yaml"
+sed -i -e "s|{{REPO_KEY}}|$repo_key|m" "repo_config_c.yaml"
+sed -i "s/\r/\n/g" "repo_config_c.yaml"
 juju-deploy $PLACE/contrail-openstack-compute --config repo_config_c.yaml
 juju-set contrail-openstack-compute "vhost-interface=eth0"
 
