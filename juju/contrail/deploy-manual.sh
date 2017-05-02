@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -28,6 +28,7 @@ echo "---------------------------------------------------- From: $deploy_from  V
 prepare_repo
 repo_ip=`get-machine-ip-by-number $m0`
 repo_key=`curl http://$repo_ip/repo.key`
+repo_key=`echo "$repo_key" | awk '{printf("      %s\n", $0)}'`
 # it sets machines variables
 prepare_machines
 
