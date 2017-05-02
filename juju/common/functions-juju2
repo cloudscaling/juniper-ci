@@ -64,7 +64,7 @@ function get-machine-ip-by-number() {
 }
 
 function get-machine-id-by-number() {
-  juju machines | awk "\$1 == \"$1\" {print \$3}"
+  juju machines | awk "\$1 == \"$1\" {print \$4}"
 }
 
 function juju-attach() {
