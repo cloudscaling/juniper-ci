@@ -86,27 +86,32 @@ services:
 
   contrail-keystone-auth:
     charm: "%JUJU_REPO%/contrail-keystone-auth"
+    series: %SERIES%
     num_units: 1
     to:
       - "lxd:5"
   contrail-controller:
     charm: "%JUJU_REPO%/contrail-controller"
+    series: %SERIES%
     num_units: 1
     expose: true
     to:
       - "5"
   contrail-analyticsdb:
     charm: "%JUJU_REPO%/contrail-analyticsdb"
+    series: %SERIES%
     num_units: 1
     to:
       - "5"
   contrail-analytics:
     charm: "%JUJU_REPO%/contrail-analytics"
+    series: %SERIES%
     num_units: 1
     to:
       - "5"
   contrail-openstack-neutron-api:
     charm: "%JUJU_REPO%/contrail-openstack-neutron-api"
+    series: %SERIES%
     options:
       install-sources: "http://%REPO_IP%/ubuntu trusty main"
       install-keys: |
@@ -114,6 +119,7 @@ services:
 %REPO_KEY%
   contrail-openstack-compute:
     charm: "%JUJU_REPO%/contrail-openstack-compute"
+    series: %SERIES%
     options:
       install-sources: "http://%REPO_IP%/ubuntu trusty main"
       install-keys: |
