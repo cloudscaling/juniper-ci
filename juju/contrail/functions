@@ -24,7 +24,7 @@ function prepare_repo() {
   echo "INFO: Machine created: $m0"
   wait_for_machines $m0
   juju-deploy cs:$SERIES/ubuntu --to $m0
-  juju-scp "$HOME/docker/$packages" "$mch:contrail_debs.tgz"
+  juju-scp "$HOME/docker/$packages" "$m0:contrail_debs.tgz"
   juju-scp "$my_dir/create-aptrepo.sh" $m0:create-aptrepo.sh
   open_port $m0 80
   juju-ssh $m0 ./create-aptrepo.sh
