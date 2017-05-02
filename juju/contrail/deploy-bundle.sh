@@ -32,12 +32,10 @@ fi
 
 echo "---------------------------------------------------- From: $JUJU_REPO  Version: $VERSION"
 
-# script needs to create machine for deploy packages before bundle start
-# it can be moved to the bundle when charms will accept packages as resource
-# or script will create apt-repo somewhere before (TODO)
-# NOTE: it sets machines variables
-prepare_machines
-
+prepare_repo
+repo_ip=`get-machine-ip-by-number $m0`
+repo_key=`curl http://$repo_ip/repo.key`
+repo_key=`echo "$repo_key" | awk '{printf("          %s\n", $0)}'`
 
 # change bundles' variables
 echo "INFO: Change variables in bundle..."
@@ -47,6 +45,8 @@ BUNDLE="$BUNDLE.tmp"
 sed -i -e "s/%SERIES%/$SERIES/m" $BUNDLE
 sed -i -e "s/%OPENSTACK_ORIGIN%/$OPENSTACK_ORIGIN/m" $BUNDLE
 sed -i -e "s|%JUJU_REPO%|$JUJU_REPO|m" $BUNDLE
+sed -i -e "s|%APT_REPO%|$repo_ip|m" $BUNDLE
+sed -i -e "s|%REPO_KEY%|$repo_key|m" $BUNDLE
 
 # script needs to change directory to local charms repository
 cd contrail-charms

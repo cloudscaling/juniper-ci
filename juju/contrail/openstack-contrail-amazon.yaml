@@ -108,11 +108,17 @@ services:
   contrail-openstack-neutron-api:
     charm: "%JUJU_REPO%/contrail-openstack-neutron-api"
     options:
-      install-sources: ""
+      install-sources: "http://%APT_REPO%/ubuntu trusty main"
+      install-keys: |
+        - |
+%REPO_KEY%
   contrail-openstack-compute:
     charm: "%JUJU_REPO%/contrail-openstack-compute"
     options:
-      install-sources: ""
+      install-sources: "http://%APT_REPO%/ubuntu trusty main"
+      install-keys: |
+        - |
+%REPO_KEY%
       vhost-interface: "eth0"
 
 
@@ -138,7 +144,7 @@ relations:
 
   #contrail
   - [ "contrail-controller", "ntp" ]
-  - [ "contrail-openstack-compute", "ntp" ]
+  - [ "contrail-openstack-compute:juju-info", "ntp:juju-info" ]
   - [ "contrail-controller", "contrail-keystone-auth" ]
   - [ "contrail-keystone-auth", "keystone" ]
   - [ "contrail-controller", "contrail-analytics" ]

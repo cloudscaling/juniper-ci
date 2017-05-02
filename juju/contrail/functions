@@ -18,11 +18,15 @@ function check_containers() {
   done
 }
 
-function add_packages() {
-  mch=$1
-  juju-scp "$HOME/docker/$packages" "$mch:$packages"
-  juju-ssh $mch "sudo dpkg -i $packages"
-  juju-ssh $mch "sudo /opt/contrail/contrail_packages/setup.sh"
+function prepare_repo() {
+  m0=$(create_machine 0)
+  echo "INFO: Machine created: $m0"
+  wait_for_machines $m0
+  juju-deploy cs:$SERIES/ubuntu --to $m0
+  juju-scp "$HOME/docker/$packages" "$mch:contrail.deb"
+  juju-scp "$my_dir/create-apt-repo.sh" $m0:create-aptrepo.sh
+  juju-ssh $m0 create-aptrepo.sh
+  open_port $m0 80
 }
 
 function prepare_machines() {
@@ -47,11 +51,6 @@ function prepare_machines() {
   else
     wait_for_machines $m1 $m2 $m3 $m4 $m5 $m6
   fi
-
-  # add packages only to machine with neutron-api and nova-compute if needed
-  add_packages $m5
-  add_packages $m2
-  add_packages $m3
 
   juju-status-tabular
 }
