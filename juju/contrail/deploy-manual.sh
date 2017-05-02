@@ -27,6 +27,7 @@ echo "---------------------------------------------------- From: $deploy_from  V
 
 prepare_repo
 repo_ip=`get-machine-ip-by-number $m0`
+repo_key=`curl http://$repo_ip/repo.key`
 # it sets machines variables
 prepare_machines
 
@@ -83,10 +84,10 @@ if [ "$DEPLOY_AS_HA_MODE" != 'false' ] ; then
 fi
 
 juju-deploy $PLACE/contrail-openstack-neutron-api
-juju-set contrail-openstack-neutron-api "install-sources="
+juju-set contrail-openstack-neutron-api "install-sources='http://$repo_ip/ubuntu trusty main'"
 
 juju-deploy $PLACE/contrail-openstack-compute
-juju-set contrail-openstack-compute "install-sources=" "vhost-interface=eth0"
+juju-set contrail-openstack-compute "install-sources='http://$repo_ip/ubuntu trusty main'" "vhost-interface=eth0"
 
 sleep 30
 

@@ -19,14 +19,16 @@ function check_containers() {
 }
 
 function prepare_repo() {
+  echo "INFO: Prepare apt-repo"
   m0=$(create_machine 0)
   echo "INFO: Machine created: $m0"
   wait_for_machines $m0
   juju-deploy cs:$SERIES/ubuntu --to $m0
   juju-scp "$HOME/docker/$packages" "$mch:contrail.deb"
-  juju-scp "$my_dir/create-apt-repo.sh" $m0:create-aptrepo.sh
+  juju-scp "$my_dir/create-aptrepo.sh" $m0:create-aptrepo.sh
   juju-ssh $m0 create-aptrepo.sh
   open_port $m0 80
+  echo "INFO: apt-repo is ready"
 }
 
 function prepare_machines() {
