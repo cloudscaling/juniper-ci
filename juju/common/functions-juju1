@@ -64,6 +64,11 @@ function get-machine-ip-by-number() {
   exit 100
 }
 
+function get-machine-id-by-number() {
+  echo "ERROR: get-machine-id-by-number for juju 1.0 is not implemented"
+  exit 100
+}
+
 function juju-attach() {
   echo "ERROR: juju-attach is not available for juju 1.0"
   exit 100

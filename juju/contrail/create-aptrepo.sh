@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy reprepro apache2 rng-tools gnupg2
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy reprepro apache2 rng-tools gnupg2 &>/dev/null
 
 # prepare packages
 cdir=$(pwd)
