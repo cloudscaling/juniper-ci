@@ -157,3 +157,23 @@ relations:
   - [ "contrail-controller", "contrail-openstack-neutron-api" ]
   - [ "contrail-openstack-compute", "nova-compute" ]
   - [ "contrail-openstack-compute", "contrail-controller"]
+
+machines:
+  "0":
+    series: %SERIES%
+    constraints: instance-type=t2.medium root-disk=40G
+  "1":
+    series: %SERIES%
+    constraints: instance-type=c4.large root-disk=40G
+  "2":
+    series: %SERIES%
+    constraints: instance-type=c4.large root-disk=40G
+  "3":
+    series: %SERIES%
+    constraints: instance-type=t2.medium root-disk=40G
+  "4":
+    series: %SERIES%
+    constraints: instance-type=t2.medium root-disk=40G
+  "5":
+    series: %SERIES%
+    constraints: instance-type=r3.large root-disk=40G

@@ -22,7 +22,7 @@ if [[ "$deploy_from" == github ]] ; then
     exit 1
   else
     # version 2
-    JUJU_REPO="$WORKSPACE/contrail-charms/$SERIES/"
+    JUJU_REPO="$WORKSPACE/contrail-charms"
   fi
 else
   # deploy_from=charmstore
