@@ -83,11 +83,16 @@ if [ "$DEPLOY_AS_HA_MODE" != 'false' ] ; then
   juju-add-unit contrail-analyticsdb --to $m8
 fi
 
-juju-deploy $PLACE/contrail-openstack-neutron-api
-juju-set contrail-openstack-neutron-api "install-sources='http://$repo_ip/ubuntu trusty main'"
+cp "$my_dir/repo_config.yaml.tmpl" "/tmp/repo_config_na.yaml"
+sed -i -e "s|{{repo_ip}}|$repo_ip|m" "/tmp/repo_config_na.yaml"
+sed -i -e "s|{{REPO_KEY}}|$repo_key|m" "/tmp/repo_config_na.yaml"
+juju-deploy $PLACE/contrail-openstack-neutron-api --config repo_config_na.yaml
 
-juju-deploy $PLACE/contrail-openstack-compute
-juju-set contrail-openstack-compute "install-sources='http://$repo_ip/ubuntu trusty main'" "vhost-interface=eth0"
+cp "$my_dir/repo_config.yaml.tmpl" "/tmp/repo_config_c.yaml"
+sed -i -e "s|{{repo_ip}}|$repo_ip|m" "/tmp/repo_config_c.yaml"
+sed -i -e "s|{{REPO_KEY}}|$repo_key|m" "/tmp/repo_config_c.yaml"
+juju-deploy $PLACE/contrail-openstack-compute --config repo_config_c.yaml
+juju-set contrail-openstack-compute "vhost-interface=eth0"
 
 sleep 30
 

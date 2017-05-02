@@ -45,7 +45,7 @@ BUNDLE="$BUNDLE.tmp"
 sed -i -e "s/%SERIES%/$SERIES/m" $BUNDLE
 sed -i -e "s/%OPENSTACK_ORIGIN%/$OPENSTACK_ORIGIN/m" $BUNDLE
 sed -i -e "s|%JUJU_REPO%|$JUJU_REPO|m" $BUNDLE
-sed -i -e "s|%APT_REPO%|$repo_ip|m" $BUNDLE
+sed -i -e "s|%REPO_IP%|$repo_ip|m" $BUNDLE
 sed -i -e "s|%REPO_KEY%|$repo_key|m" $BUNDLE
 
 # script needs to change directory to local charms repository

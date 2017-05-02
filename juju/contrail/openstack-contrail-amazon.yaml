@@ -108,14 +108,14 @@ services:
   contrail-openstack-neutron-api:
     charm: "%JUJU_REPO%/contrail-openstack-neutron-api"
     options:
-      install-sources: "http://%APT_REPO%/ubuntu trusty main"
+      install-sources: "http://%REPO_IP%/ubuntu trusty main"
       install-keys: |
         - |
 %REPO_KEY%
   contrail-openstack-compute:
     charm: "%JUJU_REPO%/contrail-openstack-compute"
     options:
-      install-sources: "http://%APT_REPO%/ubuntu trusty main"
+      install-sources: "http://%REPO_IP%/ubuntu trusty main"
       install-keys: |
         - |
 %REPO_KEY%
