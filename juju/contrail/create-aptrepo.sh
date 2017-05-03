@@ -46,7 +46,7 @@ cd /srv/reprepro/
 sudo chmod -R a+r .
 cd ubuntu
 sudo chown -R `whoami` .
-sudo cp "$cdir/repo.key" /srv/reprepro/
+sudo cp "$cdir/repo.key" /srv/reprepro/ubuntu/
 
 cat >/srv/reprepro/ubuntu/conf/distributions <<EOF
 Origin: Contrail
