@@ -2,7 +2,7 @@
 
 rm -f logs.*
 sudo tar -cf logs.tar /var/log/juju
-for ldir in '/etc/contrail' '/etc/contrailctl' '/etc/neutron' '/etc/nova' '/var/log/upstart' '/var/log/neutron' '/var/log/nova' '/var/log/contrail' ; do
+for ldir in '/etc/apache2' '/etc/apt' '/etc/contrail' '/etc/contrailctl' '/etc/neutron' '/etc/nova' '/var/log/upstart' '/var/log/neutron' '/var/log/nova' '/var/log/contrail' ; do
   if [ -d "$ldir" ] ; then
     tar -rf logs.tar "$ldir"
   fi
