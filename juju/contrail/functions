@@ -57,6 +57,20 @@ function prepare_machines() {
   juju-status-tabular
 }
 
+function get_machine_index_by_service() {
+  local srv=$1
+  juju-status-tabular $srv | awk "/^$srv\//{print \$4}"
+}
+
+function detect_machines() {
+  m1=`get_machine_index_by_service openstack-dashboard`
+  m2=`get_machine_index_by_service glance`
+  m3=`get_machine_index_by_service keystone`
+  m4=`get_machine_index_by_service nova-cloud-controller`
+  m5=`get_machine_index_by_service neutron-api`
+  m6=`get_machine_index_by_service contrail-controller`
+}
+
 function hack_openstack() {
   if [[ "$jver" == 2 ]] ; then
     # Juju 2.0 registers services with private ips (using new modern tool 'network-get public')
@@ -83,6 +97,10 @@ function post_deploy() {
   echo "INFO: Wait for services start: $(date)"
   wait_absence_status_for_services "executing|blocked|waiting"
   echo "INFO: Wait for services end: $(date)"
+
+  if [[ -z "$m1" || -z "$m2" || -z "$m3" || -z "$m4" || -z "$m5" || -z "$m6" ]] ; then
+    detect_machines
+  fi
 
   # check for errors
   if juju-status | grep "current" | grep error ; then
