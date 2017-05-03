@@ -1,6 +1,14 @@
 #!/bin/bash -e
 
-if ! sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy reprepro apache2 rng-tools gnupg2 &>apt.log ; then
+rm -f apt.log
+for i in {1..6} ; do
+  if sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy reprepro apache2 rng-tools gnupg2 &>apt.log ; then
+    rm -f apt.log
+    break
+  fi
+  sleep 20
+done
+if [ -f apt.log ] ; then
   cat apt.log
   exit 100
 fi
