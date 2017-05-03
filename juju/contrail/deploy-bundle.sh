@@ -34,7 +34,7 @@ echo "---------------------------------------------------- From: $JUJU_REPO  Ver
 
 prepare_repo
 repo_ip=`get-machine-ip-by-number $m0`
-repo_key=`curl http://$repo_ip/repo.key`
+repo_key=`curl -s http://$repo_ip/repo.key`
 repo_key=`echo "$repo_key" | awk '{printf("          %s\r", $0)}'`
 
 # change bundles' variables
@@ -49,10 +49,7 @@ sed -i -e "s|%REPO_IP%|$repo_ip|m" $BUNDLE
 sed -i -e "s|%REPO_KEY%|$repo_key|m" $BUNDLE
 sed -i "s/\r/\n/g" $BUNDLE
 
-# script needs to change directory to local charms repository
-cd contrail-charms
 juju-deploy-bundle $BUNDLE
-cd ..
 
 juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
 juju-attach contrail-analyticsdb contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
