@@ -28,7 +28,7 @@ private_ip=`curl -s ${mac_url}${mac}local-ipv4s`
 
 juju bootstrap --bootstrap-series=trusty aws amazon --config vpc-id=$vpc_id --config vpc-id-force=true
 
-repo_key=`curl -s http://$private_ip/repo.key`
+repo_key=`curl -s http://$private_ip/ubuntu/repo.key`
 repo_key=`echo "$repo_key" | awk '{printf("          %s\r", $0)}'`
 
 # change bundles' variables

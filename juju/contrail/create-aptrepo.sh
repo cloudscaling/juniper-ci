@@ -68,20 +68,14 @@ for ff in `ls /tmp/pkgs/*.deb` ; do
   reprepro includedeb trusty $ff
 done
 
-cat >000-default.conf <<EOF
-<VirtualHost *:80>
-    ServerAdmin webmaster@localhost
-    DocumentRoot /srv/reprepro
-    <Directory /srv/reprepro>
-	Options Indexes FollowSymLinks
-	AllowOverride None
-	Require all granted
-    </Directory>
-
-    LogLevel debug
-    ErrorLog ${APACHE_LOG_DIR}/error.log
-    CustomLog ${APACHE_LOG_DIR}/access.log combined
-</VirtualHost>
+cat >apt-repo.conf <<EOF
+Alias /ubuntu/ "/srv/reprepro/ubuntu/"
+<Directory "/srv/reprepro/ubuntu/">
+    Options Indexes FollowSymLinks
+    AllowOverride None
+    Require all granted
+</Directory>
 EOF
-sudo cp 000-default.conf /etc/apache2/sites-available/000-default.conf
+sudo cp apt-repo.conf /etc/apache2/sites-available/apt-repo.conf
+sudo sed -E -i -e "s|</VirtualHost>|        Include sites-available/apt-repo.conf\n</VirtualHost>|" /etc/apache2/sites-available/000-default.conf
 sudo service apache2 restart
