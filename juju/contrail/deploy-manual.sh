@@ -120,7 +120,7 @@ juju-add-relation "neutron-api:identity-service" "keystone:identity-service"
 juju-add-relation "neutron-api:amqp" "rabbitmq-server:amqp"
 
 juju-add-relation "contrail-controller" "ntp"
-juju-add-relation "contrail-openstack-compute:juju-info" "ntp:juju-info"
+juju-add-relation "nova-compute" "ntp"
 
 juju-add-relation "contrail-controller" "contrail-keystone-auth"
 juju-add-relation "contrail-keystone-auth" "keystone"
