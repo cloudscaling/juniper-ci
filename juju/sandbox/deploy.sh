@@ -3,10 +3,20 @@
 SERIES='trusty'
 OPENSTACK_ORIGIN="cloud:${SERIES}-${OPENSTACK_VERSION}"
 
-./juniper-ci/juju/sandbox/_set-juju-creds.sh
+mac_url='http://169.254.169.254/latest/meta-data/network/interfaces/macs/'
+mac=`curl -s $mac_url`
+vpc_id=`curl -s ${mac_url}${mac}vpc-id`
+subnet_id=`curl -s ${mac_url}${mac}subnet-id`
+private_ip=`curl -s ${mac_url}${mac}local-ipv4s`
 
-wget -nv https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail_debs-${VERSION}-${OPENSTACK_VERSION}.tgz -O contrail_debs.tgz
-./juniper-ci/juju/contrail/create-aptrepo.sh
+./juniper-ci/juju/sandbox/_set-juju-creds.sh
+juju bootstrap --bootstrap-series=trusty aws amazon --config vpc-id=$vpc_id --config vpc-id-force=true
+
+rm -rf contrail-charms
+git clone https://github.com/Juniper/contrail-charms.git
+cd contrail-charms
+git checkout $CHARMS_VERSION
+cd ..
 
 mkdir -p docker
 cd docker
@@ -17,19 +27,8 @@ wget -nv ${base_name}/contrail-analyticsdb-${suffix}-${VERSION}.tar.gz
 wget -nv ${base_name}/contrail-controller-${suffix}-${VERSION}.tar.gz
 cd ..
 
-rm -rf contrail-charms
-git clone https://github.com/Juniper/contrail-charms.git
-cd contrail-charms
-git checkout $CHARMS_VERSION
-cd ..
-
-mac_url='http://169.254.169.254/latest/meta-data/network/interfaces/macs/'
-mac=`curl -s $mac_url`
-vpc_id=`curl -s ${mac_url}${mac}vpc-id`
-subnet_id=`curl -s ${mac_url}${mac}subnet-id`
-private_ip=`curl -s ${mac_url}${mac}local-ipv4s`
-
-juju bootstrap --bootstrap-series=trusty aws amazon --config vpc-id=$vpc_id --config vpc-id-force=true
+wget -nv https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail_debs-${VERSION}-${OPENSTACK_VERSION}.tgz -O contrail_debs.tgz
+./juniper-ci/juju/contrail/create-aptrepo.sh
 
 repo_key=`curl -s http://$private_ip/ubuntu/repo.key`
 repo_key=`echo "$repo_key" | awk '{printf("          %s\r", $0)}'`
