@@ -3,7 +3,7 @@
 ACCESS_KEY=${ACCESS_KEY:-''}
 SECRET_KEY=${SECRET_KEY:-''}
 
-juju remove-credential aws aws &>/dev/null || bin/true
+juju remove-credential aws aws &>/dev/null || /bin/true
 
 cat >"$HOME/creds.yaml" <<EOF
 credentials:
