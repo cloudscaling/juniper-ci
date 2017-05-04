@@ -6,10 +6,9 @@ function check_containers() {
     exit 1
   fi
   packages="contrail_debs-${BUILD}-${VERSION}.tgz"
-  image_controller="contrail-controller-u14.04-4.0.0.0-${BUILD}.tar.gz"
-  image_analytics="contrail-analytics-u14.04-4.0.0.0-${BUILD}.tar.gz"
-  image_analyticsdb="contrail-analyticsdb-u14.04-4.0.0.0-${BUILD}.tar.gz"
-  image_agent="contrail-agent-u14.04-4.0.0.0-${BUILD}.tar.gz"
+  image_controller="contrail-controller-ubuntu14.04-4.0.0.0-${BUILD}.tar.gz"
+  image_analytics="contrail-analytics-ubuntu14.04-4.0.0.0-${BUILD}.tar.gz"
+  image_analyticsdb="contrail-analyticsdb-ubuntu14.04-4.0.0.0-${BUILD}.tar.gz"
   for ff in "$packages" "$image_controller"  "$image_analytics" "$image_analyticsdb" ; do
     if [ ! -f "$HOME/docker/$ff" ] ; then
       echo "ERROR: There is no file $ff which is needed for deployment."
