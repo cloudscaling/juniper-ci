@@ -3,6 +3,8 @@
 SERIES='trusty'
 OPENSTACK_ORIGIN="cloud:${SERIES}-${OPENSTACK_VERSION}"
 
+./juniper-ci/juju/sandbox/_set-juju-creds.sh
+
 wget -nv https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail_debs-${VERSION}-${OPENSTACK_VERSION}.tgz -O contrail_debs.tgz
 ./juniper-ci/juju/contrail/create-aptrepo.sh
 
