@@ -17,6 +17,7 @@ wget -nv ${base_name}/contrail-analyticsdb-${suffix}-${VERSION}.tar.gz
 wget -nv ${base_name}/contrail-controller-${suffix}-${VERSION}.tar.gz
 cd ..
 
+rm -rf contrail-charms
 git clone https://github.com/Juniper/contrail-charms.git
 cd contrail-charms
 git checkout $CHARMS_VERSION
