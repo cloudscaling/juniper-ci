@@ -34,7 +34,7 @@ if ! output=`gpg2 --list-keys contrail@juniper.net` ; then
     %no-protection
     %commit
     %echo done
-  EOF
+EOF
   sudo rngd -r /dev/urandom
   gpg2 --batch --gen-key key.cfg
 fi
