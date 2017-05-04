@@ -21,7 +21,8 @@ tar xf "$cdir/contrail_debs.tgz"
 cd "$cdir"
 
 # create gpg key for repository
-cat >key.cfg <<EOF
+if ! output=`gpg2 --list-keys contrail@juniper.net` ; then
+  cat >key.cfg <<EOF
     %echo Generating a basic OpenPGP key
     Key-Type: default
     Subkey-Type: ELG-E
@@ -33,10 +34,10 @@ cat >key.cfg <<EOF
     %no-protection
     %commit
     %echo done
-EOF
-
-sudo rngd -r /dev/urandom
-gpg2 --batch --gen-key key.cfg
+  EOF
+  sudo rngd -r /dev/urandom
+  gpg2 --batch --gen-key key.cfg
+fi
 gpg2 --export -a contrail@juniper.net > repo.key
 GPGKEYID=`gpg2 --list-keys --keyid-format LONG contrail@juniper.net | grep "^pub" | awk '{print $2}' | cut -d / -f2`
 
