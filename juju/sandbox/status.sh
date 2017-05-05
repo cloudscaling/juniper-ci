@@ -1,6 +1,9 @@
 #!/bin/bash -e
 
-./juniper-ci/juju/sandbox/_set-juju-creds.sh &>/dev/null
+my_file="$(readlink -e "$0")"
+my_dir="$(dirname $my_file)"
+
+$my_dir/_set-juju-creds.sh &>/dev/null
 
 if ! juju status &>/dev/null ; then
   echo "-1"

@@ -5,7 +5,8 @@ SECRET_KEY=${SECRET_KEY:-''}
 
 juju remove-credential aws aws &>/dev/null || /bin/true
 
-cat >"$HOME/creds.yaml" <<EOF
+creds_file="/tmp/creds.yaml"
+cat >"$creds_file" <<EOF
 credentials:
   aws:
     aws:
@@ -13,6 +14,7 @@ credentials:
       access-key: $ACCESS_KEY
       secret-key: $SECRET_KEY
 EOF
-juju add-credential aws -f "$HOME/creds.yaml"
+juju add-credential aws -f "$creds_file"
+rm -f "$creds_file"
 region=`curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r ".region"`
 juju set-default-region aws $region

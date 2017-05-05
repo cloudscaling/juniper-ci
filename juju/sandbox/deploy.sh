@@ -1,5 +1,12 @@
 #!/bin/bash -e
 
+my_file="$(readlink -e "$0")"
+my_dir="$(dirname $my_file)"
+
+export VERSION=${VERSION:-'3062'}
+export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
+export CHARMS_VERSION=${CHARMS_VERSION:-'98b03eec82958b77777c0b53e6292a065ef57bf9'}
+
 SERIES='trusty'
 OPENSTACK_ORIGIN="cloud:${SERIES}-${OPENSTACK_VERSION}"
 
@@ -9,7 +16,11 @@ vpc_id=`curl -s ${mac_url}${mac}vpc-id`
 subnet_id=`curl -s ${mac_url}${mac}subnet-id`
 private_ip=`curl -s ${mac_url}${mac}local-ipv4s`
 
-./juniper-ci/juju/sandbox/_set-juju-creds.sh
+# change directory to working directory
+cd /opt
+cdir="$(pwd)"
+
+$my_dir/_set-juju-creds.sh
 juju --debug bootstrap --bootstrap-series=trusty aws amazon --config vpc-id=$vpc_id --config vpc-id-force=true
 
 rm -rf contrail-charms
@@ -28,16 +39,16 @@ wget -nv ${base_name}/contrail-controller-${suffix}-${VERSION}.tar.gz
 cd ..
 
 wget -nv https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail_debs-${VERSION}-${OPENSTACK_VERSION}.tgz -O contrail_debs.tgz
-./juniper-ci/juju/contrail/create-aptrepo.sh
+$my_dir/../contrail/create-aptrepo.sh
 
 repo_key=`curl -s http://$private_ip/ubuntu/repo.key`
 repo_key=`echo "$repo_key" | awk '{printf("          %s\r", $0)}'`
 
 # change bundles' variables
-JUJU_REPO="$(pwd)/contrail-charms"
-BUNDLE="./bundle.yaml"
+JUJU_REPO="$cdir/contrail-charms"
+BUNDLE="$cdir/bundle.yaml"
 rm -f "$BUNDLE"
-cp "juniper-ci/juju/sandbox/bundle.yaml.template" "$BUNDLE"
+cp "$my_dir/bundle.yaml.template" "$BUNDLE"
 sed -i -e "s/%SERIES%/$SERIES/m" $BUNDLE
 sed -i -e "s/%OPENSTACK_ORIGIN%/$OPENSTACK_ORIGIN/m" $BUNDLE
 sed -i -e "s|%JUJU_REPO%|$JUJU_REPO|m" $BUNDLE
@@ -46,11 +57,11 @@ sed -i -e "s|%REPO_KEY%|$repo_key|m" $BUNDLE
 sed -i "s/\r/\n/g" $BUNDLE
 
 juju deploy $BUNDLE
-juju attach contrail-controller contrail-controller="./docker/contrail-controller-${suffix}-${VERSION}.tar.gz"
-juju attach contrail-analyticsdb contrail-analyticsdb="./docker/contrail-analyticsdb-${suffix}-${VERSION}.tar.gz"
-juju attach contrail-analytics contrail-analytics="./docker/contrail-analytics-${suffix}-${VERSION}.tar.gz"
+juju attach contrail-controller contrail-controller="$cdir/docker/contrail-controller-${suffix}-${VERSION}.tar.gz"
+juju attach contrail-analyticsdb contrail-analyticsdb="$cdir/docker/contrail-analyticsdb-${suffix}-${VERSION}.tar.gz"
+juju attach contrail-analytics contrail-analytics="$cdir/docker/contrail-analytics-${suffix}-${VERSION}.tar.gz"
 
-source ./juniper-ci/juju/common/functions
-source ./juniper-ci/juju/contrail/functions
+source "$my_dir/../common/functions"
+source "$my_dir/../contrail/functions"
 detect_machines
 hack_openstack
