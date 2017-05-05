@@ -5,6 +5,7 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get -fqy -o Dpkg::Options::="--force-con
 sudo apt-get install -fy juju awscli mc joe git jq curl
 
 mkdir -p /opt
+cd /opt
 rm -rf juniper-ci
 git clone https://github.com/cloudscaling/juniper-ci.git
 ./juniper-ci/juju/sandbox/deploy.sh
