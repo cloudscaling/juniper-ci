@@ -10,7 +10,7 @@ subnet_id=`curl -s ${mac_url}${mac}subnet-id`
 private_ip=`curl -s ${mac_url}${mac}local-ipv4s`
 
 ./juniper-ci/juju/sandbox/_set-juju-creds.sh
-juju bootstrap --bootstrap-series=trusty aws amazon --config vpc-id=$vpc_id --config vpc-id-force=true
+juju --debug bootstrap --bootstrap-series=trusty aws amazon --config vpc-id=$vpc_id --config vpc-id-force=true
 
 rm -rf contrail-charms
 git clone https://github.com/Juniper/contrail-charms.git

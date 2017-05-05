@@ -2,14 +2,15 @@
 
 ./juniper-ci/juju/sandbox/_set-juju-creds.sh &>/dev/null
 
-if ! juju status ; then
+if ! juju status &>/dev/null ; then
   echo "-1"
   exit
 fi
 
+all_units=`juju status --format oneline | grep "workload:" | wc -l`
 ready_units=`juju status --format line | grep "workload:active" | wc -l`
-if (( ready_units < 17 )) ; then
-  echo $(( ready_units * 100 / 17 ))
+if (( ready_units < all_units )) ; then
+  echo $(( ready_units * 100 / all_units ))
   exit
 fi
 
