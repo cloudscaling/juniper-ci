@@ -181,6 +181,7 @@ function run_os_checks() {
   check_instance_simple $private_net_id 10.5.0.10 || ret=1
   echo ''
 
+  sleep 5
   set -x
   openstack server list
   set +x
