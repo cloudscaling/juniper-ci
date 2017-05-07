@@ -128,6 +128,9 @@ juju-set contrail-openstack-compute "vhost-interface=eth0"
 if [ "$DEPLOY_AS_HA_MODE" != 'false' ] ; then
   juju-deploy cs:$SERIES/haproxy --to $m0
   juju-add-relation "contrail-analytics" "haproxy"
+  juju-add-relation "contrail-controller" "haproxy"
+fi
+
 sleep 30
 
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
