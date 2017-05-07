@@ -30,32 +30,6 @@ function prepare_repo() {
   echo "INFO: apt-repo is ready"
 }
 
-function prepare_machines() {
-  m1=$(create_machine 0)
-  echo "INFO: Machine created: $m1"
-  m2=$(create_machine 1)
-  echo "INFO: Machine created: $m2"
-  m3=$(create_machine 1)
-  echo "INFO: Machine created: $m3"
-  m4=$(create_machine 0)
-  echo "INFO: Machine created: $m4"
-  m5=$(create_machine 0)
-  echo "INFO: Machine created: $m5"
-  m6=$(create_machine 2)
-  echo "INFO: Machine created: $m6"
-  if [ "$DEPLOY_AS_HA_MODE" != 'false' ] ; then
-    m7=$(create_machine 2)
-    echo "INFO: Machine created: $m7"
-    m8=$(create_machine 2)
-    echo "INFO: Machine created: $m8"
-    wait_for_machines $m1 $m2 $m3 $m4 $m5 $m6 $m7 $m8
-  else
-    wait_for_machines $m1 $m2 $m3 $m4 $m5 $m6
-  fi
-
-  juju-status-tabular
-}
-
 function get_machine_index_by_service() {
   local srv=$1
   juju-status-tabular $srv | awk "/^$srv\//{print \$4}"
