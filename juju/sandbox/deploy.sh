@@ -3,9 +3,9 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
-export VERSION=${VERSION:-'3062'}
+export VERSION=${VERSION:-'3073'}
 export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
-export CHARMS_VERSION=${CHARMS_VERSION:-'98b03eec82958b77777c0b53e6292a065ef57bf9'}
+export CHARMS_VERSION=${CHARMS_VERSION:-'5b72b3edaddfba2718dc1dffff31421e70cfa54b'}
 
 SERIES='trusty'
 OPENSTACK_ORIGIN="cloud:${SERIES}-${OPENSTACK_VERSION}"
