@@ -30,7 +30,7 @@ repo_ip=`get-machine-ip-by-number $m0`
 repo_key=`curl -s http://$repo_ip/ubuntu/repo.key`
 repo_key=`echo "$repo_key" | awk '{printf("      %s\r", $0)}'`
 
-if [ "$DEPLOY_AS_HA_MODE" != 'false' ] ; then
+if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   m0=$(create_machine 0)
   echo "INFO: Machine created: $m0"
 fi
@@ -46,7 +46,7 @@ m5=$(create_machine 0)
 echo "INFO: Machine created: $m5"
 m6=$(create_machine 2)
 echo "INFO: Machine created: $m6"
-if [ "$DEPLOY_AS_HA_MODE" != 'false' ] ; then
+if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   m7=$(create_machine 2)
   echo "INFO: Machine created: $m7"
   m8=$(create_machine 2)
@@ -101,7 +101,7 @@ juju-expose contrail-controller
 juju-deploy $PLACE/contrail-analyticsdb --to $m6 --resource contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
 juju-deploy $PLACE/contrail-analytics --to $m6 --resource contrail-analytics="$HOME/docker/$image_analytics"
 
-if [ "$DEPLOY_AS_HA_MODE" != 'false' ] ; then
+if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-add-unit contrail-controller --to $m7
   juju-add-unit contrail-controller --to $m8
   juju-add-unit contrail-analytics --to $m7
@@ -125,8 +125,9 @@ sed -i "s/\r/\n/g" "repo_config_c.yaml"
 juju-deploy $PLACE/contrail-openstack-compute --config repo_config_c.yaml
 juju-set contrail-openstack-compute "vhost-interface=eth0"
 
-if [ "$DEPLOY_AS_HA_MODE" != 'false' ] ; then
+if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-deploy cs:$SERIES/haproxy --to $m0
+  juju-expose haproxy
   juju-add-relation "contrail-analytics" "haproxy"
   juju-add-relation "contrail-controller" "haproxy"
 fi
