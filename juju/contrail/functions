@@ -68,7 +68,7 @@ function hack_openstack() {
 function post_deploy() {
   sleep 30
   echo "INFO: Wait for services start: $(date)"
-  wait_absence_status_for_services "executing|blocked|waiting"
+  wait_absence_status_for_services "executing|blocked|waiting" 39
   echo "INFO: Wait for services end: $(date)"
 
   if [[ -z "$m1" || -z "$m2" || -z "$m3" || -z "$m4" || -z "$m5" || -z "$m6" ]] ; then
