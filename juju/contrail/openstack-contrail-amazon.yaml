@@ -67,6 +67,7 @@ services:
     num_units: 1
     options:
       admin-password: "password"
+      admin-role: "admin"
       debug: "true"
       openstack-origin: "%OPENSTACK_ORIGIN%"
     expose: true
