@@ -1,11 +1,16 @@
 #!/bin/bash -e
 
+if [[ "$HOME" == "" ]] ; then
+  echo "ERROR: HOME variable must be set"
+  exit 1
+fi
+
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
 export VERSION=${VERSION:-'3073'}
 export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
-export CHARMS_VERSION=${CHARMS_VERSION:-'5b72b3edaddfba2718dc1dffff31421e70cfa54b'}
+export CHARMS_VERSION=${CHARMS_VERSION:-'b6c43803c068b6ccbcbb12800ac0add384dcff3e'}
 
 SERIES='trusty'
 OPENSTACK_ORIGIN="cloud:${SERIES}-${OPENSTACK_VERSION}"
@@ -17,7 +22,7 @@ subnet_id=`curl -s ${mac_url}${mac}subnet-id`
 private_ip=`curl -s ${mac_url}${mac}local-ipv4s`
 
 # change directory to working directory
-cd /opt
+cd "$HOME"
 cdir="$(pwd)"
 
 $my_dir/_set-juju-creds.sh
