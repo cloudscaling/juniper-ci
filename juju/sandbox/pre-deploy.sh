@@ -21,3 +21,7 @@ $prefix apt-get install -fy juju awscli mc joe git jq curl
 cd "$HOME"
 rm -rf juniper-ci
 git clone https://github.com/cloudscaling/juniper-ci.git
+
+if [ "$(whoami)" == "root" ] ; then
+  chown -R $user "$HOME"
+fi
