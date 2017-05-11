@@ -11,9 +11,10 @@ my_dir="$(dirname $my_file)"
 export VERSION=${VERSION:-'3073'}
 export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
 export CHARMS_VERSION=${CHARMS_VERSION:-'b6c43803c068b6ccbcbb12800ac0add384dcff3e'}
-
-SERIES='trusty'
+export SERIES=${SERIES:-'trusty'}
 OPENSTACK_ORIGIN="cloud:${SERIES}-${OPENSTACK_VERSION}"
+
+base_name='https://s3-us-west-2.amazonaws.com/contrailpkgs'
 
 mac_url='http://169.254.169.254/latest/meta-data/network/interfaces/macs/'
 mac=`curl -s $mac_url`
@@ -36,14 +37,13 @@ cd ..
 
 mkdir -p docker
 cd docker
-base_name='https://s3-us-west-2.amazonaws.com/contrailpkgs'
 suffix='ubuntu14.04-4.0.0.0'
-wget -nv ${base_name}/contrail-analytics-${suffix}-${VERSION}.tar.gz
-wget -nv ${base_name}/contrail-analyticsdb-${suffix}-${VERSION}.tar.gz
-wget -nv ${base_name}/contrail-controller-${suffix}-${VERSION}.tar.gz
+wget -nv "${base_name}/contrail-analytics-${suffix}-${VERSION}.tar.gz"
+wget -nv "${base_name}/contrail-analyticsdb-${suffix}-${VERSION}.tar.gz"
+wget -nv "${base_name}/contrail-controller-${suffix}-${VERSION}.tar.gz"
 cd ..
 
-wget -nv https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail_debs-${VERSION}-${OPENSTACK_VERSION}.tgz -O contrail_debs.tgz
+wget -nv "${base_name}/contrail_debs-${VERSION}-${OPENSTACK_VERSION}.tgz" -O contrail_debs.tgz
 $my_dir/../contrail/create-aptrepo.sh
 
 repo_key=`curl -s http://$private_ip/ubuntu/repo.key`
