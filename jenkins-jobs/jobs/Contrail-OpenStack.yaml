@@ -27,6 +27,10 @@
           name: DEPLOY_AS_HA_MODE
           description: "Deploy 3 controllers instead of 1"
           default: false
+      - bool:
+          name: USE_SSL
+          description: "Deploy Contrail/OpenStack with certificates"
+          default: false
     scm:
       - juniper-contrail-charms
       - juniper-ci
