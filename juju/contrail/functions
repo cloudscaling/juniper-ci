@@ -92,3 +92,15 @@ function post_deploy() {
     exit 1
   fi
 }
+
+function apply_ssl() {
+  if [[ "$USE_SSL" != "true" ]] ; then
+    return
+  fi
+
+  for charm in keystone neutron-api glance nova-cloud-controller openstack-dashboard contrail-controller ; do
+    juju-set $charm --file $my_dir/ssl_config.yaml
+  done
+
+  juju-set keystone "use-https=true"
+}

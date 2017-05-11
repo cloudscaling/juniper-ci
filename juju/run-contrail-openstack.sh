@@ -17,16 +17,13 @@ if [[ "$jver" == 1 ]] ; then
   exit 1
 fi
 
-SERIES=${SERIES:-trusty}
-export SERIES
-VERSION=${VERSION:-mitaka}
-export VERSION
-OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
-export OPENSTACK_ORIGIN
-BUILD="3073"
-export BUILD
-DEPLOY_AS_HA_MODE=${DEPLOY_AS_HA_MODE:-false}
-export DEPLOY_AS_HA_MODE
+export SERIES=${SERIES:-trusty}
+export VERSION=${VERSION:-mitaka}
+export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
+export BUILD="3073"
+export DEPLOY_AS_HA_MODE=${DEPLOY_AS_HA_MODE:-false}
+export USE_SSL=${USE_SSL:-true}
+
 
 if ! juju-bootstrap ; then
   echo "Bootstrap error. exiting..."

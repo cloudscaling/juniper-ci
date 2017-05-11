@@ -132,6 +132,8 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-add-relation "contrail-controller" "haproxy"
 fi
 
+apply_ssl
+
 sleep 30
 
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
