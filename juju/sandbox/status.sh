@@ -17,6 +17,10 @@ fi
 
 all_units=`juju status --format oneline | grep "workload:" | wc -l`
 ready_units=`juju status --format line | grep "workload:active" | wc -l`
+if (( all_units < 5 )) ; then
+  echo "0"
+  exit
+fi
 if (( ready_units < all_units )) ; then
   echo $(( ready_units * 100 / all_units ))
   exit
