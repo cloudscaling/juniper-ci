@@ -15,9 +15,10 @@ else
   prefix="sudo"
 fi
 
-$prefix apt-get -qq update
-$prefix DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade
-$prefix apt-get install -fy juju awscli mc joe git jq curl
+export DEBIAN_FRONTEND=noninteractive
+${prefix} apt-get -qq update
+${prefix} apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade
+${prefix} apt-get install -fy juju awscli mc joe git jq curl
 
 mkdir -p "$HOME"
 cd "$HOME"
