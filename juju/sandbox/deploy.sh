@@ -35,18 +35,29 @@ cd contrail-charms
 git checkout $CHARMS_VERSION
 cd ..
 
+# NOTE: this operation (downloading all archives) can take from 1 minute to 10 minutes or more.
+# so now script doesn't delete/re-download archives if something with same file name is present.
 mkdir -p docker
 cd docker
 suffix='ubuntu14.04-4.0.0.0'
-wget -nv "${base_name}/contrail-analytics-${suffix}-${VERSION}.tar.gz"
-wget -nv "${base_name}/contrail-analyticsdb-${suffix}-${VERSION}.tar.gz"
-wget -nv "${base_name}/contrail-controller-${suffix}-${VERSION}.tar.gz"
+if [ ! -f "${base_name}/contrail-analytics-${suffix}-${VERSION}.tar.gz" ] ; then
+  wget -nv "${base_name}/contrail-analytics-${suffix}-${VERSION}.tar.gz"
+fi
+if [ ! -f "${base_name}/contrail-analyticsdb-${suffix}-${VERSION}.tar.gz" ] ; then
+  wget -nv "${base_name}/contrail-analyticsdb-${suffix}-${VERSION}.tar.gz"
+fi
+if [ ! -f "${base_name}/contrail-controller-${suffix}-${VERSION}.tar.gz" ] ; then
+  wget -nv "${base_name}/contrail-controller-${suffix}-${VERSION}.tar.gz"
+fi
 cd ..
 
-wget -nv "${base_name}/contrail_debs-${VERSION}-${OPENSTACK_VERSION}.tgz" -O contrail_debs.tgz
+if [ ! -f contrail_debs.tgz ] ; then
+  wget -nv "${base_name}/contrail_debs-${VERSION}-${OPENSTACK_VERSION}.tgz" -O contrail_debs.tgz
+fi
 # only this file is allowed to be run with sudo in the sandbox.
 sudo $my_dir/../contrail/create-aptrepo.sh
 
+rm repo.key
 repo_key=`curl -s http://$private_ip/ubuntu/repo.key`
 repo_key=`echo "$repo_key" | awk '{printf("          %s\r", $0)}'`
 

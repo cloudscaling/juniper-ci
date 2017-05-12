@@ -42,6 +42,7 @@ gpg2 --export -a contrail@juniper.net > repo.key
 GPGKEYID=`gpg2 --list-keys --keyid-format LONG contrail@juniper.net | grep "^pub" | awk '{print $2}' | cut -d / -f2`
 
 # setup repository
+sudo rm -rf /srv/reprepro/ubuntu
 sudo mkdir -p /srv/reprepro/ubuntu/{conf,dists,incoming,indices,logs,pool,project,tmp}
 cd /srv/reprepro/
 sudo chmod -R a+r .
@@ -78,5 +79,7 @@ Alias /ubuntu/ "/srv/reprepro/ubuntu/"
 </Directory>
 EOF
 sudo cp apt-repo.conf /etc/apache2/sites-available/apt-repo.conf
-sudo sed -E -i -e "s|</VirtualHost>|        Include sites-available/apt-repo.conf\n</VirtualHost>|" /etc/apache2/sites-available/000-default.conf
+if ! grep -q "apt-repo.conf" /etc/apache2/sites-available/000-default.conf ; then
+  sudo sed -E -i -e "s|</VirtualHost>|        Include sites-available/apt-repo.conf\n</VirtualHost>|" /etc/apache2/sites-available/000-default.conf
+fi
 sudo service apache2 restart
