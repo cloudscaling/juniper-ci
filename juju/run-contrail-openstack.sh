@@ -9,6 +9,7 @@ my_dir="$(dirname $my_file)"
 source $my_dir/common/functions
 
 log_dir=$WORKSPACE/logs
+chmod -R u+w $log_dir
 rm -rf $log_dir
 mkdir $log_dir
 
