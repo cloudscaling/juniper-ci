@@ -56,9 +56,6 @@ function hack_openstack() {
     juju-set glance os-public-hostname=$ip
     ip=`get-machine-ip-by-number $m3`
     juju-set keystone os-public-hostname=$ip
-    echo "INFO: Wait for services start: $(date)"
-    wait_absence_status_for_services "executing|blocked|waiting|allocating" 10
-    echo "INFO: Wait for services end: $(date)"
   fi
 
   # open port for vnc console
@@ -66,24 +63,18 @@ function hack_openstack() {
 }
 
 function post_deploy() {
-  sleep 30
-  echo "INFO: Wait for services start: $(date)"
-  wait_absence_status_for_services "executing|blocked|waiting" 39
-  echo "INFO: Wait for services end: $(date)"
+  echo "INFO: Waiting for services start: $(date)"
+  # sleep some time while machines are not up - bundle deployment creates machines and assigns applications without waiting for machines
+  # but hack_openstack must have machines IP to configure services
+  sleep 180
 
   if [[ -z "$m1" || -z "$m2" || -z "$m3" || -z "$m4" || -z "$m5" || -z "$m6" ]] ; then
     detect_machines
   fi
-
-  # check for errors
-  if juju-status | grep "current" | grep error ; then
-    echo "ERROR: Some services went to error state"
-    juju-ssh 0 sudo grep Error /var/log/juju/all-machines.log 2>/dev/null
-    exit 1
-  fi
-
   hack_openstack
-  juju-status-tabular
+
+  wait_absence_status_for_services "executing|blocked|waiting" 39
+  echo "INFO: Waiting for services end: $(date)"
 
   # check for errors
   if juju-status | grep "current" | grep error ; then
@@ -91,6 +82,8 @@ function post_deploy() {
     juju-ssh 0 sudo grep Error /var/log/juju/all-machines.log 2>/dev/null
     exit 1
   fi
+
+  juju-status-tabular
 }
 
 function apply_ssl() {
@@ -98,14 +91,7 @@ function apply_ssl() {
     return
   fi
 
-  tmp_cfg="/tmp/ssl_config.yaml"
-  for charm in keystone neutron-api glance nova-cloud-controller openstack-dashboard ; do
-    echo "${charm}:" > "$tmp_cfg"
-    cat $my_dir/ssl_openstack_config.yaml >> "$tmp_cfg"
-    juju-set $charm --file "$tmp_cfg"
-  done
+  juju-set keystone "use-https=True" "https-service-endpoints=True"
 
   juju-set contrail-controller --file "$my_dir/ssl_contrail_config.yaml"
-
-  juju-set keystone "use-https=true"
 }
