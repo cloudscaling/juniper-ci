@@ -44,7 +44,8 @@ wget -nv "${base_name}/contrail-controller-${suffix}-${VERSION}.tar.gz"
 cd ..
 
 wget -nv "${base_name}/contrail_debs-${VERSION}-${OPENSTACK_VERSION}.tgz" -O contrail_debs.tgz
-$my_dir/../contrail/create-aptrepo.sh
+# only this file is allowed to be run with sudo in the sandbox.
+sudo $my_dir/../contrail/create-aptrepo.sh
 
 repo_key=`curl -s http://$private_ip/ubuntu/repo.key`
 repo_key=`echo "$repo_key" | awk '{printf("          %s\r", $0)}'`
