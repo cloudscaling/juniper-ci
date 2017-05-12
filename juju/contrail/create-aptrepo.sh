@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 rm -f apt.log
 for i in {1..6} ; do

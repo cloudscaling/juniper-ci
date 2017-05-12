@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 if [[ "$HOME" == "" ]] ; then
   echo "ERROR: HOME variable must be set"
@@ -58,7 +58,6 @@ fi
 # only this file is allowed to be run with sudo in the sandbox.
 sudo $my_dir/../contrail/create-aptrepo.sh
 
-rm repo.key
 repo_key=`curl -s http://$private_ip/ubuntu/repo.key`
 repo_key=`echo "$repo_key" | awk '{printf("          %s\r", $0)}'`
 
