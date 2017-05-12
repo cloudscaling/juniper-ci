@@ -6,12 +6,14 @@ script_params="$@"
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
-source $my_dir/common/functions
+source "$my_dir/common/functions"
 
-log_dir=$WORKSPACE/logs
-chmod -R u+w $log_dir
-rm -rf $log_dir
-mkdir $log_dir
+log_dir="$WORKSPACE/logs"
+if [ -d $log_dir ] ; then
+  chmod -R u+w "$log_dir"
+  rm -rf "$log_dir"
+fi
+mkdir "$log_dir"
 
 if [[ "$jver" == 1 ]] ; then
   echo "ERROR: only juju 2.0 and higher supports resources. Please install and use juju 2.0 or higher."
