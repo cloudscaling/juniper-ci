@@ -82,4 +82,4 @@ sudo cp apt-repo.conf /etc/apache2/sites-available/apt-repo.conf
 if ! grep -q "apt-repo.conf" /etc/apache2/sites-available/000-default.conf ; then
   sudo sed -E -i -e "s|</VirtualHost>|        Include sites-available/apt-repo.conf\n</VirtualHost>|" /etc/apache2/sites-available/000-default.conf
 fi
-sudo service apache2 restart
+sudo service apache2 reload

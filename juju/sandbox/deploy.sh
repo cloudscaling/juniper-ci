@@ -99,7 +99,7 @@ stage=4
 get_file "contrail-controller-${suffix}-${VERSION}.tar.gz"
 stage=5
 get_file "contrail_debs-${VERSION}-${OPENSTACK_VERSION}.tgz"
-mv "docker/contrail_debs-${VERSION}-${OPENSTACK_VERSION}.tgz" contrail_debs.tgz
+cp "docker/contrail_debs-${VERSION}-${OPENSTACK_VERSION}.tgz" contrail_debs.tgz
 
 stage=6
 
