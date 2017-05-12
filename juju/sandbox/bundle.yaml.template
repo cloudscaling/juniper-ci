@@ -16,7 +16,7 @@ services:
     charm: "cs:%SERIES%/percona-cluster"
     num_units: 1
     options:
-      root-password: "password"
+      root-password: "%PASSWORD%"
       max-connections: 1500
     to:
       - "0"
@@ -66,7 +66,7 @@ services:
     charm: "cs:%SERIES%/keystone"
     num_units: 1
     options:
-      admin-password: "password"
+      admin-password: "%PASSWORD%"
       admin-role: "admin"
       debug: "true"
       openstack-origin: "%OPENSTACK_ORIGIN%"

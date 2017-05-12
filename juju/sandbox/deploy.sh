@@ -13,6 +13,7 @@ export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
 export CHARMS_VERSION=${CHARMS_VERSION:-'b6c43803c068b6ccbcbb12800ac0add384dcff3e'}
 export SERIES=${SERIES:-'trusty'}
 OPENSTACK_ORIGIN="cloud:${SERIES}-${OPENSTACK_VERSION}"
+export PASSWORD=${PASSWORD:-'password'}
 
 base_name='https://s3-us-west-2.amazonaws.com/contrailpkgs'
 
@@ -68,6 +69,7 @@ rm -f "$BUNDLE"
 cp "$my_dir/bundle.yaml.template" "$BUNDLE"
 sed -i -e "s/%SERIES%/$SERIES/m" $BUNDLE
 sed -i -e "s/%OPENSTACK_ORIGIN%/$OPENSTACK_ORIGIN/m" $BUNDLE
+sed -i -e "s/%PASSWORD%/$PASSWORD/m" $BUNDLE
 sed -i -e "s|%JUJU_REPO%|$JUJU_REPO|m" $BUNDLE
 sed -i -e "s|%REPO_IP%|$private_ip|m" $BUNDLE
 sed -i -e "s|%REPO_KEY%|$repo_key|m" $BUNDLE
