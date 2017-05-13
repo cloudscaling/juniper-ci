@@ -18,7 +18,7 @@ fi
 export DEBIAN_FRONTEND=noninteractive
 ${prefix} apt-get -qq update
 ${prefix} apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade
-${prefix} apt-get install -fy juju awscli mc joe git jq curl
+${prefix} apt-get install -fy juju awscli mc joe git jq curl virtualenv
 
 mkdir -p "$HOME"
 cd "$HOME"
