@@ -155,3 +155,60 @@ hack_openstack
 stage=12
 
 reset_status
+
+wget -t 2 -T 60 -q http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img &
+pid=$!
+
+log_info "Waiting for service start"
+wait_absence_status_for_services "executing|blocked|waiting" 39
+log_info "Waiting for service end"
+# check for errors
+if juju status --format tabular | grep "current" | grep error ; then
+  echo "ERROR: Some services went to error state"
+  juju status --format tabular
+  exit 1
+fi
+juju status --format tabular
+
+log_info "source OpenStack credentials"
+ip=`juju status --format line | awk '/ contrail-controller/{print $3}'`
+export OS_AUTH_URL=http://$ip:5000/v2.0
+export OS_USERNAME=admin
+export OS_TENANT_NAME=admin
+export OS_PROJECT_NAME=admin
+export OS_PASSWORD="$PASSWORD"
+
+log_info "create virtual env and install openstack client"
+rm -rf .venv
+virtualenv .venv
+source .venv/bin/activate
+pip install -q python-openstackclient 2>/dev/null
+
+log_info "create image"
+wait $pid
+openstack image create --public --file cirros-0.3.4-x86_64-disk.img cirros
+
+log_info "create public network"
+openstack network create --external public
+public_net_id=`openstack network show public -f value -c id`
+
+log_info "allocate floating ips in amazon"
+log_info "create subnet in public network"
+#openstack subnet create --no-dhcp --network $public_net_id --subnet-range 10.5.0.0/24 --gateway 0.0.0.0 public
+
+log_info "create demo tenant"
+openstack project create demo
+log_info "add admin user to demo tenant"
+openstack role add --project demo --user $OS_USERNAME admin
+
+log_info "create private network for demo project"
+openstack network create --project demo --internal private-network-demo
+private_net_id=`openstack network show private-network-demo -f value -c id`
+openstack subnet create --project demo --network $private_net_id --subnet-range 10.10.0.0/24 private-network-demo
+local private_subnet_id=`openstack subnet list --network $private_net_id -f value -c ID`
+
+log_info "create router for private-public"
+openstack router create router-ext
+router_id=`openstack router show router-ext -f value -c id`
+openstack router set --external-gateway $public_net_id $router_id
+openstack router add subnet $router_id $private_subnet_id

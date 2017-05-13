@@ -66,6 +66,8 @@ services:
     charm: "cs:%SERIES%/keystone"
     num_units: 1
     options:
+      https-service-endpoints: "false"
+      use-https: "false"
       admin-password: "password"
       admin-role: "admin"
       debug: "true"
