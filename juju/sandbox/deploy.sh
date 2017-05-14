@@ -193,7 +193,8 @@ openstack network create --external public
 public_net_id=`openstack network show public -f value -c id`
 
 log_info "allocate floating ips in amazon"
-log_info "create subnet in public network"
+log_info "create subnets in public network for each allocated ip"
+# TODO:
 #openstack subnet create --no-dhcp --network $public_net_id --subnet-range 10.5.0.0/24 --gateway 0.0.0.0 public
 
 log_info "create demo tenant"
@@ -201,18 +202,19 @@ openstack project create demo
 log_info "add admin user to demo tenant"
 openstack role add --project demo --user $OS_USERNAME admin
 
-exit 0
-
-#export OS_TENANT_NAME=admin
-#export OS_PROJECT_NAME=admin
 log_info "create private network for demo project"
-openstack network create --internal private-network-demo
+
+# Mitaka version can't take project-id for neutron commands. using nuetron cli.
+#openstack network create --internal private-network-demo
+neutron --os-project-name demo net-create private-network-demo
+
 private_net_id=`openstack network show private-network-demo -f value -c id`
 openstack subnet create --network $private_net_id --subnet-range 10.10.0.0/24 private-network-demo
 private_subnet_id=`openstack subnet list --network $private_net_id -f value -c ID`
 
 log_info "create router for private-public"
-openstack router create router-ext
+#openstack router create router-ext
+neutron --os-project-name demo router-create reouter-ext
 router_id=`openstack router show router-ext -f value -c id`
 openstack router set --external-gateway $public_net_id $router_id
 openstack router add subnet $router_id $private_subnet_id
