@@ -182,7 +182,7 @@ log_info "create virtual env and install openstack client"
 rm -rf .venv
 virtualenv .venv
 source .venv/bin/activate
-pip install -q python-openstackclient 2>/dev/null
+pip install -q python-openstackclient python-neutronclient 2>/dev/null
 
 log_info "create image"
 wait $pid
@@ -201,11 +201,15 @@ openstack project create demo
 log_info "add admin user to demo tenant"
 openstack role add --project demo --user $OS_USERNAME admin
 
+exit 0
+
+#export OS_TENANT_NAME=admin
+#export OS_PROJECT_NAME=admin
 log_info "create private network for demo project"
-openstack network create --project demo --internal private-network-demo
+openstack network create --internal private-network-demo
 private_net_id=`openstack network show private-network-demo -f value -c id`
-openstack subnet create --project demo --network $private_net_id --subnet-range 10.10.0.0/24 private-network-demo
-local private_subnet_id=`openstack subnet list --network $private_net_id -f value -c ID`
+openstack subnet create --network $private_net_id --subnet-range 10.10.0.0/24 private-network-demo
+private_subnet_id=`openstack subnet list --network $private_net_id -f value -c ID`
 
 log_info "create router for private-public"
 openstack router create router-ext

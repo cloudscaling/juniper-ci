@@ -55,9 +55,11 @@ function hack_openstack() {
     ip=`get-machine-ip-by-number $m2`
     juju-set glance os-public-hostname=$ip
     ip=`get-machine-ip-by-number $m3`
-    juju-set keystone os-public-hostname=$ip
+    juju-set keystone os-public-hostname=$ip os-admin-hostname=$ip
   fi
 
+  # open admin port of keystone - to be able to create projects
+  open_port $m3 35357
   # open port for vnc console
   open_port $m4 6080
 }
