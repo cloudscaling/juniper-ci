@@ -171,7 +171,7 @@ fi
 juju status --format tabular
 
 log_info "source OpenStack credentials"
-ip=`juju status --format line | awk '/ contrail-controller/{print $3}'`
+ip=`juju status --format line | awk '/ keystone/{print $3}'`
 export OS_AUTH_URL=http://$ip:5000/v2.0
 export OS_USERNAME=admin
 export OS_TENANT_NAME=admin

@@ -56,7 +56,3 @@ echo "http://$ip/horizon"
 
 ip=`juju status --format line | awk '/ contrail-controller/{print $3}'`
 echo "http://$ip:8080/"
-
-# not needed now
-#ip=`juju status --format line | awk '/ contrail-controller/{print $3}'`
-#echo "http://$ip:5000/"
