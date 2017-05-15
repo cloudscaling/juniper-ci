@@ -48,8 +48,6 @@ base_url='https://s3-us-west-2.amazonaws.com/contrailpkgs'
 suffix='ubuntu14.04-4.0.0.0'
 
 set_status "detecting instance details"
-instance_id=`curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r ".instanceId"`
-log_info "Instance ID is $instance_id"
 mac_url='http://169.254.169.254/latest/meta-data/network/interfaces/macs/'
 mac=`curl -s $mac_url`
 log_info "MAC is $mac"
@@ -194,86 +192,10 @@ log_info "create public network"
 openstack network create --external public
 public_net_id=`openstack network show public -f value -c id`
 
-# NOTE: try to avoid addresses with such last octet due to wide CIDR in openstack in case of its usage
-# (try to use /27 or smaller (/27 or /28 or /29 or /30 only)
-function cidr() {
-  local ip=$1
-  local mask="7"
-  local cidr=""
-  while [[ -z "$cidr" && $mask != "0" ]] ; do
-    ((--mask))
-    local rmask=$((8 - mask))
-    local rmask_exp=$(( 2 ** rmask))
-    local cidr=$((ip - ip % rmask_exp))
-    if (( ip == cidr || ip == (cidr + 2) || ip == (cidr + rmask_exp - 1) )) ; then
-      local cidr=""
-    fi
-  done
-  echo $cidr/$((mask + 24))
-}
-
-forbidden_octets=",0,2,4,8,16,31,32,34,63,64,66,95,96,98,128,159,160,162,191,192,194,223,224,226,255,"
-for i in {1..2} ; do
-  log_info "allocate network intrface and floating ip #$i in amazon"
-  ip=""
-  for op in {1..5} ; do
-    log_info "Trying #$op to allocate suitable FIP"
-    address_ouput=`aws ec2 allocate-address --domain vpc`
-    ip=`echo "$addres_output" | jq -r ".PublicIp"`
-    ip_id=`echo "$addres_output" | jq -r ".AllocationId"`
-    ip_last_octet=`echo "$ip" | cut -d . -f 4`
-    if ! echo "$forbidden_octets" | grep -q ",$ip_last_octet," ; then
-      break
-    fi
-    ip=""
-    ip_id=`echo "$addres_output" | jq -r ".AllocationId"`
-    aws ec2 release-address --allocation-id $ip_id
-    sleep 2
-  done
-  if [ -z "$ip" ] ; then
-    log_info "Can't allocate suitable address from Amazon"
-    exit 1
-  fi
-  log_info "Allocated ip $ip"
-  ip_first_octets=`echo "$ip" | cut -d . -f 1,2,3`
-  ip_last_octet=`echo "$ip" | cut -d . -f 4`
-
-  log_info "Trying to calculate CIDR"
-  cidr=`cidr $ip_last_octet`
-  if [ -z "$cidr" ] ; then
-    log_info "Can't calculate CIDR for last octet $ip_last_octet of address $ip"
-    exit 1
-  fi
-  full_cidr="${ip_first_octets}.${cidr}"
-
-  if ! output=`aws ec2 create-network-interface --subnet-id $subnet_id` ; then
-    log_info "Can't create network interface"
-    echo "$output"
-    exit 1
-  fi
-  ni_id=`echo "$output" | jq -r ".NetworkInterface.NetworkInterfaceId"`
-
-  if ! output=`aws ec2 associate-address --allocation-id $ip_id --network-interface-id $ni_id` ; then
-    log_info "Can't associate address to network interface"
-    echo "$output"
-    exit 1
-  fi
-  #assoc_id=`echo "$output" | jq -r ".AssociationId"`
-
-  if ! output=`aws ec2 attach-network-interface --network-interface-id $ni_id --instance-id $instance_id --device-index $i` ; then
-    log_info "Can't attach network interface $ni_id to instance $instance_id with device-index $i"
-    echo "$output"
-    exit 1
-  fi
-  # NOTE: we don't modify this attribute cause no way to make address auto-deleteable
-  # and making network interface auto-deleteable is not required
-  #attach_id=`echo "$output" | jq -r ".?????????"`
-  #aws ec2 modify-network-interface-attribute --network-interface-id $ni_id --attachment AttachmentId=$attach_id,DeleteOnTermination=true
-
-  log_info "create subnet in public network for allocated ip #$i"
-  openstack subnet create --no-dhcp --network $public_net_id --subnet-range $full_cidr --gateway 0.0.0.0 public
-done
-
+log_info "allocate floating ips in amazon"
+log_info "create subnets in public network for each allocated ip"
+# TODO:
+#openstack subnet create --no-dhcp --network $public_net_id --subnet-range 10.5.0.0/24 --gateway 0.0.0.0 public
 
 log_info "create demo tenant"
 openstack project create demo
