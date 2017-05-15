@@ -114,6 +114,7 @@ cp "$my_dir/repo_config.yaml.tmpl" "repo_config_na.yaml"
 sed -i -e "s|{{charm_name}}|contrail-openstack-neutron-api|m" "repo_config_na.yaml"
 sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_na.yaml"
 sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_na.yaml"
+sed -i -e "s|{{series}}|$SERIES|m" "repo_config_na.yaml"
 sed -i "s/\r/\n/g" "repo_config_na.yaml"
 juju-deploy $PLACE/contrail-openstack-neutron-api --config repo_config_na.yaml
 
@@ -121,6 +122,7 @@ cp "$my_dir/repo_config.yaml.tmpl" "repo_config_c.yaml"
 sed -i -e "s|{{charm_name}}|contrail-openstack-compute|m" "repo_config_c.yaml"
 sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_c.yaml"
 sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_c.yaml"
+sed -i -e "s|{{series}}|$SERIES|m" "repo_config_c.yaml"
 sed -i "s/\r/\n/g" "repo_config_c.yaml"
 juju-deploy $PLACE/contrail-openstack-compute --config repo_config_c.yaml
 juju-set contrail-openstack-compute "vhost-interface=eth0"

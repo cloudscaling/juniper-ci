@@ -116,7 +116,7 @@ services:
     charm: "%JUJU_REPO%/contrail-openstack-neutron-api"
     series: %SERIES%
     options:
-      install-sources: "deb http://%REPO_IP%/ubuntu trusty main"
+      install-sources: "deb http://%REPO_IP%/ubuntu %SERIES% main"
       install-keys: |
         - |
 %REPO_KEY%
@@ -124,7 +124,7 @@ services:
     charm: "%JUJU_REPO%/contrail-openstack-compute"
     series: %SERIES%
     options:
-      install-sources: "deb http://%REPO_IP%/ubuntu trusty main"
+      install-sources: "deb http://%REPO_IP%/ubuntu %SERIES% main"
       install-keys: |
         - |
 %REPO_KEY%

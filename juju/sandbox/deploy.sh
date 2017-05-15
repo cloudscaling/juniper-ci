@@ -65,7 +65,7 @@ log_info "working in the HOME directory = $HOME"
 set_status "setting juju credentials"
 $my_dir/_set-juju-creds.sh
 set_status "bootstrapping juju"
-juju --debug bootstrap --bootstrap-series=trusty aws amazon --config vpc-id=$vpc_id --config vpc-id-force=true
+juju --debug bootstrap --bootstrap-series=$SERIES aws amazon --config vpc-id=$vpc_id --config vpc-id-force=true
 
 stage=1
 

@@ -1,5 +1,7 @@
 #!/bin/bash -ex
 
+SERIES="${SERIES:-'trusty'}"
+
 rm -f apt.log
 for i in {1..6} ; do
   if sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy reprepro apache2 rng-tools gnupg2 &>apt.log ; then
@@ -53,7 +55,7 @@ sudo cp "$cdir/repo.key" /srv/reprepro/ubuntu/
 cat >/srv/reprepro/ubuntu/conf/distributions <<EOF
 Origin: Contrail
 Label: Base Contrail packages
-Codename: trusty
+Codename: $SERIES
 Architectures: i386 amd64 source
 Components: main
 Description: Description of repository you are creating
@@ -67,7 +69,7 @@ EOF
 
 for ff in `ls /tmp/pkgs/*.deb` ; do
   echo "Adding $ff"
-  reprepro includedeb trusty $ff
+  reprepro includedeb $SERIES $ff
 done
 
 cat >apt-repo.conf <<EOF

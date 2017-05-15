@@ -34,7 +34,7 @@ function prepare_repo() {
   juju-scp "$HOME/docker/$packages" "$m0:contrail_debs.tgz"
   juju-scp "$my_dir/create-aptrepo.sh" $m0:create-aptrepo.sh
   open_port $m0 80
-  juju-ssh $m0 ./create-aptrepo.sh
+  juju-ssh $m0 ./create-aptrepo.sh $SERIES
   echo "INFO: apt-repo is ready"
 }
 
