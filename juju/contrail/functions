@@ -15,7 +15,12 @@ function check_containers() {
   image_analyticsdb="contrail-analyticsdb-ubuntu${uver}-4.0.0.0-${BUILD}.tar.gz"
   for ff in "$packages" "$image_controller"  "$image_analytics" "$image_analyticsdb" ; do
     if [ ! -f "$HOME/docker/$ff" ] ; then
-      wget -nv "${base_url}/$ff" -O "docker/$ff"
+      echo "INFO: download ${base_url}/$ff to $HOME/docker/$ff"
+      if ! wget -nv "${base_url}/$ff" -O "$HOME/docker/$ff" ; then
+        rm -f "$HOME/docker/$ff"
+        echo "ERROR: Can't download ${base_url}/$ff to $HOME/docker/$ff"
+        exit 1
+      fi
     fi
   done
 }
