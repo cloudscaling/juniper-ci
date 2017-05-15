@@ -8,9 +8,10 @@
           default: true
       - choice:
           name: VERSION
-          description: "Version of the OpenStack"
+          description: "Version of the OpenStack. mitaka implies trusty and newton implaies xenial."
           choices:
             - mitaka
+            - newton
       - choice:
           name: DEPLOY_FROM
           description: "A place where to get charms"
@@ -38,6 +39,9 @@
       - shell: |
           #!/bin/bash -e
           export SERIES='trusty'
+          if [[ "$VERSION" == "newton" ]] ; then
+            export SERIES='xenial'
+          fi
           ./juniper-ci/juju/run-contrail-openstack.sh deploy-$DEPLOY_TYPE.sh $DEPLOY_FROM
     publishers:
       - junit:
