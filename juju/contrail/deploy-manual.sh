@@ -125,7 +125,6 @@ sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_c.yaml"
 sed -i -e "s|{{series}}|$SERIES|m" "repo_config_c.yaml"
 sed -i "s/\r/\n/g" "repo_config_c.yaml"
 juju-deploy $PLACE/contrail-openstack-compute --config repo_config_c.yaml
-juju-set contrail-openstack-compute "vhost-interface=eth0"
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-deploy cs:$SERIES/haproxy --to $m0

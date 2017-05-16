@@ -128,7 +128,6 @@ services:
       install-keys: |
         - |
 %REPO_KEY%
-      vhost-interface: "eth0"
 
 
 relations:
