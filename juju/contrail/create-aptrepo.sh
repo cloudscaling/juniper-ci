@@ -2,7 +2,7 @@
 
 # first param of script is an ubuntu series
 
-SERIES="${1:-'trusty'}"
+SERIES="${1:-trusty}"
 
 rm -f apt.log
 for i in {1..6} ; do
