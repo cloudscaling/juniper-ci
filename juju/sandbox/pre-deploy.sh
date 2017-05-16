@@ -24,6 +24,11 @@ mkdir -p "$HOME"
 cd "$HOME"
 rm -rf juniper-ci
 git clone https://github.com/cloudscaling/juniper-ci.git
+if [ -n "$CI_SHA" ] ; then
+  cd juniper-ci
+  git checkout "$CI_SHA"
+  cd ..
+fi
 
 if [ "$(whoami)" == "root" ] ; then
   chown -R $user "$HOME"
