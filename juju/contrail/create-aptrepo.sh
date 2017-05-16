@@ -1,6 +1,8 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
-SERIES="${SERIES:-'trusty'}"
+# first param of script is an ubuntu series
+
+SERIES="${1:-'trusty'}"
 
 rm -f apt.log
 for i in {1..6} ; do
