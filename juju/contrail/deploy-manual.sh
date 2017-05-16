@@ -99,7 +99,9 @@ juju-deploy $PLACE/contrail-keystone-auth --to $m6
 juju-deploy $PLACE/contrail-controller --to $m6 --resource contrail-controller="$HOME/docker/$image_controller"
 juju-expose contrail-controller
 juju-deploy $PLACE/contrail-analyticsdb --to $m6 --resource contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
+juju-expose contrail-analyticsdb
 juju-deploy $PLACE/contrail-analytics --to $m6 --resource contrail-analytics="$HOME/docker/$image_analytics"
+juju-expose contrail-analytics
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-add-unit contrail-controller --to $m7

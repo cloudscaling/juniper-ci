@@ -104,12 +104,14 @@ services:
     charm: "%JUJU_REPO%/contrail-analyticsdb"
     series: %SERIES%
     num_units: 1
+    expose: true
     to:
       - "5"
   contrail-analytics:
     charm: "%JUJU_REPO%/contrail-analytics"
     series: %SERIES%
     num_units: 1
+    expose: true
     to:
       - "5"
   contrail-openstack-neutron-api:
