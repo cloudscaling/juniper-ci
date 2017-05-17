@@ -7,6 +7,8 @@ if [[ "$HOME" == "" ]] ; then
   exit 1
 fi
 
+addresses_store_file="$HOME/.addresses"
+
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 my_pid=$$
@@ -48,6 +50,8 @@ base_url='https://s3-us-west-2.amazonaws.com/contrailpkgs'
 suffix='ubuntu14.04-4.0.0.0'
 
 set_status "detecting instance details"
+instance_id=`curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r ".instanceId"`
+log_info "Instance ID is $instance_id"
 mac_url='http://169.254.169.254/latest/meta-data/network/interfaces/macs/'
 mac=`curl -s $mac_url`
 log_info "MAC is $mac"
@@ -156,8 +160,6 @@ stage=12
 
 reset_status
 
-wget -t 2 -T 60 -q http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img &
-pid=$!
 
 log_info "Waiting for service start"
 wait_absence_status_for_services "executing|blocked|waiting" 39
@@ -169,6 +171,11 @@ if juju status --format tabular | grep "current" | grep error ; then
   exit 1
 fi
 juju status --format tabular
+
+
+wget -t 2 -T 60 -q http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img &
+pid=$!
+
 
 log_info "source OpenStack credentials"
 ip=`juju status --format line | awk '/ keystone/{print $3}'`
@@ -192,10 +199,91 @@ log_info "create public network"
 openstack network create --external public
 public_net_id=`openstack network show public -f value -c id`
 
-log_info "allocate floating ips in amazon"
-log_info "create subnets in public network for each allocated ip"
-# TODO:
-#openstack subnet create --no-dhcp --network $public_net_id --subnet-range 10.5.0.0/24 --gateway 0.0.0.0 public
+# NOTE: try to avoid addresses with such last octet due to wide CIDR in openstack in case of its usage
+# (try to use /27 or smaller (/27 or /28 or /29 or /30 only)
+function cidr() {
+  local ip=$1
+  local mask="7"
+  local cidr=""
+  while [[ -z "$cidr" && $mask != "0" ]] ; do
+    ((--mask))
+    local rmask=$((8 - mask))
+    local rmask_exp=$(( 2 ** rmask))
+    local cidr=$((ip - ip % rmask_exp))
+    if (( ip == cidr || ip == (cidr + 2) || ip == (cidr + rmask_exp - 1) )) ; then
+      local cidr=""
+    fi
+  done
+  echo $cidr/$((mask + 24))
+}
+
+log_info "iterate over compute hosts to add secondary ip-s"
+for compute in `juju status contrail-openstack-compute | grep -A 2 '^Machine' | awk '/started/ {print($1","$4)}'` ; do
+  index=`echo "$compute" | cut -d , -f 1`
+  id=`echo "$compute" | cut -d , -f 2`
+  log_info "detect network interface id for instance $id"
+  ni_id=`aws ec2 describe-instances --instance-id $id --query 'Reservations[*].Instances[*].NetworkInterfaces[*].NetworkInterfaceId' --output text`
+  log_info "network interface is $ni_id"
+  log_info "add two secondary private addresses to this network interface of compute host"
+  aws ec2 assign-private-ip-addresses --network-interface-id $ni_id --secondary-private-ip-address-count 2
+  log_info "getting new addresses"
+  private_ips=(`aws ec2 describe-instances --instance-id $id --query 'Reservations[*].Instances[*].NetworkInterfaces[*].PrivateIpAddresses[*]' --output text | awk '/^False/{print $3}'`)
+  log_info "addresses are: ${private_ips[@]}"
+
+  for ip in ${private_ips[@]} ; do
+    # TODO: detect interface for adding aliases
+    juju ssh $index "sudo ifconfig eth0 add $ip up"
+  done
+done
+# here we have private_ips from one compute hosts which will be associated with new elastic ips
+
+truncate -s 0 "$addresses_store_file"
+
+forbidden_octets=",0,2,4,8,16,31,32,34,63,64,66,95,96,98,128,159,160,162,191,192,194,223,224,226,255,"
+for i in {0..1} ; do
+  log_info "allocate network interface and floating ip #$((i+1)) in amazon"
+  ip=""
+  for op in {1..5} ; do
+    log_info "Trying #$op to allocate suitable FIP"
+    address_ouput=`aws ec2 allocate-address --domain vpc`
+    ip=`echo "$addres_output" | jq -r ".PublicIp"`
+    ip_id=`echo "$addres_output" | jq -r ".AllocationId"`
+    ip_last_octet=`echo "$ip" | cut -d . -f 4`
+    if ! echo "$forbidden_octets" | grep -q ",$ip_last_octet," ; then
+      break
+    fi
+    ip=""
+    aws ec2 release-address --allocation-id $ip_id
+    sleep 2
+  done
+  if [ -z "$ip" ] ; then
+    log_info "Can't allocate suitable address from Amazon"
+    exit 1
+  fi
+  log_info "Allocated ip $ip"
+  echo "${ip},${ip_id}" >> "$addresses_store_file"
+  ip_first_octets=`echo "$ip" | cut -d . -f 1,2,3`
+  ip_last_octet=`echo "$ip" | cut -d . -f 4`
+
+  log_info "Trying to calculate CIDR"
+  cidr=`cidr $ip_last_octet`
+  if [ -z "$cidr" ] ; then
+    log_info "Can't calculate CIDR for last octet $ip_last_octet of address $ip"
+    exit 1
+  fi
+  full_cidr="${ip_first_octets}.${cidr}"
+
+  private_ip=${private_ips[$i]}
+  if ! output=`aws ec2 associate-address --allocation-id $ip_id --network-interface-id $ni_id --private-ip-address $private_ip` ; then
+    log_info "Can't associate address to network interface"
+    echo "$output"
+    exit 1
+  fi
+
+  log_info "create subnet in public network for allocated ip #$i"
+  openstack subnet create --no-dhcp --network $public_net_id --subnet-range $full_cidr --gateway 0.0.0.0 public --allocation-pool start=$ip,end=$ip
+done
+
 
 log_info "create demo tenant"
 openstack project create demo
