@@ -302,7 +302,7 @@ private_subnet_id=`openstack subnet list --network $private_net_id -f value -c I
 
 log_info "create router for private-public"
 #openstack router create router-ext
-neutron --os-project-name demo router-create reouter-ext
+neutron --os-project-name demo router-create router-ext
 router_id=`openstack router show router-ext -f value -c id`
 openstack router set --external-gateway $public_net_id $router_id
 openstack router add subnet $router_id $private_subnet_id
