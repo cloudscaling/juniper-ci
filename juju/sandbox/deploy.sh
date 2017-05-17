@@ -306,3 +306,11 @@ neutron --os-project-name demo router-create router-ext
 router_id=`openstack router show router-ext -f value -c id`
 openstack router set --external-gateway $public_net_id $router_id
 openstack router add subnet $router_id $private_subnet_id
+
+
+log_info "start contrail event listener"
+export ANALYTICS_HOST=`juju status --format line | awk '/ contrail-analytics\//{print $3}'`
+export SSH_KEY="${HOME}/.local/share/juju/ssh/juju_id_rsa"
+nohup $my_dir/event-listener/listen-contrail-events.sh 2>&1>event-listener.log &
+sleep 2
+log_info "start contrail event listener started"
