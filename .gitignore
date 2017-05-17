@@ -6,4 +6,5 @@ vagrant
 **.DS_Store
 .buildpath
 .pydevproject
+.idea
 jenkins-jobs/generated_xml/*
