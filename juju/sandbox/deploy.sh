@@ -201,7 +201,7 @@ public_net_id=`openstack network show public -f value -c id`
 
 # NOTE: try to avoid addresses with such last octet due to wide CIDR in openstack in case of its usage
 # (try to use /27 or smaller (/27 or /28 or /29 or /30 only)
-function cidr() {
+function get_cidr() {
   local ip=$1
   local mask="7"
   local cidr=""
@@ -241,13 +241,13 @@ truncate -s 0 "$addresses_store_file"
 
 forbidden_octets=",0,2,4,8,16,31,32,34,63,64,66,95,96,98,128,159,160,162,191,192,194,223,224,226,255,"
 for i in {0..1} ; do
-  log_info "allocate network interface and floating ip #$((i+1)) in amazon"
+  log_info "allocate floating ip #$((i+1)) in amazon"
   ip=""
   for op in {1..5} ; do
-    log_info "Trying #$op to allocate suitable FIP"
-    address_ouput=`aws ec2 allocate-address --domain vpc`
-    ip=`echo "$addres_output" | jq -r ".PublicIp"`
-    ip_id=`echo "$addres_output" | jq -r ".AllocationId"`
+    log_info "Attempt #$op to allocate suitable FIP"
+    address_output=`aws ec2 allocate-address --domain vpc`
+    ip=`echo "$address_output" | jq -r ".PublicIp"`
+    ip_id=`echo "$address_output" | jq -r ".AllocationId"`
     ip_last_octet=`echo "$ip" | cut -d . -f 4`
     if ! echo "$forbidden_octets" | grep -q ",$ip_last_octet," ; then
       break
@@ -266,7 +266,7 @@ for i in {0..1} ; do
   ip_last_octet=`echo "$ip" | cut -d . -f 4`
 
   log_info "Trying to calculate CIDR"
-  cidr=`cidr $ip_last_octet`
+  cidr=`get_cidr $ip_last_octet`
   if [ -z "$cidr" ] ; then
     log_info "Can't calculate CIDR for last octet $ip_last_octet of address $ip"
     exit 1
