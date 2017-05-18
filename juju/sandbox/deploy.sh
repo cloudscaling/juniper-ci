@@ -39,9 +39,9 @@ touch deploy_status.$my_pid
 
 set_status "start deploying..."
 
-export VERSION=${VERSION:-'3073'}
+export VERSION=${VERSION:-'6'}
 export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
-export CHARMS_VERSION=${CHARMS_VERSION:-'b6c43803c068b6ccbcbb12800ac0add384dcff3e'}
+export CHARMS_VERSION=${CHARMS_VERSION:-'48d7c5ecf806f9ab53e19558dd4b85895b741908'}
 export SERIES=${SERIES:-'trusty'}
 OPENSTACK_ORIGIN="cloud:${SERIES}-${OPENSTACK_VERSION}"
 export PASSWORD=${PASSWORD:-'password'}
