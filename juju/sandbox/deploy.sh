@@ -189,7 +189,7 @@ log_info "create virtual env and install openstack client"
 rm -rf .venv
 virtualenv .venv
 source .venv/bin/activate
-pip install -q python-openstackclient python-neutronclient 2>/dev/null
+pip install -q python-openstackclient python-neutronclient twisted awscli 2>/dev/null
 
 log_info "create image"
 wait $pid
