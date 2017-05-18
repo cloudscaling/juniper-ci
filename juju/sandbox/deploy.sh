@@ -196,8 +196,23 @@ wait $pid
 openstack image create --public --file cirros-0.3.4-x86_64-disk.img cirros
 
 log_info "create public network"
-openstack network create --external public
+openstack network create --external public --share
 public_net_id=`openstack network show public -f value -c id`
+
+log_info "create demo tenant"
+openstack project create demo
+log_info "add admin user to demo tenant"
+openstack role add --project demo --user $OS_USERNAME admin
+
+log_info "create router for demo project"
+# openstack cli doesn't work with project argument in Mitaka
+#openstack router create router-ext
+neutron --os-project-name demo router-create router-ext
+router_id=`openstack router show router-ext -f value -c id`
+log_info "created router: $router_id"
+log_info "attach external gateway for router"
+openstack router set --external-gateway $public_net_id $router_id
+
 
 # NOTE: try to avoid addresses with such last octet due to wide CIDR in openstack in case of its usage
 # (try to use /27 or smaller (/27 or /28 or /29 or /30 only)
@@ -283,29 +298,6 @@ for i in {0..1} ; do
   log_info "create subnet in public network for allocated ip #$i"
   openstack subnet create --no-dhcp --network $public_net_id --subnet-range $full_cidr --gateway 0.0.0.0 public --allocation-pool start=$ip,end=$ip
 done
-
-
-log_info "create demo tenant"
-openstack project create demo
-log_info "add admin user to demo tenant"
-openstack role add --project demo --user $OS_USERNAME admin
-
-log_info "create private network for demo project"
-
-# Mitaka version can't take project-id for neutron commands. using nuetron cli.
-#openstack network create --internal private-network-demo
-neutron --os-project-name demo net-create private-network-demo
-
-private_net_id=`openstack network show private-network-demo -f value -c id`
-openstack subnet create --network $private_net_id --subnet-range 10.10.0.0/24 private-network-demo
-private_subnet_id=`openstack subnet list --network $private_net_id -f value -c ID`
-
-log_info "create router for private-public"
-#openstack router create router-ext
-neutron --os-project-name demo router-create router-ext
-router_id=`openstack router show router-ext -f value -c id`
-openstack router set --external-gateway $public_net_id $router_id
-openstack router add subnet $router_id $private_subnet_id
 
 
 log_info "start contrail event listener"
