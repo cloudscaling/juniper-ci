@@ -30,6 +30,18 @@ fi
 secondary_private_ips=(`$ssh_cmd sudo ifconfig | grep -v ${primary_private_ip} | grep 'inet addr' | grep -o -P '(?<=addr:).*(?=  Bcast)'`)
 
 
+function cleanup_odd_rules_from_iptables() {
+    local fip=$1
+    local secondary_private_ip=$2
+    local chains=("PREROUTING" "POSTROUTING")
+    for c in ${chains[@]} ; do
+        local rule=`${ssh_cmd} sudo iptables -t nat -S ${c} | grep "${fip}" | grep -v "${secondary_private_ip}" | grep -o -P "(?<=-A ).*"`
+        if [[ -n "${rule}" ]] ; then
+            ${ssh_cmd} sudo iptables -t nat -D ${rule}
+        fi
+    done
+}
+
 function add_rule_to_iptables() {
     local fip=$1
     local secondary_private_ip=$2
@@ -52,19 +64,8 @@ function del_rule_from_iptables() {
     fi
 }
 
-function cleanup_rules_from_iptables_for_fip() {
-    local fip=$1
-    local chains=("PREROUTING" "POSTROUTING")
-    for c in ${chains[@]} ; do
-        local rule=`${ssh_cmd} sudo iptables -t nat -S ${c} | grep "${fip}" | grep -o -P "(?<=-A ).*"`
-        if [[ -n "${rule}" ]] ; then
-            ${ssh_cmd} sudo iptables -t nat -D ${rule}
-        fi
-    done
-}
-
 function add_fip_vgw_subnets() {
-    local vgw_subnets=${1:-''}
+    local vgw_subnets=$1
     ${ssh_cmd} sudo python /opt/contrail/utils/provision_vgw_interface.py \
         --oper create --interface vgw --subnets "${vgw_subnets}" --routes 0.0.0.0/0 \
         --vrf default-domain:admin:public:public
@@ -80,5 +81,15 @@ function remove_fip_vgw_subnets() {
     local fip=$1
     if ${ssh_cmd} sudo ip route show ${fip}/32 | grep -q vgw ; then
         ${ssh_cmd} sudo ip route del ${fip}/32 dev vgw
+    fi
+}
+
+function ensure_ip_forwarding() {
+    ${ssh_cmd} sudo sysctl net.ipv4.ip_forward=1
+    if ! ${ssh_cmd} sudo iptables -C FORWARD -i vhost0 -o vgw -j ACCEPT ; then
+        ${ssh_cmd} sudo iptables -A FORWARD -i vhost0 -o vgw -j ACCEPT
+    fi
+    if ! {ssh_cmd} iptables -C FORWARD -i vgw -o vhost0 -j ACCEPT ; then
+        {ssh_cmd} iptables -A FORWARD -i vgw -o vhost0 -j ACCEPT
     fi
 }
