@@ -35,7 +35,8 @@ if [[ -z "${fip_private_address}" || ! "${secondary_private_ips[@]}" =~ "${fip_p
     fi
 
     for i in {1..2} ; do
-        # the 0 - is primary private ip, so skip it
+        # TODO: there is assumption the 0 - is primary private ip (so skip it)
+        #   rework to request all private IPs and parse ouptut instead of seversl requests
         sp_ip=`aws ec2 describe-instances \
             --filter "Name=private-ip-address,Values=${primary_private_ip}" \
             --query "Reservations[*].Instances[*].NetworkInterfaces[*].PrivateIpAddresses[${i}]"`
@@ -65,6 +66,7 @@ fi
 
 # always cgeck that vgw is created and iptables and routes are set
 
+cleanup_rules_from_iptables_for_fip ${fip}
 add_rule_to_iptables ${fip} ${secondary_private_ip}
 
 if [[ -n $"vgw_subnets" ]] ; then

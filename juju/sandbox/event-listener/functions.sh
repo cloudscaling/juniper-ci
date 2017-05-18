@@ -52,14 +52,22 @@ function del_rule_from_iptables() {
     fi
 }
 
+function cleanup_rules_from_iptables_for_fip() {
+    local fip=$1
+    local chains=("PREROUTING" "POSTROUTING")
+    for c in ${chains[@]} ; do
+        local rule=`${ssh_cmd} sudo iptables -t nat -S ${c} | grep "${fip}" | grep -o -P "(?<=-A ).*"`
+        if [[ -n "${rule}" ]] ; then
+            ${ssh_cmd} sudo iptables -t nat -D ${rule}
+        fi
+    done
+}
+
 function add_fip_vgw_subnets() {
-
     local vgw_subnets=${1:-''}
-
     ${ssh_cmd} sudo python /opt/contrail/utils/provision_vgw_interface.py \
         --oper create --interface vgw --subnets "${vgw_subnets}" --routes 0.0.0.0/0 \
         --vrf default-domain:admin:public:public
-
     #Workarraund for sandbox because provision_vgw_interface.py uses 'route add' that cant work with /32 mask
     for i in ${vgw_subnets} ; do
         if ! ${ssh_cmd} sudo ip route show ${i} | grep -q vgw ; then
@@ -69,9 +77,7 @@ function add_fip_vgw_subnets() {
 }
 
 function remove_fip_vgw_subnets() {
-
     local fip=$1
-
     if ${ssh_cmd} sudo ip route show ${fip}/32 | grep -q vgw ; then
         ${ssh_cmd} sudo ip route del ${fip}/32 dev vgw
     fi
