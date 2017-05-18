@@ -23,6 +23,7 @@ class EventListenClient(http.HTTPClient):
         self.headers = headers
         self.post_data = None
         self.event_handler = event_handler
+        self.raw_data_buffer = ''
 
     def _send_request(self):
         log.msg("ProxyClient: sendRequest: %s %s" % (self.method, self.uri))
@@ -65,25 +66,29 @@ class EventListenClient(http.HTTPClient):
          self._abort()
 
     def rawDataReceived(self, data):
-        msg = data.decode('UTF-8')
-        msg = msg.split('\n')
-        if len(msg) < 2:
-            log.msg('ProxyClient: rawDataReceived: skip data: %s' % data)
-            return
-        event = msg[0].split(':', 1)
-        if len(event) != 2 or event[0].strip() != 'event':
-            log.msg('ProxyClient: rawDataReceived: skip data: no event: %s' % event)
-            return
-        if event[1].strip() != 'update':
-            log.msg('ProxyClient: rawDataReceived: skip data: event is not update: %s' % event)
-            return
-        event_data = msg[1].split(':', 1)
-        if len(event_data) != 2 or event_data[0].strip() != 'data':
-            log.msg('ProxyClient: rawDataReceived: %s' % event_data)
-            return
-        event_data = json.loads(event_data[1].strip())
-        log.msg('ProxyClient: _process_event: json: %s' % event_data)
-        self.event_handler.on_event(event_data)
+        self.raw_data_buffer += data.decode('UTF-8')
+        msg = self.raw_data_buffer.split('\n')
+        while len(msg) > 2:
+            event = msg[0].split(':', 1)
+            if len(event) != 2 or event[0].strip() != 'event':
+                msg = msg[1:]
+                log.msg('ProxyClient: rawDataReceived: skip line: not event: %s' % event)
+                continue
+            if event[1].strip() != 'update':
+                msg = msg[1:]
+                log.msg('ProxyClient: rawDataReceived: skip event: event is not update: %s' % event)
+                continue
+            event_data = msg[1].split(':', 1)
+            msg = msg[2:]
+            if len(event_data) != 2 or event_data[0].strip() != 'data':
+                log.msg('ProxyClient: rawDataReceived: skip event: no data: %s' % event_data)
+                continue
+            # log.msg('ProxyClient: rawDataReceived: process event: event_data=%s' % event_data)
+            log.msg('ProxyClient: rawDataReceived: process event')
+            event_data = json.loads(event_data[1].strip())
+            self.event_handler.on_event(event_data)
+        self.raw_data_buffer = '\n'.join(msg) if len(msg) > 0 else ''
+        log.msg('ProxyClient: rawDataReceived: not all data received, waiting next chunk, raw_data_buffer=%s', self.raw_data_buffer)
 
 
 class ProxyClientFactory(protocol.ClientFactory):

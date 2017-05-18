@@ -13,13 +13,14 @@ if [[ -n "$SSH_KEY" ]] ; then
 else
     ssh_opts = ''
 fi
+ssh_user=${SSH_USER:-'ubuntu'}
 ssh_opts+=" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-ssh_node=${SSH_NODE_ADDRESS:-`openstack server show $vm_uuid | awk '/OS-EXT-SRV-ATTR:host/ {print $4}'`)}
+ssh_node=${SSH_NODE_ADDRESS:-`openstack server show $vm_uuid | awk '/OS-EXT-SRV-ATTR:host/ {print $4}'`}
 if [[ -z "$ssh_node" ]] ; then
     echo "FATAL: failed to find compute node by uuid $vm_uuid"
     exit -1
 fi
-ssh_cmd="ssh ${ssh_opts} ${ssh_node}"
+ssh_cmd="ssh ${ssh_opts} ${ssh_user}@${ssh_node}"
 
 primary_private_ip=`$ssh_cmd sudo ifconfig vhost0 | grep -o -P '(?<=addr:).*(?=  Bcast)'`
 if [[ -z "$primary_private_ip" ]] ; then
@@ -89,7 +90,7 @@ function ensure_ip_forwarding() {
     if ! ${ssh_cmd} sudo iptables -C FORWARD -i vhost0 -o vgw -j ACCEPT ; then
         ${ssh_cmd} sudo iptables -A FORWARD -i vhost0 -o vgw -j ACCEPT
     fi
-    if ! {ssh_cmd} iptables -C FORWARD -i vgw -o vhost0 -j ACCEPT ; then
-        {ssh_cmd} iptables -A FORWARD -i vgw -o vhost0 -j ACCEPT
+    if ! ${ssh_cmd} sudo iptables -C FORWARD -i vgw -o vhost0 -j ACCEPT ; then
+        ${ssh_cmd} sudo iptables -A FORWARD -i vgw -o vhost0 -j ACCEPT
     fi
 }

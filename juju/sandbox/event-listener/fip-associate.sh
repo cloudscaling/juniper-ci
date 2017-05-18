@@ -68,7 +68,7 @@ associated_fips_query='Reservations[*].Instances[*].NetworkInterfaces[*].Private
 associated_fips=(`aws ec2 describe-instances \
     --filter "Name=private-ip-address,Values=${primary_private_ip}" \
     --query "${associated_fips_query}" \
-    --output text | grep -v 'ASSOCIATION' | awk '{print $3}'`)
+    --output text`)
 
 if [[ -z "${associated_fips[@]}" ]] ; then
     echo "FATAL: there is no associated secondary private ip address"
@@ -82,7 +82,7 @@ for i in ${associated_fips[@]} ; do
     fi
     vgw_subnets+="${i}/32"
 done
-add_fip_vgw_subnets ${vgw_subnets}
+add_fip_vgw_subnets "${vgw_subnets}"
 
 # always ensure that ip forwarding is enabled
 ensure_ip_forwarding
