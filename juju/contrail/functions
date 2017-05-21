@@ -29,7 +29,9 @@ function prepare_repo() {
   echo "INFO: Prepare apt-repo"
   m0=$(create_machine mem=4G cores=1 root-disk=40G)
   echo "INFO: Machine created: $m0"
-  wait_for_machines $m0
+  if ! wait_for_machines $m0 ; then
+    return 1
+  fi
   juju-deploy cs:$SERIES/ubuntu --to $m0
   juju-scp "$HOME/docker/$packages" "$m0:contrail_debs.tgz"
   juju-scp "$my_dir/create-aptrepo.sh" $m0:create-aptrepo.sh
@@ -83,14 +85,17 @@ function post_deploy() {
   fi
   hack_openstack
 
-  wait_absence_status_for_services "executing|blocked|waiting" 39
+  if ! wait_absence_status_for_services "executing|blocked|waiting" 39 ; then
+    echo "ERROR: Waiting for services end: $(date)"
+    return 1
+  fi
   echo "INFO: Waiting for services end: $(date)"
 
   # check for errors
   if juju-status | grep "current" | grep error ; then
     echo "ERROR: Some services went to error state"
     juju-ssh 0 sudo grep Error /var/log/juju/all-machines.log 2>/dev/null
-    exit 1
+    return 1
   fi
 
   juju-status-tabular

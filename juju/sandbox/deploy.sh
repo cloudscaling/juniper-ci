@@ -162,14 +162,12 @@ reset_status
 
 
 log_info "Waiting for service start"
-wait_absence_status_for_services "executing|blocked|waiting" 39
-log_info "Waiting for service end"
-# check for errors
-if juju status --format tabular | grep "current" | grep error ; then
+if ! wait_absence_status_for_services "executing|blocked|waiting" 39 ; then
   echo "ERROR: Some services went to error state"
   juju status --format tabular
   exit 1
 fi
+log_info "Waiting for service end"
 juju status --format tabular
 
 
