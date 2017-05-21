@@ -20,12 +20,12 @@ if [[ "$jver" == 1 ]] ; then
   exit 1
 fi
 
-export SERIES=${SERIES:-trusty}
-export VERSION=${VERSION:-mitaka}
+export SERIES="${SERIES:-trusty}"
+export VERSION="${VERSION:-mitaka}"
 export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
-export BUILD="6"
-export DEPLOY_AS_HA_MODE=${DEPLOY_AS_HA_MODE:-false}
-export USE_SSL=${USE_SSL:-true}
+export BUILD="${BUILD:-9}"
+export DEPLOY_AS_HA_MODE="${DEPLOY_AS_HA_MODE:-false}"
+export USE_SSL="${USE_SSL:-true}"
 
 
 if ! juju-bootstrap ; then
