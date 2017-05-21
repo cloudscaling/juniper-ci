@@ -24,7 +24,7 @@ function wait_absence_status_for_services() {
       juju-status-tabular
       return 1
     fi
-    local merr=`juju-status | python -c "import sys; import json; ms = json.load(sys.stdin)['machines']; [sys.stdout.write(str(m) + '\n') for m in ms if ms[m]['juju-status']['current'] == 'down']"`
+    local merr=`juju-status-json | python -c "import sys; import json; ms = json.load(sys.stdin)['machines']; [sys.stdout.write(str(m) + '\n') for m in ms if ms[m]['juju-status']['current'] == 'down']"`
     if [ -n "$merr" ] ; then
       echo "ERROR: Machines went to down state: "$merr
       juju-status-tabular
@@ -73,7 +73,7 @@ function wait_for_machines() {
       fi
       sleep 10
       ((++fail))
-      local status=`juju-status | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']['$machine']['juju-status']['current'])"`
+      local status=`juju-status-json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']['$machine']['juju-status']['current'])"`
       if [[ "$status" == "down" ]] ; then
         echo "ERROR: Machine $machine went to 'down' state."
         juju-status-tabular
