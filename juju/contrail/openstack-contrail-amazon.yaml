@@ -11,7 +11,7 @@ services:
     charm: "cs:%SERIES%/rabbitmq-server"
     num_units: 1
     to:
-      - "0"
+      - "general-1"
   mysql:
     charm: "cs:%SERIES%/percona-cluster"
     num_units: 1
@@ -19,7 +19,7 @@ services:
       root-password: "password"
       max-connections: 1500
     to:
-      - "0"
+      - "general-1"
   openstack-dashboard:
     charm: "cs:%SERIES%/openstack-dashboard"
     num_units: 1
@@ -28,7 +28,7 @@ services:
       openstack-origin: "%OPENSTACK_ORIGIN%"
     expose: true
     to:
-      - "0"
+      - "general-1"
   nova-cloud-controller:
     charm: "cs:%SERIES%/nova-cloud-controller"
     num_units: 1
@@ -39,7 +39,7 @@ services:
       network-manager: "Neutron"
     expose: true
     to:
-      - "3"
+      - "general-2"
   nova-compute:
     charm: "cs:%SERIES%/nova-compute"
     num_units: 2
@@ -51,8 +51,8 @@ services:
       enable-live-migration: "true"
       migration-auth-type: "ssh"
     to:
-      - "1"
-      - "2"
+      - "compute-1"
+      - "compute-2"
   glance:
     charm: "cs:%SERIES%/glance"
     num_units: 1
@@ -61,7 +61,7 @@ services:
       openstack-origin: "%OPENSTACK_ORIGIN%"
     expose: true
     to:
-      - "1"
+      - "compute-1"
   keystone:
     charm: "cs:%SERIES%/keystone"
     num_units: 1
@@ -74,7 +74,7 @@ services:
       openstack-origin: "%OPENSTACK_ORIGIN%"
     expose: true
     to:
-      - "2"
+      - "compute-2"
   neutron-api:
     charm: "cs:%SERIES%/neutron-api"
     num_units: 1
@@ -85,35 +85,35 @@ services:
       neutron-security-groups: "true"
     expose: true
     to:
-      - "4"
+      - "general-3"
 
   contrail-keystone-auth:
     charm: "%JUJU_REPO%/contrail-keystone-auth"
     series: %SERIES%
     num_units: 1
     to:
-      - "5"
+      - "contrail-1"
   contrail-controller:
     charm: "%JUJU_REPO%/contrail-controller"
     series: %SERIES%
     num_units: 1
     expose: true
     to:
-      - "5"
+      - "contrail-1"
   contrail-analyticsdb:
     charm: "%JUJU_REPO%/contrail-analyticsdb"
     series: %SERIES%
     num_units: 1
     expose: true
     to:
-      - "5"
+      - "contrail-1"
   contrail-analytics:
     charm: "%JUJU_REPO%/contrail-analytics"
     series: %SERIES%
     num_units: 1
     expose: true
     to:
-      - "5"
+      - "contrail-1"
   contrail-openstack-neutron-api:
     charm: "%JUJU_REPO%/contrail-openstack-neutron-api"
     series: %SERIES%
@@ -166,21 +166,21 @@ relations:
   - [ "contrail-openstack-compute", "contrail-controller"]
 
 machines:
-  "0":
+  "general-1":
     series: %SERIES%
-    constraints: instance-type=t2.medium root-disk=40G
-  "1":
+    constraints: mem=8G cores=2 root-disk=40G
+  "compute-1":
     series: %SERIES%
-    constraints: instance-type=c4.large root-disk=40G
-  "2":
+    constraints: mem=7G cores=4 root-disk=40G
+  "compute-2":
     series: %SERIES%
-    constraints: instance-type=c4.large root-disk=40G
-  "3":
+    constraints: mem=7G cores=4 root-disk=40G
+  "general-2":
     series: %SERIES%
-    constraints: instance-type=t2.medium root-disk=40G
-  "4":
+    constraints: mem=8G cores=2 root-disk=40G
+  "general-3":
     series: %SERIES%
-    constraints: instance-type=t2.medium root-disk=40G
-  "5":
+    constraints: mem=8G cores=2 root-disk=40G
+  "contrail-1":
     series: %SERIES%
-    constraints: instance-type=r3.large root-disk=40G
+    constraints: mem=15G cores=2 root-disk=40G

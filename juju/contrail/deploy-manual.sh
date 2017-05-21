@@ -30,27 +30,31 @@ repo_ip=`get-machine-ip-by-number $m0`
 repo_key=`curl -s http://$repo_ip/ubuntu/repo.key`
 repo_key=`echo "$repo_key" | awk '{printf("      %s\r", $0)}'`
 
+general_type="mem=8G cores=2 root-disk=40G"
+compute_type="mem=7G cores=4 root-disk=40G"
+contrail_type="mem=15G cores=2 root-disk=40G"
+
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
-  m0=$(create_machine 0)
-  echo "INFO: Machine created: $m0"
+  m0=$(create_machine $general_type)
+  echo "INFO: General machine created: $m0"
 fi
-m1=$(create_machine 0)
-echo "INFO: Machine created: $m1"
-m2=$(create_machine 1)
-echo "INFO: Machine created: $m2"
-m3=$(create_machine 1)
-echo "INFO: Machine created: $m3"
-m4=$(create_machine 0)
-echo "INFO: Machine created: $m4"
-m5=$(create_machine 0)
-echo "INFO: Machine created: $m5"
-m6=$(create_machine 2)
-echo "INFO: Machine created: $m6"
+m1=$(create_machine $general_type)
+echo "INFO: General machine created: $m1"
+m2=$(create_machine $compute_type)
+echo "INFO: Compute machine created: $m2"
+m3=$(create_machine $compute_type)
+echo "INFO: Compute machine created: $m3"
+m4=$(create_machine $general_type)
+echo "INFO: General machine created: $m4"
+m5=$(create_machine $general_type)
+echo "INFO: General machine created: $m5"
+m6=$(create_machine $contrail_type)
+echo "INFO: Contrail machine created: $m6"
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
-  m7=$(create_machine 2)
-  echo "INFO: Machine created: $m7"
-  m8=$(create_machine 2)
-  echo "INFO: Machine created: $m8"
+  m7=$(create_machine $contrail_type)
+  echo "INFO: Contrail machine created: $m7"
+  m8=$(create_machine $contrail_type)
+  echo "INFO: Contrail machine created: $m8"
   wait_for_machines $m0 $m1 $m2 $m3 $m4 $m5 $m6 $m7 $m8
 else
   wait_for_machines $m1 $m2 $m3 $m4 $m5 $m6

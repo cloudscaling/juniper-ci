@@ -90,34 +90,14 @@ function wait_status() {
 }
 
 function create_machine() {
-  # 0: general machine for parameters testing
-  # 1: compute machine for OpenStack
-  # 2: machine for controller of OpenStack services
-  local type="$1"
-  shift
-  local additional_constraints="$@"
-
-  case "$type" in
-  "0")
-    local instance_type="t2.medium"
-    ;;
-  "1")
-    local instance_type="c4.large"
-    ;;
-  "2")
-    local instance_type="r3.large"
-    ;;
-  *)
-    return 1
-    ;;
-  esac
+  local constraints="$@"
 
   local az_opts=""
   if [ -n "$AZ" ] ; then
     az_opts="zone=$AZ"
   fi
 
-  juju-add-machine $az_opts --series=$SERIES --constraints "$additional_constraints instance-type=$instance_type root-disk=40G" 2>&1 | tail -1 | awk '{print $3}'
+  juju-add-machine $az_opts --series=$SERIES --constraints "$constraints" 2>&1 | tail -1 | awk '{print $3}'
   # NOTE: 'tail -1' is needed here for enabled debug mode. in this mode there are several lines in output but we need only last.
 }
 
