@@ -4,9 +4,8 @@ my_file="$(readlink -e "$0")"
 my_dir="$(dirname ${my_file})"
 
 fip=$1
-vm_uuid=$1
 
-#TODO: nothing to do for now
+#TODO: rework functions.sh - use parameters instead io global vars
 # expects:
 #   vm_uuid
 #   fip

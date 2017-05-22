@@ -6,6 +6,7 @@ my_dir="$(dirname ${my_file})"
 vm_uuid=$1
 fip=$2
 
+#TODO: rework functions.sh - use parameters instead io global vars
 # expects:
 #   vm_uuid
 #   fip

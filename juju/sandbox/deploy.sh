@@ -297,8 +297,7 @@ done
 
 
 log_info "start contrail event listener"
-export ANALYTICS_HOST=`juju status --format line | awk '/ contrail-analytics\//{print $3}'`
 export SSH_KEY="${HOME}/.local/share/juju/ssh/juju_id_rsa"
-nohup $my_dir/event-listener/listen-contrail-events.sh 2>&1>event-listener.log &
+nohup $my_dir/event-listener/contrail-polling.sh 2>&1>/var/log/sandbox/contrail-polling.log &
 sleep 2
 log_info "start contrail event listener started"
