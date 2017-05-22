@@ -88,7 +88,7 @@ function ensure_ip_forwarding() {
 
 function remove_fip_vgw_subnets() {
     local fip=$1
-    local dev_name="vgw_`echo $fip | tr '.' '_'`"
+    local dev_name="vgw`echo $fip | tr -d '.'`"
     local subnet="${fip}/32"
     if ifconfig ${dev_name} ; then
         ${ssh_cmd} sudo python /opt/contrail/utils/provision_vgw_interface.py \
@@ -105,7 +105,7 @@ function remove_fip_vgw_subnets() {
 function ensure_fip_vgw_subnets() {
     local fips=$1
     for fip in ${fips} ; do
-        local dev_name="vgw_`echo ${fip} | tr '.' '_'`"
+        local dev_name="vgw`echo ${fip} | tr -d '.'`"
         local subnet="${fip}/32"
         if ! ifconfig ${dev_name} ; then
             ${ssh_cmd} sudo python /opt/contrail/utils/provision_vgw_interface.py \

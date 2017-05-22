@@ -19,11 +19,11 @@ while true; do
         fixed_ip=`echo ${fip} | cut -d ',' -f 2`
         if [[ "${fixed_ip}" != 'None' ]] ; then
             vm_uuid=`echo "${instances}" | grep "${fixed_ip}" | awk '{print $2}'`
-            ${FIP_ASSOCIATE_SCRIPT} ${vm_uuid} ${floating_ip}
+            ${FIP_ASSOCIATE_SCRIPT} ${vm_uuid} ${floating_ip} || /bin/true
         else
             # cleanup rules and vgw for dis-associated fips
             for vm_uuid in `echo "${instances}" | awk '/ACTIVE/ {print $2}'` ; do
-                ${FIP_DISASSOCIATE_SCRIPT} ${vm_uuid} ${floating_ip}
+                ${FIP_DISASSOCIATE_SCRIPT} ${vm_uuid} ${floating_ip} || /bin/true
             done
         fi
     done
