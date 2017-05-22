@@ -10,7 +10,7 @@ my_pid=$$
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
-
+cd "$HOME"
 cat >deploy_status.$my_pid <<EOF
 -2
 0
@@ -32,7 +32,7 @@ function release_addresses() {
   done
 }
 
-killall -g contrail-polling.sh
+killall -g contrail-polling.sh || /bin/true
 
 release_addresses || /bin/true
 
