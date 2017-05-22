@@ -27,6 +27,7 @@ export BUILD="${BUILD:-6}"
 export DEPLOY_AS_HA_MODE="${DEPLOY_AS_HA_MODE:-false}"
 export USE_SSL="${USE_SSL:-true}"
 
+export PASSWORD=${PASSWORD:-'password'}
 
 if ! juju-bootstrap ; then
   echo "Bootstrap error. exiting..."
@@ -63,7 +64,6 @@ function catch_errors() {
 echo "--------------------------------------------- Run deploy script: $inner_script"
 $my_dir/contrail/$inner_script $script_params
 
-create_stackrc
 $my_dir/contrail/check-openstack.sh
 
 #if [[ "$RUN_TEMPEST" == 'true' ]] ; then
