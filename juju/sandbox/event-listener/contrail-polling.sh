@@ -13,7 +13,7 @@ tenant_id=`openstack project list | awk '/ admin / {print $2}'`
 
 while true; do
     os_token=`openstack token issue | awk '/ id / {print $4}'`
-    python ${my_dir}/contrail-listener.py \
+    python ${my_dir}/contrail-polling.py \
         --headers "{\"X-Auth-Token\": \"${os_token}\"}" \
         --address ${CONTRAIL_HOST} \
         --user_id ${user_id} \
