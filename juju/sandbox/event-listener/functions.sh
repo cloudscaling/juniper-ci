@@ -90,7 +90,7 @@ function remove_fip_vgw_subnets() {
     local fip=$1
     local dev_name="vgw`echo $fip | tr -d '.'`"
     local subnet="${fip}/32"
-    if ifconfig ${dev_name} ; then
+    if ${ssh_cmd} sudo ifconfig ${dev_name} ; then
         ${ssh_cmd} sudo python /opt/contrail/utils/provision_vgw_interface.py \
             --oper delete --interface ${dev_name} --subnets ${subnet} --routes 0.0.0.0/0 \
             --vrf default-domain:admin:public:public
@@ -107,7 +107,7 @@ function ensure_fip_vgw_subnets() {
     for fip in ${fips} ; do
         local dev_name="vgw`echo ${fip} | tr -d '.'`"
         local subnet="${fip}/32"
-        if ! ifconfig ${dev_name} ; then
+        if ! ${ssh_cmd} sudo ifconfig ${dev_name} ; then
             ${ssh_cmd} sudo python /opt/contrail/utils/provision_vgw_interface.py \
                 --oper create --interface ${dev_name} --subnets ${subnet} --routes 0.0.0.0/0 \
                 --vrf default-domain:admin:public:public

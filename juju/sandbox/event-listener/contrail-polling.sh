@@ -22,9 +22,12 @@ while true; do
             ${FIP_ASSOCIATE_SCRIPT} ${vm_uuid} ${floating_ip} || /bin/true
         else
             # cleanup rules and vgw for dis-associated fips
-            for vm_uuid in `echo "${instances}" | awk '/ACTIVE/ {print $2}'` ; do
-                ${FIP_DISASSOCIATE_SCRIPT} ${vm_uuid} ${floating_ip} || /bin/true
+            compute_nodes=`openstack compute service list -c Host --service nova-compute -f value`
+            for n in $compute_nodes ; do
+                SSH_NODE_ADDRESS=n ${FIP_DISASSOCIATE_SCRIPT} ${vm_uuid} ${floating_ip} || /bin/true
             done
         fi
     done
+
+    sleep 2
 done
