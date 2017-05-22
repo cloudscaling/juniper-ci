@@ -32,6 +32,8 @@ function release_addresses() {
   done
 }
 
+killall -g listen-contrail-events.sh
+
 release_addresses || /bin/true
 
 $my_dir/_set-juju-creds.sh
