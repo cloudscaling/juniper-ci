@@ -32,7 +32,7 @@ function release_addresses() {
   done
 }
 
-killall -g listen-contrail-events.sh
+killall -g contrail-polling.sh
 
 release_addresses || /bin/true
 
