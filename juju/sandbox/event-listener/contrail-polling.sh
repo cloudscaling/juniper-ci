@@ -11,8 +11,8 @@ export FIP_DISASSOCIATE_SCRIPT=${FIP_DISASSOCIATE_SCRIPT:-"${my_dir}/fip-disasso
 while true; do
     instances=`openstack server list --all-projects`
     fips=`openstack floating ip list --long --noindent -f table`
-    fips_arr=(`echo "${fips}" | awk '/ACTIVE/{print($4","$6)}'`)
-    if [[ -n "${fips_arr[@]}" ]] ; then
+    if [[ -n "${fips}" ]] ; then
+        fips_arr=(`echo "${fips}" | awk '/ACTIVE/{print($4","$6)}'`)
         for fip in ${fips_arr[@]} ; do
             floating_ip=`echo ${fip} | cut -d ',' -f 1`
             fixed_ip=`echo ${fip} | cut -d ',' -f 2`
