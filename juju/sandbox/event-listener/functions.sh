@@ -3,6 +3,8 @@
 
 export SSH_KEY=${SSH_KEY:-''}
 
+vm_uuid=${vm_uuid:-''}
+
 if [[ -z "$vm_uuid" && -z "$SSH_NODE_ADDRESS" ]] ; then
     echo "Either vm_uuid or SSH_NODE_ADDRESS is expected"
     exit -1
