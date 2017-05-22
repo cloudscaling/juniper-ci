@@ -88,7 +88,7 @@ class EventListenClient(http.HTTPClient):
             event_data = json.loads(event_data[1].strip())
             self.event_handler.on_event(event_data)
         self.raw_data_buffer = '\n'.join(msg) if len(msg) > 0 else ''
-        log.msg('ProxyClient: rawDataReceived: not all data received, waiting next chunk, raw_data_buffer=%s', self.raw_data_buffer)
+        log.msg('ProxyClient: rawDataReceived: not all data received, waiting next chunk, raw_data_buffer=%s' % self.raw_data_buffer)
 
 
 class ProxyClientFactory(protocol.ClientFactory):
