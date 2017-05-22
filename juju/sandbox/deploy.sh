@@ -9,7 +9,7 @@ fi
 
 # base constants for SandBox
 
-export VERSION=${VERSION:-'6'}
+export VERSION=${VERSION:-'10'}
 export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
 export CHARMS_VERSION=${CHARMS_VERSION:-'48d7c5ecf806f9ab53e19558dd4b85895b741908'}
 export SERIES=${SERIES:-'trusty'}
