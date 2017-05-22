@@ -23,9 +23,6 @@ export WORKSPACE="$HOME"
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 my_pid=$$
-stage=0
-# count stages in this file by yourself and place it here for status
-stages_count=12
 
 function log_info() {
   echo "$(date) INFO: $@"
@@ -33,9 +30,11 @@ function log_info() {
 
 function set_status() {
   log_info "$@"
-  echo "$stage" > deploy_status.$my_pid
-  echo "$stages_count" >> deploy_status.$my_pid
-  echo "$@" >> deploy_status.$my_pid
+  cat >deploy_status.$my_pid <<EOF
+$stage
+$stages_count
+$@
+EOF
 }
 
 function reset_status() {
@@ -45,11 +44,19 @@ function reset_status() {
 
 cd "$HOME"
 
-# cleanup previous states
-rm -f deploy_status.*
-touch deploy_status.$my_pid
+stage=0
+# count stages in this file by yourself and place the count here for status
+stages_count=12
 
 set_status "start deploying..."
+
+set_status "setting juju credentials"
+$my_dir/_set-juju-creds.sh
+if juju status ; then
+  # deployment already exists
+  rm -f deploy_status.$my_pid
+  exit 5
+fi
 
 set_status "detecting instance details"
 instance_id=`curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r ".instanceId"`
@@ -68,8 +75,6 @@ log_info "PRIVATE_IP is $private_ip"
 cdir="$(pwd)"
 log_info "working in the HOME directory = $HOME"
 
-set_status "setting juju credentials"
-$my_dir/_set-juju-creds.sh
 set_status "bootstrapping juju"
 juju --debug bootstrap --bootstrap-series=$SERIES aws amazon --config vpc-id=$vpc_id --config vpc-id-force=true
 
@@ -162,6 +167,8 @@ stage=12
 
 reset_status
 
+# TODO:
+# next code is not ready for progress yet
 
 log_info "Waiting for service start"
 if ! wait_absence_status_for_services "executing|blocked|waiting" 39 ; then

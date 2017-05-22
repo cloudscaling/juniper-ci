@@ -1,9 +1,21 @@
-#!/bin/bash
+#!/bin/bash -e
 
 if [[ "$HOME" == "" ]] ; then
   echo "ERROR: HOME variable must be set"
   exit 1
 fi
+
+my_pid=$$
+
+my_file="$(readlink -e "$0")"
+my_dir="$(dirname $my_file)"
+
+
+cat >deploy_status.$my_pid <<EOF
+-2
+0
+Destroying Juju deployment
+EOF
 
 addresses_store_file="$HOME/.addresses"
 
@@ -20,15 +32,12 @@ function release_addresses() {
   done
 }
 
-
-release_addresses
-
-my_file="$(readlink -e "$0")"
-my_dir="$(dirname $my_file)"
+release_addresses || /bin/true
 
 $my_dir/_set-juju-creds.sh
-
 juju destroy-controller -y --destroy-all-models amazon
 
-release_addresses
+release_addresses || /bin/true
 rm -f "$addresses_store_file"
+
+rm -f deploy_status.*
