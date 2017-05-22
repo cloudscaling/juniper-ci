@@ -8,9 +8,6 @@ export SSH_KEY=${SSH_KEY:-'/opt/sandbox/juju/.local/share/juju/ssh/juju_id_rsa'}
 export FIP_ASSOCIATE_SCRIPT=${FIP_ASSOCIATE_SCRIPT:-"${my_dir}/fip-associate.sh"}
 export FIP_DISASSOCIATE_SCRIPT=${FIP_DISASSOCIATE_SCRIPT:-"${my_dir}/fip-disassociate.sh"}
 
-
-export OS_TENANT=
-
 user_id=`openstack user show admin | awk '/ id / {print $4}'`
 tenant_id=`openstack project list | awk '/ admin / {print $2}'`
 
