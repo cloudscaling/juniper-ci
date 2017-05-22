@@ -7,7 +7,18 @@ if [[ "$HOME" == "" ]] ; then
   exit 1
 fi
 
+# base constants for SandBox
+
+export VERSION=${VERSION:-'6'}
+export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
+export CHARMS_VERSION=${CHARMS_VERSION:-'48d7c5ecf806f9ab53e19558dd4b85895b741908'}
+export SERIES=${SERIES:-'trusty'}
+export PASSWORD=${PASSWORD:-'password'}
+OPENSTACK_ORIGIN="cloud:${SERIES}-${OPENSTACK_VERSION}"
 addresses_store_file="$HOME/.addresses"
+base_url='https://s3-us-west-2.amazonaws.com/contrailpkgs'
+suffix='ubuntu14.04-4.0.0.0'
+export WORKSPACE="$HOME"
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -15,7 +26,6 @@ my_pid=$$
 stage=0
 # count stages in this file by yourself and place it here for status
 stages_count=12
-cd "$HOME"
 
 function log_info() {
   echo "$(date) INFO: $@"
@@ -33,21 +43,13 @@ function reset_status() {
   rm -f deploy_status.$my_pid
 }
 
+cd "$HOME"
+
 # cleanup previous states
 rm -f deploy_status.*
 touch deploy_status.$my_pid
 
 set_status "start deploying..."
-
-export VERSION=${VERSION:-'6'}
-export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
-export CHARMS_VERSION=${CHARMS_VERSION:-'48d7c5ecf806f9ab53e19558dd4b85895b741908'}
-export SERIES=${SERIES:-'trusty'}
-OPENSTACK_ORIGIN="cloud:${SERIES}-${OPENSTACK_VERSION}"
-export PASSWORD=${PASSWORD:-'password'}
-
-base_url='https://s3-us-west-2.amazonaws.com/contrailpkgs'
-suffix='ubuntu14.04-4.0.0.0'
 
 set_status "detecting instance details"
 instance_id=`curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r ".instanceId"`
@@ -176,12 +178,8 @@ pid=$!
 
 
 log_info "source OpenStack credentials"
-ip=`juju status --format line | awk '/ keystone/{print $3}'`
-export OS_AUTH_URL=http://$ip:5000/v2.0
-export OS_USERNAME=admin
-export OS_TENANT_NAME=admin
-export OS_PROJECT_NAME=admin
-export OS_PASSWORD="$PASSWORD"
+create_stackrc
+source "$HOME/stackrc"
 
 log_info "create virtual env and install openstack client"
 rm -rf .venv

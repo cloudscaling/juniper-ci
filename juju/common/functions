@@ -119,7 +119,7 @@ function create_stackrc() {
   echo "export OS_USERNAME=admin" >> $WORKSPACE/stackrc
   echo "export OS_TENANT_NAME=admin" >> $WORKSPACE/stackrc
   echo "export OS_PROJECT_NAME=admin" >> $WORKSPACE/stackrc
-  echo "export OS_PASSWORD=password" >> $WORKSPACE/stackrc
+  echo "export OS_PASSWORD=$PASSWORD" >> $WORKSPACE/stackrc
 }
 
 function open_port() {

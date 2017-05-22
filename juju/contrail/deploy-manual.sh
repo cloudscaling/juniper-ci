@@ -68,7 +68,7 @@ juju-deploy cs:$SERIES/ntp
 
 juju-deploy cs:$SERIES/rabbitmq-server --to $m1
 juju-deploy cs:$SERIES/percona-cluster mysql --to $m1
-juju-set mysql "root-password=password" "max-connections=1500"
+juju-set mysql "root-password=$PASSWORD" "max-connections=1500"
 
 juju-deploy cs:$SERIES/openstack-dashboard --to $m1
 juju-set openstack-dashboard "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
@@ -83,7 +83,7 @@ juju-set glance "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose glance
 
 juju-deploy cs:$SERIES/keystone --to $m3
-juju-set keystone "admin-password=password" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose keystone
 
 juju-deploy cs:$SERIES/nova-compute --to $m2
