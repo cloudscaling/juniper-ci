@@ -75,14 +75,4 @@ if [[ -z "${associated_fips[@]}" ]] ; then
     exit -1
 fi
 
-vgw_subnets=''
-for i in ${associated_fips[@]} ; do
-    if [[ -n $"vgw_subnets" ]] ; then
-        vgw_subnets+=' '
-    fi
-    vgw_subnets+="${i}/32"
-done
-add_fip_vgw_subnets "${vgw_subnets}"
-
-# always ensure that ip forwarding is enabled
-ensure_ip_forwarding
+ensure_fip_vgw_subnets "${associated_fips[@]}"

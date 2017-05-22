@@ -17,13 +17,14 @@ except ImportError:
 
 
 class EventListenClient(http.HTTPClient):
-    def __init__(self, method, uri, headers, body, event_handler):
+    def __init__(self, host, port, method, uri, headers, body, event_handler):
         self.method = method
         self.uri = uri
         self.headers = headers
         self.post_data = body
         self.event_handler = event_handler
-        self.raw_data_buffer = ''
+        self.host = host
+        self.port = port
 
     def _send_request(self):
         log.msg("ProxyClient: sendRequest: %s %s" % (self.method, self.uri))
@@ -48,6 +49,7 @@ class EventListenClient(http.HTTPClient):
 
     def connectionMade(self):
         log.msg("ProxyClient: connectionMade")
+        self.setHost(self.host.encode('UTF-8'), self.port)
         self._send_request()
         self._send_headers()
         self._send_post_data()
@@ -75,17 +77,20 @@ class EventListenClient(http.HTTPClient):
 class ProxyClientFactory(protocol.ClientFactory):
     protocol = EventListenClient
 
-    def __init__(self, method, uri, headers, body, event_handler):
+    def __init__(self, host, port, method, uri, headers, body, event_handler):
         self.method = method
         self.uri = uri
         self.headers = headers
         self.event_handler = event_handler
         self.body = body
+        self.host = host
+        self.port = port
 
     def buildProtocol(self, addr):
         log.msg("ProxyClientFactory: buildProtocol: method=%s, uri=%s, headers=%s"
                 % (self.method, self.uri, self.headers))
-        return self.protocol(self.method, self.uri, self.headers, self.body, self.event_handler)
+        return self.protocol(self.host, self.port,
+                             self.method, self.uri, self.headers, self.body, self.event_handler)
 
     def clientConnectionFailed(self, connector, reason):
         log.err("ProxyClientFactory: Server connection failed: %s" % reason)
@@ -172,6 +177,8 @@ def main():
     if options.fip_disassociate is not None:
         callbacks['fip_disassociate'] = options.fip_disassociate
     client_factory = ProxyClientFactory(
+        host=options.address,
+        port=options.port,
         method='POST',
         uri='/neutron/floatingip',
         headers=headers,

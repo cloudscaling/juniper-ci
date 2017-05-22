@@ -65,32 +65,58 @@ function del_rule_from_iptables() {
     fi
 }
 
-function add_fip_vgw_subnets() {
-    local vgw_subnets=$1
-    ${ssh_cmd} sudo python /opt/contrail/utils/provision_vgw_interface.py \
-        --oper create --interface vgw --subnets "${vgw_subnets}" --routes 0.0.0.0/0 \
-        --vrf default-domain:admin:public:public
-    #Workarraund for sandbox because provision_vgw_interface.py uses 'route add' that cant work with /32 mask
-    for i in ${vgw_subnets} ; do
-        if ! ${ssh_cmd} sudo ip route show ${i} | grep -q vgw ; then
-            ${ssh_cmd} sudo ip route add ${i} dev vgw
-        fi
-    done
-}
-
-function remove_fip_vgw_subnets() {
-    local fip=$1
-    if ${ssh_cmd} sudo ip route show ${fip}/32 | grep -q vgw ; then
-        ${ssh_cmd} sudo ip route del ${fip}/32 dev vgw
+function remove_ip_forwarding() {
+    local dev_name=$1
+    if ${ssh_cmd} sudo iptables -C FORWARD -i vhost0 -o ${dev_name} -j ACCEPT ; then
+        ${ssh_cmd} sudo iptables -D FORWARD -i vhost0 -o ${dev_name} -j ACCEPT
+    fi
+    if ${ssh_cmd} sudo iptables -C FORWARD -i ${dev_name} -o vhost0 -j ACCEPT ; then
+        ${ssh_cmd} sudo iptables -D FORWARD -i ${dev_name} -o vhost0 -j ACCEPT
     fi
 }
 
 function ensure_ip_forwarding() {
+    local dev_name=$1
     ${ssh_cmd} sudo sysctl net.ipv4.ip_forward=1
-    if ! ${ssh_cmd} sudo iptables -C FORWARD -i vhost0 -o vgw -j ACCEPT ; then
-        ${ssh_cmd} sudo iptables -A FORWARD -i vhost0 -o vgw -j ACCEPT
+    if ! ${ssh_cmd} sudo iptables -C FORWARD -i vhost0 -o ${dev_name} -j ACCEPT ; then
+        ${ssh_cmd} sudo iptables -A FORWARD -i vhost0 -o ${dev_name} -j ACCEPT
     fi
-    if ! ${ssh_cmd} sudo iptables -C FORWARD -i vgw -o vhost0 -j ACCEPT ; then
-        ${ssh_cmd} sudo iptables -A FORWARD -i vgw -o vhost0 -j ACCEPT
+    if ! ${ssh_cmd} sudo iptables -C FORWARD -i ${dev_name} -o vhost0 -j ACCEPT ; then
+        ${ssh_cmd} sudo iptables -A FORWARD -i ${dev_name} -o vhost0 -j ACCEPT
     fi
+}
+
+function remove_fip_vgw_subnets() {
+    local fip=$1
+    local dev_name="vgw_`echo $fip | tr '.' '_'`"
+    local subnet="${fip}/32"
+    if ifconfig ${dev_name} ; then
+        ${ssh_cmd} sudo python /opt/contrail/utils/provision_vgw_interface.py \
+            --oper delete --interface ${dev_name} --subnets ${subnet} --routes 0.0.0.0/0 \
+            --vrf default-domain:admin:public:public
+    fi
+    local current_route=`${ssh_cmd} sudo ip route show ${subnet}`
+    if echo "${current_route}" | grep -q ${dev_name} ; then
+        ${ssh_cmd} sudo ip route del ${subnet} dev ${dev_name}
+    fi
+    remove_ip_forwarding ${dev_name}
+}
+
+function ensure_fip_vgw_subnets() {
+    local fips=$1
+    for fip in ${fips} ; do
+        local dev_name="vgw_`echo ${fip} | tr '.' '_'`"
+        local subnet="${fip}/32"
+        if ! ifconfig ${dev_name} ; then
+            ${ssh_cmd} sudo python /opt/contrail/utils/provision_vgw_interface.py \
+                --oper create --interface ${dev_name} --subnets ${subnet} --routes 0.0.0.0/0 \
+                --vrf default-domain:admin:public:public
+        fi
+        #Workarraund for sandbox because provision_vgw_interface.py uses 'route add' that cant work with /32 mask
+        local current_route=`${ssh_cmd} sudo ip route show ${subnet}`
+        if ! echo "${current_route}" | grep -q ${dev_name} ; then
+            ${ssh_cmd} sudo ip route add ${subnet} dev ${dev_name}
+        fi
+        ensure_ip_forwarding ${dev_name}
+    done
 }
