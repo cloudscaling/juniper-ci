@@ -24,7 +24,7 @@ while true; do
             # cleanup rules and vgw for dis-associated fips
             compute_nodes=`openstack compute service list -c Host --service nova-compute -f value`
             for n in $compute_nodes ; do
-                SSH_NODE_ADDRESS=n ${FIP_DISASSOCIATE_SCRIPT} ${floating_ip} || /bin/true
+                SSH_NODE_ADDRESS=${n} ${FIP_DISASSOCIATE_SCRIPT} ${floating_ip} || /bin/true
             done
         fi
     done

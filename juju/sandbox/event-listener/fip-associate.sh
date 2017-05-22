@@ -63,16 +63,5 @@ fi
 cleanup_odd_rules_from_iptables ${fip} ${secondary_private_ip}
 add_rule_to_iptables ${fip} ${secondary_private_ip}
 
-# prepare ip routes vgw devices
-associated_fips_query='Reservations[*].Instances[*].NetworkInterfaces[*].PrivateIpAddresses[? ! Primary && Association!=`null`].Association.[PublicIp]'
-associated_fips=(`aws ec2 describe-instances \
-    --filter "Name=private-ip-address,Values=${primary_private_ip}" \
-    --query "${associated_fips_query}" \
-    --output text`)
-
-if [[ -z "${associated_fips[@]}" ]] ; then
-    echo "FATAL: there is no associated secondary private ip address"
-    exit -1
-fi
-
-ensure_fip_vgw_subnets "${associated_fips[@]}"
+# create vgw adnd ensure forwarding vgw<=>vhost
+ensure_fip_vgw_subnets ${fip}
