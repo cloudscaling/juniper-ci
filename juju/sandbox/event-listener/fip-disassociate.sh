@@ -3,8 +3,8 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname ${my_file})"
 
-vm_uuid=$1
-fip=$2
+fip=$1
+vm_uuid=''
 
 #TODO: nothing to do for now
 # expects:
