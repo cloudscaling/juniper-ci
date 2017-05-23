@@ -12,7 +12,7 @@ while true; do
     compute_nodes=`openstack compute service list -c Host --service nova-compute -f value`
     instances=`openstack server list --all-projects`
     fips=`openstack floating ip list --long --noindent -f table`
-    fips_arr=()
+    fips_arr=('')
     if [[ -n "${fips}" ]] ; then
         fips_arr=(`echo "${fips}" | awk '/ACTIVE/{print($4","$6)}'`)
     fi
