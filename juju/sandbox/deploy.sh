@@ -270,6 +270,7 @@ for i in {0..1} ; do
     if ! echo "$forbidden_octets" | grep -q ",$ip_last_octet," ; then
       break
     fi
+    # TODO: also here must be check that second cidr is not intersect with first
     ip=""
     aws ec2 release-address --allocation-id $ip_id
     sleep 2
