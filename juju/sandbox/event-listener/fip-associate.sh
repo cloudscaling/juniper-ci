@@ -5,6 +5,7 @@ my_dir="$(dirname ${my_file})"
 
 vm_uuid=$1
 fip=$2
+fip_subnet=$3
 
 #TODO: rework functions.sh - use parameters instead io global vars
 # expects:
@@ -65,4 +66,4 @@ cleanup_odd_rules_from_iptables ${fip} ${secondary_private_ip}
 add_rule_to_iptables ${fip} ${secondary_private_ip}
 
 # create vgw adnd ensure forwarding vgw<=>vhost
-ensure_fip_vgw_subnets ${fip}
+ensure_fip_vgw_subnets ${fip_subnet}

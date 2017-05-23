@@ -4,6 +4,7 @@ my_file="$(readlink -e "$0")"
 my_dir="$(dirname ${my_file})"
 
 fip=$1
+fip_subnet=$2
 
 #TODO: rework functions.sh - use parameters instead io global vars
 # expects:
@@ -15,5 +16,5 @@ fip=$1
 #       secondary_private_ips
 source ${my_dir}/functions.sh
 
-remove_fip_vgw_subnets ${fip}
+remove_fip_vgw_subnets ${fip_subnet}
 

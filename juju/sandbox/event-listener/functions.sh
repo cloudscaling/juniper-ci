@@ -89,34 +89,23 @@ function ensure_ip_forwarding() {
 }
 
 function remove_fip_vgw_subnets() {
-    local fip=$1
-    local dev_name="vgw`echo $fip | tr -d '.'`"
-    local subnet="${fip}/32"
+    local fip_subnet=$1
+    local dev_name="vgw`echo ${fip_subnet} | cut -d '/' -f 1 | tr -d '.'`"
     if ${ssh_cmd} sudo ifconfig ${dev_name} ; then
-        local current_route=`${ssh_cmd} sudo ip route show ${subnet}`
-        if echo "${current_route}" | grep -q ${dev_name} ; then
-            ${ssh_cmd} sudo ip route del ${subnet} dev ${dev_name}
-        fi
         remove_ip_forwarding ${dev_name}
         ${ssh_cmd} sudo python /opt/contrail/utils/provision_vgw_interface.py \
-            --oper delete --interface ${dev_name} --subnets ${subnet} --routes 0.0.0.0/0 \
+            --oper delete --interface ${dev_name} --subnets ${fip_subnet} --routes 0.0.0.0/0 \
             --vrf default-domain:admin:public:public
     fi
 }
 
 function ensure_fip_vgw_subnets() {
-    local fip=$1
-    local dev_name="vgw`echo ${fip} | tr -d '.'`"
-    local subnet="${fip}/32"
+    local fip_subnet=$1
+    local dev_name="vgw`echo ${fip_subnet} | cut -d '/' -f 1 | tr -d '.'`"
     if ! ${ssh_cmd} sudo ifconfig ${dev_name} ; then
         ${ssh_cmd} sudo python /opt/contrail/utils/provision_vgw_interface.py \
-            --oper create --interface ${dev_name} --subnets ${subnet} --routes 0.0.0.0/0 \
+            --oper create --interface ${dev_name} --subnets ${fip_subnet} --routes 0.0.0.0/0 \
             --vrf default-domain:admin:public:public
-    fi
-    #Workarraund for sandbox because provision_vgw_interface.py uses 'route add' that cant work with /32 mask
-    local current_route=`${ssh_cmd} sudo ip route show ${subnet}`
-    if ! echo "${current_route}" | grep -q ${dev_name} ; then
-        ${ssh_cmd} sudo ip route add ${subnet} dev ${dev_name}
     fi
     ensure_ip_forwarding ${dev_name}
 }
