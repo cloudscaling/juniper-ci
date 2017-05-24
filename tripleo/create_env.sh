@@ -100,6 +100,11 @@ rm -f "$my_dir/kp-$NUM" "$my_dir/kp-$NUM.pub"
 ssh-keygen -b 2048 -t rsa -f "$my_dir/kp-$NUM" -q -N ""
 rootpass=`openssl passwd -1 123`
 
+#check that nbd kernel module is loaded
+if ! lsmod |grep '^nbd ' ; then
+  modprobe nbd max_part=8
+fi
+
 # TODO: use guestfish instead of manual attachment
 # mount undercloud root disk. (it helps to create multienv)
 # !!! WARNING !!! in case of errors you need to unmount/disconnect it manually!!!
