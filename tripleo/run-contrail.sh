@@ -17,7 +17,7 @@ export CONTRAIL_CONTROLLER_COUNT="${CONTRAIL_CONTROLLER_COUNT:-1}"
 BASE_ADDR=${BASE_ADDR:-172}
 ((env_addr=BASE_ADDR+NUM*10))
 ip_addr="192.168.${env_addr}.2"
-ssh_opts="-i $WORKSPACE/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+ssh_opts="-i $WORKSPACE/juniper-ci/tripleo/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 ssh_addr="root@${ip_addr}"
 
 

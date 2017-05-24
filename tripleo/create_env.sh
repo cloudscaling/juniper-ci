@@ -108,10 +108,13 @@ fi
 # TODO: use guestfish instead of manual attachment
 # mount undercloud root disk. (it helps to create multienv)
 # !!! WARNING !!! in case of errors you need to unmount/disconnect it manually!!!
-qemu-nbd -n -c /dev/nbd3 $pool_path/undercloud-$NUM.qcow2
+nbd_dev="/dev/nbd${NUM}"
+qemu-nbd -d $nbd_dev || true
+qemu-nbd -n -c $nbd_dev $pool_path/undercloud-$NUM.qcow2
 sleep 5
+ret=0
 tmpdir=$(mktemp -d)
-mount /dev/nbd3p1 $tmpdir
+mount ${nbd_dev}p1 $tmpdir || ret=1
 sleep 2
 
 function change_undercloud_image() {
@@ -134,18 +137,18 @@ function change_undercloud_image() {
   echo "PermitRootLogin yes" > $tmpdir/etc/ssh/sshd_config
 }
 
-ret=0
-change_undercloud_image || ret=1
+# patch image
+[ $ret == 0 ] && change_undercloud_image || ret=2
 
 # unmount disk
-umount /dev/nbd3p1
+[ $ret != 1 ] && umount ${nbd_dev}p1 || ret=2
 sleep 2
-rm -rf $tmpdir
-qemu-nbd -d /dev/nbd3
+rm -rf $tmpdir || ret=3
+qemu-nbd -d $nbd_dev || ret=4
 sleep 2
 
 if [[ $ret != 0 ]] ; then
-  echo "ERROR: there were errors in changing undercloud image"
+  echo "ERROR: there were errors in changing undercloud image, ret=$ret"
   exit 1
 fi
 
