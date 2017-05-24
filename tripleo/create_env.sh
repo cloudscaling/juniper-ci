@@ -6,6 +6,15 @@ if [[ -z "$NUM" ]] ; then
   exit 1
 fi
 
+my_file="$(readlink -e "$0")"
+my_dir="$(dirname $my_file)"
+
+# base image for VMs
+BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-'CentOS-7-x86_64-GenericCloud-1607.qcow2'}
+BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
+mkdir -p ${BASE_IMAGE_DIR}
+BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
+
 # number of machines in overcloud
 # by default scripts will create hyperconverged environment with SDS on compute
 CONTROLLER_COUNT=${CONTROLLER_COUNT:-3}
@@ -13,11 +22,11 @@ COMPUTE_COUNT=${COMPUTE_COUNT:-2}
 STORAGE_COUNT=${STORAGE_COUNT:-0}
 CONTRAIL_CONTROLLER_COUNT=${CONTRAIL_CONTROLLER_COUNT:-1}
 
-my_file="$(readlink -e "$0")"
-my_dir="$(dirname $my_file)"
-
 # ready image for undercloud - using CentOS cloud image. just run and ssh into it.
-BASE_IMAGE="/var/lib/images/CentOS-7-x86_64-GenericCloud-1607.qcow2"
+if [[ ! -f ${BASE_IMAGE} ]] ; then
+  wget -o ${BASE_IMAGE} https://cloud.centos.org/centos/7/images/${BASE_IMAGE_NAME}
+fi
+
 # disk size for overcloud machines
 vm_disk_size="30G"
 # volume's poolname
