@@ -3,12 +3,44 @@ Overview
 
 This repository provides scripts for installing TripleO with OpenContrail on host with kvm virtualization enabled.
 
-
-Prepare steps
 =============
+KVM Host (it is usually a jenkins slave)
+- Install packages
+      apt-get install -y git qemu-kvm iptables-persistent ufw virtinst uuid-runtime
 
-- check that user 'stack' exists on the kvm host and he has home directory, and he is added to libvirtd group
-- checkout this project
+- Enable firewall with allowing ssh ports
+
+- Prepare jenkins user to access from Jenkins master server:
+      Create jenkins user with certificate authentication only
+      Add the pub-key of master jenkins server into jenkins's user authorized_keys file (/home/jenkins/.ssh/authorized_keys)
+
+- Allow ssh to skip cert-check and don't save host signatures in the known host file:
+      Example of ssh config:
+      cat /home/jenkins/.ssh/config
+      Host *
+      StrictHostKeyChecking no
+      UserKnownHostsFile=/dev/null
+
+- Allow jenkins user to run deploy under privileged user, add to sudoers file:
+
+  ```
+  For TRIPLEO CI:
+  jenkins ALL=(ALL) NOPASSWD:SETENV: /opt/jenkins/deploy_all.sh
+  jenkins ALL=(ALL) NOPASSWD:SETENV: /opt/jenkins/clean_env.sh
+  ```
+  These scripts should point to jenkins scripts in a worskace
+
+- On the Jenkins master add new builder, with options:
+  * limit number of executor processess with reasonable number, e.g. 3 for the server with 128GB RAM, 32 logical CPUs and a RAID on 2 SSD disks.
+  * root of remote filesystem: /home/jenkins
+  * the way to run jenkins slave agent: Launch jenkins via execution of command on the master:
+    ssh -v jenkins@158.69.124.47 'cd ~ && wget http://52.15.65.240:8080/jnlpJars/slave.jar && java -jar ~/slave.jar'
+    (put your real IP/name of jenkins slave server)
+    In unknown reason the the other ways didn't work in our case.
+
+- Check that user 'stack' exists on the kvm host and he has home directory, and he is added to libvirt group
+
+- Checkout this project
 
 
 Files and parameters
