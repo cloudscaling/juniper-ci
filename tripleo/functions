@@ -97,9 +97,12 @@ function delete_domains() {
     sleep 2
     virsh undefine $name || true
   done
-  virsh destroy rd-undercloud-$NUM || true
-  sleep 2
-  virsh undefine rd-undercloud-$NUM || true
+
+  if virsh dominfo rd-undercloud-$NUM 2>/dev/null ; then
+    virsh destroy rd-undercloud-$NUM || true
+    sleep 2
+    virsh undefine rd-undercloud-$NUM || true
+  fi
 }
 
 function delete_volume() {

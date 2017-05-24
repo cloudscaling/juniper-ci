@@ -32,7 +32,7 @@ key_file="/home/stack/.ssh/authorized_keys"
 if [[ ! -f ${key_file} ]] ; then
   key_file="/home/stack/.ssh/authorized_keys2"
 fi
-if [[ ! -f ${key_file} ]] ; then
+if [[ -f ${key_file} ]] ; then
   grep -v "my${NUM}domain" ${key_file} > ${key_file}_f
   chown stack:stack ${key_file}_f
   chmod 600 ${key_file}authorized_keys_f
