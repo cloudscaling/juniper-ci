@@ -14,13 +14,27 @@ function check_containers() {
   image_analytics="contrail-analytics-ubuntu${uver}-4.0.0.0-${BUILD}.tar.gz"
   image_analyticsdb="contrail-analyticsdb-ubuntu${uver}-4.0.0.0-${BUILD}.tar.gz"
   for ff in "$packages" "$image_controller"  "$image_analytics" "$image_analyticsdb" ; do
-    if [ ! -f "$HOME/docker/$ff" ] ; then
-      echo "INFO: download ${base_url}/$ff to $HOME/docker/$ff"
-      if ! wget -nv "${base_url}/$ff" -O "$HOME/docker/$ff" ; then
-        rm -f "$HOME/docker/$ff"
-        echo "ERROR: Can't download ${base_url}/$ff to $HOME/docker/$ff"
-        exit 1
+    if [ -f "$HOME/docker/$ff" ] ; then
+      local flsize=$(stat -c%s "$HOME/docker/$ff")
+      local frsize=$(curl --head -s ${base_url}/$ff | awk '/Content-Length/{print $2}')
+      local fltime=$(stat -c%Y "$HOME/docker/$ff")
+      local frtime_full=`curl --head -s ${base_url}/$ff | awk '/Last-Modified/{print substr($0, index($0,$3))}'`
+      local frtime=`date --date="$frtime_full" +%s`
+      if [[ "$flsize" != "$frsize" ]] ; then
+        echo "INFO: Local file size ($flsize) is not equal to remote ($frsize). File is to be removed for re-download."
+      elif [[ "$fltime" != "$frtime" ]] ; then
+        echo "INFO: Local file time ($(stat -c%y "$HOME/docker/$ff")) is not equal to remote ($frtime_full). File is to be removed re-download."
+      else
+        continue
       fi
+    fi
+
+    rm -f "$HOME/docker/$ff"
+    echo "INFO: download ${base_url}/$ff to $HOME/docker/$ff"
+    if ! wget -nv "${base_url}/$ff" -O "$HOME/docker/$ff" ; then
+      rm -f "$HOME/docker/$ff"
+      echo "ERROR: Can't download ${base_url}/$ff to $HOME/docker/$ff"
+      exit 1
     fi
   done
 }
