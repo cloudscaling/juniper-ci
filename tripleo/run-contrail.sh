@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -14,7 +14,7 @@ export OPENSTACK_VERSION="${OPENSTACK_VERSION:-'newton'}"
 export CONTROLLER_COUNT="${CONTROLLER_COUNT:-1}"
 export CONTRAIL_CONTROLLER_COUNT="${CONTRAIL_CONTROLLER_COUNT:-1}"
 
-BASE_ADDR=${BASE_ADDR:-172}
+BASE_ADDR=${BASE_ADDR:-122}
 ((env_addr=BASE_ADDR+NUM*10))
 ip_addr="192.168.${env_addr}.2"
 ssh_opts="-i $WORKSPACE/juniper-ci/tripleo/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"

@@ -12,7 +12,7 @@ if [[ -z "$NUM" ]] ; then
 fi
 
 SSH_VIRT_TYPE=${VIRT_TYPE:-'virsh'}
-BASE_ADDR=${BASE_ADDR:-172}
+BASE_ADDR=${BASE_ADDR:-122}
 MEMORY=${MEMORY:-8291}
 SWAP=${SWAP:-0}
 SSH_USER=${SSH_USER:-'stack'}

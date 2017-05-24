@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 # this script file should be copied to undercloud machine and run there.
 

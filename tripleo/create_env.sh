@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 # suffix for deployment
 if [[ -z "$NUM" ]] ; then
@@ -24,7 +24,7 @@ CONTRAIL_CONTROLLER_COUNT=${CONTRAIL_CONTROLLER_COUNT:-1}
 
 # ready image for undercloud - using CentOS cloud image. just run and ssh into it.
 if [[ ! -f ${BASE_IMAGE} ]] ; then
-  wget -o ${BASE_IMAGE} https://cloud.centos.org/centos/7/images/${BASE_IMAGE_NAME}
+  wget -O ${BASE_IMAGE} https://cloud.centos.org/centos/7/images/${BASE_IMAGE_NAME}
 fi
 
 # disk size for overcloud machines
