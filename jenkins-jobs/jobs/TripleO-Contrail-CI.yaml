@@ -2,7 +2,7 @@
     name: TripleO-Contrail-CI
     description: 'TripleO Contrail CI'
     defaults: global
-    node: slave
+    node: slave1
     concurrent: true
     parameters:
       - choice:
