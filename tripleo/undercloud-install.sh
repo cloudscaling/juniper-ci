@@ -9,7 +9,7 @@ if [[ -z "$NUM" ]] ; then
   exit 1
 fi
 
-BASE_ADDR=${BASE_ADDR:-122}
+BASE_ADDR=${BASE_ADDR:-172}
 IMAGES=${IMAGES:-"/home/stack/images-$OPENSTACK_VERSION.tar"}
 NETDEV=${NETDEV:-'eth1'}
 SKIP_SSH_TO_HOST_KEY=${SKIP_SSH_TO_HOST_KEY:-'no'}

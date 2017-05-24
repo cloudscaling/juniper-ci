@@ -9,7 +9,7 @@ my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
 NUM=${NUM:-0}
-BASE_ADDR=${BASE_ADDR:-122}
+BASE_ADDR=${BASE_ADDR:-172}
 ((env_addr=BASE_ADDR+NUM*10))
 ip_addr="192.168.${env_addr}.2"
 ssh_opts="-i $my_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
