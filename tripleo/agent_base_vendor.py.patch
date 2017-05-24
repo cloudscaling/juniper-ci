@@ -1,0 +1,19 @@
+--- agent_base_vendor.py.org	2016-09-27 01:28:32.492743226 +0300
++++ agent_base_vendor.py	2016-09-26 16:40:22.062010957 +0300
+@@ -803,6 +803,16 @@
+                 self._log_and_raise_deployment_error(task, msg)
+ 
+         try:
++            manager_utils.node_power_action(task, states.POWER_OFF)
++        except Exception as e:
++            msg = (_("DBG: Failed to power off node %(node)s "
++                     "before set boot device %(boot_dev)s. "
++                     "Error: %(error)s") %
++                   {'boot_dev': boot_devices.DISK, 'node': node.uuid,
++                    'error': e})
++            self._log_and_raise_deployment_error(task, msg)
++
++        try:
+             deploy_utils.try_set_boot_device(task, boot_devices.DISK)
+         except Exception as e:
+             msg = (_("Failed to change the boot device to %(boot_dev)s "

@@ -1,0 +1,50 @@
+- job:
+    name: TripleO-Contrail-CI
+    description: 'TripleO Contrail CI'
+    defaults: global
+    node: slave
+    concurrent: true
+    parameters:
+      - choice:
+          name: NUM
+          description: "Enironment Nubmer"
+          choices:
+            - '3'
+            - '4'
+            - '5'
+            - '6'
+      - choice:
+          name: OPENSTACK_VERSION
+          description: "Version of the OpenStack"
+          choices:
+            - 'newton'
+            - 'mitaka'
+      - choice:
+          name: CONTROLLER_COUNT
+          description: "Count of OS controllers to deploy"
+          choices:
+            - '1'
+            - '3'
+            - '5'
+      - choice:
+          name: CONTRAIL_CONTROLLER_COUNT
+          description: "Count of contrail controllers to deploy"
+          choices:
+            - '1'
+            - '3'
+      - choice:
+          name: CLEAN_ENV
+          choices:
+            - 'auto'
+            - 'always'
+            - 'never'
+    scm:
+      - juniper-ci
+    builders:
+      - shell: |
+          #!/bin/bash -e
+          ./juniper-ci/tripleo/run-contrail.sh
+    publishers:
+      - archive:
+          artifacts: 'logs/**'
+          allow-empty: 'true'

@@ -1,0 +1,110 @@
+#!/bin/bash
+
+function get_network_name() {
+  local type=$1
+  case "$type" in
+    management)
+      echo "rd-mgmt-$NUM"
+      ;;
+    provisioning)
+      echo "rd-prov-$NUM"
+      ;;
+    external)
+      echo "rd-ext-$NUM"
+      ;;
+    *)
+      return 1
+  esac
+}
+
+function get_network_ip() {
+  local type=$1
+  case "$type" in
+    management)
+      ((addr=172+NUM*10))
+      ;;
+    provisioning)
+      ((addr=176+NUM*10))
+      ;;
+    external)
+      ((addr=175+NUM*10))
+      ;;
+    *)
+      return 1
+  esac
+  echo "192.168.$addr"
+}
+
+function build_network_xml() {
+  local type="$1"
+  local nname="$2"
+  local fname=`mktemp`
+  local addr=$(get_network_ip $type)
+  case "$type" in
+    management)
+      echo "<network><name>$nname</name><bridge name=\"$nname\" /><forward mode=\"nat\"/><ip address=\"$addr.1\" netmask=\"255.255.255.0\"/></network>" > $fname
+      ;;
+    provisioning)
+      echo "<network><name>$nname</name><bridge name=\"$nname\" /><ip address=\"$addr.1\" netmask=\"255.255.255.0\"/></network>" > $fname
+      ;;
+    external)
+      echo "<network><name>$nname</name><forward mode=\"nat\"><nat><port start=\"1024\" end=\"65535\"/></nat></forward><ip address=\"$addr.1\" netmask=\"255.255.255.0\"><dhcp><range start=\"$addr.2\" end=\"$addr.254\"/></dhcp></ip></network>" > $fname
+      ;;
+    *)
+      return 1
+  esac
+  echo $fname
+}
+
+function delete_network() {
+  local type="$1"
+  local network_name=`get_network_name $type`
+  virsh net-destroy $network_name 2> /dev/null || true
+  virsh net-undefine $network_name 2> /dev/null || true
+}
+
+function create_network() {
+  local type="$1"
+
+  delete_network $type
+
+  local network_name=`get_network_name $type`
+  local fxml=`build_network_xml $type $network_name`
+  virsh net-define $fxml
+  rm $fxml
+  virsh net-autostart $network_name
+  virsh net-start $network_name
+}
+
+function create_pool() {
+  local poolname="$1"
+  local path="/var/lib/libvirt/$poolname"
+  virsh pool-define-as $poolname dir - - - - "$path"
+  virsh pool-build $poolname
+  virsh pool-start $poolname
+  virsh pool-autostart $poolname
+}
+
+function get_pool_path() {
+  local poolname=$1
+  virsh pool-info $poolname &>/dev/null || return
+  virsh pool-dumpxml $poolname | sed -n '/path/{s/.*<path>\(.*\)<\/path>.*/\1/;p}'
+}
+
+function delete_domains() {
+  for name in `virsh list --all | grep "rd-overcloud-$NUM-" | awk '{print $2}'` ; do
+    virsh destroy $name || true
+    sleep 2
+    virsh undefine $name || true
+  done
+  virsh destroy rd-undercloud-$NUM || true
+  sleep 2
+  virsh undefine rd-undercloud-$NUM || true
+}
+
+function delete_volume() {
+  volname=$1
+  poolname=$2
+  pool_path=$(get_pool_path $poolname)
+  virsh vol-delete $volname --pool $poolname 2>/dev/null || rm -f $pool_path/$volname 2>/dev/null
+}
