@@ -16,9 +16,9 @@ function check_containers() {
   for ff in "$packages" "$image_controller"  "$image_analytics" "$image_analyticsdb" ; do
     if [ -f "$HOME/docker/$ff" ] ; then
       local flsize=$(stat -c%s "$HOME/docker/$ff")
-      local frsize=$(curl --head -s ${base_url}/$ff | awk '/Content-Length/{print $2}')
+      local frsize=$(curl --head -s ${base_url}/$ff | awk '/Content-Length/{print $2}' | tr -d '\r')
       local fltime=$(stat -c%Y "$HOME/docker/$ff")
-      local frtime_full=`curl --head -s ${base_url}/$ff | awk '/Last-Modified/{print substr($0, index($0,$3))}'`
+      local frtime_full=`curl --head -s ${base_url}/$ff | awk '/Last-Modified/{print substr($0, index($0,$3))}' | tr -d '\r'`
       local frtime=`date --date="$frtime_full" +%s`
       if [[ "$flsize" != "$frsize" ]] ; then
         echo "INFO: Local file size ($flsize) is not equal to remote ($frsize). File is to be removed for re-download."
