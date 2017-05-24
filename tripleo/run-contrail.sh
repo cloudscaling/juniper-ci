@@ -9,7 +9,7 @@ if [[ -z "$WORKSPACE" ]] ; then
 fi
 
 export NUM=${NUM:-0}
-export CLEAN_ENV=${CLEAN_ENV:-'true'}
+export CLEAN_ENV=${CLEAN_ENV:-'auto'}
 export OPENSTACK_VERSION="${OPENSTACK_VERSION:-'newton'}"
 export CONTROLLER_COUNT="${CONTROLLER_COUNT:-1}"
 export CONTRAIL_CONTROLLER_COUNT="${CONTRAIL_CONTROLLER_COUNT:-1}"
@@ -20,7 +20,6 @@ ip_addr="192.168.${env_addr}.2"
 ssh_opts="-i $WORKSPACE/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 ssh_addr="root@${ip_addr}"
 
-trap 'catch_errors $LINENO' ERR
 
 function cleanup_environment() {
 # /opt/jenkins/clean_env.sh is available for modifying only for root,
@@ -56,6 +55,12 @@ function catch_errors() {
 
   exit $exit_code
 }
+
+trap 'catch_errors $LINENO' ERR
+
+if [[ $CLEAN_ENV != 'never' ]] ; then
+  cleanup_environment
+fi
 
 # /opt/jenkins/deploy_all.sh is available for modifying only for root,
 # this script should point to correct deploy_all.sh.
