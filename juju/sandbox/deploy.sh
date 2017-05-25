@@ -19,6 +19,7 @@ addresses_store_file="$HOME/.addresses"
 base_url='https://s3-us-west-2.amazonaws.com/contrailpkgs'
 suffix='ubuntu14.04-4.0.0.0'
 export WORKSPACE="$HOME"
+export SANDBOX_MODE='true'
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
