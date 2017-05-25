@@ -114,8 +114,12 @@ function cleanup_environment() {
 }
 
 function create_stackrc() {
-  auth_ip=`get_machine_ip keystone`
-  echo "export OS_AUTH_URL=http://$auth_ip:5000/v2.0" > $WORKSPACE/stackrc
+  local auth_ip=`get_machine_ip keystone`
+  local proto="https"
+  if [[ "$USE_SSL" != "true" ]]
+    local proto="http"
+  fi
+  echo "export OS_AUTH_URL=$proto://$auth_ip:5000/v2.0" > $WORKSPACE/stackrc
   echo "export OS_USERNAME=admin" >> $WORKSPACE/stackrc
   echo "export OS_TENANT_NAME=admin" >> $WORKSPACE/stackrc
   echo "export OS_PROJECT_NAME=admin" >> $WORKSPACE/stackrc
