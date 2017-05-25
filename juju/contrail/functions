@@ -106,11 +106,6 @@ function hack_openstack() {
 function post_deploy() {
   echo "INFO: Waiting for services start: $(date)"
 
-  if [[ -z "$m1" || -z "$m2" || -z "$m3" || -z "$m4" || -z "$m5" || -z "$m6" ]] ; then
-    detect_machines
-  fi
-  hack_openstack
-
   if ! wait_absence_status_for_services "executing|blocked|waiting" 39 ; then
     echo "ERROR: Waiting for services end: $(date)"
     return 1

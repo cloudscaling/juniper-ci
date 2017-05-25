@@ -53,6 +53,8 @@ sed -i "s/\r/\n/g" $BUNDLE
 juju-deploy-bundle $BUNDLE
 
 apply_ssl
+detect_machines
+hack_openstack
 
 juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
 juju-attach contrail-analyticsdb contrail-analyticsdb="$HOME/docker/$image_analyticsdb"

@@ -100,11 +100,11 @@ juju-expose neutron-api
 # Contrail
 juju-deploy $PLACE/contrail-keystone-auth --to $m6
 
-juju-deploy $PLACE/contrail-controller --to $m6 --resource contrail-controller="$HOME/docker/$image_controller"
+juju-deploy $PLACE/contrail-controller --to $m6
 juju-expose contrail-controller
-juju-deploy $PLACE/contrail-analyticsdb --to $m6 --resource contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
+juju-deploy $PLACE/contrail-analyticsdb --to $m6
 juju-expose contrail-analyticsdb
-juju-deploy $PLACE/contrail-analytics --to $m6 --resource contrail-analytics="$HOME/docker/$image_analytics"
+juju-deploy $PLACE/contrail-analytics --to $m6
 juju-expose contrail-analytics
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
@@ -140,6 +140,11 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
 fi
 
 apply_ssl
+hack_openstack
+
+juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
+juju-attach contrail-analyticsdb contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
+juju-attach contrail-analytics contrail-analytics="$HOME/docker/$image_analytics"
 
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
 juju-add-relation "keystone:shared-db" "mysql:shared-db"
