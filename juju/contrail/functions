@@ -127,7 +127,8 @@ function apply_ssl() {
     return
   fi
 
-  juju-set keystone "use-https=True" "https-service-endpoints=True"
+  juju-set keystone "use-https=True"
+  #"https-service-endpoints=True"
 
   #juju-set contrail-controller --file "$my_dir/ssl_contrail_config.yaml"
 }
