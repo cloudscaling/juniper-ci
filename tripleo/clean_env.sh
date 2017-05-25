@@ -28,15 +28,4 @@ for (( i=1; i<=10; i++ )) ; do
   delete_volume overcloud-$NUM-ctrlcont-$i.qcow2 $poolname
 done
 
-key_file="/home/stack/.ssh/authorized_keys"
-if [[ ! -f ${key_file} ]] ; then
-  key_file="/home/stack/.ssh/authorized_keys2"
-fi
-if [[ -f ${key_file} ]] ; then
-  grep -v "my${NUM}domain" ${key_file} > ${key_file}_f
-  chown stack:stack ${key_file}_f
-  chmod 600 ${key_file}authorized_keys_f
-  mv ${key_file}_f ${key_file}
-fi
-
 rm -f "$my_dir/kp-$NUM" "$my_dir/kp-$NUM.pub"
