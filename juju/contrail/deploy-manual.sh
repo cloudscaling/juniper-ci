@@ -141,8 +141,6 @@ fi
 
 apply_ssl
 
-sleep 30
-
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
 juju-add-relation "keystone:shared-db" "mysql:shared-db"
 juju-add-relation "glance:shared-db" "mysql:shared-db"
