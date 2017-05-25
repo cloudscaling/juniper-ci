@@ -130,6 +130,8 @@ function change_undercloud_image() {
   # configure root access
   mkdir -p $tmpdir/root/.ssh
   cp "$my_dir/kp-$NUM.pub" $tmpdir/root/.ssh/authorized_keys
+  cp "/home/stack/.ssh/id_rsa" $tmpdir/root/stack_id_rsa
+  cp "/home/stack/.ssh/id_rsa.pub" $tmpdir/root/stack_id_rsa.pub
   echo "PS1='\${debian_chroot:+(\$debian_chroot)}undercloud:\[\033[01;31m\](\$?)\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\\\$ '" >> $tmpdir/root/.bashrc
   sed -i "s root:\*: root:$rootpass: " $tmpdir/etc/shadow
   sed -i "s root:\!\!: root:$rootpass: " $tmpdir/etc/shadow

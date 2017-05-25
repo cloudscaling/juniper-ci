@@ -30,10 +30,25 @@ service ntpd start
 
 # create stack user
 if ! grep -q 'stack' /etc/passwd ; then
-  useradd stack
+  useradd -m stack -s /bin/bash
   echo "stack:password" | chpasswd
   echo "stack ALL=(root) NOPASSWD:ALL" | tee -a /etc/sudoers.d/stack
   chmod 0440 /etc/sudoers.d/stack
+  mkdir /home/stack/.ssh
+  chown stack:stack /home/stack/.ssh
+  chmod 600 /home/stack/.ssh
+  # key to stack user may access kvm host
+  cp /root/stack_id_rsa /home/stack/.ssh/id_rsa
+  cp /root/stack_id_rsa.pub /home/stack/.ssh/id_rsa.pub
+  chmod 600 /home/stack/.ssh/id_rsa
+  chmod 644 /home/stack/.ssh/id_rsa.pub
+  # ssh config to do not check host keys and avoid garbadge in known hosts files
+  cat <<EOF >/home/stack/.ssh/config
+Host *
+StrictHostKeyChecking no
+UserKnownHostsFile=/dev/null
+EOF
+  chmod 644 /home/stack/.ssh/config
 else
   echo User stack is already exist
 fi
@@ -54,7 +69,7 @@ sed -i -e 's%gpgcheck=.*%gpgcheck=0%' /etc/yum.repos.d/CentOS-Ceph-Hammer.repo
 sed -i -e 's/Defaults[ \t]*requiretty.*/#Defaults    requiretty/g' /etc/sudoers
 
 cp "$my_dir/__undercloud-install-2-as-stack-user.sh" /home/stack/
-chown stack /home/stack/__undercloud-install-2-as-stack-user.sh
+chown stack:stack /home/stack/__undercloud-install-2-as-stack-user.sh
 sudo -u stack NUM=$NUM NETDEV=$NETDEV SKIP_SSH_TO_HOST_KEY=$SKIP_SSH_TO_HOST_KEY OPENSTACK_VERSION=$OPENSTACK_VERSION /home/stack/__undercloud-install-2-as-stack-user.sh
 
 # increase timeouts due to virtual installation

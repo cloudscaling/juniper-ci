@@ -5,7 +5,7 @@
 cd ~
 
 NETDEV=${NETDEV:-'eth1'}
-SKIP_SSH_TO_HOST_KEY=${SKIP_SSH_TO_HOST_KEY:-'no'}
+# SKIP_SSH_TO_HOST_KEY=${SKIP_SSH_TO_HOST_KEY:-'no'}
 OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
 
 ((addr=176+NUM*10))
@@ -76,16 +76,3 @@ cd ..
 # update undercloud's network information
 sid=`neutron subnet-list | grep " $prov_ip.0" | awk '{print $2}'`
 neutron subnet-update $sid --dns-nameserver $dns_nameserver
-
-mkdir -p .ssh
-cat <<EOF >.ssh/config
-Host *
-StrictHostKeyChecking no
-UserKnownHostsFile=/dev/null
-EOF
-chmod 644 .ssh/config
-
-# copy ssh key from undercloud machine to KVM host. it needs to allow control of host VM's from undercloud's ironic service
-if [[ "$SKIP_SSH_TO_HOST_KEY" != "yes" ]] ; then
-  sshpass -p password ssh -i ~/.ssh/id_rsa stack@${mgmt_ip}.1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "echo $(cat ~/.ssh/id_rsa.pub) >> .ssh/authorized_keys ; chmod 600 .ssh/authorized_keys"
-fi
