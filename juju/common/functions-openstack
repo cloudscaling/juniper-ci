@@ -90,6 +90,7 @@ function create_virtualenv() {
 function create_image() {
   image_name=${1:-cirros}
 
+  echo "INFO: Check/create image"
   activate_venv
 
   if ! output=`openstack --insecure image show $image_name 2>/dev/null` ; then
@@ -106,6 +107,7 @@ function create_image() {
 }
 
 function create_flavors() {
+  echo "INFO: Check/create flavor"
   activate_venv
   if ! openstack --insecure flavor show 51 &>/dev/null ; then
     openstack --insecure flavor create --disk 1 --vcpus 1 --ram 128 --id 51 test_flavor >/dev/null

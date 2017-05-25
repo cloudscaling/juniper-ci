@@ -50,14 +50,19 @@ sed -i -e "s|%REPO_IP%|$repo_ip|m" $BUNDLE
 sed -i -e "s|%REPO_KEY%|$repo_key|m" $BUNDLE
 sed -i "s/\r/\n/g" $BUNDLE
 
+echo "INFO: Deploy bundle $(date)"
 juju-deploy-bundle $BUNDLE
 
+echo "INFO: Apply SSL/Set endpoints $(date)"
 apply_ssl
 detect_machines
 hack_openstack
 
+echo "INFO: Attach contrail-controller container $(date)"
 juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
+echo "INFO: Attach contrail-analyticsdb container $(date)"
 juju-attach contrail-analyticsdb contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
+echo "INFO: Attach contrail-analytics container $(date)"
 juju-attach contrail-analytics contrail-analytics="$HOME/docker/$image_analytics"
 
 post_deploy
