@@ -40,10 +40,10 @@ fi
 
 CONT_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-cont- | wc -l)
 COMP_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-comp- | wc -l)
-CONTROLLER_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-ctrlcont- | wc -l)
+CONTRAIL_CONTROLLER_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-ctrlcont- | wc -l)
 ANALYTICS_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-analytics- | wc -l)
 ANALYTICSDB_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-analyticsdb- | wc -l)
-((OCM_COUNT=CONT_COUNT+COMP_COUNT+CONTROLLER_COUNT+ANALYTICS_COUNT+ANALYTICSDB_COUNT))
+((OCM_COUNT=CONT_COUNT+COMP_COUNT+CONTRAIL_CONTROLLER_COUNT+ANALYTICS_COUNT+ANALYTICSDB_COUNT))
 
 # collect MAC addresses of overcloud machines
 function get_macs() {
@@ -63,7 +63,7 @@ function get_macs() {
 
 get_macs cont $CONT_COUNT
 get_macs comp $COMP_COUNT
-get_macs controller $CONTROLLER_COUNT
+get_macs ctrlcont $CONTRAIL_CONTROLLER_COUNT
 get_macs analytics $ANALYTICS_COUNT
 get_macs analyticsdb $ANALYTICSDB_COUNT
 
@@ -110,8 +110,8 @@ for (( i=1; i<=COMP_COUNT; i++ )) ; do
   mac=$(sed -n ${i}p /tmp/nodes-comp.txt)
   define_machine "profile:compute,boot_option:local" $mac
 done
-for (( i=1; i<=CONTROLLER_COUNT; i++ )) ; do
-  mac=$(sed -n ${i}p /tmp/nodes-controller.txt)
+for (( i=1; i<=CONTRAIL_CONTROLLER_COUNT; i++ )) ; do
+  mac=$(sed -n ${i}p /tmp/nodes-ctrlcont.txt)
   define_machine "profile:contrail-controller,boot_option:local" $mac
 done
 for (( i=1; i<=ANALYTICS_COUNT; i++ )) ; do
@@ -160,7 +160,7 @@ if [[ $COMP_COUNT > 0 ]] ; then
   openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="compute" compute
 fi
 
-if [[ $CONTROLLER_COUNT > 0 ]] ; then
+if [[ $CONTRAIL_CONTROLLER_COUNT > 0 ]] ; then
   openstack flavor create --id auto --ram $MEMORY $swap_opts --disk $DISK_SIZE --vcpus $CPU_COUNT contrail-controller
   openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="contrail-controller" contrail-controller
 fi
