@@ -36,10 +36,12 @@ if ! grep -q 'stack' /etc/passwd ; then
   chmod 0440 /etc/sudoers.d/stack
   mkdir /home/stack/.ssh
   chown stack:stack /home/stack/.ssh
-  chmod 600 /home/stack/.ssh
+  chmod 700 /home/stack/.ssh
   # key to stack user may access kvm host
   cp /root/stack_id_rsa /home/stack/.ssh/id_rsa
   cp /root/stack_id_rsa.pub /home/stack/.ssh/id_rsa.pub
+  chown stack:stack /home/stack/.ssh/id_rsa
+  chown stack:stack /home/stack/.ssh/id_rsa.pub
   chmod 600 /home/stack/.ssh/id_rsa
   chmod 644 /home/stack/.ssh/id_rsa.pub
   # ssh config to do not check host keys and avoid garbadge in known hosts files
@@ -48,6 +50,7 @@ Host *
 StrictHostKeyChecking no
 UserKnownHostsFile=/dev/null
 EOF
+  chown stack:stack /home/stack/.ssh/config
   chmod 644 /home/stack/.ssh/config
 else
   echo User stack is already exist
