@@ -116,7 +116,7 @@ function cleanup_environment() {
 function create_stackrc() {
   local auth_ip=`get_machine_ip keystone`
   local proto="https"
-  if [[ "$USE_SSL" != "true" ]]
+  if [[ "$USE_SSL" != "true" ]] ; then
     local proto="http"
   fi
   echo "export OS_AUTH_URL=$proto://$auth_ip:5000/v2.0" > $WORKSPACE/stackrc

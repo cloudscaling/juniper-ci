@@ -72,14 +72,33 @@ function hack_openstack() {
   if [[ "$jver" == 2 ]] ; then
     # Juju 2.0 registers services with private ips (using new modern tool 'network-get public')
     echo "INFO: HACK: Reconfigure public endpoints for OpenStack $(date)"
-    ip=`get-machine-ip-by-number $m4`
-    juju-set nova-cloud-controller os-public-hostname=$ip
-    ip=`get-machine-ip-by-number $m5`
-    juju-set neutron-api os-public-hostname=$ip
-    ip=`get-machine-ip-by-number $m2`
-    juju-set glance os-public-hostname=$ip
-    ip=`get-machine-ip-by-number $m3`
-    juju-set keystone os-public-hostname=$ip os-admin-hostname=$ip
+
+    local mchs=('2' '3' '4' '5')
+    local mch_srvs=('glance' 'keystone' 'nova-cloud-controller' 'neutron-api')
+    local mch_sets=('0' '0' '0' '0')
+    for j in {1..30} ; do
+      echo "INFO: attempt $j"
+      for i in {0..3} ; do
+        if [[ ${mch_sets[$i]} != '0' ]] ; then
+          continue;
+        fi
+        local addr_count=`juju machines --format json | python -c "import sys; import json; sys.stdout.write(str(len(json.load(sys.stdin)['machines'].get('${mchs[$i]}', {}).get('ip-addresses', []))))"`
+        if [[ $addr_count != '0' ]] ; then
+          local ip=`get-machine-ip-by-number ${mchs[$i]}`
+          echo "INFO: Update hostnames of ${mch_srvs[$i]} with IP=$ip"
+          if [[ "$SANDBOX_MODE" == 'true' && "${mch_srvs[$i]}" == 'keystone' ]] ; then
+            juju-set ${mch_srvs[$i]} os-public-hostname=$ip os-admin-hostname=$ip
+          else
+            juju-set ${mch_srvs[$i]} os-public-hostname=$ip
+          fi
+          mch_sets[$i]='1'
+        fi
+      done
+      if ! echo $mch_sets | grep -q '0' ; then
+        break
+      fi
+      sleep 2
+    done
   fi
 
   # open admin port of keystone - to be able to create projects
@@ -90,14 +109,6 @@ function hack_openstack() {
 
 function post_deploy() {
   echo "INFO: Waiting for services start: $(date)"
-  # sleep some time while machines are not up - bundle deployment creates machines and assigns applications without waiting for machines
-  # but hack_openstack must have machines IP to configure services
-  sleep 180
-
-  if [[ -z "$m1" || -z "$m2" || -z "$m3" || -z "$m4" || -z "$m5" || -z "$m6" ]] ; then
-    detect_machines
-  fi
-  hack_openstack
 
   if ! wait_absence_status_for_services "executing|blocked|waiting" 39 ; then
     echo "ERROR: Waiting for services end: $(date)"

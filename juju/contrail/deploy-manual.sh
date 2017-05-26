@@ -64,6 +64,7 @@ juju-status-tabular
 
 # OpenStack base
 
+echo "INFO: Deploy all $(date)"
 juju-deploy cs:$SERIES/ntp
 
 juju-deploy cs:$SERIES/rabbitmq-server --to $m1
@@ -100,11 +101,11 @@ juju-expose neutron-api
 # Contrail
 juju-deploy $PLACE/contrail-keystone-auth --to $m6
 
-juju-deploy $PLACE/contrail-controller --to $m6 --resource contrail-controller="$HOME/docker/$image_controller"
+juju-deploy $PLACE/contrail-controller --to $m6
 juju-expose contrail-controller
-juju-deploy $PLACE/contrail-analyticsdb --to $m6 --resource contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
+juju-deploy $PLACE/contrail-analyticsdb --to $m6
 juju-expose contrail-analyticsdb
-juju-deploy $PLACE/contrail-analytics --to $m6 --resource contrail-analytics="$HOME/docker/$image_analytics"
+juju-deploy $PLACE/contrail-analytics --to $m6
 juju-expose contrail-analytics
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
@@ -139,10 +140,19 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-add-relation "contrail-controller" "haproxy"
 fi
 
+echo "INFO: Apply SSL/Set ndpoints $(date)"
+
 apply_ssl
+hack_openstack
 
-sleep 30
+echo "INFO: Attach contrail-controller container $(date)"
+juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
+echo "INFO: Attach contrail-analyticsdb container $(date)"
+juju-attach contrail-analyticsdb contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
+echo "INFO: Attach contrail-analytics container $(date)"
+juju-attach contrail-analytics contrail-analytics="$HOME/docker/$image_analytics"
 
+echo "INFO: Add relations $(date)"
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
 juju-add-relation "keystone:shared-db" "mysql:shared-db"
 juju-add-relation "glance:shared-db" "mysql:shared-db"
