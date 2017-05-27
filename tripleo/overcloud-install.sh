@@ -203,6 +203,14 @@ git clone https://github.com/Juniper/contrail-tripleo-heat-templates -b stable/n
 cp -r contrail-tripleo-heat-templates/environments/contrail ~/tripleo-heat-templates/environments
 cp -r contrail-tripleo-heat-templates/puppet/services/network/* ~/tripleo-heat-templates/puppet/services/network
 
+# Prepare copy of roles_data file with added
+# services Analytics an Analytics DB into ContrailController role
+src_role_file='tripleo-heat-templates/environments/contrail/roles_data.yaml'
+role_file='tripleo-heat-templates/environments/contrail/roles_data_ci.yaml'
+sed '/- OS::TripleO::Services::ContrailDatabase/a\
+    - OS::TripleO::Services::ContrailAnalyticsDatabase\
+    - OS::TripleO::Services::ContrailAnalytics' $src_role_file > $role_file
+
 #TODO: add yaml with concrete parameters
 
 ha_opts=""
@@ -213,7 +221,7 @@ fi
 if [[ "$DEPLOY" != '1' ]] ; then
   # deploy overcloud. if you do it manually then I recommend to do it in screen.
   echo "openstack overcloud deploy --templates tripleo-heat-templates/ \
-    --roles-file tripleo-heat-templates/environments/contrail/roles_data_ci.yaml \
+    --roles-file $role_file \
     -e tripleo-heat-templates/environments/contrail/contrail-services.yaml \
     -e tripleo-heat-templates/environments/contrail/contrail-net-single.yaml \
     --control-flavor control --control-scale $CONT_COUNT \
@@ -227,7 +235,7 @@ fi
 set +e
 
 openstack overcloud deploy --templates tripleo-heat-templates/ \
-  --roles-file tripleo-heat-templates/environments/contrail/roles_data_ci.yaml \
+  --roles-file $role_file \
   -e tripleo-heat-templates/environments/contrail/contrail-services.yaml \
   -e tripleo-heat-templates/environments/contrail/contrail-net-single.yaml \
   --control-flavor control --control-scale $CONT_COUNT \
