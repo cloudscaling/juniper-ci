@@ -192,6 +192,9 @@ openstack baremetal introspection bulk start
 # prepare Contrail puppet modules
 mkdir -p ~/usr/share/openstack-puppet/modules
 git clone https://github.com/Juniper/contrail-tripleo-puppet -b stable/newton ~/usr/share/openstack-puppet/modules/tripleo
+git clone https://github.com/garethr/garethr-docker.git ~/usr/share/openstack-puppet/modules/docker
+git clone https://github.com/puppetlabs/puppetlabs-apt.git ~/usr/share/openstack-puppet/modules/apt
+git clone https://github.com/stahnma/puppet-module-epel.git ~/usr/share/openstack-puppet/modules/epel
 #TODO: replace personal repo with Juniper ones
 git clone https://github.com/alexey-mr/puppet-contrail -b stable/newton ~/usr/share/openstack-puppet/modules/contrail
 tar czvf puppet-modules.tgz usr/
