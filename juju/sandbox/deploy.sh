@@ -313,7 +313,7 @@ for i in {0..1} ; do
 done
 
 log_info "provision VGW on compute host with subnets $subnets"
-juju ssh $index sudo /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets IP-Ys --routes $subnets --vrf default-domain:admin:public:public
+juju ssh $index sudo /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets $subnets --routes 0.0.0.0/0 --vrf default-domain:admin:public:public
 
 log_info "add rules to allow forwarding between vhost0 and vgw"
 juju ssh $index sudo iptables -A FORWARD -i vhost0 -o vgw -j ACCEPT
