@@ -151,8 +151,8 @@ openstack flavor create --id auto --ram $MEMORY $swap_opts --disk $DISK_SIZE --v
 openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" baremetal
 
 if [[ $CONT_COUNT > 0 ]] ; then
-  openstack flavor create --id auto --ram $MEMORY $swap_opts --disk $DISK_SIZE --vcpus $CPU_COUNT controller
-  openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="controller" controller
+  openstack flavor create --id auto --ram $MEMORY $swap_opts --disk $DISK_SIZE --vcpus $CPU_COUNT control
+  openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="controller" control
 fi
 
 if [[ $COMP_COUNT > 0 ]] ; then
@@ -171,8 +171,8 @@ if  [[ $ANALYTICS_COUNT > 0 ]] ; then
 fi
 
 if [[ $ANALYTICSDB_COUNT > 0 ]] ; then
-  openstack flavor create --id auto --ram $MEMORY $swap_opts --disk $DISK_SIZE --vcpus $CPU_COUNT contrail-analyticsdb
-openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="contrail-analyticsdb" contrail-analyticsdb
+  openstack flavor create --id auto --ram $MEMORY $swap_opts --disk $DISK_SIZE --vcpus $CPU_COUNT contrail-analytics-database
+  openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="contrail-analyticsdb" contrail-analytics-database
 fi
 
 openstack flavor list --long
@@ -228,7 +228,7 @@ if [[ "$DEPLOY" != '1' ]] ; then
     --roles-file $role_file \
     -e tripleo-heat-templates/environments/contrail/contrail-services.yaml \
     -e tripleo-heat-templates/environments/contrail/contrail-net-single.yaml \
-    --control-flavor controller --control-scale $CONT_COUNT \
+    --control-flavor control --control-scale $CONT_COUNT \
     --compute-flavor compute  --compute-scale $COMP_COUNT \
     --ntp-server pool.ntp.org $ha_opts"
   echo "Add '-e templates/firstboot/firstboot.yaml' if you use swap"
@@ -242,7 +242,7 @@ openstack overcloud deploy --templates tripleo-heat-templates/ \
   --roles-file $role_file \
   -e tripleo-heat-templates/environments/contrail/contrail-services.yaml \
   -e tripleo-heat-templates/environments/contrail/contrail-net-single.yaml \
-  --control-flavor controller --control-scale $CONT_COUNT \
+  --control-flavor control --control-scale $CONT_COUNT \
   --compute-flavor compute  --compute-scale $COMP_COUNT \
   --ntp-server pool.ntp.org $ha_opts
 
