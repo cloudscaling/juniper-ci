@@ -11,7 +11,7 @@ fi
 
 export VERSION=${VERSION:-'14'}
 export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
-export CHARMS_VERSION=${CHARMS_VERSION:-'9411375428dc23a4087104904896533d1892d15e'}
+export CHARMS_VERSION=${CHARMS_VERSION:-'84a1e65a789cda65dd90fecc76d7f72e93970e35'}
 export SERIES=${SERIES:-'trusty'}
 export PASSWORD=${PASSWORD:-'password'}
 OPENSTACK_ORIGIN="cloud:${SERIES}-${OPENSTACK_VERSION}"
@@ -236,28 +236,30 @@ function get_cidr() {
   echo $cidr/$((mask + 24))
 }
 
-log_info "iterate over compute hosts to add secondary ip-s"
-for compute in `juju status contrail-openstack-compute | grep -A 2 '^Machine' | awk '/started/ {print($1","$4)}'` ; do
-  index=`echo "$compute" | cut -d , -f 1`
-  id=`echo "$compute" | cut -d , -f 2`
-  log_info "detect network interface id for instance $id"
-  ni_id=`aws ec2 describe-instances --instance-id $id --query 'Reservations[*].Instances[*].NetworkInterfaces[*].NetworkInterfaceId' --output text`
-  log_info "network interface is $ni_id"
-  log_info "add two secondary private addresses to this network interface of compute host"
-  aws ec2 assign-private-ip-addresses --network-interface-id $ni_id --secondary-private-ip-address-count 2
-  log_info "getting new addresses"
-  private_ips=(`aws ec2 describe-instances --instance-id $id --query 'Reservations[*].Instances[*].NetworkInterfaces[*].PrivateIpAddresses[*]' --output text | awk '/^False/{print $3}'`)
-  log_info "addresses are: ${private_ips[@]}"
+# getting only one compute node. VM-s on other computes should be availabe via this compute by contrail overlay
+log_info "detect compute for adding secondary ip-s"
+compute=`juju status contrail-openstack-compute | grep -A 2 '^Machine' | awk '/started/ {print($1","$4)}' | head -1`
+log_info "detected compute is $compute"
+index=`echo "$compute" | cut -d , -f 1`
+id=`echo "$compute" | cut -d , -f 2`
+log_info "detect network interface id for instance $id"
+ni_id=`aws ec2 describe-instances --instance-id $id --query 'Reservations[*].Instances[*].NetworkInterfaces[*].NetworkInterfaceId' --output text`
+log_info "network interface is $ni_id"
+log_info "add two secondary private addresses to this network interface of compute host"
+aws ec2 assign-private-ip-addresses --network-interface-id $ni_id --secondary-private-ip-address-count 2
+log_info "getting new addresses"
+private_ips=(`aws ec2 describe-instances --instance-id $id --query 'Reservations[*].Instances[*].NetworkInterfaces[*].PrivateIpAddresses[*]' --output text | awk '/^False/{print $3}'`)
+log_info "addresses are: ${private_ips[@]}"
 
-  for ip in ${private_ips[@]} ; do
-    # TODO: detect interface for adding aliases
-    juju ssh $index "sudo ifconfig eth0 add $ip up"
-  done
+for ip in ${private_ips[@]} ; do
+  # TODO: detect interface for adding aliases
+  juju ssh $index "sudo ifconfig eth0 add $ip up"
 done
 # here we have private_ips from one compute hosts which will be associated with new elastic ips
 
 truncate -s 0 "$addresses_store_file"
 
+subnets=''
 forbidden_octets=",0,2,4,8,16,31,32,34,63,64,66,95,96,98,128,159,160,162,191,192,194,223,224,226,255,"
 for i in {0..1} ; do
   log_info "allocate floating ip #$((i+1)) in amazon"
@@ -292,6 +294,7 @@ for i in {0..1} ; do
     exit 1
   fi
   full_cidr="${ip_first_octets}.${cidr}"
+  subnets="$subnets $full_cidr"
 
   private_ip=${private_ips[$i]}
   if ! output=`aws ec2 associate-address --allocation-id $ip_id --network-interface-id $ni_id --private-ip-address $private_ip` ; then
@@ -300,13 +303,24 @@ for i in {0..1} ; do
     exit 1
   fi
 
+  log_info "add DNAT rules"
+  juju ssh $index sudo iptables -t nat -A PREROUTING -d $private_ip/32 -j DNAT --to-destination $ip
+  log_info "add SNAT rules"
+  juju ssh $index sudo iptables -t nat -A POSTROUTING -s $ip/32 -j SNAT --to-source $private_ip
+
   log_info "create subnet in public network for allocated ip #$i"
   openstack subnet create --no-dhcp --network $public_net_id --subnet-range $full_cidr --gateway 0.0.0.0 public --allocation-pool start=$ip,end=$ip
 done
 
+log_info "provision VGW on compute host with subnets $subnets"
+juju ssh $index sudo /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets $subnets --routes 0.0.0.0/0 --vrf default-domain:admin:public:public
 
-log_info "start contrail event listener"
-export SSH_KEY="${HOME}/.local/share/juju/ssh/juju_id_rsa"
-nohup $my_dir/event-listener/contrail-polling.sh 2>&1>/var/log/sandbox/contrail-polling.log &
-sleep 2
-log_info "start contrail event listener started"
+log_info "add rules to allow forwarding between vhost0 and vgw"
+juju ssh $index sudo iptables -A FORWARD -i vhost0 -o vgw -j ACCEPT
+juju ssh $index sudo iptables -A FORWARD -i vgw -o vhost0 -j ACCEPT
+
+#log_info "start contrail event listener"
+#export SSH_KEY="${HOME}/.local/share/juju/ssh/juju_id_rsa"
+#nohup $my_dir/event-listener/contrail-polling.sh 2>&1>/var/log/sandbox/contrail-polling.log &
+#sleep 2
+#log_info "start contrail event listener started"
