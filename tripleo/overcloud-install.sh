@@ -13,11 +13,11 @@ fi
 
 SSH_VIRT_TYPE=${VIRT_TYPE:-'virsh'}
 BASE_ADDR=${BASE_ADDR:-172}
-MEMORY=${MEMORY:-8291}
+MEMORY=${MEMORY:-8000}
 SWAP=${SWAP:-0}
 SSH_USER=${SSH_USER:-'stack'}
 CPU_COUNT=${CPU_COUNT:-2}
-DISK_SIZE=${DISK_SIZE:-30}
+DISK_SIZE=${DISK_SIZE:-29}
 
 # su - stack
 cd ~
@@ -190,6 +190,7 @@ openstack baremetal introspection bulk start
 
 
 # prepare Contrail puppet modules
+rm -rf ~/usr/share/openstack-puppet/modules
 mkdir -p ~/usr/share/openstack-puppet/modules
 git clone https://github.com/Juniper/contrail-tripleo-puppet -b stable/newton ~/usr/share/openstack-puppet/modules/tripleo
 git clone https://github.com/garethr/garethr-docker.git ~/usr/share/openstack-puppet/modules/docker
@@ -201,19 +202,28 @@ tar czvf puppet-modules.tgz usr/
 upload-swift-artifacts -f puppet-modules.tgz
 
 # prepare tripleo heat templates
+rm -rf ~/tripleo-heat-templates
 cp -r /usr/share/openstack-tripleo-heat-templates/ ~/tripleo-heat-templates
+rm -rf ~/contrail-tripleo-heat-templates
 git clone https://github.com/Juniper/contrail-tripleo-heat-templates -b stable/newton
-cp -r contrail-tripleo-heat-templates/environments/contrail ~/tripleo-heat-templates/environments
-cp -r contrail-tripleo-heat-templates/puppet/services/network/* ~/tripleo-heat-templates/puppet/services/network
+cp -r ~/contrail-tripleo-heat-templates/environments/contrail ~/tripleo-heat-templates/environments
+cp -r ~/contrail-tripleo-heat-templates/puppet/services/network/* ~/tripleo-heat-templates/puppet/services/network
 
 # # Prepare copy of roles_data file with added
 # # services Analytics an Analytics DB into ContrailController role
-src_role_file='tripleo-heat-templates/environments/contrail/roles_data.yaml'
-role_file='tripleo-heat-templates/environments/contrail/roles_data_ci.yaml'
-# sed '/- OS::TripleO::Services::ContrailDatabase/a\
+role_file='tripleo-heat-templates/environments/contrail/roles_data.yaml'
+# sed -i '/- OS::TripleO::Services::ContrailDatabase/a\
 #     - OS::TripleO::Services::ContrailAnalyticsDatabase\
 #     - OS::TripleO::Services::ContrailAnalytics' $src_role_file > $role_file
-cp $src_role_file $role_file
+
+contrail_services_file='tripleo-heat-templates/environments/contrail/contrail-services.yaml'
+sed -i 's/ContrailRepo:.*/ContrailRepo:  http:\/\/192.168.202.2\/contrail/g' $contrail_services_file
+sed -i "s/ControllerCount:.*/ControllerCount: $CONT_COUNT/g" $contrail_services_file
+sed -i "s/ContrailControllerCount:.*/ContrailControllerCount: $CONTRAIL_CONTROLLER_COUNT/g" $contrail_services_file
+sed -i "s/ContrailAnalyticsCount:.*/ContrailAnalyticsCount: $ANALYTICS_COUNT/g" $contrail_services_file
+sed -i "s/ContrailAnalyticsDatabaseCount:.*/ContrailAnalyticsDatabaseCount: $ANALYTICSDB_COUNT/g" $contrail_services_file
+sed -i "s/ComputeCount:.*/ComputeCount: $COMP_COUNT/g" $contrail_services_file
+sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_services_file
 
 #TODO: add yaml with concrete parameters
 
@@ -226,11 +236,8 @@ if [[ "$DEPLOY" != '1' ]] ; then
   # deploy overcloud. if you do it manually then I recommend to do it in screen.
   echo "openstack overcloud deploy --templates tripleo-heat-templates/ \
     --roles-file $role_file \
-    -e tripleo-heat-templates/environments/contrail/contrail-services.yaml \
-    -e tripleo-heat-templates/environments/contrail/contrail-net-single.yaml \
-    --control-flavor control --control-scale $CONT_COUNT \
-    --compute-flavor compute  --compute-scale $COMP_COUNT \
-    --ntp-server pool.ntp.org $ha_opts"
+    -e $contrail_services_file \
+    -e tripleo-heat-templates/environments/contrail/contrail-net-single.yaml $ha_opts"
   echo "Add '-e templates/firstboot/firstboot.yaml' if you use swap"
   exit
 fi
@@ -240,12 +247,8 @@ set +e
 
 openstack overcloud deploy --templates tripleo-heat-templates/ \
   --roles-file $role_file \
-  -e tripleo-heat-templates/environments/contrail/contrail-services.yaml \
-  -e tripleo-heat-templates/environments/contrail/contrail-net-single.yaml \
-  --control-flavor control --control-scale $CONT_COUNT \
-  --compute-flavor compute  --compute-scale $COMP_COUNT \
-  --ntp-server pool.ntp.org $ha_opts
-
+  -e $contrail_services_file \
+  -e tripleo-heat-templates/environments/contrail/contrail-net-single.yaml $ha_opts
 
 errors=$?
 
