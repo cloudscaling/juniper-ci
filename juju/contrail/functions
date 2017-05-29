@@ -144,7 +144,6 @@ function apply_ssl() {
   done
 
   juju-set keystone "use-https=True"
-  # "https-service-endpoints=True"
 
 
   #juju-set contrail-controller --file "$my_dir/ssl_contrail_config.yaml"
@@ -159,16 +158,13 @@ function create_root_ca() {
 function apply_ssl_config() {
   local mch=$1
   local srv=$2
-  local addresses=`juju machines --format json | python -c "import sys; import json; [sys.stdout.write(addr + '\n') for addr in json.load(sys.stdin)['machines'].get('$mch', {}).get('ip-addresses', [])]"`
 
-  for addr in $addresses ; do
-    local cfname="cert_m${mch}_${addr}"
-    openssl genrsa -out "$ssl_dir/$cfname.key" 2048
-    openssl req -new -key "$ssl_dir/$cfname.key" -out "$ssl_dir/$cfname.csr" -subj "/C=US/ST=CA/L=Sunnyvale/O=Juniper/CN=$addr"
-    openssl x509 -req -in "$ssl_dir/$cfname.csr" -CA "$ssl_dir/rootCA.crt" -CAkey "$ssl_dir/rootCA.key" -CAcreateserial -out "$ssl_dir/$cfname.crt" -days 365
-    cat "$ssl_dir/$cfname.crt" >> "$ssl_dir/cert_m${mch}.crt"
-    cat "$ssl_dir/$cfname.key" >> "$ssl_dir/cert_m${mch}.key"
-  done
+  local addr=`get-machine-ip-by-number $mch`
+  echo "INFO: creating certificate for address: $addr (machine $mch / service $srv)"
+  local cfname="cert_m${mch}_${addr}"
+  openssl genrsa -out "$ssl_dir/$cfname.key" 2048
+  openssl req -new -key "$ssl_dir/$cfname.key" -out "$ssl_dir/$cfname.csr" -subj "/C=US/ST=CA/L=Sunnyvale/O=Juniper/CN=$addr"
+  openssl x509 -req -in "$ssl_dir/$cfname.csr" -CA "$ssl_dir/rootCA.crt" -CAkey "$ssl_dir/rootCA.key" -CAcreateserial -out "$ssl_dir/$cfname.crt" -days 365
   cat "$ssl_dir/$cfname.crt" | base64 > "$ssl_dir/$cfname.crt.b64"
   cat "$ssl_dir/$cfname.key" | base64 > "$ssl_dir/$cfname.key.b64"
 
