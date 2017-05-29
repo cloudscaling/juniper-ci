@@ -33,6 +33,18 @@
             - '1'
             - '3'
       - choice:
+          name: CONTRAIL_ANALYTICS_COUNT
+          description: "Count of contrail analytics to deploy"
+          choices:
+            - '1'
+            - '3'
+      - choice:
+          name: CONTRAIL_ANALYTICSDB_COUNT
+          description: "Count of contrail analytics DB to deploy"
+          choices:
+            - '1'
+            - '3'
+      - choice:
           name: CLEAN_ENV
           choices:
             - 'auto'

@@ -17,10 +17,13 @@ BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
 
 # number of machines in overcloud
 # by default scripts will create hyperconverged environment with SDS on compute
-CONTROLLER_COUNT=${CONTROLLER_COUNT:-3}
+CONTROLLER_COUNT=${CONTROLLER_COUNT:-1}
 COMPUTE_COUNT=${COMPUTE_COUNT:-2}
 STORAGE_COUNT=${STORAGE_COUNT:-0}
 CONTRAIL_CONTROLLER_COUNT=${CONTRAIL_CONTROLLER_COUNT:-1}
+CONTRAIL_ANALYTICS_COUNT=${CONTRAIL_ANALYTICS_COUNT:-1}
+CONTRAIL_ANALYTICSDB_COUNT=${CONTRAIL_ANALYTICSDB_COUNT:-1}
+
 
 # ready image for undercloud - using CentOS cloud image. just run and ssh into it.
 if [[ ! -f ${BASE_IMAGE} ]] ; then
@@ -83,6 +86,14 @@ for (( i=1 ; i<=STORAGE_COUNT; i++ )) ; do
 done
 for (( i=1 ; i<=CONTRAIL_CONTROLLER_COUNT; i++ )) ; do
   name="overcloud-$NUM-ctrlcont-$i"
+  create_root_volume $name
+done
+for (( i=1 ; i<=CONTRAIL_ANALYTICS_COUNT; i++ )) ; do
+  name="overcloud-$NUM-ctrlanalytics-$i"
+  create_root_volume $name
+done
+for (( i=1 ; i<=CONTRAIL_ANALYTICSDB_COUNT; i++ )) ; do
+  name="overcloud-$NUM-ctrlanalyticsdb-$i"
   create_root_volume $name
 done
 
@@ -202,6 +213,14 @@ for (( i=1; i<=STORAGE_COUNT; i++ )) ; do
 done
 for (( i=1; i<=CONTRAIL_CONTROLLER_COUNT; i++ )) ; do
   name="overcloud-$NUM-ctrlcont-$i"
+  define-machine rd-$name "--disk path=$pool_path/$name.qcow2,device=disk,bus=virtio,format=qcow2"
+done
+for (( i=1; i<=CONTRAIL_ANALYTICS_COUNT; i++ )) ; do
+  name="overcloud-$NUM-ctrlanalytics-$i"
+  define-machine rd-$name "--disk path=$pool_path/$name.qcow2,device=disk,bus=virtio,format=qcow2"
+done
+for (( i=1; i<=CONTRAIL_ANALYTICSDB_COUNT; i++ )) ; do
+  name="overcloud-$NUM-ctrlanalyticsdb-$i"
   define-machine rd-$name "--disk path=$pool_path/$name.qcow2,device=disk,bus=virtio,format=qcow2"
 done
 

@@ -41,8 +41,8 @@ fi
 CONT_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-cont- | wc -l)
 COMP_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-comp- | wc -l)
 CONTRAIL_CONTROLLER_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-ctrlcont- | wc -l)
-ANALYTICS_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-analytics- | wc -l)
-ANALYTICSDB_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-analyticsdb- | wc -l)
+ANALYTICS_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-ctrlanalytics- | wc -l)
+ANALYTICSDB_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-ctrlanalyticsdb- | wc -l)
 ((OCM_COUNT=CONT_COUNT+COMP_COUNT+CONTRAIL_CONTROLLER_COUNT+ANALYTICS_COUNT+ANALYTICSDB_COUNT))
 
 # collect MAC addresses of overcloud machines
@@ -64,8 +64,8 @@ function get_macs() {
 get_macs cont $CONT_COUNT
 get_macs comp $COMP_COUNT
 get_macs ctrlcont $CONTRAIL_CONTROLLER_COUNT
-get_macs analytics $ANALYTICS_COUNT
-get_macs analyticsdb $ANALYTICSDB_COUNT
+get_macs ctrlanalytics $ANALYTICS_COUNT
+get_macs ctrlanalyticsdb $ANALYTICSDB_COUNT
 
 id_rsa=$(awk 1 ORS='\\n' ~/.ssh/id_rsa)
 # create overcloud machines definition
@@ -206,13 +206,14 @@ git clone https://github.com/Juniper/contrail-tripleo-heat-templates -b stable/n
 cp -r contrail-tripleo-heat-templates/environments/contrail ~/tripleo-heat-templates/environments
 cp -r contrail-tripleo-heat-templates/puppet/services/network/* ~/tripleo-heat-templates/puppet/services/network
 
-# Prepare copy of roles_data file with added
-# services Analytics an Analytics DB into ContrailController role
+# # Prepare copy of roles_data file with added
+# # services Analytics an Analytics DB into ContrailController role
 src_role_file='tripleo-heat-templates/environments/contrail/roles_data.yaml'
 role_file='tripleo-heat-templates/environments/contrail/roles_data_ci.yaml'
-sed '/- OS::TripleO::Services::ContrailDatabase/a\
-    - OS::TripleO::Services::ContrailAnalyticsDatabase\
-    - OS::TripleO::Services::ContrailAnalytics' $src_role_file > $role_file
+# sed '/- OS::TripleO::Services::ContrailDatabase/a\
+#     - OS::TripleO::Services::ContrailAnalyticsDatabase\
+#     - OS::TripleO::Services::ContrailAnalytics' $src_role_file > $role_file
+cp $src_role_file $role_file
 
 #TODO: add yaml with concrete parameters
 
@@ -227,7 +228,7 @@ if [[ "$DEPLOY" != '1' ]] ; then
     --roles-file $role_file \
     -e tripleo-heat-templates/environments/contrail/contrail-services.yaml \
     -e tripleo-heat-templates/environments/contrail/contrail-net-single.yaml \
-    --control-flavor control --control-scale $CONT_COUNT \
+    --control-flavor controller --control-scale $CONT_COUNT \
     --compute-flavor compute  --compute-scale $COMP_COUNT \
     --ntp-server pool.ntp.org $ha_opts"
   echo "Add '-e templates/firstboot/firstboot.yaml' if you use swap"
