@@ -242,7 +242,7 @@ openstack overcloud deploy --templates tripleo-heat-templates/ \
   --roles-file $role_file \
   -e tripleo-heat-templates/environments/contrail/contrail-services.yaml \
   -e tripleo-heat-templates/environments/contrail/contrail-net-single.yaml \
-  --control-flavor control --control-scale $CONT_COUNT \
+  --control-flavor controller --control-scale $CONT_COUNT \
   --compute-flavor compute  --compute-scale $COMP_COUNT \
   --ntp-server pool.ntp.org $ha_opts
 
