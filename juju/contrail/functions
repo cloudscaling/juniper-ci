@@ -86,11 +86,7 @@ function hack_openstack() {
         if [[ $addr_count != '0' ]] ; then
           local ip=`get-machine-ip-by-number ${mchs[$i]}`
           echo "INFO: Update hostnames of ${mch_srvs[$i]} with IP=$ip"
-          if [[ "$SANDBOX_MODE" == 'true' && "${mch_srvs[$i]}" == 'keystone' ]] ; then
-            juju-set ${mch_srvs[$i]} os-public-hostname=$ip os-admin-hostname=$ip
-          else
-            juju-set ${mch_srvs[$i]} os-public-hostname=$ip
-          fi
+          juju-set ${mch_srvs[$i]} os-public-hostname=$ip os-admin-hostname=$ip os-internal-hostname=$ip
           mch_sets[$i]='1'
         fi
       done
