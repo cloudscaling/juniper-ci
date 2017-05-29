@@ -27,6 +27,9 @@ if [[ "$(whoami)" != "stack" ]] ; then
   exit 1
 fi
 
+((prov_ip_addr=176+NUM*10))
+prov_ip="192.168.${prov_ip_addr}.2"
+
 ((addr=BASE_ADDR+NUM*10))
 virt_host_ip="192.168.${addr}.1"
 if [[ "$SSH_VIRT_TYPE" != 'vbox' ]] ; then
@@ -217,13 +220,22 @@ role_file='tripleo-heat-templates/environments/contrail/roles_data.yaml'
 #     - OS::TripleO::Services::ContrailAnalytics' $src_role_file > $role_file
 
 contrail_services_file='tripleo-heat-templates/environments/contrail/contrail-services.yaml'
-sed -i 's/ContrailRepo:.*/ContrailRepo:  http:\/\/192.168.202.2\/contrail/g' $contrail_services_file
+sed -i "s/ContrailRepo:.*/ContrailRepo:  http:\/\/${prov_ip}\/contrail/g" $contrail_services_file
 sed -i "s/ControllerCount:.*/ControllerCount: $CONT_COUNT/g" $contrail_services_file
 sed -i "s/ContrailControllerCount:.*/ContrailControllerCount: $CONTRAIL_CONTROLLER_COUNT/g" $contrail_services_file
 sed -i "s/ContrailAnalyticsCount:.*/ContrailAnalyticsCount: $ANALYTICS_COUNT/g" $contrail_services_file
 sed -i "s/ContrailAnalyticsDatabaseCount:.*/ContrailAnalyticsDatabaseCount: $ANALYTICSDB_COUNT/g" $contrail_services_file
 sed -i "s/ComputeCount:.*/ComputeCount: $COMP_COUNT/g" $contrail_services_file
 sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_services_file
+
+contrail_net_file='tripleo-heat-templates/environments/contrail/contrail-net-single.yaml'
+sed -i "s/ControlPlaneDefaultRoute:.*/ControlPlaneDefaultRoute: ${prov_ip}/g" $contrail_net_file
+sed -i "s/EC2MetadataIp:.*/EC2MetadataIp: ${prov_ip}/g" $contrail_net_file
+sed -i "s/VrouterPhysicalInterface:.*/VrouterPhysicalInterface: ens3/g" $contrail_net_file
+sed -i "s/VrouterGateway:.*/VrouterGateway: ${prov_ip}/g" $contrail_net_file
+sed -i "s/ControlVirtualInterface:.*/ControlVirtualInterface: ens3/g" $contrail_net_file
+sed -i "s/PublicVirtualInterface:.*/PublicVirtualInterface: ens4/g" $contrail_net_file
+
 
 #TODO: add yaml with concrete parameters
 
@@ -237,7 +249,7 @@ if [[ "$DEPLOY" != '1' ]] ; then
   echo "openstack overcloud deploy --templates tripleo-heat-templates/ \
     --roles-file $role_file \
     -e $contrail_services_file \
-    -e tripleo-heat-templates/environments/contrail/contrail-net-single.yaml $ha_opts"
+    -e $contrail_net_file $ha_opts"
   echo "Add '-e templates/firstboot/firstboot.yaml' if you use swap"
   exit
 fi
@@ -248,7 +260,7 @@ set +e
 openstack overcloud deploy --templates tripleo-heat-templates/ \
   --roles-file $role_file \
   -e $contrail_services_file \
-  -e tripleo-heat-templates/environments/contrail/contrail-net-single.yaml $ha_opts
+  -e $contrail_net_file $ha_opts
 
 errors=$?
 
