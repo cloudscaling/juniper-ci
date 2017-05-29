@@ -140,11 +140,7 @@ function apply_ssl() {
   local mchs=("$m1" "$m2" "$m3" "$m4" "$m5")
   local mch_srvs=('openstack-dashboard' 'glance' 'keystone' 'nova-cloud-controller' 'neutron-api')
   for i in {0..4} ; do
-    local mch=${mchs[$i]}
-    local srv=${mch_srvs[$i]}
-
-    create_ssl_config $mch
-    juju-set $srv --file "$ssl_dir/ssl_config_m$mch.yaml"
+    apply_ssl_config ${mchs[$i]} ${mch_srvs[$i]}
   done
 
   juju-set keystone "use-https=True"
@@ -160,8 +156,9 @@ function create_root_ca() {
   cat "$ssl_dir/rootCA.crt" | base64 > "$ssl_dir/rootCA.crt.b64"
 }
 
-function create_ssl_config() {
+function apply_ssl_config() {
   local mch=$1
+  local srv=$2
   local addresses=`juju machines --format json | python -c "import sys; import json; [sys.stdout.write(addr + '\n') for addr in json.load(sys.stdin)['machines'].get('$mch', {}).get('ip-addresses', [])]"`
   local addr_first=`echo "$addresses" | head -1`
 
@@ -190,11 +187,13 @@ EOF
   cat "$ssl_dir/$cfname.key" | base64 > "$ssl_dir/$cfname.key.b64"
 
   local ssl_config="$ssl_dir/ssl_config_m$mch.yaml"
-  echo "keystone:" > "$ssl_config"
+  echo "$srv:" > "$ssl_config"
   echo "  ssl_ca: |" >> "$ssl_config"
   cat "$ssl_dir/rootCA.crt.b64" | awk '{printf("    %s\n", $0)}' >> "$ssl_config"
   echo "  ssl_cert: |" >> "$ssl_config"
   cat "$ssl_dir/$cfname.crt.b64" | awk '{printf("    %s\n", $0)}' >> "$ssl_config"
   echo "  ssl_key: |" >> "$ssl_config"
   cat "$ssl_dir/$cfname.key.b64" | awk '{printf("    %s\n", $0)}' >> "$ssl_config"
+
+  juju-set $srv --file "$ssl_config"
 }
