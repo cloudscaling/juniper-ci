@@ -156,7 +156,7 @@ EOF
     ((++i))
   done
 
-  openssl req -new -key "$ssl_dir/local.key" -out "$ssl_dir/local.csr" -subj "/C=US/ST=CA/L=Sunnyvale/O=Juniper/CN=$addr_first" -config "$ssl_dir/openssl.conf"
+  openssl req -new -key "$ssl_dir/local.key" -out "$ssl_dir/local.csr" -subj "/C=US/ST=CA/L=Sunnyvale/O=Juniper/CN=$addr_first" -config "$ssl_dir/csr_details.conf"
   openssl x509 -req -in "$ssl_dir/local.csr" -CA "$ssl_dir/rootCA.crt" -CAkey "$ssl_dir/rootCA.key" -CAcreateserial -out "$ssl_dir/local.crt" -days 365
 
   cat "$ssl_dir/rootCA.crt" | base64 > "$ssl_dir/rootCA.crt.b64"
