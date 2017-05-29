@@ -115,11 +115,11 @@ for (( i=1; i<=CONTRAIL_CONTROLLER_COUNT; i++ )) ; do
   define_machine "profile:contrail-controller,boot_option:local" $mac
 done
 for (( i=1; i<=ANALYTICS_COUNT; i++ )) ; do
-  mac=$(sed -n ${i}p /tmp/nodes-analytics.txt)
+  mac=$(sed -n ${i}p /tmp/nodes-ctrlanalytics.txt)
   define_machine "profile:contrail-analytics,boot_option:local" $mac
 done
 for (( i=1; i<=ANALYTICSDB_COUNT; i++ )) ; do
-  mac=$(sed -n ${i}p /tmp/nodes-analyticsdb.txt)
+  mac=$(sed -n ${i}p /tmp/nodes-ctrlanalyticsdb.txt)
   define_machine "profile:contrail-analyticsdb,boot_option:local" $mac
 done
 
