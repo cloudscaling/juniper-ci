@@ -53,10 +53,11 @@ sed -i "s/\r/\n/g" $BUNDLE
 echo "INFO: Deploy bundle $(date)"
 juju-deploy-bundle $BUNDLE
 
-echo "INFO: Apply SSL/Set endpoints $(date)"
-apply_ssl
+echo "INFO: Set endpoints $(date)"
 detect_machines
 hack_openstack
+echo "INFO: Apply SSL $(date)"
+apply_ssl
 
 echo "INFO: Attach contrail-controller container $(date)"
 juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"

@@ -92,7 +92,6 @@ juju-add-unit nova-compute --to $m3
 juju-set nova-compute "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "virt-type=qemu" "enable-resize=True" "enable-live-migration=True" "migration-auth-type=ssh"
 
 # Neutron
-
 juju-deploy cs:$SERIES/neutron-api --to $m5
 juju-set neutron-api "debug=true" "manage-neutron-plugin-legacy-mode=false" "openstack-origin=$OPENSTACK_ORIGIN" "neutron-security-groups=true"
 juju-set nova-cloud-controller "network-manager=Neutron"
@@ -140,10 +139,10 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-add-relation "contrail-controller" "haproxy"
 fi
 
-echo "INFO: Apply SSL/Set ndpoints $(date)"
-
-apply_ssl
+echo "INFO: Update endpoints $(date)"
 hack_openstack
+echo "INFO: Apply SSL flag $(date)"
+apply_ssl
 
 echo "INFO: Attach contrail-controller container $(date)"
 juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
@@ -172,7 +171,7 @@ juju-add-relation "neutron-api:identity-service" "keystone:identity-service"
 juju-add-relation "neutron-api:amqp" "rabbitmq-server:amqp"
 
 juju-add-relation "contrail-controller" "ntp"
-juju-add-relation "nova-compute" "ntp"
+juju-add-relation "contrail-openstack-compute:juju-info" "ntp:juju-info"
 
 juju-add-relation "contrail-controller" "contrail-keystone-auth"
 juju-add-relation "contrail-keystone-auth" "keystone"

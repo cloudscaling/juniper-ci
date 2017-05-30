@@ -154,7 +154,7 @@ relations:
 
   #contrail
   - [ "contrail-controller", "ntp" ]
-  - [ "nova-compute", "ntp" ]
+  - [ "contrail-openstack-compute:juju-info", "ntp:juju-info" ]
   - [ "contrail-controller", "contrail-keystone-auth" ]
   - [ "contrail-keystone-auth", "keystone" ]
   - [ "contrail-controller", "contrail-analytics" ]
