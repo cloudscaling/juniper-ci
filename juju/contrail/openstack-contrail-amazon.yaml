@@ -164,7 +164,6 @@ relations:
   - [ "contrail-controller", "contrail-openstack-neutron-api" ]
   - [ "contrail-openstack-compute", "nova-compute" ]
   - [ "contrail-openstack-compute", "contrail-controller"]
-  - [ "contrail-openstack-compute", "keystone" ]
 
 machines:
   "0":
