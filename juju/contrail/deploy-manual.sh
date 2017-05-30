@@ -83,6 +83,7 @@ juju-deploy cs:$SERIES/glance --to $m2
 juju-set glance "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose glance
 
+rm -rf charm-keystone
 git clone https://github.com/openstack/charm-keystone.git
 juju-deploy --series=$SERIES $WORKSPACE/charm-keystone keystone --to $m3
 #juju-deploy cs:$SERIES/keystone --to $m3
