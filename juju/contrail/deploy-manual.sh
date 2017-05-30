@@ -185,4 +185,7 @@ juju-add-relation "contrail-openstack-neutron-api" "contrail-controller"
 juju-add-relation "nova-compute" "contrail-openstack-compute"
 juju-add-relation "contrail-openstack-compute" "contrail-controller"
 
+# to pass information about contrail API-s to keystone endpoints
+juju-add-relation "contrail-openstack-compute" "keystone"
+
 post_deploy
