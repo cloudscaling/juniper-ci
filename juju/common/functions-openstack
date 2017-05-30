@@ -188,6 +188,7 @@ function run_os_checks() {
   openstack --insecure server list
   set +x
 
+  openstack --insecure catalog list || keystone catalog || /bin/true
   deactivate_venv
 
   return $ret
