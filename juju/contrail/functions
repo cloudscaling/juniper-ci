@@ -141,6 +141,14 @@ function apply_ssl() {
   for i in ${!mchs[@]} ; do
     apply_ssl_config ${mchs[$i]} ${mch_srvs[$i]}
   done
+  # instead of adding certificates to other services we have to add rootCA to all other machines
+  # (setting ssl_ca for each module doesn't do something useful and keystone doesn't do it byself)
+  for mch in "$m1" "$m2" "$m4" "$m5" ; do
+    juju-scp "$ssl_dir/rootCA.crt" "${mch}:rootCA.crt"
+    juju-ssh $mch sudo mkdir -p /usr/local/share/ca-certificates/openstack
+    juju-ssh $mch sudo cp rootCA.crt /usr/local/share/ca-certificates/openstack/
+    juju-ssh $mch sudo update-ca-certificates
+  done
 
   juju-set keystone "use-https=True"
 
