@@ -133,9 +133,12 @@ function apply_ssl() {
 
   create_root_ca
 
-  local mchs=("$m1" "$m2" "$m3" "$m4" "$m5")
-  local mch_srvs=('openstack-dashboard' 'glance' 'keystone' 'nova-cloud-controller' 'neutron-api')
-  for i in {0..4} ; do
+  # due to bug https://bugs.launchpad.net/charm-neutron-api/+bug/1690912 we'll set only keystone SSL
+  #local mchs=("$m1" "$m2" "$m3" "$m4" "$m5")
+  #local mch_srvs=('openstack-dashboard' 'glance' 'keystone' 'nova-cloud-controller' 'neutron-api')
+  local mchs=("$m3")
+  local mch_srvs=('keystone')
+  for i in ${!mchs[@]} ; do
     apply_ssl_config ${mchs[$i]} ${mch_srvs[$i]}
   done
 
