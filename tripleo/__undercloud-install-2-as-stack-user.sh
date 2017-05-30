@@ -4,6 +4,11 @@
 
 cd ~
 
+if [[ -z "$NUM" ]] ; then
+  echo "Please set NUM variable to specific environment number. (export NUM=4)"
+  exit 1
+fi
+
 NETDEV=${NETDEV:-'eth1'}
 # SKIP_SSH_TO_HOST_KEY=${SKIP_SSH_TO_HOST_KEY:-'no'}
 OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}

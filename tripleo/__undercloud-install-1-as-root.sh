@@ -5,6 +5,11 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
+if [[ -z "$NUM" ]] ; then
+  echo "Please set NUM variable to specific environment wber. (export NUM=4)"
+  exit 1
+fi
+
 NETDEV=${NETDEV:-'eth1'}
 SKIP_SSH_TO_HOST_KEY=${SKIP_SSH_TO_HOST_KEY:-'no'}
 OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
@@ -80,3 +85,16 @@ openstack-config --set /etc/nova/nova.conf DEFAULT rpc_response_timeout 600
 openstack-config --set /etc/ironic/ironic.conf DEFAULT rpc_response_timeout 600
 openstack-service restart nova
 openstack-service restart ironic
+
+# prepare contrail packages
+for i in `ls /root/contrail_packages/*.rpm` ; do
+  rpm -ivh ${i}
+done
+mkdir -p /var/www/html/contrail
+tar -zxvf /opt/contrail/contrail_packages/contrail_rpms.tgz -C /var/www/html/contrail
+
+# prepare docker iamges
+mkdir -p mkdir -p /var/www/html/contrail-docker
+for i in `ls /root/contrail_packages/*.tgz` ; do
+  tar -zxvf ${i} -C /var/www/html/contrail-docker
+done

@@ -24,6 +24,8 @@ CONTRAIL_CONTROLLER_COUNT=${CONTRAIL_CONTROLLER_COUNT:-1}
 CONTRAIL_ANALYTICS_COUNT=${CONTRAIL_ANALYTICS_COUNT:-1}
 CONTRAIL_ANALYTICSDB_COUNT=${CONTRAIL_ANALYTICSDB_COUNT:-1}
 
+# Dir with contrail packages
+CONTRAIL_PACKAGES_DIR=${CONTRAIL_PACKAGES_DIR:-'/home/root/contrail/latest'}
 
 # ready image for undercloud - using CentOS cloud image. just run and ssh into it.
 if [[ ! -f ${BASE_IMAGE} ]] ; then
@@ -148,6 +150,8 @@ function change_undercloud_image() {
   sed -i "s root:\!\!: root:$rootpass: " $tmpdir/etc/shadow
   grep root $tmpdir/etc/shadow
   echo "PermitRootLogin yes" > $tmpdir/etc/ssh/sshd_config
+  rm -rf $tmpdir/root/contrail_packages
+  cp $CONTRAIL_PACKAGES_DIR/* $tmpdir/root/contrail_packages
 }
 
 # patch image
