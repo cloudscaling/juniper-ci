@@ -193,16 +193,25 @@ openstack baremetal introspection bulk start
 
 
 # prepare Contrail puppet modules
-rm -rf ~/usr/share/openstack-puppet/modules
-mkdir -p ~/usr/share/openstack-puppet/modules
-git clone https://github.com/Juniper/contrail-tripleo-puppet -b stable/newton ~/usr/share/openstack-puppet/modules/tripleo
-git clone https://github.com/garethr/garethr-docker.git ~/usr/share/openstack-puppet/modules/docker
-git clone https://github.com/puppetlabs/puppetlabs-apt.git ~/usr/share/openstack-puppet/modules/apt
-git clone https://github.com/stahnma/puppet-module-epel.git ~/usr/share/openstack-puppet/modules/epel
+rm -rf usr/share/openstack-puppet/modules
+mkdir -p usr/share/openstack-puppet/modules
+git clone https://github.com/Juniper/contrail-tripleo-puppet -b stable/newton usr/share/openstack-puppet/modules/tripleo
 #TODO: replace personal repo with Juniper ones
-git clone https://github.com/alexey-mr/puppet-contrail -b stable/newton ~/usr/share/openstack-puppet/modules/contrail
+git clone https://github.com/alexey-mr/puppet-contrail -b stable/newton usr/share/openstack-puppet/modules/contrail
 tar czvf puppet-modules.tgz usr/
 upload-swift-artifacts -f puppet-modules.tgz
+
+# prepare containers for all nodes
+# TODO: rework somehow to avoid copying of large archives on all nodes
+#       one of the wayts is to wget containers directly from overcloud nodes
+#       (they are available on undrecloud)
+mkdir -p tmp
+for i in controller analytics analyticsdb ; do
+  container_repo="http://localhost/contrail-docker/`curl http://localhost/contrail-docker/  2>&1 | awk -F '"' \"/contrail-${i}-/ {print(\\$8)}\"`"
+  wget --tries 5 --waitretry=2 --retry-connrefused -O tmp/container-${i}.tar.gz ${container_repo}
+done
+tar czvf contrail-containers.tgz tmp/
+upload-swift-artifacts -f contrail-containers.tgz
 
 # prepare tripleo heat templates
 rm -rf ~/tripleo-heat-templates

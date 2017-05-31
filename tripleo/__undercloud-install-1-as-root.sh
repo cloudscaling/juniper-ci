@@ -29,7 +29,7 @@ yum update -y
 
 # install ntpd - it is needed for correct work of OS services
 # (particulary neutron services may not work properly)
-yum install -y ntp
+yum install -y ntp wget
 chkconfig ntpd on
 service ntpd start
 
@@ -93,7 +93,7 @@ done
 mkdir -p /var/www/html/contrail
 tar -zxvf /opt/contrail/contrail_packages/contrail_rpms.tgz -C /var/www/html/contrail
 
-# prepare docker iamges
+# prepare docker images
 mkdir -p mkdir -p /var/www/html/contrail-docker
 for i in `ls /root/contrail_packages/*.tgz` ; do
   tar -zxvf ${i} -C /var/www/html/contrail-docker
