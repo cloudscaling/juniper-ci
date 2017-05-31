@@ -318,3 +318,6 @@ juju ssh $index sudo /opt/contrail/utils/provision_vgw_interface.py --oper creat
 log_info "add rules to allow forwarding between vhost0 and vgw"
 juju ssh $index sudo iptables -A FORWARD -i vhost0 -o vgw -j ACCEPT
 juju ssh $index sudo iptables -A FORWARD -i vgw -o vhost0 -j ACCEPT
+
+log_info "allow all traffic to compute node: $id"
+open_port $index 0-65535 all
