@@ -318,9 +318,3 @@ juju ssh $index sudo /opt/contrail/utils/provision_vgw_interface.py --oper creat
 log_info "add rules to allow forwarding between vhost0 and vgw"
 juju ssh $index sudo iptables -A FORWARD -i vhost0 -o vgw -j ACCEPT
 juju ssh $index sudo iptables -A FORWARD -i vgw -o vhost0 -j ACCEPT
-
-#log_info "start contrail event listener"
-#export SSH_KEY="${HOME}/.local/share/juju/ssh/juju_id_rsa"
-#nohup $my_dir/event-listener/contrail-polling.sh 2>&1>/var/log/sandbox/contrail-polling.log &
-#sleep 2
-#log_info "start contrail event listener started"
