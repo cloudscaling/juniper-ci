@@ -23,7 +23,7 @@ fi
 export SERIES="${SERIES:-trusty}"
 export VERSION="${VERSION:-mitaka}"
 export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
-export BUILD="${BUILD:-14}"
+export BUILD="${BUILD:-17}"
 export DEPLOY_AS_HA_MODE="${DEPLOY_AS_HA_MODE:-false}"
 export USE_SSL="${USE_SSL:-true}"
 
