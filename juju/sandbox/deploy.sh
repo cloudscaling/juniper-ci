@@ -9,9 +9,9 @@ fi
 
 # base constants for SandBox
 
-export VERSION=${VERSION:-'16'}
+export VERSION=${VERSION:-'17'}
 export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
-export CHARMS_VERSION=${CHARMS_VERSION:-'84a1e65a789cda65dd90fecc76d7f72e93970e35'}
+export CHARMS_VERSION=${CHARMS_VERSION:-'bf08a5dc2460df793414643b671a6cea4c54e2e2'}
 export SERIES=${SERIES:-'trusty'}
 export PASSWORD=${PASSWORD:-'password'}
 OPENSTACK_ORIGIN="cloud:${SERIES}-${OPENSTACK_VERSION}"
