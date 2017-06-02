@@ -83,11 +83,9 @@ juju-deploy cs:$SERIES/glance --to $m2
 juju-set glance "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose glance
 
-rm -rf charm-keystone
-git clone https://github.com/openstack/charm-keystone.git
-juju-deploy --series=$SERIES $WORKSPACE/charm-keystone keystone --to $m3
-#juju-deploy cs:$SERIES/keystone --to $m3
-juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+juju-deploy cs:$SERIES/keystone --to $m3
+#juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+juju-set keystone "admin-password=$PASSWORD" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose keystone
 
 juju-deploy cs:$SERIES/nova-compute --to $m2
@@ -104,9 +102,9 @@ juju-expose neutron-api
 juju-deploy $PLACE/contrail-keystone-auth --to $m6
 
 juju-deploy $PLACE/contrail-controller --to $m6
+juju-set contrail-controller cloud-admin-role=Admin
 juju-expose contrail-controller
 juju-deploy $PLACE/contrail-analyticsdb --to $m6
-juju-expose contrail-analyticsdb
 juju-deploy $PLACE/contrail-analytics --to $m6
 juju-expose contrail-analytics
 
