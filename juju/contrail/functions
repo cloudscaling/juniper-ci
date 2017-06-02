@@ -123,15 +123,20 @@ function post_deploy() {
 }
 
 function apply_ssl() {
-  if [[ "$USE_SSL" != "true" ]] ; then
-    return
-  fi
-
   ssl_dir="$WORKSPACE/ssl"
   rm -rf "$ssl_dir"
   mkdir -p "$ssl_dir"
 
   create_root_ca
+
+  apply_ssl_os
+  apply_ssl_contrail
+}
+
+function apply_ssl_os() {
+  if [[ "$USE_SSL_OS" != "true" ]] ; then
+    return
+  fi
 
   # due to bug https://bugs.launchpad.net/charm-neutron-api/+bug/1690912 we'll set only keystone SSL
   #local mchs=("$m1" "$m2" "$m3" "$m4" "$m5")
@@ -152,9 +157,6 @@ function apply_ssl() {
   done
 
   juju-set keystone "use-https=True"
-
-
-  #juju-set contrail-controller --file "$my_dir/ssl_contrail_config.yaml"
 }
 
 function create_root_ca() {
@@ -186,4 +188,12 @@ function apply_ssl_config() {
   cat "$ssl_dir/$cfname.key.b64" | awk '{printf("    %s\n", $0)}' >> "$ssl_config"
 
   juju-set $srv --file "$ssl_config"
+}
+
+function apply_ssl_contrail() {
+  if [[ "$USE_SSL_CONTRAIL" != "true" ]] ; then
+    return
+  fi
+
+  #juju-set contrail-controller --file "$my_dir/ssl_contrail_config.yaml"
 }
