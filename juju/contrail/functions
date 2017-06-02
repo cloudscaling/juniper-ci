@@ -160,8 +160,8 @@ function apply_ssl_os() {
 }
 
 function create_root_ca() {
-  openssl genrsa -out "$ssl_dir/rootCA.key" 2048
-  openssl req -x509 -new -key "$ssl_dir/rootCA.key" -days 365 -out "$ssl_dir/rootCA.crt" -subj "/C=US/ST=CA/L=SV/O=Juniper/CN=RootCA"
+  openssl genrsa -out "$ssl_dir/rootCA.key" 2048 &>/dev/null
+  openssl req -x509 -new -key "$ssl_dir/rootCA.key" -days 365 -out "$ssl_dir/rootCA.crt" -subj "/C=US/ST=CA/L=SV/O=Juniper/CN=RootCA" &>/dev/null
   cat "$ssl_dir/rootCA.crt" | base64 > "$ssl_dir/rootCA.crt.b64"
 }
 

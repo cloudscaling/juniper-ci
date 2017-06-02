@@ -56,7 +56,7 @@ juju-deploy-bundle $BUNDLE
 echo "INFO: Set endpoints $(date)"
 detect_machines
 hack_openstack
-echo "INFO: Apply SSL $(date)"
+echo "INFO: Apply SSL flag if set $(date)"
 apply_ssl
 
 echo "INFO: Attach contrail-controller container $(date)"
