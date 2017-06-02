@@ -127,6 +127,12 @@ function apply_ssl() {
   rm -rf "$ssl_dir"
   mkdir -p "$ssl_dir"
 
+cat >"$ssl_dir/v3.ext" <<EOF
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+EOF
+
   create_root_ca
 
   apply_ssl_os
@@ -170,7 +176,7 @@ function apply_ssl_config() {
   local srv=$2
 
   local addr=`get-machine-ip-by-number $mch`
-  create_cert $mch $srv $addr
+  apply_ssl_config_by_addr $mch $srv $addr
 }
 
 function apply_ssl_config_by_addr() {
@@ -182,7 +188,7 @@ function apply_ssl_config_by_addr() {
   local cfname="cert_m${mch}_${addr}"
   openssl genrsa -out "$ssl_dir/$cfname.key" 2048
   openssl req -new -key "$ssl_dir/$cfname.key" -out "$ssl_dir/$cfname.csr" -subj "/C=US/ST=CA/L=Sunnyvale/O=Juniper/CN=$addr"
-  openssl x509 -req -in "$ssl_dir/$cfname.csr" -CA "$ssl_dir/rootCA.crt" -CAkey "$ssl_dir/rootCA.key" -CAcreateserial -out "$ssl_dir/$cfname.crt" -days 365
+  openssl x509 -req -in "$ssl_dir/$cfname.csr" -extfile "$ssl_dir/v3.ext" -CA "$ssl_dir/rootCA.crt" -CAkey "$ssl_dir/rootCA.key" -CAcreateserial -out "$ssl_dir/$cfname.crt" -days 365
   cat "$ssl_dir/$cfname.crt" | base64 > "$ssl_dir/$cfname.crt.b64"
   cat "$ssl_dir/$cfname.key" | base64 > "$ssl_dir/$cfname.key.b64"
 
