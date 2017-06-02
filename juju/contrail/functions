@@ -170,6 +170,14 @@ function apply_ssl_config() {
   local srv=$2
 
   local addr=`get-machine-ip-by-number $mch`
+  create_cert $mch $srv $addr
+}
+
+function apply_ssl_config_by_addr() {
+  local mch=$1
+  local srv=$2
+  local addr=$3
+
   echo "INFO: creating certificate for address: $addr (machine $mch / service $srv)"
   local cfname="cert_m${mch}_${addr}"
   openssl genrsa -out "$ssl_dir/$cfname.key" 2048
@@ -195,5 +203,8 @@ function apply_ssl_contrail() {
     return
   fi
 
-  juju-set contrail-controller --file "$my_dir/ssl_contrail_config.yaml"
+  mch=$m6
+  local addr=`get-machine-ip-by-number $mch`
+  addr=`juju machines --format json | python -c "import sys; import json; [sys.stdout.write(addr + '\n') for addr in json.load(sys.stdin)['machines'].get('$mch', {}).get('ip-addresses', [])]" | grep -v $addr`
+  apply_ssl_config_by_addr $mch "contrail-controller" $addr
 }
