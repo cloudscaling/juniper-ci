@@ -16,6 +16,8 @@ fi
 if which vif ; then
   vif --list &>vif.log
   tar -rf logs.tar vif.log
+  ifconfig &>if.log
+  tar -rf logs.tar if.log
 fi
 
 if docker ps | grep -q contrail ; then
