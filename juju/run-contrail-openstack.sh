@@ -20,15 +20,22 @@ if [[ "$jver" == 1 ]] ; then
   exit 1
 fi
 
+declare -A BUILDS
+BUILDS=([mitaka]=18 [newton]=17)
+
 export SERIES="${SERIES:-trusty}"
 export VERSION="${VERSION:-mitaka}"
 export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
-export BUILD="${BUILD:-18}"
+export BUILD="${BUILD:-${BUILDS[$VERSION]}}"
 export DEPLOY_AS_HA_MODE="${DEPLOY_AS_HA_MODE:-false}"
 export USE_SSL_OS="${USE_SSL_OS:-false}"
 export USE_SSL_CONTRAIL="${USE_SSL_CONTRAIL:-false}"
 
 export PASSWORD=${PASSWORD:-'password'}
+
+echo "INFO: Date: $(date)"
+echo "INFO: Starting deployment process with vars:"
+env|sort
 
 if ! juju-bootstrap ; then
   echo "Bootstrap error. exiting..."
