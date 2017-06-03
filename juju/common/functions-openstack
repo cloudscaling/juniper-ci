@@ -209,6 +209,7 @@ function _check_instance_log() {
     echo "ERROR: console log is empty for instance $instance_id"
     return 1
   fi
+  openstack --insecure console log show $id | tail -50
   return 0
 }
 
