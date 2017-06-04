@@ -35,8 +35,8 @@ compute_type="mem=7G cores=4 root-disk=40G"
 contrail_type="mem=15G cores=2 root-disk=40G"
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
-  m0=$(create_machine $general_type)
-  echo "INFO: General machine created: $m0"
+  #m0=$(create_machine $general_type)
+  echo "INFO: Using apt-repo machine for HAProxy: $m0"
 fi
 m1=$(create_machine $general_type)
 echo "INFO: General machine created: $m1"
@@ -136,6 +136,8 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-expose haproxy
   juju-add-relation "contrail-analytics" "haproxy"
   juju-add-relation "contrail-controller" "haproxy"
+  ip=`get-machine-ip-by-number $m0`
+  juju-set contrail-controller vip=$ip
 fi
 
 echo "INFO: Update endpoints $(date)"
