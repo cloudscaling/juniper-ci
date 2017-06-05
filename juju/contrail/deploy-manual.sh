@@ -36,7 +36,7 @@ contrail_type="mem=15G cores=2 root-disk=40G"
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   m0=$(create_machine $general_type)
-  echo "INFO: Using apt-repo machine for HAProxy: $m0"
+  echo "INFO: General machine created: $m0"
 fi
 m1=$(create_machine $general_type)
 echo "INFO: General machine created: $m1"
@@ -115,21 +115,21 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-add-unit contrail-analyticsdb --to $m8
 fi
 
-cp "$my_dir/repo_config.yaml.tmpl" "repo_config_na.yaml"
-sed -i -e "s|{{charm_name}}|contrail-openstack-neutron-api|m" "repo_config_na.yaml"
-sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_na.yaml"
-sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_na.yaml"
-sed -i -e "s|{{series}}|$SERIES|m" "repo_config_na.yaml"
-sed -i "s/\r/\n/g" "repo_config_na.yaml"
-juju-deploy $PLACE/contrail-openstack-neutron-api --config repo_config_na.yaml
+cp "$my_dir/repo_config.yaml.tmpl" "repo_config_co.yaml"
+sed -i -e "s|{{charm_name}}|contrail-openstack|m" "repo_config_co.yaml"
+sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_co.yaml"
+sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_co.yaml"
+sed -i -e "s|{{series}}|$SERIES|m" "repo_config_co.yaml"
+sed -i "s/\r/\n/g" "repo_config_co.yaml"
+juju-deploy $PLACE/contrail-openstack --config repo_config_co.yaml
 
-cp "$my_dir/repo_config.yaml.tmpl" "repo_config_c.yaml"
-sed -i -e "s|{{charm_name}}|contrail-openstack-compute|m" "repo_config_c.yaml"
-sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_c.yaml"
-sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_c.yaml"
-sed -i -e "s|{{series}}|$SERIES|m" "repo_config_c.yaml"
-sed -i "s/\r/\n/g" "repo_config_c.yaml"
-juju-deploy $PLACE/contrail-openstack-compute --config repo_config_c.yaml
+cp "$my_dir/repo_config.yaml.tmpl" "repo_config_cv.yaml"
+sed -i -e "s|{{charm_name}}|contrail-vrouter-agent|m" "repo_config_cv.yaml"
+sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_cv.yaml"
+sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_cv.yaml"
+sed -i -e "s|{{series}}|$SERIES|m" "repo_config_cv.yaml"
+sed -i "s/\r/\n/g" "repo_config_cv.yaml"
+juju-deploy $PLACE/contrail-vrouter-agent --config repo_config_cv.yaml
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-deploy cs:$SERIES/haproxy --to $m0
@@ -172,7 +172,7 @@ juju-add-relation "neutron-api:identity-service" "keystone:identity-service"
 juju-add-relation "neutron-api:amqp" "rabbitmq-server:amqp"
 
 juju-add-relation "contrail-controller" "ntp"
-juju-add-relation "contrail-openstack-compute:juju-info" "ntp:juju-info"
+juju-add-relation "contrail-vrouter-agent:juju-info" "ntp:juju-info"
 
 juju-add-relation "contrail-controller" "contrail-keystone-auth"
 juju-add-relation "contrail-keystone-auth" "keystone"
@@ -180,10 +180,11 @@ juju-add-relation "contrail-controller" "contrail-analytics"
 juju-add-relation "contrail-controller" "contrail-analyticsdb"
 juju-add-relation "contrail-analytics" "contrail-analyticsdb"
 
-juju-add-relation "contrail-openstack-neutron-api" "neutron-api"
-juju-add-relation "contrail-openstack-neutron-api" "contrail-controller"
+juju-add-relation "contrail-openstack" "neutron-api"
+juju-add-relation "contrail-openstack" "nova-compute"
+juju-add-relation "contrail-openstack" "contrail-controller"
 
-juju-add-relation "nova-compute" "contrail-openstack-compute"
-juju-add-relation "contrail-openstack-compute" "contrail-controller"
+juju-add-relation "contrail-vrouter-agent:juju-info" "nova-compute:juju-info"
+juju-add-relation "contrail-vrouter-agent" "contrail-controller"
 
 post_deploy
