@@ -135,7 +135,8 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-deploy cs:$SERIES/haproxy --to $m0
   juju-expose haproxy
   juju-add-relation "contrail-analytics" "haproxy"
-  juju-add-relation "contrail-controller" "haproxy"
+  juju-add-relation "contrail-controller:http-services" "haproxy"
+  juju-add-relation "contrail-controller:https-services" "haproxy"
   ip=`get-machine-ip-by-number $m0`
   juju-set contrail-controller vip=$ip
 fi
