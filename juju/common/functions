@@ -146,3 +146,8 @@ function open_port() {
   aws ec2 authorize-security-group-ingress --group-id $sg_id --protocol $protocol --port $port --cidr 0.0.0.0/0
   aws ec2 describe-security-groups --group-id $sg_id
 }
+
+function get_machine_index_by_service() {
+  local srv=$1
+  juju-status-tabular $srv | awk "/^$srv\//{print \$4}"
+}

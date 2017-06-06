@@ -54,11 +54,6 @@ function prepare_repo() {
   echo "INFO: apt-repo is ready"
 }
 
-function get_machine_index_by_service() {
-  local srv=$1
-  juju-status-tabular $srv | awk "/^$srv\//{print \$4}"
-}
-
 function detect_machines() {
   m1=`get_machine_index_by_service openstack-dashboard`
   m2=`get_machine_index_by_service glance`
