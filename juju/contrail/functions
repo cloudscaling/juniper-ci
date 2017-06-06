@@ -69,7 +69,6 @@ function detect_machines() {
 }
 
 function hack_openstack() {
-  set -x
   if [[ "$jver" == 2 ]] ; then
     # Juju 2.0 registers services with private ips (using new modern tool 'network-get public')
     echo "INFO: HACK: Reconfigure public endpoints for OpenStack $(date)"
@@ -91,7 +90,7 @@ function hack_openstack() {
           mch_sets[$i]='1'
         fi
       done
-      if ! echo $mch_sets | grep -q '0' ; then
+      if ! echo ${mch_sets[@]} | grep -q '0' ; then
         break
       fi
       sleep 2
@@ -102,7 +101,6 @@ function hack_openstack() {
   open_port $m3 35357
   # open port for vnc console
   open_port $m4 6080
-  set +x
 }
 
 function post_deploy() {
