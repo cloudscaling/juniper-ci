@@ -114,7 +114,7 @@ services:
     expose: true
     to:
       - "5"
-  contrail-openstack-neutron-api:
+  contrail-openstack:
     charm: "%JUJU_REPO%/contrail-openstack-neutron-api"
     series: %SERIES%
     options:
@@ -122,7 +122,7 @@ services:
       install-keys: |
         - |
 %REPO_KEY%
-  contrail-openstack-compute:
+  contrail-vrouter-agent:
     charm: "%JUJU_REPO%/contrail-openstack-compute"
     series: %SERIES%
     options:
@@ -152,18 +152,21 @@ relations:
   - [ "neutron-api", "nova-cloud-controller" ]
   - [ "neutron-api", "keystone" ]
 
-  #contrail
   - [ "contrail-controller", "ntp" ]
-  - [ "contrail-openstack-compute:juju-info", "ntp:juju-info" ]
+  - [ "nova-compute:juju-info", "ntp:juju-info" ]
+
+  #contrail
   - [ "contrail-controller", "contrail-keystone-auth" ]
   - [ "contrail-keystone-auth", "keystone" ]
   - [ "contrail-controller", "contrail-analytics" ]
   - [ "contrail-controller", "contrail-analyticsdb" ]
   - [ "contrail-analytics", "contrail-analyticsdb" ]
-  - [ "contrail-openstack-neutron-api", "neutron-api"]
-  - [ "contrail-controller", "contrail-openstack-neutron-api" ]
-  - [ "contrail-openstack-compute", "nova-compute" ]
-  - [ "contrail-openstack-compute", "contrail-controller"]
+
+  - [ "contrail-openstack", "neutron-api"]
+  - [ "contrail-openstack", "nova-api"]
+  - [ "contrail-openstack", "contrail-controller" ]
+  - [ "contrail-vrouter-agent:juju-info", "nova-compute:juju-info" ]
+  - [ "contrail-vrouter-agent", "contrail-controller"]
 
 machines:
   "0":
