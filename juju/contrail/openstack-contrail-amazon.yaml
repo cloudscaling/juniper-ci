@@ -115,7 +115,7 @@ services:
     to:
       - "5"
   contrail-openstack:
-    charm: "%JUJU_REPO%/contrail-openstack-neutron-api"
+    charm: "%JUJU_REPO%/contrail-openstack"
     series: %SERIES%
     options:
       install-sources: "deb http://%REPO_IP%/ubuntu %SERIES% main"
@@ -123,7 +123,7 @@ services:
         - |
 %REPO_KEY%
   contrail-vrouter-agent:
-    charm: "%JUJU_REPO%/contrail-openstack-compute"
+    charm: "%JUJU_REPO%/contrail-vrouter-agent"
     series: %SERIES%
     options:
       install-sources: "deb http://%REPO_IP%/ubuntu %SERIES% main"
