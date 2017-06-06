@@ -124,12 +124,12 @@ sed -i "s/\r/\n/g" "repo_config_co.yaml"
 juju-deploy $PLACE/contrail-openstack --config repo_config_co.yaml
 
 cp "$my_dir/repo_config.yaml.tmpl" "repo_config_cv.yaml"
-sed -i -e "s|{{charm_name}}|contrail-vrouter-agent|m" "repo_config_cv.yaml"
+sed -i -e "s|{{charm_name}}|contrail-agent|m" "repo_config_cv.yaml"
 sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_cv.yaml"
 sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_cv.yaml"
 sed -i -e "s|{{series}}|$SERIES|m" "repo_config_cv.yaml"
 sed -i "s/\r/\n/g" "repo_config_cv.yaml"
-juju-deploy $PLACE/contrail-vrouter-agent --config repo_config_cv.yaml
+juju-deploy $PLACE/contrail-agent --config repo_config_cv.yaml
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-deploy cs:$SERIES/haproxy --to $m0
@@ -185,7 +185,7 @@ juju-add-relation "contrail-openstack" "neutron-api"
 juju-add-relation "contrail-openstack" "nova-compute"
 juju-add-relation "contrail-openstack" "contrail-controller"
 
-juju-add-relation "contrail-vrouter-agent:juju-info" "nova-compute:juju-info"
-juju-add-relation "contrail-vrouter-agent" "contrail-controller"
+juju-add-relation "contrail-agent:juju-info" "nova-compute:juju-info"
+juju-add-relation "contrail-agent" "contrail-controller"
 
 post_deploy
