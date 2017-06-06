@@ -163,7 +163,7 @@ relations:
   - [ "contrail-analytics", "contrail-analyticsdb" ]
 
   - [ "contrail-openstack", "neutron-api"]
-  - [ "contrail-openstack", "nova-api"]
+  - [ "contrail-openstack", "nova-compute"]
   - [ "contrail-openstack", "contrail-controller" ]
   - [ "contrail-vrouter-agent:juju-info", "nova-compute:juju-info" ]
   - [ "contrail-vrouter-agent", "contrail-controller"]
