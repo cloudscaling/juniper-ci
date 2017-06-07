@@ -134,6 +134,12 @@ function create_network() {
   openstack --insecure router set --external-gateway $public_net_id $router_id
   openstack --insecure router add subnet $router_id $private_subnet_id
 
+  echo "INFO: Add rules to default security group"
+  local project_id=`openstack --insecure project list | awk '/ admin /{print $2}'`
+  local group_id=`openstack --insecure security group list -c ID -c Project | grep $project_id | awk '{print $2}'`
+  openstack --insecure security group rule create $group_id --protocol tcp --dst-port 22:22
+  openstack --insecure security group rule create $group_id --protocol icmp
+
   deactivate_venv
 }
 
@@ -190,11 +196,6 @@ function run_os_checks() {
   return $ret
 }
 
-function _get_current_routes() {
-  local mch=$1
-  juju-ssh $mch ip route | awk '/169.254/{print $1} 2>/dev/null'
-}
-
 function _check_instance_log() {
   local id=$1
   # wait for console-log
@@ -205,9 +206,9 @@ function _check_instance_log() {
     echo "ERROR: console log is empty for instance $instance_id"
     return 1
   fi
-  echo '>>>>>>>>>'
+  echo '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
   openstack --insecure console log show $id | tail -50
-  echo '<<<<<<<<<'
+  echo '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'
   return 0
 }
 
@@ -218,10 +219,15 @@ function _get_instance_machine() {
   get_machine_by_ip $ip
 }
 
+function _get_current_routes() {
+  local mch=$1
+  juju-ssh $mch ip route 2>/dev/null | awk '/169.254/{print $1}'
+}
+
 function _check_new_route() {
   local mch=$1
   local route=$2
-  if ! juju-ssh $mch ip route 2>/dev/null | grep "$route" ; then
+  if ! juju-ssh $mch ip route 2>/dev/null | grep -q "$route" ; then
     echo "ERROR: Route $route is absent on host:"
     juju-ssh $mch ip route
     return 1
@@ -232,6 +238,7 @@ function _check_new_route() {
 function _check_instance_ping() {
   local mch=$1
   local ip=$2
+  echo "INFO: Trying to ping instance with ip $ip"
   if ! juju-ssh $mch ping -c 2 $ip 2>/dev/null ; then
     echo "ERROR: Can't ping instance by ip $ip"
     return 1
@@ -243,19 +250,21 @@ function _check_instance_ping() {
 function _check_instance_ssh_and_metadata() {
   local mch=$1
   local ip=$2
-  local ssh_opts='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
-  juju-ssh sudo apt-get -y install sshpass
-  echo "INFO: Trying to ssh into instance with ip $ip"
-  if ! juju-ssh $mch sshpass 'cubswin:)' ssh $ssh_opts cirros@$ip ifconfig 2>/dev/null ; then
+  local ssh_opts='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5'
+  juju-ssh $mch sudo apt-get -y install sshpass &>/dev/null
+  echo "INFO: Trying to ssh into instance with ip $ip and run ifconfig"
+  if ! juju-ssh $mch sshpass -p 'cubswin:\)' ssh $ssh_opts cirros@$ip /sbin/ifconfig 2>/dev/null ; then
     echo "ERROR: Can't ssh into instance by ip $ip"
     return 1
   fi
 
   echo "INFO: Trying to ssh into instance with ip $ip and get meta-data/public-ipv4"
-  if ! juju-ssh $mch sshpass 'cubswin:)' ssh $ssh_opts cirros@$ip curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null ; then
+  if ! juju-ssh $mch sshpass -p 'cubswin:\)' ssh $ssh_opts cirros@$ip curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null ; then
+    echo ""
     echo "ERROR: Can't get instance metadata by ssh into ip $ip"
     return 1
   fi
+  echo ""
   echo "INFO: Can ssh and get metadata for instance by ip $ip"
   return 0
 }
@@ -265,8 +274,6 @@ function check_instance_simple() {
   local flavor=51
   local net_id=$1
   local fip=$2
-
-  set -x
 
   declare -a rts
   for mch in `get_machine_index_by_service nova-compute` ; do
@@ -284,9 +291,10 @@ function check_instance_simple() {
   wait_instance $instance_id $((3*MAX_FAIL)) || ret=1
   openstack --insecure server add floating ip $instance_id $fip
   if [[ $ret == 0 ]] ; then
-    _check_instance_log $instance_id || ret=1
     mch=`_get_instance_machine $instance_id`
     echo "INFO: Instance is on machine $mch"
+
+    _check_instance_log $instance_id || ret=1
 
     local routes_to_skip="${rts[mch]}"
     local rt=`_get_current_routes $mch`
@@ -308,6 +316,7 @@ function check_instance_simple() {
 
     # add VGW to second compute host and check ping/ssh from there
     another_compute_host=`get_machine_index_by_service nova-compute | grep -v $mch`
+    echo "INFO: Adding vgw to another compute: $another_compute_host"
     juju-ssh $another_compute_host sudo /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx
 
     _check_instance_ping $another_compute_host $fip || ret=1
