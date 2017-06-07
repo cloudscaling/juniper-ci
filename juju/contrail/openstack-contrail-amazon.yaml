@@ -153,7 +153,7 @@ relations:
   - [ "neutron-api", "keystone" ]
 
   - [ "contrail-controller", "ntp" ]
-  - [ "nova-compute:juju-info", "ntp:juju-info" ]
+  - [ "nova-compute", "ntp" ]
 
   #contrail
   - [ "contrail-controller", "contrail-keystone-auth" ]

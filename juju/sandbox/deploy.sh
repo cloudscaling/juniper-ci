@@ -10,9 +10,10 @@ fi
 # base constants for SandBox
 
 export VERSION=${VERSION:-'18'}
-export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
-export CHARMS_VERSION=${CHARMS_VERSION:-'6f5c8653e9086531e8f4bb9490a13376280cee81'}
+export CHARMS_VERSION=${CHARMS_VERSION:-'223e975f2103dc3f3ca851cf46944cf23f6a0fdd'}
+# here must be trusty-mitaka or xenial-newton
 export SERIES=${SERIES:-'trusty'}
+export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
 export PASSWORD=${PASSWORD:-'password'}
 OPENSTACK_ORIGIN="cloud:${SERIES}-${OPENSTACK_VERSION}"
 addresses_store_file="$HOME/.addresses"
