@@ -21,7 +21,7 @@ if [[ "$jver" == 1 ]] ; then
 fi
 
 declare -A BUILDS
-BUILDS=([mitaka]=18 [newton]=18)
+BUILDS=([mitaka]=20 [newton]=20)
 
 export SERIES="${SERIES:-trusty}"
 export VERSION="${VERSION:-mitaka}"
