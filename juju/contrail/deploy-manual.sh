@@ -26,9 +26,11 @@ fi
 echo "---------------------------------------------------- From: $deploy_from  Version: $VERSION"
 
 prepare_repo
-repo_ip=`get-machine-ip-by-number $m0`
+repo_ip=`get-machine-ip-by-number $mrepo`
 repo_key=`curl -s http://$repo_ip/ubuntu/repo.key`
 repo_key=`echo "$repo_key" | awk '{printf("      %s\r", $0)}'`
+
+detect_subnet
 
 general_type="mem=8G cores=2 root-disk=40G"
 compute_type="mem=7G cores=4 root-disk=40G"
@@ -55,10 +57,15 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   echo "INFO: Contrail machine created: $m7"
   m8=$(create_machine $contrail_type)
   echo "INFO: Contrail machine created: $m8"
-  wait_for_machines $m0 $m1 $m2 $m3 $m4 $m5 $m6 $m7 $m8
+  machines=($m0 $m1 $m2 $m3 $m4 $m5 $m6 $m7 $m8)
 else
-  wait_for_machines $m1 $m2 $m3 $m4 $m5 $m6
+  machines=($m1 $m2 $m3 $m4 $m5 $m6)
 fi
+
+wait_for_machines ${machines[@]}
+for mch in ${machines[@]} ; do
+  add_interface $mch
+done
 
 juju-status-tabular
 
@@ -101,9 +108,12 @@ juju-expose neutron-api
 juju-deploy $PLACE/contrail-keystone-auth --to $m6
 
 juju-deploy $PLACE/contrail-controller --to $m6
+juju-set contrail-controller control-network=$subnet_cidr
 juju-expose contrail-controller
 juju-deploy $PLACE/contrail-analyticsdb --to $m6
+juju-set contrail-analyticsdb control-network=$subnet_cidr
 juju-deploy $PLACE/contrail-analytics --to $m6
+juju-set contrail-analytics control-network=$subnet_cidr
 juju-expose contrail-analytics
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then

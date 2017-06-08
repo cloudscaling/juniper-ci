@@ -46,9 +46,11 @@ fi
 iid=`juju show-controller amazon --format yaml | awk '/instance-id/{print $2}'`
 if [ -n "$iid" ] ; then
   AZ=`aws ec2 describe-instances --instance-id "$iid" --query 'Reservations[*].Instances[*].Placement.AvailabilityZone' --output text`
+  vpc_id=`aws ec2 describe-instances --instance-id "$iid" --query 'Reservations[*].Instances[*].VpcId' --output text`
 fi
-echo "INFO: Availability zone of this deployment is $AZ"
+echo "INFO: Availability zone of this deployment is $AZ, vpc is $vpc_id"
 export AZ
+export vpc_id
 
 trap 'catch_errors $LINENO' ERR EXIT
 

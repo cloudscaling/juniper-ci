@@ -33,7 +33,7 @@ fi
 echo "---------------------------------------------------- From: $JUJU_REPO  Version: $VERSION"
 
 prepare_repo
-repo_ip=`get-machine-ip-by-number $m0`
+repo_ip=`get-machine-ip-by-number $mrepo`
 repo_key=`curl -s http://$repo_ip/ubuntu/repo.key`
 repo_key=`echo "$repo_key" | awk '{printf("          %s\r", $0)}'`
 
