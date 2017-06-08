@@ -87,6 +87,7 @@ function add_interface() {
   aws ec2 modify-network-interface-attribute --network-interface-id $eni_id --attachment AttachmentId=$eni_attach_id,DeleteOnTermination=true
   sleep 5
   echo "INFO: additional interface $eni_id attached to instance $iid - $eni_attach_id"
+  juju-ssh $mch sudo lshw -class network
 
   nif='eth1'
   juju-ssh $mch "sudo bash -c 'echo \"auto $nif\" > /etc/network/interfaces.d/$nif.cfg && echo \"iface $nif inet dhcp\" >> /etc/network/interfaces.d/$nif.cfg && ifup $nif'" 2>/dev/null
