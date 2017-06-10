@@ -1,8 +1,10 @@
 #!/bin/bash -e
 
 inner_script="${1:-deploy-manual.sh}"
-shift
-script_params="$@"
+if [[ $# != 0 ]] ; then
+  shift
+  script_params="$@"
+fi
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
