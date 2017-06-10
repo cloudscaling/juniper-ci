@@ -9,7 +9,7 @@ fi
 
 # base constants for SandBox
 
-export VERSION=${VERSION:-'18'}
+export VERSION=${VERSION:-'20'}
 export CHARMS_VERSION=${CHARMS_VERSION:-'223e975f2103dc3f3ca851cf46944cf23f6a0fdd'}
 # here must be trusty-mitaka or xenial-newton
 export SERIES=${SERIES:-'trusty'}
