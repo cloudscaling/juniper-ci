@@ -7,7 +7,7 @@
           name: USER
           default: jbuilder
           description: "name of the user to access jenkins for update jobs"
-      - string:
+      - password:
           name: PASSWORD
           description: "password for the user to access jenkins for update jobs"
     scm:
