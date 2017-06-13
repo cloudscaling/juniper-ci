@@ -53,7 +53,8 @@ function create_images() {
 
   # package redhat-lsb-core is absent due to some bug in newton image
   # workaround is to add ceph repo:
-  export DIB_YUM_REPO_CONF="$DIB_YUM_REPO_CONF /etc/yum.repos.d/CentOS-Ceph-Hammer.repo"
+  # there is enabled jewel repo in centos image
+  # export DIB_YUM_REPO_CONF="$DIB_YUM_REPO_CONF /etc/yum.repos.d/CentOS-Ceph-Hammer.repo"
 
   #export DELOREAN_TRUNK_REPO="http://buildlogs.centos.org/centos/7/cloud/x86_64/rdo-trunk-master-tripleo/"
   #export DIB_INSTALLTYPE_puppet_modules=source

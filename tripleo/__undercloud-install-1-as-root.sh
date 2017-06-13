@@ -70,8 +70,9 @@ curl -L -o /etc/yum.repos.d/delorean-deps-$OPENSTACK_VERSION.repo http://trunk.r
 yum -y install yum-plugin-priorities python-tripleoclient python-rdomanager-oscplugin sshpass openstack-utils
 
 # add Ceph repos to workaround bug with redhat-lsb-core package
-yum -y install --enablerepo=extras centos-release-ceph-hammer
-sed -i -e 's%gpgcheck=.*%gpgcheck=0%' /etc/yum.repos.d/CentOS-Ceph-Hammer.repo
+# todo: there is enabled ceph repo jewel
+#yum -y install --enablerepo=extras centos-release-ceph-hammer
+#sed -i -e 's%gpgcheck=.*%gpgcheck=0%' /etc/yum.repos.d/CentOS-Ceph-Hammer.repo
 
 # another hack to avoid 'sudo: require tty' error
 sed -i -e 's/Defaults[ \t]*requiretty.*/#Defaults    requiretty/g' /etc/sudoers
