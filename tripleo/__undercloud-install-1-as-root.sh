@@ -42,7 +42,7 @@ fi
 echo "stack:password" | chpasswd
 echo "stack ALL=(root) NOPASSWD:ALL" | tee -a /etc/sudoers.d/stack
 chmod 0440 /etc/sudoers.d/stack
-mkdir /home/stack/.ssh
+mkdir -p /home/stack/.ssh
 chown stack:stack /home/stack/.ssh
 chmod 700 /home/stack/.ssh
 # key to stack user may access kvm host
