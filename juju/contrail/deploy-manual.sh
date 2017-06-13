@@ -30,7 +30,9 @@ repo_ip=`get-machine-ip-by-number $mrepo`
 repo_key=`curl -s http://$repo_ip/ubuntu/repo.key`
 repo_key=`echo "$repo_key" | awk '{printf("      %s\r", $0)}'`
 
-detect_subnet
+if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
+  detect_subnet
+fi
 
 general_type="mem=8G cores=2 root-disk=40G"
 compute_type="mem=7G cores=4 root-disk=40G"
@@ -63,9 +65,11 @@ else
 fi
 
 wait_for_machines ${machines[@]}
-for mch in ${machines[@]} ; do
-  add_interface $mch
-done
+if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
+  for mch in ${machines[@]} ; do
+    add_interface $mch
+  done
+fi
 
 juju-status-tabular
 
@@ -108,12 +112,9 @@ juju-expose neutron-api
 juju-deploy $PLACE/contrail-keystone-auth --to $m6
 
 juju-deploy $PLACE/contrail-controller --to $m6
-juju-set contrail-controller control-network=$subnet_cidr
 juju-expose contrail-controller
 juju-deploy $PLACE/contrail-analyticsdb --to $m6
-juju-set contrail-analyticsdb control-network=$subnet_cidr
 juju-deploy $PLACE/contrail-analytics --to $m6
-juju-set contrail-analytics control-network=$subnet_cidr
 juju-expose contrail-analytics
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
@@ -140,7 +141,13 @@ sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_cv.yaml"
 sed -i -e "s|{{series}}|$SERIES|m" "repo_config_cv.yaml"
 sed -i "s/\r/\n/g" "repo_config_cv.yaml"
 juju-deploy $PLACE/contrail-agent --config repo_config_cv.yaml
-juju-set contrail-agent control-network=$subnet_cidr
+
+if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
+  juju-set contrail-controller control-network=$subnet_cidr
+  juju-set contrail-analyticsdb control-network=$subnet_cidr
+  juju-set contrail-analytics control-network=$subnet_cidr
+  juju-set contrail-agent control-network=$subnet_cidr
+fi
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-deploy cs:$SERIES/haproxy --to $m0

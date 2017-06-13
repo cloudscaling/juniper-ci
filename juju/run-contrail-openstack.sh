@@ -32,6 +32,7 @@ export BUILD="${BUILD:-${BUILDS[$VERSION]}}"
 export DEPLOY_AS_HA_MODE="${DEPLOY_AS_HA_MODE:-false}"
 export USE_SSL_OS="${USE_SSL_OS:-false}"
 export USE_SSL_CONTRAIL="${USE_SSL_CONTRAIL:-false}"
+export USE_ADDITIONAL_INTERFACE="${USE_ADDITIONAL_INTERFACE:-false}"
 
 export PASSWORD=${PASSWORD:-'password'}
 
@@ -39,8 +40,19 @@ echo "INFO: Date: $(date)"
 echo "INFO: Starting deployment process with vars:"
 env|sort
 
+if [[ "$inner_script" == "deploy-bundle.sh" ]] ; then
+  if [[ "$DEPLOY_AS_HA_MODE" == "true" ]] ; then
+    echo "ERROR: bundle deployment doesn't support HA mode"
+    exit 1
+  fi
+  if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
+    echo "ERROR: bundle deployment doesn't support deploying with additional interface"
+    exit 1
+  fi
+fi
+
 if ! juju-bootstrap ; then
-  echo "Bootstrap error. exiting..."
+  echo "ERROR: Bootstrap error. exiting..."
   exit 1
 fi
 
