@@ -10,7 +10,7 @@ my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
 # base image for VMs
-BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-'CentOS-7-x86_64-GenericCloud-1607.qcow2'}
+BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-'undercloud.qcow2'}
 BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
 mkdir -p ${BASE_IMAGE_DIR}
 BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
