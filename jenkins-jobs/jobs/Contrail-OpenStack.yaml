@@ -36,12 +36,21 @@
           name: USE_SSL_CONTRAIL
           description: "Deploy Contrail with certificates"
           default: false
+      - bool:
+          name: USE_ADDITIONAL_INTERFACE
+          description: "Deploy Contrail with additional interfaces that is used for control-network"
+          default: false
     scm:
       - juniper-contrail-charms
       - juniper-ci
     builders:
       - shell: |
-          echo "DESCRIPTION $VERSION $DEPLOY_TYPE HA=$DEPLOY_AS_HA_MODE OS_SSL=$USE_SSL_OS C_SSL=$USE_SSL_CONTRAIL"
+          desc="$VERSION $DEPLOY_TYPE"
+          if [[ "$DEPLOY_AS_HA_MODE" == "true" ]] ; then desc="$desc +HA" ; fi
+          if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
+          if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
+          if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
+          echo "DESCRIPTION $desc"
       - description-setter:
           regexp: "DESCRIPTION (.*)"
       - shell: |
