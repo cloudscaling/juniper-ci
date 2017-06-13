@@ -41,9 +41,9 @@
       - juniper-ci
     builders:
       - shell: |
-          echo "[DESCRIPTION] $VERSION $DEPLOY_TYPE HA=$DEPLOY_AS_HA_MODE OS_SSL=$USE_SSL_OS C_SSL=$USE_SSL_CONTRAIL"
+          echo "DESCRIPTION $VERSION $DEPLOY_TYPE HA=$DEPLOY_AS_HA_MODE OS_SSL=$USE_SSL_OS C_SSL=$USE_SSL_CONTRAIL"
       - description-setter:
-          regexp: "\[DESCRIPTION\] (.*)"
+          regexp: "DESCRIPTION (.*)"
       - shell: |
           #!/bin/bash -e
           export SERIES='trusty'
