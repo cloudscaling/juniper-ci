@@ -89,7 +89,14 @@ function add_interface() {
   sleep 5
   echo "INFO: additional interface $eni_id is attached to instance $mch:$iid - $eni_attach_id"
 
-  nif=`juju-ssh $mch "sudo lshw" 2>/dev/null | grep -A 10 'network.*DISABLED' | awk '/logical name/{print $3}' | head -1 | tr -d '\r'`
+  for i in {1..4} ; do
+    nif=`juju-ssh $mch "sudo lshw" 2>/dev/null | grep -A 10 'network.*DISABLED' | awk '/logical name/{print $3}' | head -1 | tr -d '\r'`
+    if [ -n "$nif" ] ; then
+      break
+    fi
+    sleep 5
+  done
+  echo "INFO: interface $nif detected"
   juju-ssh $mch "sudo bash -c 'echo \"auto $nif\" > /etc/network/interfaces.d/$nif.cfg && echo \"iface $nif inet dhcp\" >> /etc/network/interfaces.d/$nif.cfg && ifup $nif 1>/dev/null'" 2>/dev/null
   echo "INFO: interface $nif added"
   sleep 5
