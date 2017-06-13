@@ -1,4 +1,4 @@
-# /bin/bash
+#!/bin/bash
 
 MAX_FAIL=30
 
@@ -134,9 +134,11 @@ function create_network() {
   openstack --insecure router set --external-gateway $public_net_id $router_id
   openstack --insecure router add subnet $router_id $private_subnet_id
 
-  for mch in `juju-status-tabular nova-compute | grep -A 6 "^Machine " | tail -n +2 | grep -B 6 "^$" | head -n -1 | awk '{print $1}'` ; do
-    juju-ssh $mch sudo /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx
-  done
+  echo "INFO: Add rules to default security group"
+  local project_id=`openstack --insecure project list | awk '/ admin /{print $2}'`
+  local group_id=`openstack --insecure security group list -c ID -c Project | grep $project_id | awk '{print $2}'`
+  openstack --insecure security group rule create $group_id --protocol tcp --dst-port 22:22
+  openstack --insecure security group rule create $group_id --protocol icmp
 
   deactivate_venv
 }
@@ -194,11 +196,6 @@ function run_os_checks() {
   return $ret
 }
 
-function _get_current_routes() {
-  local mch=$1
-  juju-ssh $mch ip route | awk '/169.254/{print $1} 2>/dev/null'
-}
-
 function _check_instance_log() {
   local id=$1
   # wait for console-log
@@ -209,21 +206,28 @@ function _check_instance_log() {
     echo "ERROR: console log is empty for instance $instance_id"
     return 1
   fi
+  echo '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+  openstack --insecure console log show $id | tail -50
+  echo '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'
   return 0
 }
 
 function _get_instance_machine() {
   local id=$1
-  local host=`openstack --insecure server show $id | grep "$host_attr" | awk '{print $4}'`
-  local ip=`openstack --insecure hypervisor show -f value -c host_ip $host`
-  local mch=`get_machine_by_ip $ip`
-  echo $mch
+  local host=`openstack --insecure server list --long -c ID -c Host | grep $id | awk '{print $4}'`
+  local ip=`nslookup $host | awk '/Address/{print $2}' | tail -1`
+  get_machine_by_ip $ip
+}
+
+function _get_current_routes() {
+  local mch=$1
+  juju-ssh $mch ip route 2>/dev/null | awk '/169.254/{print $1}'
 }
 
 function _check_new_route() {
   local mch=$1
   local route=$2
-  if ! juju-ssh $mch ip route 2>/dev/null | grep "$route" ; then
+  if ! juju-ssh $mch ip route 2>/dev/null | grep -q "$route" ; then
     echo "ERROR: Route $route is absent on host:"
     juju-ssh $mch ip route
     return 1
@@ -233,12 +237,35 @@ function _check_new_route() {
 
 function _check_instance_ping() {
   local mch=$1
-  local fip=$2
-  if ! juju-ssh $mch ping -c 2 $fip 2>/dev/null ; then
-    echo "ERROR: Can't ping instance by ip $fip"
+  local ip=$2
+  echo "INFO: Trying to ping instance with ip $ip"
+  if ! juju-ssh $mch ping -c 2 $ip 2>/dev/null ; then
+    echo "ERROR: Can't ping instance by ip $ip"
     return 1
   fi
-  echo "INFO: Can ping instance by ip $fip"
+  echo "INFO: Can ping instance by ip $ip"
+  return 0
+}
+
+function _check_instance_ssh_and_metadata() {
+  local mch=$1
+  local ip=$2
+  local ssh_opts='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5'
+  juju-ssh $mch sudo apt-get -y install sshpass &>/dev/null
+  echo "INFO: Trying to ssh into instance with ip $ip and run ifconfig"
+  if ! juju-ssh $mch sshpass -p 'cubswin:\)' ssh $ssh_opts cirros@$ip /sbin/ifconfig 2>/dev/null ; then
+    echo "ERROR: Can't ssh into instance by ip $ip"
+    return 1
+  fi
+
+  echo "INFO: Trying to ssh into instance with ip $ip and get meta-data/public-ipv4"
+  if ! juju-ssh $mch sshpass -p 'cubswin:\)' ssh $ssh_opts cirros@$ip curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null ; then
+    echo ""
+    echo "ERROR: Can't get instance metadata by ssh into ip $ip"
+    return 1
+  fi
+  echo ""
+  echo "INFO: Can ssh and get metadata for instance by ip $ip"
   return 0
 }
 
@@ -249,7 +276,7 @@ function check_instance_simple() {
   local fip=$2
 
   declare -a rts
-  for mch in `juju-status-tabular nova-compute | grep -A 6 "^Machine " | tail -n +2 | grep -B 6 "^$" | head -n -1 | awk '{print $1}'` ; do
+  for mch in `get_machine_index_by_service nova-compute` ; do
     rts[$mch]=`_get_current_routes $mch`
   done
 
@@ -264,9 +291,10 @@ function check_instance_simple() {
   wait_instance $instance_id $((3*MAX_FAIL)) || ret=1
   openstack --insecure server add floating ip $instance_id $fip
   if [[ $ret == 0 ]] ; then
-    _check_instance_log $instance_id || ret=1
     mch=`_get_instance_machine $instance_id`
     echo "INFO: Instance is on machine $mch"
+
+    _check_instance_log $instance_id || ret=1
 
     local routes_to_skip="${rts[mch]}"
     local rt=`_get_current_routes $mch`
@@ -275,12 +303,27 @@ function check_instance_simple() {
       local new_route="$r"
       break
     done
-    echo "INFO: Instance's new route is $new_route"
+    if [[ -n $new_route ]] ; then
+      echo "INFO: Instance's new route is $new_route"
+      _check_new_route $mch $new_route || ret=1
+    else
+      echo "INFO: Couldn't find new route 169.254.0.*"
+      ret=1
+    fi
 
-    _check_new_route $mch $new_route || ret=1
     _check_instance_ping $mch $new_route || ret=1
-    _check_instance_ping $mch $fip || ret=1
-    #_check_instance_ssh $instance_id || ret=1
+    _check_instance_ssh_and_metadata $mch $new_route || ret=1
+
+    # add VGW to second compute host and check ping/ssh from there
+    another_compute_host=`get_machine_index_by_service nova-compute | grep -v $mch`
+    echo "INFO: Adding vgw to another compute: $another_compute_host"
+    juju-ssh $another_compute_host sudo /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx
+
+    _check_instance_ping $another_compute_host $fip || ret=1
+    _check_instance_ssh_and_metadata $another_compute_host $fip || ret=1
+
+    # remove VGW
+    juju-ssh $another_compute_host sudo /opt/contrail/utils/provision_vgw_interface.py --oper delete --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx
   fi
 
   openstack --insecure server show $instance_id

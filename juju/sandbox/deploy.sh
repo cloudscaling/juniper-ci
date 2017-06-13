@@ -9,10 +9,11 @@ fi
 
 # base constants for SandBox
 
-export VERSION=${VERSION:-'16'}
-export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
-export CHARMS_VERSION=${CHARMS_VERSION:-'84a1e65a789cda65dd90fecc76d7f72e93970e35'}
+export VERSION=${VERSION:-'20'}
+export CHARMS_VERSION=${CHARMS_VERSION:-'223e975f2103dc3f3ca851cf46944cf23f6a0fdd'}
+# here must be trusty-mitaka or xenial-newton
 export SERIES=${SERIES:-'trusty'}
+export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
 export PASSWORD=${PASSWORD:-'password'}
 OPENSTACK_ORIGIN="cloud:${SERIES}-${OPENSTACK_VERSION}"
 addresses_store_file="$HOME/.addresses"
@@ -319,8 +320,5 @@ log_info "add rules to allow forwarding between vhost0 and vgw"
 juju ssh $index sudo iptables -A FORWARD -i vhost0 -o vgw -j ACCEPT
 juju ssh $index sudo iptables -A FORWARD -i vgw -o vhost0 -j ACCEPT
 
-#log_info "start contrail event listener"
-#export SSH_KEY="${HOME}/.local/share/juju/ssh/juju_id_rsa"
-#nohup $my_dir/event-listener/contrail-polling.sh 2>&1>/var/log/sandbox/contrail-polling.log &
-#sleep 2
-#log_info "start contrail event listener started"
+log_info "allow all traffic to compute node: $id"
+open_port $index 0-65535 all

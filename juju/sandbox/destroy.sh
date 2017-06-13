@@ -32,8 +32,6 @@ function release_addresses() {
   done
 }
 
-killall -g contrail-polling.sh || /bin/true
-
 release_addresses || /bin/true
 
 $my_dir/_set-juju-creds.sh

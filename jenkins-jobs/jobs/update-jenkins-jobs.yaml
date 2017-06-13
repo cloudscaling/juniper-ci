@@ -2,6 +2,14 @@
     name: update-jenkins-jobs
     description: "Updates jenkins jobs"
     defaults: global
+    parameters:
+      - string:
+          name: USER
+          default: jbuilder
+          description: "name of the user to access jenkins for update jobs"
+      - password:
+          name: PASSWORD
+          description: "password for the user to access jenkins for update jobs"
     scm:
       - juniper-ci
       - github:

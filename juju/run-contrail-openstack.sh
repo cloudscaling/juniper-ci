@@ -1,8 +1,10 @@
 #!/bin/bash -e
 
 inner_script="${1:-deploy-manual.sh}"
-shift
-script_params="$@"
+if [[ $# != 0 ]] ; then
+  shift
+  script_params="$@"
+fi
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -20,17 +22,37 @@ if [[ "$jver" == 1 ]] ; then
   exit 1
 fi
 
+declare -A BUILDS
+BUILDS=([mitaka]=20 [newton]=20)
+
 export SERIES="${SERIES:-trusty}"
 export VERSION="${VERSION:-mitaka}"
 export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
-export BUILD="${BUILD:-14}"
+export BUILD="${BUILD:-${BUILDS[$VERSION]}}"
 export DEPLOY_AS_HA_MODE="${DEPLOY_AS_HA_MODE:-false}"
-export USE_SSL="${USE_SSL:-true}"
+export USE_SSL_OS="${USE_SSL_OS:-false}"
+export USE_SSL_CONTRAIL="${USE_SSL_CONTRAIL:-false}"
+export USE_ADDITIONAL_INTERFACE="${USE_ADDITIONAL_INTERFACE:-false}"
 
 export PASSWORD=${PASSWORD:-'password'}
 
+echo "INFO: Date: $(date)"
+echo "INFO: Starting deployment process with vars:"
+env|sort
+
+if [[ "$inner_script" == "deploy-bundle.sh" ]] ; then
+  if [[ "$DEPLOY_AS_HA_MODE" == "true" ]] ; then
+    echo "ERROR: bundle deployment doesn't support HA mode"
+    exit 1
+  fi
+  if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
+    echo "ERROR: bundle deployment doesn't support deploying with additional interface"
+    exit 1
+  fi
+fi
+
 if ! juju-bootstrap ; then
-  echo "Bootstrap error. exiting..."
+  echo "ERROR: Bootstrap error. exiting..."
   exit 1
 fi
 
@@ -38,9 +60,11 @@ fi
 iid=`juju show-controller amazon --format yaml | awk '/instance-id/{print $2}'`
 if [ -n "$iid" ] ; then
   AZ=`aws ec2 describe-instances --instance-id "$iid" --query 'Reservations[*].Instances[*].Placement.AvailabilityZone' --output text`
+  vpc_id=`aws ec2 describe-instances --instance-id "$iid" --query 'Reservations[*].Instances[*].VpcId' --output text`
 fi
-echo "INFO: Availability zone of this deployment is $AZ"
+echo "INFO: Availability zone of this deployment is $AZ, vpc is $vpc_id"
 export AZ
+export vpc_id
 
 trap 'catch_errors $LINENO' ERR EXIT
 

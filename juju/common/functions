@@ -116,7 +116,7 @@ function cleanup_environment() {
 function create_stackrc() {
   local auth_ip=`get_machine_ip keystone`
   local proto="https"
-  if [[ "$USE_SSL" != "true" ]] ; then
+  if [[ "$USE_SSL_OS" != "true" ]] ; then
     local proto="http"
   fi
   echo "export OS_AUTH_URL=$proto://$auth_ip:5000/v2.0" > $WORKSPACE/stackrc
@@ -129,17 +129,25 @@ function create_stackrc() {
 function open_port() {
   local mch=$1
   local port=$2
+  local protocol=${3:-tcp}
 
-  if [[ "$jver" == 1 ]] ; then
-    local m_index=`juju-status-tabular | grep -A 7 "\[Machines\]" | grep "$mch  " | awk '{print $1}'`
-    local sg_id=`aws ec2 describe-instances | grep -C 2 "\-$m_index\"" | awk '/GroupId/{print $2}' | head -1 | xargs`
-  else
+  for i in {0..30} ; do
     local iid=`get-machine-id-by-number $mch`
-    local sg_id=`aws ec2 describe-instances --instance-id "$iid" --query 'Reservations[*].Instances[*].SecurityGroups' | grep -C 2 "\-$mch\"" | awk '/GroupId/{print $2}' | head -1 | xargs`
-  fi
+    if [[ "$iid" == i-* ]] ; then
+      break
+    fi
+    sleep 5
+  done
+
+  local sg_id=`aws ec2 describe-instances --instance-id "$iid" --query 'Reservations[*].Instances[*].SecurityGroups' | grep -C 2 "\-$mch\"" | awk '/GroupId/{print $2}' | head -1 | xargs`
   if echo $sg_id | grep ',' ; then
     sg_id=`echo $sg_id | sed 's/\,//g'`
   fi
-  aws ec2 authorize-security-group-ingress --group-id $sg_id --protocol tcp --port $port --cidr 0.0.0.0/0
+  aws ec2 authorize-security-group-ingress --group-id $sg_id --protocol $protocol --port $port --cidr 0.0.0.0/0
   aws ec2 describe-security-groups --group-id $sg_id
+}
+
+function get_machine_index_by_service() {
+  local srv=$1
+  juju-status-tabular $srv | awk "/^$srv\//{print \$4}"
 }

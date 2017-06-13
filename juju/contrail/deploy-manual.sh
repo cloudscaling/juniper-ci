@@ -26,9 +26,13 @@ fi
 echo "---------------------------------------------------- From: $deploy_from  Version: $VERSION"
 
 prepare_repo
-repo_ip=`get-machine-ip-by-number $m0`
+repo_ip=`get-machine-ip-by-number $mrepo`
 repo_key=`curl -s http://$repo_ip/ubuntu/repo.key`
 repo_key=`echo "$repo_key" | awk '{printf("      %s\r", $0)}'`
+
+if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
+  detect_subnet
+fi
 
 general_type="mem=8G cores=2 root-disk=40G"
 compute_type="mem=7G cores=4 root-disk=40G"
@@ -55,9 +59,16 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   echo "INFO: Contrail machine created: $m7"
   m8=$(create_machine $contrail_type)
   echo "INFO: Contrail machine created: $m8"
-  wait_for_machines $m0 $m1 $m2 $m3 $m4 $m5 $m6 $m7 $m8
+  machines=($m0 $m1 $m2 $m3 $m4 $m5 $m6 $m7 $m8)
 else
-  wait_for_machines $m1 $m2 $m3 $m4 $m5 $m6
+  machines=($m1 $m2 $m3 $m4 $m5 $m6)
+fi
+
+wait_for_machines ${machines[@]}
+if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
+  for mch in ${machines[@]} ; do
+    add_interface $mch
+  done
 fi
 
 juju-status-tabular
@@ -83,10 +94,7 @@ juju-deploy cs:$SERIES/glance --to $m2
 juju-set glance "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose glance
 
-rm -rf charm-keystone
-git clone https://github.com/openstack/charm-keystone.git
-juju-deploy --series=$SERIES $WORKSPACE/charm-keystone keystone --to $m3
-#juju-deploy cs:$SERIES/keystone --to $m3
+juju-deploy cs:$SERIES/keystone --to $m3
 juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose keystone
 
@@ -106,7 +114,6 @@ juju-deploy $PLACE/contrail-keystone-auth --to $m6
 juju-deploy $PLACE/contrail-controller --to $m6
 juju-expose contrail-controller
 juju-deploy $PLACE/contrail-analyticsdb --to $m6
-juju-expose contrail-analyticsdb
 juju-deploy $PLACE/contrail-analytics --to $m6
 juju-expose contrail-analytics
 
@@ -119,32 +126,42 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-add-unit contrail-analyticsdb --to $m8
 fi
 
-cp "$my_dir/repo_config.yaml.tmpl" "repo_config_na.yaml"
-sed -i -e "s|{{charm_name}}|contrail-openstack-neutron-api|m" "repo_config_na.yaml"
-sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_na.yaml"
-sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_na.yaml"
-sed -i -e "s|{{series}}|$SERIES|m" "repo_config_na.yaml"
-sed -i "s/\r/\n/g" "repo_config_na.yaml"
-juju-deploy $PLACE/contrail-openstack-neutron-api --config repo_config_na.yaml
+cp "$my_dir/repo_config.yaml.tmpl" "repo_config_co.yaml"
+sed -i -e "s|{{charm_name}}|contrail-openstack|m" "repo_config_co.yaml"
+sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_co.yaml"
+sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_co.yaml"
+sed -i -e "s|{{series}}|$SERIES|m" "repo_config_co.yaml"
+sed -i "s/\r/\n/g" "repo_config_co.yaml"
+juju-deploy $PLACE/contrail-openstack --config repo_config_co.yaml
 
-cp "$my_dir/repo_config.yaml.tmpl" "repo_config_c.yaml"
-sed -i -e "s|{{charm_name}}|contrail-openstack-compute|m" "repo_config_c.yaml"
-sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_c.yaml"
-sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_c.yaml"
-sed -i -e "s|{{series}}|$SERIES|m" "repo_config_c.yaml"
-sed -i "s/\r/\n/g" "repo_config_c.yaml"
-juju-deploy $PLACE/contrail-openstack-compute --config repo_config_c.yaml
+cp "$my_dir/repo_config.yaml.tmpl" "repo_config_cv.yaml"
+sed -i -e "s|{{charm_name}}|contrail-agent|m" "repo_config_cv.yaml"
+sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_cv.yaml"
+sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_cv.yaml"
+sed -i -e "s|{{series}}|$SERIES|m" "repo_config_cv.yaml"
+sed -i "s/\r/\n/g" "repo_config_cv.yaml"
+juju-deploy $PLACE/contrail-agent --config repo_config_cv.yaml
+
+if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
+  juju-set contrail-controller control-network=$subnet_cidr
+  juju-set contrail-analyticsdb control-network=$subnet_cidr
+  juju-set contrail-analytics control-network=$subnet_cidr
+  juju-set contrail-agent control-network=$subnet_cidr
+fi
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-deploy cs:$SERIES/haproxy --to $m0
   juju-expose haproxy
   juju-add-relation "contrail-analytics" "haproxy"
-  juju-add-relation "contrail-controller" "haproxy"
+  juju-add-relation "contrail-controller:http-services" "haproxy"
+  juju-add-relation "contrail-controller:https-services" "haproxy"
+  ip=`get-machine-ip-by-number $m0`
+  juju-set contrail-controller vip=$ip
 fi
 
 echo "INFO: Update endpoints $(date)"
 hack_openstack
-echo "INFO: Apply SSL flag $(date)"
+echo "INFO: Apply SSL flag if set $(date)"
 apply_ssl
 
 echo "INFO: Attach contrail-controller container $(date)"
@@ -174,7 +191,7 @@ juju-add-relation "neutron-api:identity-service" "keystone:identity-service"
 juju-add-relation "neutron-api:amqp" "rabbitmq-server:amqp"
 
 juju-add-relation "contrail-controller" "ntp"
-juju-add-relation "contrail-openstack-compute:juju-info" "ntp:juju-info"
+juju-add-relation "nova-compute:juju-info" "ntp:juju-info"
 
 juju-add-relation "contrail-controller" "contrail-keystone-auth"
 juju-add-relation "contrail-keystone-auth" "keystone"
@@ -182,13 +199,11 @@ juju-add-relation "contrail-controller" "contrail-analytics"
 juju-add-relation "contrail-controller" "contrail-analyticsdb"
 juju-add-relation "contrail-analytics" "contrail-analyticsdb"
 
-juju-add-relation "contrail-openstack-neutron-api" "neutron-api"
-juju-add-relation "contrail-openstack-neutron-api" "contrail-controller"
+juju-add-relation "contrail-openstack" "neutron-api"
+juju-add-relation "contrail-openstack" "nova-compute"
+juju-add-relation "contrail-openstack" "contrail-controller"
 
-juju-add-relation "nova-compute" "contrail-openstack-compute"
-juju-add-relation "contrail-openstack-compute" "contrail-controller"
-
-# to pass information about contrail API-s to keystone endpoints
-juju-add-relation "contrail-openstack-compute" "keystone"
+juju-add-relation "contrail-agent:juju-info" "nova-compute:juju-info"
+juju-add-relation "contrail-agent" "contrail-controller"
 
 post_deploy
