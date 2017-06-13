@@ -37,9 +37,13 @@ if docker ps | grep -q contrail ; then
         docker exec contrail-controller rabbitmqctl cluster_status &>"./$ldir/rabbitmq-cluster-status.log"
       fi
       docker cp "contrail-$cnt:/var/log/contrail" "./$ldir"
-      mv "$ldir/contrail" "$ldir/contrail-logs"
+      mv "$ldir/contrail" "$ldir/var-log-contrail"
       docker cp "contrail-$cnt:/etc/contrail" "./$ldir"
-      mv "$ldir/contrail" "$ldir/contrail-etc"
+      mv "$ldir/contrail" "$ldir/etc-contrail"
+      if [[ "$cnt" == "controller" ]] ; then
+        docker cp "contrail-$cnt:/etc/rabbitmq" "./$ldir"
+        mv "$ldir/rabbitmq" "$ldir/etc-rabbitmq"
+      fi
 
       tar -rf logs.tar "$ldir"
     fi
