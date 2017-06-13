@@ -199,7 +199,6 @@ git clone https://github.com/Juniper/contrail-tripleo-puppet -b stable/newton us
 #TODO: replace personal repo with Juniper ones
 git clone https://github.com/alexey-mr/puppet-contrail -b stable/newton usr/share/openstack-puppet/modules/contrail
 tar czvf puppet-modules.tgz usr/
-upload-swift-artifacts -f puppet-modules.tgz
 
 # prepare containers for all nodes
 # TODO: rework somehow to avoid copying of large archives on all nodes
@@ -212,6 +211,9 @@ for i in controller analytics analyticsdb ; do
 done
 tar czvf contrail-containers.tgz tmp/
 upload-swift-artifacts -f contrail-containers.tgz
+
+# upload artifacts to swift
+upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz -f contrail-containers.tgz
 
 # prepare tripleo heat templates
 rm -rf ~/tripleo-heat-templates
@@ -257,6 +259,7 @@ if [[ "$DEPLOY" != '1' ]] ; then
   # deploy overcloud. if you do it manually then I recommend to do it in screen.
   echo "openstack overcloud deploy --templates tripleo-heat-templates/ \
     --roles-file $role_file \
+    -e .tripleo/environments/deployment-artifacts.yaml \
     -e $contrail_services_file \
     -e $contrail_net_file $ha_opts"
   echo "Add '-e templates/firstboot/firstboot.yaml' if you use swap"
@@ -268,6 +271,7 @@ set +e
 
 openstack overcloud deploy --templates tripleo-heat-templates/ \
   --roles-file $role_file \
+  -e .tripleo/environments/deployment-artifacts.yaml \
   -e $contrail_services_file \
   -e $contrail_net_file $ha_opts
 
