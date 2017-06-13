@@ -70,6 +70,7 @@ function detect_subnet() {
 
 function add_interface() {
   local mch=$1
+  echo "INFO: attaching additional interface to machine $mch"
 
   if [[ -z "$subnet_id" ]] ; then
     echo "ERROR: additional subnet is not defined"
@@ -86,10 +87,10 @@ function add_interface() {
   eni_attach_id=`aws ec2 attach-network-interface --network-interface-id $eni_id --instance-id $iid --device-index 1 --query 'AttachmentId' --output text`
   aws ec2 modify-network-interface-attribute --network-interface-id $eni_id --attachment AttachmentId=$eni_attach_id,DeleteOnTermination=true
   sleep 5
-  echo "INFO: additional interface $eni_id attached to instance $mch:$iid - $eni_attach_id"
+  echo "INFO: additional interface $eni_id is attached to instance $mch:$iid - $eni_attach_id"
 
   nif=`juju-ssh $mch "sudo lshw" 2>/dev/null | grep -A 10 'network.*DISABLED' | awk '/logical name/{print $3}' | head -1 | tr -d '\r'`
-  juju-ssh $mch "sudo bash -c 'echo \"auto $nif\" > /etc/network/interfaces.d/$nif.cfg && echo \"iface $nif inet dhcp\" >> /etc/network/interfaces.d/$nif.cfg && ifup $nif'" 2>/dev/null
+  juju-ssh $mch "sudo bash -c 'echo \"auto $nif\" > /etc/network/interfaces.d/$nif.cfg && echo \"iface $nif inet dhcp\" >> /etc/network/interfaces.d/$nif.cfg && ifup $nif 1>/dev/null'" 2>/dev/null
   echo "INFO: interface $nif added"
   sleep 5
   juju-ssh $mch ifconfig 2>/dev/null | grep -A 1 "^[a-z].*" | grep -v "\-\-"
