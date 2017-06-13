@@ -97,7 +97,7 @@ function add_interface() {
     sleep 5
   done
   echo "INFO: interface $nif detected"
-  juju-ssh $mch "sudo bash -c 'echo \"auto $nif\" > /etc/network/interfaces.d/$nif.cfg && echo \"iface $nif inet dhcp\" >> /etc/network/interfaces.d/$nif.cfg && ifup $nif 1>/dev/null'" 2>/dev/null
+  juju-ssh $mch "sudo bash -c 'echo \"auto $nif\" > /etc/network/interfaces.d/$nif.cfg && echo \"iface $nif inet dhcp\" >> /etc/network/interfaces.d/$nif.cfg && ifup $nif &>ifup.out'" 2>/dev/null
   echo "INFO: interface $nif added"
   sleep 5
   juju-ssh $mch ifconfig 2>/dev/null | grep -A 1 "^[a-z].*" | grep -v "\-\-"
