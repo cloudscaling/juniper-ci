@@ -84,6 +84,8 @@ function create_virtualenv() {
   virtualenv .venv
   source .venv/bin/activate
   pip install -q python-openstackclient 2>/dev/null
+  # NOTE: version 9.0 always writes debug output if run via openstack
+  pip install -q "python-novaclient<9.0" 2>/dev/null
   deactivate
 }
 
