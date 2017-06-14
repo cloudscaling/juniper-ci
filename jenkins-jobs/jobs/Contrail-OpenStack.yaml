@@ -45,6 +45,7 @@
       - juniper-ci
     builders:
       - shell: |
+          #!/bin/bash -e
           desc="$VERSION $DEPLOY_TYPE"
           if [[ "$DEPLOY_AS_HA_MODE" == "true" ]] ; then desc="$desc +HA" ; fi
           if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
