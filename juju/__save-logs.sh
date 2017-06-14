@@ -43,6 +43,8 @@ if docker ps | grep -q contrail ; then
       if [[ "$cnt" == "controller" ]] ; then
         docker cp "contrail-$cnt:/etc/rabbitmq" "./$ldir"
         mv "$ldir/rabbitmq" "$ldir/etc-rabbitmq"
+        docker cp "contrail-$cnt:/var/log/rabbitmq" "./$ldir"
+        mv "$ldir/rabbitmq" "$ldir/var-log-rabbitmq"
       fi
 
       tar -rf logs.tar "$ldir"
