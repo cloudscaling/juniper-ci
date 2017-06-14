@@ -62,7 +62,7 @@ chown stack:stack /home/stack/.ssh/config
 chmod 644 /home/stack/.ssh/config
 
 # install useful utils
-yum install -y yum-utils screen mc deltarpm
+yum install -y yum-utils screen mc deltarpm createrepo
 # add OpenStack repositories
 curl -L -o /etc/yum.repos.d/delorean-$OPENSTACK_VERSION.repo https://trunk.rdoproject.org/centos7-$OPENSTACK_VERSION/current/delorean.repo
 curl -L -o /etc/yum.repos.d/delorean-deps-$OPENSTACK_VERSION.repo http://trunk.rdoproject.org/centos7-$OPENSTACK_VERSION/delorean-deps.repo
@@ -93,6 +93,10 @@ for i in `ls /root/contrail_packages/*.rpm` ; do
 done
 mkdir -p /var/www/html/contrail
 tar -zxvf /opt/contrail/contrail_packages/contrail_rpms.tgz -C /var/www/html/contrail
+
+# hack: centos images don have openstack-utilities packages
+wget -P /var/www/html/contrail  http://mirror.comnet.uz/centos/7/cloud/x86_64/openstack-newton/common/openstack-utils-2017.1-1.el7.noarch.rpm
+createrepo --update -v /var/www/html/contrail
 
 # prepare docker images
 mkdir -p mkdir -p /var/www/html/contrail-docker
