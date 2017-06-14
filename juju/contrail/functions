@@ -1,8 +1,6 @@
 #!/bin/bash -e
 
 function check_containers() {
-  return 0
-
   local base_url='https://s3-us-west-2.amazonaws.com/contrailpkgs'
   mkdir -p "$HOME/docker"
   packages="contrail_debs-${BUILD}-${VERSION}.tgz"
@@ -15,6 +13,9 @@ function check_containers() {
   image_controller="contrail-controller-ubuntu${uver}-4.0.0.0-${BUILD}.tar.gz"
   image_analytics="contrail-analytics-ubuntu${uver}-4.0.0.0-${BUILD}.tar.gz"
   image_analyticsdb="contrail-analyticsdb-ubuntu${uver}-4.0.0.0-${BUILD}.tar.gz"
+
+  return 0
+
   for ff in "$packages" "$image_controller"  "$image_analytics" "$image_analyticsdb" ; do
     if [ -f "$HOME/docker/$ff" ] ; then
       local flsize=$(stat -c%s "$HOME/docker/$ff")
