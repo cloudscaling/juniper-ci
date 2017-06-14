@@ -1,6 +1,8 @@
 #!/bin/bash -e
 
 function check_containers() {
+  return 0
+
   local base_url='https://s3-us-west-2.amazonaws.com/contrailpkgs'
   mkdir -p "$HOME/docker"
   packages="contrail_debs-${BUILD}-${VERSION}.tgz"
