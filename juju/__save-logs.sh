@@ -8,6 +8,10 @@ for ldir in '/etc/apache2' '/etc/apt' '/etc/contrail' '/etc/contrailctl' '/etc/n
   fi
 done
 
+ps ax -H &> ps.log
+netstat -lpn &> netstat.log
+tar -rf logs.tar ps.log netstat.log
+
 if which contrail-status ; then
   contrail-status &>contrail-status.log
   tar -rf logs.tar contrail-status.log
