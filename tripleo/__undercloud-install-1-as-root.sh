@@ -87,9 +87,13 @@ openstack-config --set /etc/nova/nova.conf DEFAULT dhcp_domain $CLOUD_DOMAIN_NAM
 openstack-config --set /etc/ironic/ironic.conf DEFAULT rpc_response_timeout 600
 openstack-config --set /etc/neutron/neutron.conf DEFAULT  dns_domain $CLOUD_DOMAIN_NAME
 
-openstack-service restart nova
-openstack-service restart ironic
+# despite the field is depricated it is still important to set it
+# https://bugs.launchpad.net/neutron/+bug/1657814
+sed -i "s/[^#].*dhcp_domain =.*/dhcp_domain = ${CLOUD_DOMAIN_NAME}/" /etc/neutron/dhcp_agent.ini
+
 openstack-service restart neutron
+openstack-service restart ironic
+openstack-service restart nova
 
 
 # prepare contrail packages
