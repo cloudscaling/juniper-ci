@@ -11,6 +11,7 @@ if [[ -z "$NUM" ]] ; then
   exit 1
 fi
 
+CLOUD_DOMAIN_NAME=${CLOUD_DOMAIN_NAME:-'localdomain'}
 SSH_VIRT_TYPE=${VIRT_TYPE:-'virsh'}
 BASE_ADDR=${BASE_ADDR:-172}
 MEMORY=${MEMORY:-8000}
@@ -247,6 +248,15 @@ sed -i "s/VrouterGateway:.*/VrouterGateway: ${prov_ip}/g" $contrail_net_file
 sed -i "s/ControlVirtualInterface:.*/ControlVirtualInterface: ens3/g" $contrail_net_file
 sed -i "s/PublicVirtualInterface:.*/PublicVirtualInterface: ens4/g" $contrail_net_file
 
+# other options:
+misc_opts='misc_opts.yaml'
+echo "parameter_defaults:" > $misc_opts
+# IMPORTANT: The DNS domain used for the hosts should match the dhcp_domain configured in the Undercloud neutron.
+echo "  CloudDomain: $CLOUD_DOMAIN_NAME" >> $misc_opts
+if (( CONT_COUNT < 2 )) ; then
+  echo "  EnableGalera: false" >> $misc_opts
+fi
+
 
 #TODO: add yaml with concrete parameters
 
@@ -260,6 +270,7 @@ if [[ "$DEPLOY" != '1' ]] ; then
   echo "openstack overcloud deploy --templates tripleo-heat-templates/ \
     --roles-file $role_file \
     -e .tripleo/environments/deployment-artifacts.yaml \
+    -e $misc_opts \
     -e $contrail_services_file \
     -e $contrail_net_file $ha_opts"
   echo "Add '-e templates/firstboot/firstboot.yaml' if you use swap"
@@ -272,6 +283,7 @@ set +e
 openstack overcloud deploy --templates tripleo-heat-templates/ \
   --roles-file $role_file \
   -e .tripleo/environments/deployment-artifacts.yaml \
+  -e $misc_opts \
   -e $contrail_services_file \
   -e $contrail_net_file $ha_opts
 

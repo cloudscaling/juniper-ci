@@ -13,7 +13,7 @@ fi
 NETDEV=${NETDEV:-'eth1'}
 SKIP_SSH_TO_HOST_KEY=${SKIP_SSH_TO_HOST_KEY:-'no'}
 OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
-
+CLOUD_DOMAIN_NAME=${CLOUD_DOMAIN_NAME:-'localdomain'}
 
 # allow ip forwarding
 echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
@@ -83,9 +83,14 @@ sudo -u stack NUM=$NUM NETDEV=$NETDEV SKIP_SSH_TO_HOST_KEY=$SKIP_SSH_TO_HOST_KEY
 
 # increase timeouts due to virtual installation
 openstack-config --set /etc/nova/nova.conf DEFAULT rpc_response_timeout 600
+openstack-config --set /etc/nova/nova.conf DEFAULT dhcp_domain $CLOUD_DOMAIN_NAME
 openstack-config --set /etc/ironic/ironic.conf DEFAULT rpc_response_timeout 600
+openstack-config --set /etc/neutron/neutron.conf DEFAULT  dns_domain $CLOUD_DOMAIN_NAME
+
 openstack-service restart nova
 openstack-service restart ironic
+openstack-service restart neutron
+
 
 # prepare contrail packages
 for i in `ls /root/contrail_packages/*.rpm` ; do
