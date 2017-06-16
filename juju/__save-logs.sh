@@ -34,7 +34,7 @@ if docker ps | grep -q contrail ; then
       if grep -q trusty /etc/lsb-release ; then
         docker logs "contrail-$cnt" &>"./$ldir/$cnt.log"
       else
-        docker exec "contrail-$cnt" journalctl -u contrail-ansible.service &>"./$ldir/$cnt.log"
+        docker exec "contrail-$cnt" journalctl -u contrail-ansible.service --no-pager --since "2017-01-01" &>"./$ldir/$cnt.log"
       fi
       docker exec contrail-$cnt contrail-status &>"./$ldir/contrail-status.log"
       if [[ "$cnt" == "controller" ]] ; then
