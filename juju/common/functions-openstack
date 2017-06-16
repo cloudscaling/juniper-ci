@@ -84,6 +84,8 @@ function create_virtualenv() {
   virtualenv .venv
   source .venv/bin/activate
   pip install -q python-openstackclient 2>/dev/null
+  # NOTE: version 9.0 always writes debug output if run via openstack
+  pip install -q "python-novaclient<9.0" 2>/dev/null
   deactivate
 }
 
@@ -250,6 +252,7 @@ function _check_instance_ping() {
 function _check_instance_ssh_and_metadata() {
   local mch=$1
   local ip=$2
+  local fip=$3
   local ssh_opts='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5'
   juju-ssh $mch sudo apt-get -y install sshpass &>/dev/null
   echo "INFO: Trying to ssh into instance with ip $ip and run ifconfig"
@@ -259,13 +262,18 @@ function _check_instance_ssh_and_metadata() {
   fi
 
   echo "INFO: Trying to ssh into instance with ip $ip and get meta-data/public-ipv4"
-  if ! juju-ssh $mch sshpass -p 'cubswin:\)' ssh $ssh_opts cirros@$ip curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null ; then
+  if ! output=`juju-ssh $mch sshpass -p 'cubswin:\)' ssh $ssh_opts cirros@$ip curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null` ; then
     echo ""
     echo "ERROR: Can't get instance metadata by ssh into ip $ip"
     return 1
   fi
   echo ""
-  echo "INFO: Can ssh and get metadata for instance by ip $ip"
+  if ! echo "$output" | grep "$fip" ; then
+    echo "ERROR: Can't find public ip $fip in metadata output:"
+    echo "$output"
+    return 1
+  fi
+  echo "INFO: Can ssh and get correct metadata for instance by ip $ip"
   return 0
 }
 
@@ -312,7 +320,7 @@ function check_instance_simple() {
     fi
 
     _check_instance_ping $mch $new_route || ret=1
-    _check_instance_ssh_and_metadata $mch $new_route || ret=1
+    _check_instance_ssh_and_metadata $mch $new_route $fip || ret=1
 
     # add VGW to second compute host and check ping/ssh from there
     another_compute_host=`get_machine_index_by_service nova-compute | grep -v $mch`
@@ -320,7 +328,7 @@ function check_instance_simple() {
     juju-ssh $another_compute_host sudo /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx
 
     _check_instance_ping $another_compute_host $fip || ret=1
-    _check_instance_ssh_and_metadata $another_compute_host $fip || ret=1
+    _check_instance_ssh_and_metadata $another_compute_host $fip $fip || ret=1
 
     # remove VGW
     juju-ssh $another_compute_host sudo /opt/contrail/utils/provision_vgw_interface.py --oper delete --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx

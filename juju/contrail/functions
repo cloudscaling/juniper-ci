@@ -14,8 +14,6 @@ function check_containers() {
   image_analytics="contrail-analytics-ubuntu${uver}-4.0.0.0-${BUILD}.tar.gz"
   image_analyticsdb="contrail-analyticsdb-ubuntu${uver}-4.0.0.0-${BUILD}.tar.gz"
 
-  return 0
-
   for ff in "$packages" "$image_controller"  "$image_analytics" "$image_analyticsdb" ; do
     if [ -f "$HOME/docker/$ff" ] ; then
       local flsize=$(stat -c%s "$HOME/docker/$ff")

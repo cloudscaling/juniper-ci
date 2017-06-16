@@ -8,6 +8,10 @@ for ldir in '/etc/apache2' '/etc/apt' '/etc/contrail' '/etc/contrailctl' '/etc/n
   fi
 done
 
+ps ax -H &> ps.log
+netstat -lpn &> netstat.log
+tar -rf logs.tar ps.log netstat.log
+
 if which contrail-status ; then
   contrail-status &>contrail-status.log
   tar -rf logs.tar contrail-status.log
@@ -30,7 +34,7 @@ if docker ps | grep -q contrail ; then
       if grep -q trusty /etc/lsb-release ; then
         docker logs "contrail-$cnt" &>"./$ldir/$cnt.log"
       else
-        docker exec "contrail-$cnt" journalctl -u contrail-ansible.service &>"./$ldir/$cnt.log"
+        docker exec "contrail-$cnt" journalctl -u contrail-ansible.service --no-pager --since "2017-01-01" &>"./$ldir/$cnt.log"
       fi
       docker exec contrail-$cnt contrail-status &>"./$ldir/contrail-status.log"
       if [[ "$cnt" == "controller" ]] ; then
@@ -43,6 +47,8 @@ if docker ps | grep -q contrail ; then
       if [[ "$cnt" == "controller" ]] ; then
         docker cp "contrail-$cnt:/etc/rabbitmq" "./$ldir"
         mv "$ldir/rabbitmq" "$ldir/etc-rabbitmq"
+        docker cp "contrail-$cnt:/var/log/rabbitmq" "./$ldir"
+        mv "$ldir/rabbitmq" "$ldir/var-log-rabbitmq"
       fi
 
       tar -rf logs.tar "$ldir"
