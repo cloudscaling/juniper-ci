@@ -89,7 +89,11 @@ openstack-config --set /etc/neutron/neutron.conf DEFAULT  dns_domain $CLOUD_DOMA
 
 # despite the field is depricated it is still important to set it
 # https://bugs.launchpad.net/neutron/+bug/1657814
-sed -i "s/[^#].*dhcp_domain =.*/dhcp_domain = ${CLOUD_DOMAIN_NAME}/" /etc/neutron/dhcp_agent.ini
+if grep -q '^dhcp_domain.*=' /etc/neutron/dhcp_agent.ini ; then
+  sed -i "s/^dhcp_domain.*=.*/dhcp_domain = ${CLOUD_DOMAIN_NAME}/" /etc/neutron/dhcp_agent.ini
+else
+  sed -i "/^#.*dhcp_domain.*=/a dhcp_domain = ${CLOUD_DOMAIN_NAME}" /etc/neutron/dhcp_agent.ini
+fi
 
 openstack-service restart neutron
 openstack-service restart ironic
