@@ -62,10 +62,6 @@ if [ -n "$iid" ] ; then
   AZ=`aws ec2 describe-instances --instance-id "$iid" --query 'Reservations[*].Instances[*].Placement.AvailabilityZone' --output text`
   vpc_id=`aws ec2 describe-instances --instance-id "$iid" --query 'Reservations[*].Instances[*].VpcId' --output text`
 fi
-
-# TODO: remove it
-AZ="us-west-2b"
-
 echo "INFO: Availability zone of this deployment is $AZ, vpc is $vpc_id"
 export AZ
 export vpc_id
