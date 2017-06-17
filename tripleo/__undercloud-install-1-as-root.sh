@@ -112,7 +112,6 @@ wget -P /var/www/html/contrail  http://mirror.comnet.uz/centos/7/cloud/x86_64/op
 createrepo --update -v /var/www/html/contrail
 
 # prepare docker images
-mkdir -p mkdir -p /var/www/html/contrail-docker
 for i in `ls /root/contrail_packages/*.tgz` ; do
-  tar -zxvf ${i} -C /var/www/html/contrail-docker
+  tar -zxvf ${i} -C /var/www/html/contrail
 done

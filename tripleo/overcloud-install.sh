@@ -201,20 +201,22 @@ git clone https://github.com/Juniper/contrail-tripleo-puppet -b stable/newton us
 git clone https://github.com/alexey-mr/puppet-contrail -b stable/newton usr/share/openstack-puppet/modules/contrail
 tar czvf puppet-modules.tgz usr/
 
-# prepare containers for all nodes
-# TODO: rework somehow to avoid copying of large archives on all nodes
-#       one of the wayts is to wget containers directly from overcloud nodes
-#       (they are available on undrecloud)
-mkdir -p tmp
-for i in controller analytics analyticsdb ; do
-  container_repo="http://localhost/contrail-docker/`curl http://localhost/contrail-docker/  2>&1 | awk -F '"' \"/contrail-${i}-/ {print(\\$8)}\"`"
-  wget --tries 5 --waitretry=2 --retry-connrefused -O tmp/container-${i}.tar.gz ${container_repo}
-done
-tar czvf contrail-containers.tgz tmp/
-upload-swift-artifacts -f contrail-containers.tgz
+# # prepare containers for all nodes
+# # TODO: rework somehow to avoid copying of large archives on all nodes
+# #       one of the wayts is to wget containers directly from overcloud nodes
+# #       (they are available on undrecloud)
+# mkdir -p tmp
+# for i in controller analytics analyticsdb ; do
+#   container_repo="http://localhost/contrail-docker/`curl http://localhost/contrail-docker/  2>&1 | awk -F '"' \"/contrail-${i}-/ {print(\\$8)}\"`"
+#   wget --tries 5 --waitretry=2 --retry-connrefused -O tmp/container-${i}.tar.gz ${container_repo}
+# done
+# tar czvf contrail-containers.tgz tmp/
+# upload-swift-artifacts -f contrail-containers.tgz
 
-# upload artifacts to swift
-upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz -f contrail-containers.tgz
+# # upload artifacts to swift
+# upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz -f contrail-containers.tgz
+upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
+
 
 # prepare tripleo heat templates
 rm -rf ~/tripleo-heat-templates
