@@ -258,7 +258,7 @@ echo "  CloudDomain: $CLOUD_DOMAIN_NAME" >> $misc_opts
 if (( CONT_COUNT < 2 )) ; then
   echo "  EnableGalera: false" >> $misc_opts
 fi
-
+echo "  ContrailConfigVIP: internal_api"  >> $misc_opts
 
 #TODO: add yaml with concrete parameters
 
