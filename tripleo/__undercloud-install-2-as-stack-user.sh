@@ -29,10 +29,10 @@ undercloud_admin_vip = $prov_ip.11
 local_interface = $NETDEV
 masquerade_network = $prov_ip.0/24
 dhcp_start = $prov_ip.100
-dhcp_end = $prov_ip.120
+dhcp_end = $prov_ip.149
 network_cidr = $prov_ip.0/24
 network_gateway = $prov_ip.2
-discovery_iprange = $prov_ip.130,$prov_ip.150
+discovery_iprange = $prov_ip.150,$prov_ip.170
 EOF
 
 # install undercloud

@@ -257,26 +257,51 @@ echo "parameter_defaults:" > $misc_opts
 if (( CONT_COUNT < 2 )) ; then
   echo "  EnableGalera: false" >> $misc_opts
 fi
-# TODO: rework fo HA deployment
-contrail_vip="192.168.${addr}.50"
-contrail_analytics_vip="192.168.${addr}.60"
 cat <<EOF >> $misc_opts
   CloudDomain: $CLOUD_DOMAIN_NAME
-  ContrailControllerIPs:
-    internal_api:
-    - $contrail_vip
-  ContrailAnalyticsIPs:
-    internal_api:
-    - $contrail_analytics_vip
-  ContrailConfigVIP: $contrail_vip
-  ContrailVIP: $contrail_vip
-  ContrailAnalyticsVIP: $contrail_analytics_vip
-  ContrailWebuiVIP: $contrail_vip
   RabbitUserName: contrail
   RabbitPassword: contrail
 EOF
 
-#TODO: add yaml with concrete parameters
+contrail_controller_network_opts='controller_network_opts.yaml'
+contrail_vip="192.168.${addr}.50"
+if (( CONTRAIL_CONTROLLER_COUNT > 1 )) ; then
+  #TODO: impl config for VIP via haproxy
+  echo Error: controller count > 1 is unsupported
+  exit -1
+else
+  cat <<EOF > $contrail_controller_network_opts
+resource_registry:
+  OS::TripleO::ContrailController::Ports::InternalApiPort: ../../network/ports/internal_api_from_pool.yaml
+
+parameter_defaults:
+  ContrailControllerIPs:
+    internal_api:
+    - $contrail_vip
+  ContrailConfigVIP: $contrail_vip
+  ContrailVIP: $contrail_vip
+  ContrailWebuiVIP: $contrail_vip
+EOF
+fi
+
+contrail_analytics_network_opts='analytics_network_opts.yaml'
+contrail_analytics_vip="192.168.${addr}.60"
+if (( ANALYTICS_COUNT > 1 )) ; then
+  #TODO: impl config for VIP via haproxy
+  echo Error: analytics count > 1 is unsupported
+  exit -1
+else
+  cat <<EOF > $contrail_analytics_network_opts
+resource_registry:
+  OS::TripleO::ContrailAnalytics::Ports::InternalApiPort: ../../network/ports/internal_api_from_pool.yaml
+
+parameter_defaults:
+  ContrailAnalyticsIPs:
+    internal_api:
+    - $contrail_analytics_vip
+  ContrailAnalyticsVIP: $contrail_analytics_vip
+EOF
+fi
 
 ha_opts=""
 if (( CONT_COUNT > 1 )) ; then
@@ -286,11 +311,14 @@ fi
 if [[ "$DEPLOY" != '1' ]] ; then
   # deploy overcloud. if you do it manually then I recommend to do it in screen.
   echo "openstack overcloud deploy --templates tripleo-heat-templates/ \
-    --roles-file $role_file \
-    -e .tripleo/environments/deployment-artifacts.yaml \
-    -e $misc_opts \
-    -e $contrail_services_file \
-    -e $contrail_net_file $ha_opts"
+      --roles-file $role_file \
+      -e .tripleo/environments/deployment-artifacts.yaml \
+      -e $contrail_services_file \
+      -e $contrail_net_file \
+      -e $contrail_controller_network_opts \
+      -e $contrail_analytics_network_opts \
+      -e $misc_opts \
+      $ha_opts"
   echo "Add '-e templates/firstboot/firstboot.yaml' if you use swap"
   exit
 fi
@@ -301,9 +329,12 @@ set +e
 openstack overcloud deploy --templates tripleo-heat-templates/ \
   --roles-file $role_file \
   -e .tripleo/environments/deployment-artifacts.yaml \
-  -e $misc_opts \
   -e $contrail_services_file \
-  -e $contrail_net_file $ha_opts
+  -e $contrail_net_file \
+  -e $contrail_controller_network_opts \
+  -e $contrail_analytics_network_opts \
+  -e $misc_opts \
+  $ha_opts
 
 errors=$?
 
