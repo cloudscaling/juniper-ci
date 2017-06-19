@@ -272,7 +272,7 @@ if (( CONTRAIL_CONTROLLER_COUNT > 1 )) ; then
 else
   cat <<EOF > $contrail_controller_network_opts
 resource_registry:
-  OS::TripleO::ContrailController::Ports::InternalApiPort: ../../network/ports/internal_api_from_pool.yaml
+  OS::TripleO::ContrailController::Ports::InternalApiPort: tripleo-heat-templates/network/ports/internal_api_from_pool.yaml
 
 parameter_defaults:
   ContrailControllerIPs:
@@ -293,7 +293,7 @@ if (( ANALYTICS_COUNT > 1 )) ; then
 else
   cat <<EOF > $contrail_analytics_network_opts
 resource_registry:
-  OS::TripleO::ContrailAnalytics::Ports::InternalApiPort: ../../network/ports/internal_api_from_pool.yaml
+  OS::TripleO::ContrailAnalytics::Ports::InternalApiPort: tripleo-heat-templates/network/ports/internal_api_from_pool.yaml
 
 parameter_defaults:
   ContrailAnalyticsIPs:
