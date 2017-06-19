@@ -9,6 +9,8 @@ fi
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
+ssh_key_dir="/home/jenkins"
+
 # base image for VMs
 BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-'undercloud.qcow2'}
 BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
@@ -109,8 +111,8 @@ mgmt_mac="00:16:00:00:0$NUM:02"
 prov_ip=$(get_network_ip "provisioning")
 prov_mac="00:16:00:00:0$NUM:06"
 # generate password/key for undercloud's root
-rm -f "$my_dir/kp-$NUM" "$my_dir/kp-$NUM.pub"
-ssh-keygen -b 2048 -t rsa -f "$my_dir/kp-$NUM" -q -N ""
+rm -f "$ssh_key_dir/kp-$NUM" "$ssh_key_dir/kp-$NUM.pub"
+ssh-keygen -b 2048 -t rsa -f "$ssh_key_dir/kp-$NUM" -q -N ""
 rootpass=`openssl passwd -1 123`
 
 #check that nbd kernel module is loaded
@@ -142,7 +144,7 @@ function change_undercloud_image() {
   sed -i "s/{{mac-address}}/$prov_mac/g" $tmpdir/etc/sysconfig/network-scripts/ifcfg-eth1
   # configure root access
   mkdir -p $tmpdir/root/.ssh
-  cp "$my_dir/kp-$NUM.pub" $tmpdir/root/.ssh/authorized_keys
+  cp "$ssh_key_dir/kp-$NUM.pub" $tmpdir/root/.ssh/authorized_keys
   cp "/home/stack/.ssh/id_rsa" $tmpdir/root/stack_id_rsa
   cp "/home/stack/.ssh/id_rsa.pub" $tmpdir/root/stack_id_rsa.pub
   echo "PS1='\${debian_chroot:+(\$debian_chroot)}undercloud:\[\033[01;31m\](\$?)\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\\\$ '" >> $tmpdir/root/.bashrc
@@ -233,7 +235,7 @@ done
 # wait for undercloud machine
 iter=0
 truncate -s 0 ./tmp_file
-while ! scp -i "$my_dir/kp-$NUM" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -B ./tmp_file root@${mgmt_ip}.2:/tmp/tmp_file ; do
+while ! scp -i "$ssh_key_dir/kp-$NUM" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -B ./tmp_file root@${mgmt_ip}.2:/tmp/tmp_file ; do
   if (( iter >= 20 )) ; then
     echo "Could not connect to undercloud"
     exit 1

@@ -3,6 +3,8 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
+ssh_key_dir="/home/jenkins"
+
 if [[ -z "$NUM" ]] ; then
   echo "Please set NUM variable to specific environment number. (export NUM=4)"
   exit 1
@@ -28,4 +30,4 @@ for (( i=1; i<=10; i++ )) ; do
   delete_volume overcloud-$NUM-ctrlcont-$i.qcow2 $poolname
 done
 
-rm -f "$my_dir/kp-$NUM" "$my_dir/kp-$NUM.pub"
+rm -f "$ssh_key_dir/kp-$NUM" "$ssh_key_dir/kp-$NUM.pub"
