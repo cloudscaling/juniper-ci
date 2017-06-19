@@ -254,11 +254,27 @@ sed -i "s/PublicVirtualInterface:.*/PublicVirtualInterface: ens4/g" $contrail_ne
 misc_opts='misc_opts.yaml'
 echo "parameter_defaults:" > $misc_opts
 # IMPORTANT: The DNS domain used for the hosts should match the dhcp_domain configured in the Undercloud neutron.
-echo "  CloudDomain: $CLOUD_DOMAIN_NAME" >> $misc_opts
 if (( CONT_COUNT < 2 )) ; then
   echo "  EnableGalera: false" >> $misc_opts
 fi
-echo "  ContrailConfigVIP: internal_api"  >> $misc_opts
+# TODO: rework fo HA deployment
+contrail_vip="192.168.${addr}.50"
+contrail_analytics_vip="192.168.${addr}.60"
+cat <<EOF >> $misc_opts
+  CloudDomain: $CLOUD_DOMAIN_NAME
+  ContrailControllerIPs:
+    internal_api:
+    - $contrail_vip
+  ContrailAnalyticsIPs:
+    internal_api:
+    - $contrail_analytics_vip
+  ContrailConfigVIP: $contrail_vip
+  ContrailVIP: $contrail_vip
+  ContrailAnalyticsVIP: $contrail_analytics_vip
+  ContrailWebuiVIP: $contrail_vip
+  RabbitUserName: contrail
+  RabbitPassword: contrail
+EOF
 
 #TODO: add yaml with concrete parameters
 
