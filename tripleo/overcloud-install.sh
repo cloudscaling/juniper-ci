@@ -264,7 +264,7 @@ cat <<EOF >> $misc_opts
 EOF
 
 contrail_controller_network_opts='controller_network_opts.yaml'
-contrail_vip="192.168.${addr}.50"
+contrail_vip="192.168.${prov_ip_addr}.50"
 if (( CONTRAIL_CONTROLLER_COUNT > 1 )) ; then
   #TODO: impl config for VIP via haproxy
   echo Error: controller count > 1 is unsupported
@@ -285,7 +285,7 @@ EOF
 fi
 
 contrail_analytics_network_opts='analytics_network_opts.yaml'
-contrail_analytics_vip="192.168.${addr}.60"
+contrail_analytics_vip="192.168.${prov_ip_addr}.60"
 if (( ANALYTICS_COUNT > 1 )) ; then
   #TODO: impl config for VIP via haproxy
   echo Error: analytics count > 1 is unsupported
