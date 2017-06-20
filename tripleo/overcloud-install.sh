@@ -263,45 +263,53 @@ cat <<EOF >> $misc_opts
   RabbitPassword: contrail
 EOF
 
-contrail_controller_network_opts='controller_network_opts.yaml'
-contrail_vip="192.168.${prov_ip_addr}.50"
-if (( CONTRAIL_CONTROLLER_COUNT > 1 )) ; then
-  #TODO: impl config for VIP via haproxy
-  echo Error: controller count > 1 is unsupported
-  exit -1
-else
-  cat <<EOF > $contrail_controller_network_opts
-resource_registry:
-  OS::TripleO::ContrailController::Ports::InternalApiPort: tripleo-heat-templates/network/ports/internal_api_from_pool.yaml
-
-parameter_defaults:
-  ContrailControllerIPs:
-    internal_api:
-    - $contrail_vip
-  ContrailConfigVIP: $contrail_vip
-  ContrailVIP: $contrail_vip
-  ContrailWebuiVIP: $contrail_vip
+contrail_vip='contrail_vip.yaml'
+cat <<EOF > $contrail_vip
+heat_template_version: 2016-10-14
+parameters:
+  ContrailControllerVirtualFixedIPs:
+    default: []
+    description: Should be used for arbitrary ips.
+    type: json
+  ContrailAnalyticsVirtualFixedIPs:
+    default: []
+    description: Should be used for arbitrary ips.
+    type: json
+resources:
+  Networks:
+    type: OS::TripleO::Network
+  ContrailControllerVirtualIP:
+    type: OS::Neutron::Port
+    depends_on: Networks
+    properties:
+      name: contrail_controller_virtual_ip
+      network: {get_param: NeutronControlPlaneID}
+      fixed_ips: {get_param: ContrailControllerVirtualFixedIPs}
+      replacement_policy: AUTO
+  ContrailAnalyticsVirtualIP:
+    type: OS::Neutron::Port
+    depends_on: Networks
+    properties:
+      name: contrail_analytics_virtual_ip
+      network: {get_param: NeutronControlPlaneID}
+      fixed_ips: {get_param: ContrailAnalyticsVirtualFixedIPs}
+      replacement_policy: AUTO
+outputs:
+  ContrailConfigVIP:
+    value: {get_attr: [ContrailControllerVirtualIP, fixed_ips, 0, ip_address]}
+  ContrailVIP:
+    value: {get_attr: [ContrailControllerVirtualIP, fixed_ips, 0, ip_address]}
+  ContrailWebuiVIP:
+    value: {get_attr: [ContrailControllerVirtualIP, fixed_ips, 0, ip_address]}
+  ContrailAnalyticsVIP:
+    value: {get_attr: [ContrailAnalyticsVirtualIP, fixed_ips, 0, ip_address]}
 EOF
-fi
 
-contrail_analytics_network_opts='analytics_network_opts.yaml'
-contrail_analytics_vip="192.168.${prov_ip_addr}.60"
-if (( ANALYTICS_COUNT > 1 )) ; then
-  #TODO: impl config for VIP via haproxy
-  echo Error: analytics count > 1 is unsupported
-  exit -1
-else
-  cat <<EOF > $contrail_analytics_network_opts
+contrail_vip_env='contrail_vip_env.yaml'
+cat <<EOF >$contrail_vip_env
 resource_registry:
-  OS::TripleO::ContrailAnalytics::Ports::InternalApiPort: tripleo-heat-templates/network/ports/internal_api_from_pool.yaml
-
-parameter_defaults:
-  ContrailAnalyticsIPs:
-    internal_api:
-    - $contrail_analytics_vip
-  ContrailAnalyticsVIP: $contrail_analytics_vip
+  OS::TripleO::ContrailVirtualIPs: $contrail_vip
 EOF
-fi
 
 ha_opts=""
 if (( CONT_COUNT > 1 )) ; then
@@ -315,8 +323,7 @@ if [[ "$DEPLOY" != '1' ]] ; then
       -e .tripleo/environments/deployment-artifacts.yaml \
       -e $contrail_services_file \
       -e $contrail_net_file \
-      -e $contrail_controller_network_opts \
-      -e $contrail_analytics_network_opts \
+      -e $contrail_vip_env \
       -e $misc_opts \
       $ha_opts"
   echo "Add '-e templates/firstboot/firstboot.yaml' if you use swap"
@@ -331,8 +338,7 @@ openstack overcloud deploy --templates tripleo-heat-templates/ \
   -e .tripleo/environments/deployment-artifacts.yaml \
   -e $contrail_services_file \
   -e $contrail_net_file \
-  -e $contrail_controller_network_opts \
-  -e $contrail_analytics_network_opts \
+  -e $contrail_vip_env \
   -e $misc_opts \
   $ha_opts
 
