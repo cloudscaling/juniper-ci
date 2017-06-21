@@ -19,7 +19,7 @@ function deactivate_venv() {
 
 function create_virtualenv() {
   rm -rf .venv
-  if [[ -n "$USE_VENV" ]]
+  if [[ "$USE_VENV" == 'true' ]] ; then
     echo INFO: Create venv
     virtualenv .venv
   else
@@ -139,12 +139,13 @@ function create_network() {
   openstack --insecure network create --internal private-$netsfx
   local private_net_id=`openstack --insecure network show private-$netsfx -f value -c id`
   openstack --insecure subnet create --network $private_net_id --subnet-range 10.10.0.0/24 private-$netsfx
-  local private_subnet_id=`openstack --insecure subnet list --network $private_net_id -f value -c ID`
+  local private_subnet_id=`openstack --insecure subnet list | grep "$private_net_id" | awk '{print($2)}'`
 
   echo "INFO: Create router"
   openstack --insecure router create p-ext-$netsfx
   local router_id=`openstack --insecure router show p-ext-$netsfx -f value -c id`
-  openstack --insecure router set --external-gateway $public_net_id $router_id
+  #openstack --insecure router set --external-gateway $public_net_id $router_id
+  neutron router-gateway-set $router_id $public_net_id
   openstack --insecure router add subnet $router_id $private_subnet_id
 
   echo "INFO: Add rules to default security group"
@@ -234,7 +235,7 @@ function _get_machine_by_ip() {
 }
 
 function _get_machine_index_by_service() {
-  #local srv=$1
+  local srv=$1
   #juju-status-tabular $srv | awk "/^$srv\//{print \$4}"
   #TODO: impl
 }
