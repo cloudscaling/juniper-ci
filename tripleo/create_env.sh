@@ -73,33 +73,54 @@ function create_store_volume() {
   qemu-img create -f qcow2 -o preallocation=metadata $pool_path/$name-store.qcow2 100G
 }
 
-# create volumes for overcloud machines
-for (( i=1; i<=CONTROLLER_COUNT; i++ )) ; do
-  name="overcloud-$NUM-cont-$i"
-  create_root_volume $name
-done
-for (( i=1; i<=COMPUTE_COUNT; i++ )) ; do
-  name="overcloud-$NUM-comp-$i"
-  create_root_volume $name
-  create_store_volume $name
-done
-for (( i=1 ; i<=STORAGE_COUNT; i++ )) ; do
-  name="overcloud-$NUM-stor-$i"
-  create_root_volume $name
-  create_store_volume $name
-done
-for (( i=1 ; i<=CONTRAIL_CONTROLLER_COUNT; i++ )) ; do
-  name="overcloud-$NUM-ctrlcont-$i"
-  create_root_volume $name
-done
-for (( i=1 ; i<=CONTRAIL_ANALYTICS_COUNT; i++ )) ; do
-  name="overcloud-$NUM-ctrlanalytics-$i"
-  create_root_volume $name
-done
-for (( i=1 ; i<=CONTRAIL_ANALYTICSDB_COUNT; i++ )) ; do
-  name="overcloud-$NUM-ctrlanalyticsdb-$i"
-  create_root_volume $name
-done
+function define-machine() {
+  local name="$1"
+  shift
+  local disk_opt="$@"
+  virt-install --name $name \
+    --ram 8192 \
+    --vcpus 2 \
+    --os-variant rhel7 \
+    $disk_opt \
+    --noautoconsole \
+    --vnc \
+    --network network=$prov_net,model=$net_driver \
+    --network network=$ext_net,model=$net_driver \
+    --cpu SandyBridge,+vmx \
+    --dry-run --print-xml > /tmp/oc-$name.xml
+  virsh define --file /tmp/oc-$name.xml
+}
+
+function define_overcloud_vms() {
+  local name=$1
+  local count=$2
+  local do_create_storage=${3:-'false'}
+  local number_re='^[0-9]+$'
+  local disk_opts=''
+  if [[ $count =~ $number_re ]] ; then
+    for (( i=1 ; i<=count; i++ )) ; do
+      vol_name="overcloud-$NUM-${name}-$i"
+      create_root_volume $vol_name
+      disk_opts="--disk path=${pool_path}/${vol_name}.qcow2,device=disk,bus=virtio,format=qcow2"
+      if [[ "$do_create_storage" == 'true' ]] ; then
+        create_store_volume $vol_name
+        disk_opts+=" --disk path=${pool_path}/${name}-store.qcow2,device=disk,bus=virtio,format=qcow2"
+      fi
+      define-machine "rd-$vol_name" "$disk_opts"
+    done
+  else
+    echo Skip VM $name creation, count=$count
+  fi
+}
+
+# just define overcloud machines
+define_overcloud_vms 'cont' $CONTROLLER_COUNT
+define_overcloud_vms 'comp' $COMPUTE_COUNT 'true'
+define_overcloud_vms 'stor' $STORAGE_COUNT 'true'
+define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT
+define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT
+define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT
+
 
 # copy image for undercloud and resize them
 cp $BASE_IMAGE $pool_path/undercloud-$NUM.qcow2
@@ -186,50 +207,6 @@ virt-install --name=rd-undercloud-$NUM \
   --network network=$prov_net,model=$net_driver,mac=$prov_mac \
   --network network=$ext_net,model=$net_driver \
   --graphics vnc,listen=0.0.0.0
-
-function define-machine() {
-  name="$1"
-  shift
-  disk_opt="$@"
-  virt-install --name $name \
-    --ram 8192 \
-    --vcpus 2 \
-    --os-variant rhel7 \
-    $disk_opt \
-    --noautoconsole \
-    --vnc \
-    --network network=$prov_net,model=$net_driver \
-    --network network=$ext_net,model=$net_driver \
-    --cpu SandyBridge,+vmx \
-    --dry-run --print-xml > /tmp/oc-$name.xml
-  virsh define --file /tmp/oc-$name.xml
-}
-
-# just define overcloud machines
-for (( i=1; i<=CONTROLLER_COUNT; i++ )) ; do
-  name="overcloud-$NUM-cont-$i"
-  define-machine rd-$name "--disk path=$pool_path/$name.qcow2,device=disk,bus=virtio,format=qcow2"
-done
-for (( i=1; i<=COMPUTE_COUNT; i++ )) ; do
-  name="overcloud-$NUM-comp-$i"
-  define-machine rd-$name "--disk path=$pool_path/$name.qcow2,device=disk,bus=virtio,format=qcow2 --disk path=$pool_path/$name-store.qcow2,device=disk,bus=virtio,format=qcow2"
-done
-for (( i=1; i<=STORAGE_COUNT; i++ )) ; do
-  name="overcloud-$NUM-stor-$i"
-  define-machine rd-$name "--disk path=$pool_path/$name.qcow2,device=disk,bus=virtio,format=qcow2 --disk path=$pool_path/$name-store.qcow2,device=disk,bus=virtio,format=qcow2"
-done
-for (( i=1; i<=CONTRAIL_CONTROLLER_COUNT; i++ )) ; do
-  name="overcloud-$NUM-ctrlcont-$i"
-  define-machine rd-$name "--disk path=$pool_path/$name.qcow2,device=disk,bus=virtio,format=qcow2"
-done
-for (( i=1; i<=CONTRAIL_ANALYTICS_COUNT; i++ )) ; do
-  name="overcloud-$NUM-ctrlanalytics-$i"
-  define-machine rd-$name "--disk path=$pool_path/$name.qcow2,device=disk,bus=virtio,format=qcow2"
-done
-for (( i=1; i<=CONTRAIL_ANALYTICSDB_COUNT; i++ )) ; do
-  name="overcloud-$NUM-ctrlanalyticsdb-$i"
-  define-machine rd-$name "--disk path=$pool_path/$name.qcow2,device=disk,bus=virtio,format=qcow2"
-done
 
 
 # wait for undercloud machine

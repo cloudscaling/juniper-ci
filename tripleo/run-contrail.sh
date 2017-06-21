@@ -12,11 +12,14 @@ fi
 
 export NUM=${NUM:-0}
 export CLEAN_ENV=${CLEAN_ENV:-'auto'}
-export OPENSTACK_VERSION="${OPENSTACK_VERSION:-'newton'}"
-export CONTROLLER_COUNT="${CONTROLLER_COUNT:-1}"
-export CONTRAIL_CONTROLLER_COUNT="${CONTRAIL_CONTROLLER_COUNT:-1}"
+export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'newton'}
+export CONTROLLER_COUNT=${CONTROLLER_COUNT:-1}
+export CONTRAIL_CONTROLLER_COUNT=${CONTRAIL_CONTROLLER_COUNT:-1}
+export CONTRAIL_ANALYTICS_COUNT=${CONTRAIL_ANALYTICS_COUNT:-1}
+export CONTRAIL_ANALYTICSDB_COUNT=${CONTRAIL_ANALYTICSDB_COUNT:-1}
+export NETWORK_ISOLATION=${NETWORK_ISOLATION:-'single'}
+export BASE_ADDR=${BASE_ADDR:-172}
 
-BASE_ADDR=${BASE_ADDR:-172}
 ((env_addr=BASE_ADDR+NUM*10))
 ip_addr="192.168.${env_addr}.2"
 ssh_opts="-i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
@@ -64,7 +67,7 @@ if [[ $CLEAN_ENV != 'never' ]] ; then
   cleanup_environment
 fi
 
-# /opt/jenkins/deploy_all.sh is available for modifying only for root,
+# /opt/jenkins/tripleo_contrail_deploy_all.sh is available for modifying only for root,
 # this script should point to correct deploy_all.sh.
 # It should be set manually once during jenkins slave preparation.
 sudo -E /opt/jenkins/tripleo_contrail_deploy_all.sh

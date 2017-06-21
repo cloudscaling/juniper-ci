@@ -1,0 +1,368 @@
+#!/bin/bash -x
+
+MAX_FAIL=${MAX_FAIL:-30}
+USE_VENV=${USE_VENV:-'true'}
+SSH_CMD=${SSH_CMD:-'ssh'}
+PKT_MANAGER=${PKT_MANAGER:-'yum'}
+
+function activate_venv() {
+  if [ -d .venv ]; then
+    source .venv/bin/activate
+  fi
+}
+
+function deactivate_venv() {
+  if [ -d .venv ]; then
+    deactivate
+  fi
+}
+
+function create_virtualenv() {
+  rm -rf .venv
+  if [[ -n "$USE_VENV" ]]
+    echo INFO: Create venv
+    virtualenv .venv
+  else
+    echo INFO: Skip venv creation
+  fi
+
+  activate_venv
+  pip install -q python-openstackclient 2>/dev/null
+  # NOTE: version 9.0 always writes debug output if run via openstack
+  pip install -q "python-novaclient<9.0" 2>/dev/null
+  deactivate_venv
+}
+
+function instance_status() {
+  openstack --insecure server show $1 | awk '/ status / {print $4}'
+}
+
+function image_status() {
+  openstack --insecure image show $1 | awk '/ status / {print $4}'
+}
+
+function wait_instance() {
+  local instance_id=$1
+  local max_fail=$2
+  local wait_status=${3:-ACTIVE}
+  echo "INFO: Wait for status '$wait_status' of instance '$instance_id'"
+  local fail=0
+  local timeout=10
+  while [[ true ]] ; do
+    if ((fail >= max_fail)); then
+      echo '' >> errors
+      echo "ERROR: Instance status wait timeout occured" >> errors
+      openstack --insecure server show $instance_id >> errors
+      return 1
+    fi
+    echo "attempt $fail of $max_fail"
+    status=$(instance_status $instance_id)
+    if [[ "$status" == "$wait_status" ]]; then
+      break
+    fi
+    if [[ "$status" == "ERROR" || -z "$status" ]]; then
+      echo '' >> errors
+      echo 'ERROR: Instance booting error' >> errors
+      openstack --insecure server show $instance_id >> errors
+      return 1
+    fi
+    sleep $timeout
+    ((timeout+=5))
+    ((++fail))
+  done
+}
+
+function wait_image() {
+  local image_id=$1
+  local max_fail=$2
+  local wait_status=$3
+  echo "INFO: Wait for image: $image_id"
+  local fail=0
+  local timeout=10
+  while [[ true ]] ; do
+    if ((fail >= max_fail)); then
+      echo '' >> errors
+      echo "ERROR: Image status wait timeout occured" >> errors
+      openstack --insecure image show $image_id >> errors
+      return 1
+    fi
+    echo "attempt $fail of $max_fail"
+    status=$(image_status $image_id)
+    if [[ "$status" == "$wait_status" || "$status" == 'active' ]]; then
+      break
+    fi
+    if [[ "$status" == "error" || "$status" == "deleted" || -z "$status" ]]; then
+      echo '' >> errors
+      echo 'ERROR: Image creation error' >> errors
+      openstack --insecure image show $image_id >> errors
+      return 1
+    fi
+    sleep $timeout
+    ((timeout+=5))
+    ((++fail))
+  done
+}
+
+function create_image() {
+  local image_name=${1:-cirros}
+  activate_venv
+  if ! local output=`openstack --insecure image show $image_name 2>/dev/null` ; then
+    rm -f cirros-0.3.4-x86_64-disk.img
+    wget -t 2 -T 60 -q http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+    if ! output=`openstack --insecure image create --public --file cirros-0.3.4-x86_64-disk.img $image_name` ; then
+      return 1
+    fi
+  fi
+  local image_id=`echo "$output" | awk '/ id /{print $4}'`
+  deactivate_venv
+  echo $image_id
+}
+
+function create_flavors() {
+  activate_venv
+  if ! openstack --insecure flavor show 51 &>/dev/null ; then
+    openstack --insecure flavor create --disk 1 --vcpus 1 --ram 128 --id 51 test_flavor >/dev/null
+  fi
+  deactivate_venv
+}
+
+function create_network() {
+  local netsfx=$1
+  activate_venv
+
+  echo "INFO: Create public network and subnet"
+  openstack --insecure network create --external public-$netsfx
+  local public_net_id=`openstack --insecure network show public-$netsfx -f value -c id`
+  openstack --insecure subnet create --no-dhcp --network $public_net_id --subnet-range 10.5.0.0/24 --gateway 0.0.0.0 public-$netsfx
+
+  echo "INFO: Create private network and subnet"
+  openstack --insecure network create --internal private-$netsfx
+  local private_net_id=`openstack --insecure network show private-$netsfx -f value -c id`
+  openstack --insecure subnet create --network $private_net_id --subnet-range 10.10.0.0/24 private-$netsfx
+  local private_subnet_id=`openstack --insecure subnet list --network $private_net_id -f value -c ID`
+
+  echo "INFO: Create router"
+  openstack --insecure router create p-ext-$netsfx
+  local router_id=`openstack --insecure router show p-ext-$netsfx -f value -c id`
+  openstack --insecure router set --external-gateway $public_net_id $router_id
+  openstack --insecure router add subnet $router_id $private_subnet_id
+
+  echo "INFO: Add rules to default security group"
+  local project_id=`openstack --insecure project list | awk '/ admin /{print $2}'`
+  local group_id=`openstack --insecure security group list -c ID -c Project | grep $project_id | awk '{print $2}'`
+  openstack --insecure security group rule create $group_id --protocol tcp --dst-port 22:22
+  openstack --insecure security group rule create $group_id --protocol icmp
+
+  deactivate_venv
+}
+
+function run_os_checks() {
+  local host_attr='OS-EXT-SRV-ATTR:hypervisor_hostname '
+
+  # check installed cloud
+  activate_venv
+
+  echo "INFO: Check CLI versions:"
+  set -x
+  openstack --version
+  set +x
+
+  echo "INFO: Check OpenStack catalog first"
+  openstack --insecure catalog list || keystone catalog || /bin/true
+  deactivate_venv
+
+  echo "INFO: Check/create image"
+  if ! local image_id=`create_image` ; then
+    return 1
+  fi
+  echo "INFO: Check/create flavor"
+  create_flavors
+
+  local netsfx=$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 4)
+  create_network $netsfx
+
+  activate_venv
+  local public_net_id=`openstack --insecure network show public-$netsfx -f value -c id`
+  local private_net_id=`openstack --insecure network show private-$netsfx -f value -c id`
+  openstack --insecure floating ip create --floating-ip-address 10.5.0.10 $public_net_id
+  openstack --insecure floating ip create --floating-ip-address 10.5.0.11 $public_net_id
+  deactivate_venv
+
+  # next checks will handle return code manually
+  set +e
+
+  activate_venv
+  echo "INFO: Cirros image information"
+  openstack --insecure image show $image_id
+  local ret=0
+  check_instance_simple $private_net_id 10.5.0.10 || ret=1
+  echo ''
+
+  sleep 5
+  set -x
+  openstack --insecure server list
+  set +x
+
+  openstack --insecure catalog list || keystone catalog || /bin/true
+  deactivate_venv
+
+  return $ret
+}
+
+function _check_instance_log() {
+  local id=$1
+  # wait for console-log
+  echo "INFO: Check that console log is not empty"
+  sleep 10
+  local log_lines=`openstack --insecure console log show $id | wc -l`
+  if (( log_lines == 0 )) ; then
+    echo "ERROR: console log is empty for instance $instance_id"
+    return 1
+  fi
+  echo '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+  openstack --insecure console log show $id | tail -50
+  echo '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'
+  return 0
+}
+
+function _get_machine_by_ip() {
+  local ip=$1
+  #juju status $ip --format tabular | grep -A 1 "^Machine" | tail -1 | awk '{print $1}'
+  #echo root@$ip
+  echo TODO: impl
+  return -1
+}
+
+function _get_machine_index_by_service() {
+  #local srv=$1
+  #juju-status-tabular $srv | awk "/^$srv\//{print \$4}"
+  #TODO: impl
+}
+
+function _get_instance_machine() {
+  local id=$1
+  # TODO: make version for juju
+  #local host=`openstack --insecure server list --long -c ID -c Host | grep $id | awk '{print $4}'`
+  #local ip=`nslookup $host | awk '/Address/{print $2}' | tail -1 | sed 's/#.*$//'`
+  #_get_machine_by_ip $ip
+  echo TODO: impl
+  return -1
+}
+
+function _get_current_routes() {
+  local mch=$1
+  $SSH_CMD $mch ip route 2>/dev/null | awk '/169.254/{print $1}'
+}
+
+function _check_new_route() {
+  local mch=$1
+  local route=$2
+  if ! $SSH_CMD $mch ip route 2>/dev/null | grep -q "$route" ; then
+    echo "ERROR: Route $route is absent on host:"
+    $SSH_CMD $mch ip route
+    return 1
+  fi
+  return 0
+}
+
+function _check_instance_ping() {
+  local mch=$1
+  local ip=$2
+  echo "INFO: Trying to ping instance with ip $ip"
+  if ! $SSH_CMD $mch ping -c 2 $ip 2>/dev/null ; then
+    echo "ERROR: Can't ping instance by ip $ip"
+    return 1
+  fi
+  echo "INFO: Can ping instance by ip $ip"
+  return 0
+}
+
+function _check_instance_ssh_and_metadata() {
+  local mch=$1
+  local ip=$2
+  local fip=$3
+  local ssh_opts='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5'
+  $SSH_CMD $mch sudo $PKT_MANAGER -y install sshpass &>/dev/null
+  echo "INFO: Trying to ssh into instance with ip $ip and run ifconfig"
+  if ! $SSH_CMD $mch sshpass -p 'cubswin:\)' ssh $ssh_opts cirros@$ip /sbin/ifconfig 2>/dev/null ; then
+    echo "ERROR: Can't ssh into instance by ip $ip"
+    return 1
+  fi
+
+  echo "INFO: Trying to ssh into instance with ip $ip and get meta-data/public-ipv4"
+  if ! output=`$SSH_CMD $mch sshpass -p 'cubswin:\)' ssh $ssh_opts cirros@$ip curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null` ; then
+    echo ""
+    echo "ERROR: Can't get instance metadata by ssh into ip $ip"
+    return 1
+  fi
+  echo ""
+  if ! echo "$output" | grep "$fip" ; then
+    echo "ERROR: Can't find public ip $fip in metadata output:"
+    echo "$output"
+    return 1
+  fi
+  echo "INFO: Can ssh and get correct metadata for instance by ip $ip"
+  return 0
+}
+
+function check_instance_simple() {
+  echo "INFO: Check instance with simple flavor"
+  local flavor=51
+  local net_id=$1
+  local fip=$2
+
+  declare -a rts
+  for mch in `_get_machine_index_by_service nova-compute` ; do
+    rts[$mch]=`_get_current_routes $mch`
+  done
+
+  local iname="instance_$flavor"
+  if ! output=`openstack --insecure server create --flavor $flavor --nic net-id=$net_id --image cirros $iname` ; then
+    echo "ERROR: Couldn't boot instance"
+    echo "$output"
+    return 1
+  fi
+  local instance_id=`echo "$output" | awk '/ id /{print $4}'`
+  local ret=0
+  wait_instance $instance_id $((3*MAX_FAIL)) || ret=1
+  openstack --insecure server add floating ip $instance_id $fip
+  if [[ $ret == 0 ]] ; then
+    local mch=`_get_instance_machine $instance_id`
+    echo "INFO: Instance is on machine $mch"
+
+    _check_instance_log $instance_id || ret=1
+
+    local routes_to_skip="${rts[mch]}"
+    local rt=`_get_current_routes $mch`
+    for r in $rt ; do
+      echo "$routes_to_skip" | grep -q "$r" && continue
+      local new_route="$r"
+      break
+    done
+    if [[ -n $new_route ]] ; then
+      echo "INFO: Instance's new route is $new_route"
+      _check_new_route $mch $new_route || ret=1
+    else
+      echo "INFO: Couldn't find new route 169.254.0.*"
+      ret=1
+    fi
+
+    _check_instance_ping $mch $new_route || ret=1
+    _check_instance_ssh_and_metadata $mch $new_route $fip || ret=1
+
+    # add VGW to second compute host and check ping/ssh from there
+    local another_compute_host=`_get_machine_index_by_service nova-compute | grep -v $mch`
+    echo "INFO: Adding vgw to another compute: $another_compute_host"
+    $SSH_CMD $another_compute_host sudo /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx
+
+    _check_instance_ping $another_compute_host $fip || ret=1
+    _check_instance_ssh_and_metadata $another_compute_host $fip $fip || ret=1
+
+    # remove VGW
+    $SSH_CMD $another_compute_host sudo /opt/contrail/utils/provision_vgw_interface.py --oper delete --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx
+  fi
+
+  openstack --insecure server show $instance_id
+  openstack --insecure server delete $instance_id
+  return $ret
+}

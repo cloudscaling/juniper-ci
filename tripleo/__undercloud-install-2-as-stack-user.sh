@@ -10,7 +10,6 @@ if [[ -z "$NUM" ]] ; then
 fi
 
 NETDEV=${NETDEV:-'eth1'}
-# SKIP_SSH_TO_HOST_KEY=${SKIP_SSH_TO_HOST_KEY:-'no'}
 OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
 
 ((addr=176+NUM*10))

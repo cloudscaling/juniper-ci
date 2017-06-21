@@ -4,6 +4,8 @@ my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
 NUM=${NUM:-0}
+DEPLOY=${DEPLOY:-0}
+NETWORK_ISOLATION=${NETWORK_ISOLATION:-'single'}
 
 # common setting from create_env.sh
 if [[ -z "$NUM" ]] ; then
@@ -51,8 +53,8 @@ ANALYTICSDB_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-ctrlanalyticsdb- | wc 
 
 # collect MAC addresses of overcloud machines
 function get_macs() {
-  type=$1
-  count=$2
+  local type=$1
+  local count=$2
   truncate -s 0 /tmp/nodes-$type.txt
   for (( i=1; i<=count; i++ )) ; do
     if [[ "$SSH_VIRT_TYPE" != 'vbox' ]] ; then
@@ -84,8 +86,8 @@ cat << EOF > ~/instackenv.json
 EOF
 
 function define_machine() {
-  caps=$1
-  mac=$2
+  local caps=$1
+  local mac=$2
   cat << EOF >> ~/instackenv.json
     {
       "pm_addr": "$virt_host_ip",
@@ -106,26 +108,22 @@ function define_machine() {
 EOF
 }
 
-for (( i=1; i<=CONT_COUNT; i++ )) ; do
-  mac=$(sed -n ${i}p /tmp/nodes-cont.txt)
-  define_machine "profile:controller,boot_option:local" $mac
-done
-for (( i=1; i<=COMP_COUNT; i++ )) ; do
-  mac=$(sed -n ${i}p /tmp/nodes-comp.txt)
-  define_machine "profile:compute,boot_option:local" $mac
-done
-for (( i=1; i<=CONTRAIL_CONTROLLER_COUNT; i++ )) ; do
-  mac=$(sed -n ${i}p /tmp/nodes-ctrlcont.txt)
-  define_machine "profile:contrail-controller,boot_option:local" $mac
-done
-for (( i=1; i<=ANALYTICS_COUNT; i++ )) ; do
-  mac=$(sed -n ${i}p /tmp/nodes-ctrlanalytics.txt)
-  define_machine "profile:contrail-analytics,boot_option:local" $mac
-done
-for (( i=1; i<=ANALYTICSDB_COUNT; i++ )) ; do
-  mac=$(sed -n ${i}p /tmp/nodes-ctrlanalyticsdb.txt)
-  define_machine "profile:contrail-analyticsdb,boot_option:local" $mac
-done
+function define_vms() {
+  local name=$1
+  local count=$2
+  local caps=$3
+  local mac=''
+  for (( i=1; i<=count; i++ )) ; do
+    mac=$(sed -n ${i}p /tmp/nodes-${name}.txt)
+    define_machine $caps $mac
+  done
+}
+
+define_vms 'cont' $CONT_COUNT 'profile:controller,boot_option:local'
+define_vms 'comp' $COMP_COUNT 'profile:compute,boot_option:local'
+define_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT 'profile:contrail-controller,boot_option:local'
+define_vms 'ctrlanalytics' $ANALYTICS_COUNT 'profile:contrail-analytics,boot_option:local'
+define_vms 'ctrlanalyticsdb' $ANALYTICSDB_COUNT 'profile:contrail-analyticsdb,boot_option:local'
 
 # remove last comma
 head -n -1 ~/instackenv.json > ~/instackenv.json.tmp
@@ -151,33 +149,29 @@ swap_opts=''
 if [[ $SWAP != 0 ]] ; then
   swap_opts="--swap $SWAP"
 fi
-openstack flavor create --id auto --ram $MEMORY $swap_opts --disk $DISK_SIZE --vcpus $CPU_COUNT baremetal
-openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" baremetal
 
-if [[ $CONT_COUNT > 0 ]] ; then
-  openstack flavor create --id auto --ram $MEMORY $swap_opts --disk $DISK_SIZE --vcpus $CPU_COUNT control
-  openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="controller" control
-fi
-
-if [[ $COMP_COUNT > 0 ]] ; then
-  openstack flavor create --id auto --ram $MEMORY $swap_opts --disk $DISK_SIZE --vcpus $CPU_COUNT compute
-  openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="compute" compute
-fi
-
-if [[ $CONTRAIL_CONTROLLER_COUNT > 0 ]] ; then
-  openstack flavor create --id auto --ram $MEMORY $swap_opts --disk $DISK_SIZE --vcpus $CPU_COUNT contrail-controller
-  openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="contrail-controller" contrail-controller
-fi
-
-if  [[ $ANALYTICS_COUNT > 0 ]] ; then
-  openstack flavor create --id auto --ram $MEMORY $swap_opts --disk $DISK_SIZE --vcpus $CPU_COUNT contrail-analytics
-  openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="contrail-analytics" contrail-analytics
-fi
-
-if [[ $ANALYTICSDB_COUNT > 0 ]] ; then
-  openstack flavor create --id auto --ram $MEMORY $swap_opts --disk $DISK_SIZE --vcpus $CPU_COUNT contrail-analytics-database
-  openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" --property "capabilities:profile"="contrail-analyticsdb" contrail-analytics-database
-fi
+function create_flavor() {
+  local name=$1
+  local count=$2
+  local profile=${3:-''}
+  if (( count > 0 )) ; then
+    openstack flavor create --id auto --ram $MEMORY $swap_opts --disk $DISK_SIZE --vcpus $CPU_COUNT $name
+    openstack flavor set --property "cpu_arch"="x86_64" --property "capabilities:boot_option"="local" $name
+    if [[ -n "$profile" ]] ; then
+      openstack flavor set --property "capabilities:profile"="${profile}" $name
+    else
+      echo "Skip flavor profile propery set for $name"
+    fi
+  else
+    echo "Skip flavor creation for $name, count=$count"
+  fi
+}
+create_flavor 'baremetal' 1
+create_flavor 'control' $CONT_COUNT 'controller'
+create_flavor 'compute' $COMP_COUNT 'compute'
+create_flavor 'contrail-controller' $CONTRAIL_CONTROLLER_COUNT 'contrail-controller'
+create_flavor 'contrail-analytics' $ANALYTICS_COUNT 'contrail-analytics'
+create_flavor 'contrail-analytics-database' $ANALYTICSDB_COUNT 'contrail-analyticsdb'
 
 openstack flavor list --long
 
@@ -193,28 +187,13 @@ openstack baremetal introspection bulk start
 #sudo journalctl -l -u openstack-ironic-discoverd -u openstack-ironic-discoverd-dnsmasq -u openstack-ironic-conductor -f
 
 
-# prepare Contrail puppet modules
+# prepare Contrail puppet modules via uploading artifacts to swift
 rm -rf usr/share/openstack-puppet/modules
 mkdir -p usr/share/openstack-puppet/modules
 git clone https://github.com/Juniper/contrail-tripleo-puppet -b stable/newton usr/share/openstack-puppet/modules/tripleo
 #TODO: replace personal repo with Juniper ones
 git clone https://github.com/alexey-mr/puppet-contrail -b stable/newton usr/share/openstack-puppet/modules/contrail
 tar czvf puppet-modules.tgz usr/
-
-# # prepare containers for all nodes
-# # TODO: rework somehow to avoid copying of large archives on all nodes
-# #       one of the wayts is to wget containers directly from overcloud nodes
-# #       (they are available on undrecloud)
-# mkdir -p tmp
-# for i in controller analytics analyticsdb ; do
-#   container_repo="http://localhost/contrail-docker/`curl http://localhost/contrail-docker/  2>&1 | awk -F '"' \"/contrail-${i}-/ {print(\\$8)}\"`"
-#   wget --tries 5 --waitretry=2 --retry-connrefused -O tmp/container-${i}.tar.gz ${container_repo}
-# done
-# tar czvf contrail-containers.tgz tmp/
-# upload-swift-artifacts -f contrail-containers.tgz
-
-# # upload artifacts to swift
-# upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz -f contrail-containers.tgz
 upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
 
 
@@ -242,26 +221,18 @@ sed -i "s/ContrailAnalyticsDatabaseCount:.*/ContrailAnalyticsDatabaseCount: $ANA
 sed -i "s/ComputeCount:.*/ComputeCount: $COMP_COUNT/g" $contrail_services_file
 sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_services_file
 
-contrail_net_file='tripleo-heat-templates/environments/contrail/contrail-net-single.yaml'
-sed -i "s/ControlPlaneDefaultRoute:.*/ControlPlaneDefaultRoute: ${prov_ip}/g" $contrail_net_file
-sed -i "s/EC2MetadataIp:.*/EC2MetadataIp: ${prov_ip}/g" $contrail_net_file
-sed -i "s/VrouterPhysicalInterface:.*/VrouterPhysicalInterface: ens3/g" $contrail_net_file
-sed -i "s/VrouterGateway:.*/VrouterGateway: ${prov_ip}/g" $contrail_net_file
-sed -i "s/ControlVirtualInterface:.*/ControlVirtualInterface: ens3/g" $contrail_net_file
-sed -i "s/PublicVirtualInterface:.*/PublicVirtualInterface: ens4/g" $contrail_net_file
-
-# other options:
-misc_opts='misc_opts.yaml'
-echo "parameter_defaults:" > $misc_opts
-# IMPORTANT: The DNS domain used for the hosts should match the dhcp_domain configured in the Undercloud neutron.
-if (( CONT_COUNT < 2 )) ; then
-  echo "  EnableGalera: false" >> $misc_opts
+if [[ $NETWORK_ISOLATION == "single" ]] ; then
+  contrail_net_file='tripleo-heat-templates/environments/contrail/contrail-net-single.yaml'
+  sed -i "s/ControlPlaneDefaultRoute:.*/ControlPlaneDefaultRoute: ${prov_ip}/g" $contrail_net_file
+  sed -i "s/EC2MetadataIp:.*/EC2MetadataIp: ${prov_ip}/g" $contrail_net_file
+  sed -i "s/VrouterPhysicalInterface:.*/VrouterPhysicalInterface: ens3/g" $contrail_net_file
+  sed -i "s/VrouterGateway:.*/VrouterGateway: ${prov_ip}/g" $contrail_net_file
+  sed -i "s/ControlVirtualInterface:.*/ControlVirtualInterface: ens3/g" $contrail_net_file
+  sed -i "s/PublicVirtualInterface:.*/PublicVirtualInterface: ens4/g" $contrail_net_file
+else
+  echo TODO: not implemented
+  exit -1
 fi
-cat <<EOF >> $misc_opts
-  CloudDomain: $CLOUD_DOMAIN_NAME
-  RabbitUserName: contrail
-  RabbitPassword: contrail
-EOF
 
 contrail_vip='contrail_vip.yaml'
 cat <<EOF > $contrail_vip
@@ -309,6 +280,19 @@ contrail_vip_env='contrail_vip_env.yaml'
 cat <<EOF >$contrail_vip_env
 resource_registry:
   OS::TripleO::ContrailVirtualIPs: $contrail_vip
+EOF
+
+# other options:
+misc_opts='misc_opts.yaml'
+echo "parameter_defaults:" > $misc_opts
+# IMPORTANT: The DNS domain used for the hosts should match the dhcp_domain configured in the Undercloud neutron.
+if (( CONT_COUNT < 2 )) ; then
+  echo "  EnableGalera: false" >> $misc_opts
+fi
+cat <<EOF >> $misc_opts
+  CloudDomain: $CLOUD_DOMAIN_NAME
+  RabbitUserName: contrail
+  RabbitPassword: contrail
 EOF
 
 ha_opts=""

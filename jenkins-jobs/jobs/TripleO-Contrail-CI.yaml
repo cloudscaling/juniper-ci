@@ -28,20 +28,23 @@
             - '5'
       - choice:
           name: CONTRAIL_CONTROLLER_COUNT
-          description: "Count of contrail controllers to deploy"
+          description: "Count of contrail controllers to deploy (controller - deploy to OS controller)"
           choices:
+            - 'controller'
             - '1'
             - '3'
       - choice:
           name: CONTRAIL_ANALYTICS_COUNT
-          description: "Count of contrail analytics to deploy"
+          description: "Count of contrail analytics to deploy (controller - deploy to OS controller)"
           choices:
+            - 'controller'
             - '1'
             - '3'
       - choice:
           name: CONTRAIL_ANALYTICSDB_COUNT
-          description: "Count of contrail analytics DB to deploy"
+          description: "Count of contrail analytics DB to deploy (controller - deploy to OS controller)"
           choices:
+            - 'controller'
             - '1'
             - '3'
       - choice:
