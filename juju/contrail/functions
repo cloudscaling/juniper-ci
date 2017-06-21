@@ -151,7 +151,7 @@ function hack_openstack() {
 function post_deploy() {
   echo "INFO: Waiting for services start: $(date)"
 
-  if ! wait_absence_status_for_services "executing|blocked|waiting" 39 ; then
+  if ! wait_absence_status_for_services "executing|blocked|waiting" 45 ; then
     echo "ERROR: Waiting for services end: $(date)"
     return 1
   fi
