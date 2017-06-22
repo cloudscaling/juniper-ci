@@ -280,7 +280,7 @@ EOF
   echo INFO: add contrail controller services to OS Controller role
   pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
   to_add='    - OS::TripleO::Services::ContrailConfig\\n    - OS::TripleO::Services::ContrailControl\\n'
-  to_add=+='    - OS::TripleO::Services::ContrailDatabase\\n    - OS::TripleO::Services::ContrailWebUI\\n'
+  to_add+='    - OS::TripleO::Services::ContrailDatabase\\n    - OS::TripleO::Services::ContrailWebUI'
   sed -i "${pos_to_insert} a\\$to_add" $role_file
 fi
 if (( ANALYTICS_COUNT > 0 )) ; then
@@ -318,12 +318,12 @@ else
 EOF
   echo INFO: add contrail analytics services to OS Controller role
   pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
-  sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalytics\\n" $role_file
+  sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalytics" $role_file
 fi
 if (( ANALYTICSDB_COUNT == 0 )) ; then
   echo INFO: add contrail analyticsdb services to OS Controller role
   pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
-  sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalyticsDatabase\\n" $role_file
+  sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalyticsDatabase" $role_file
 fi
 
 # other options:
