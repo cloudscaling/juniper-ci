@@ -274,6 +274,17 @@ EOF
 EOF
 else
   echo INFO: contrail controllers are installed on OS controller nodes
+  cat <<EOF >> $contrail_vip_env
+  OS::TripleO::ContrailAnalyticsVirtualIPs: OS::Heat::None
+EOF
+  echo INFO: add contrail controller services to OS Controller role
+  pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
+  sed -i "${pos_to_insert} \\a
+    - OS::TripleO::Services::ContrailConfig
+    - OS::TripleO::Services::ContrailControl
+    - OS::TripleO::Services::ContrailDatabase
+    - OS::TripleO::Services::ContrailWebUI
+" $role_file
 fi
 if (( ANALYTICS_COUNT > 0 )) ; then
   echo INFO: contrail analytics are installed on own nodes, prepare VIPs env file
@@ -305,8 +316,22 @@ EOF
 EOF
 else
   echo INFO: contrail analytics are installed on OS controller nodes
+  cat <<EOF >> $contrail_vip_env
+  OS::TripleO::ContrailAnalyticsVirtualIPs: OS::Heat::None
+EOF
+  echo INFO: add contrail analytics services to OS Controller role
+  pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
+  sed -i "${pos_to_insert} \\a
+    - OS::TripleO::Services::ContrailAnalytics
+" $role_file
 fi
-
+if (( ANALYTICSDB_COUNT == 0 )) ; then
+  echo INFO: add contrail analyticsdb services to OS Controller role
+  pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
+  sed -i "${pos_to_insert} \\a
+    - OS::TripleO::Services::ContrailAnalyticsDatabase
+" $role_file
+fi
 
 # other options:
 misc_opts='misc_opts.yaml'
