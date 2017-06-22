@@ -205,12 +205,7 @@ git clone https://github.com/Juniper/contrail-tripleo-heat-templates -b stable/n
 cp -r ~/contrail-tripleo-heat-templates/environments/contrail ~/tripleo-heat-templates/environments
 cp -r ~/contrail-tripleo-heat-templates/puppet/services/network/* ~/tripleo-heat-templates/puppet/services/network
 
-# # Prepare copy of roles_data file with added
-# # services Analytics an Analytics DB into ContrailController role
 role_file='tripleo-heat-templates/environments/contrail/roles_data.yaml'
-# sed -i '/- OS::TripleO::Services::ContrailDatabase/a\
-#     - OS::TripleO::Services::ContrailAnalyticsDatabase\
-#     - OS::TripleO::Services::ContrailAnalytics' $src_role_file > $role_file
 
 contrail_services_file='tripleo-heat-templates/environments/contrail/contrail-services.yaml'
 sed -i "s/ContrailRepo:.*/ContrailRepo:  http:\/\/${prov_ip}\/contrail/g" $contrail_services_file
@@ -236,6 +231,7 @@ fi
 
 # Create ports for Contrail Controller and/or Analytis if any is installed on own node.
 # In that case OS controller will host VIP and haproxy will forward requests.
+enable_ext_puppet_syntax='false'
 contrail_vip_env='contrail_controller_vip_env.yaml'
   cat <<EOF > $contrail_vip_env
 resource_registry:
@@ -278,6 +274,7 @@ else
   OS::TripleO::ContrailAnalyticsVirtualIPs: OS::Heat::None
 EOF
   echo INFO: add contrail controller services to OS Controller role
+  enable_ext_puppet_syntax='true'
   pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
   to_add='    - OS::TripleO::Services::ContrailConfig\\n    - OS::TripleO::Services::ContrailControl\\n'
   to_add+='    - OS::TripleO::Services::ContrailDatabase\\n    - OS::TripleO::Services::ContrailWebUI'
@@ -313,6 +310,7 @@ EOF
 EOF
 else
   echo INFO: contrail analytics are installed on OS controller nodes
+  enable_ext_puppet_syntax='true'
   cat <<EOF >> $contrail_vip_env
   OS::TripleO::ContrailAnalyticsVirtualIPs: OS::Heat::None
 EOF
@@ -322,11 +320,16 @@ EOF
 fi
 if (( ANALYTICSDB_COUNT == 0 )) ; then
   echo INFO: add contrail analyticsdb services to OS Controller role
+  enable_ext_puppet_syntax='true'
   pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
   sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalyticsDatabase" $role_file
 fi
 
-cat <<EOF > enable_ext_puppet_syntax.yaml
+# other options
+misc_opts='misc_opts.yaml'
+rm -f $misc_opts
+if [[ "$enable_ext_puppet_syntax" == 'true' ]] ; then
+  cat <<EOF > enable_ext_puppet_syntax.yaml
 heat_template_version: 2014-10-16
 parameters:
   server:
@@ -350,13 +353,12 @@ outputs:
     description: Deployment reference, used to trigger post-deploy on changes
     value: {get_attr: [NodeDeployment, deploy_stdout]}
 EOF
-
-# other options
-misc_opts='misc_opts.yaml'
-cat <<EOF > $misc_opts
+  cat <<EOF >> $misc_opts
 resource_registry:
   OS::TripleO::ControllerExtraConfigPre: enable_ext_puppet_syntax.yaml
-
+EOF
+fi
+cat <<EOF >> $misc_opts
 parameter_defaults:
   CloudDomain: $CLOUD_DOMAIN_NAME
   RabbitUserName: contrail
