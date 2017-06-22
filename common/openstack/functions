@@ -276,7 +276,9 @@ function _get_machines_by_service() {
   else
     _access_undercloud
     if [[ "$srv" == 'nova-compute' ]] ; then
-      openstack --insecure server list | grep compute | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+'
+      for ip in `openstack --insecure server list | grep compute | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+'` ; do
+        _get_machine_by_ip $ip
+      done
     else
       echo "ERROR: _get_machines_by_service not implemented for service $srv"
       return -1
