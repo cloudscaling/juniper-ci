@@ -10,9 +10,8 @@ my_dir="$(dirname $my_file)"
 if [ -z "$WORKSPACE" ] ; then
   export WORKSPACE="$HOME"
 fi
-cd $WORKSPACE
 
-source $WORKSPACE/overcloudrc
+cd $WORKSPACE
 source "$my_dir/../common/openstack/functions"
 create_virtualenv
 run_os_checks

@@ -18,6 +18,10 @@ USE_VENV=${USE_VENV:-'true'}
 SSH_CMD=${SSH_CMD:-'ssh'}
 PKT_MANAGER=${PKT_MANAGER:-'yum'}
 
+OVERCLOUDRC_FILE=${OVERCLOUDRC_FILE:-"${WORKSPACE}/overcloudrc"}
+UNDERCLOUDRC_FILE=${UNDERCLOUDRC_FILE:-"${WORKSPACE}/stackrc"}
+
+
 function activate_venv() {
   if [ -d .venv ]; then
     source .venv/bin/activate
@@ -173,6 +177,8 @@ function create_network() {
 }
 
 function run_os_checks() {
+  _access_overcloud
+
   local host_attr='OS-EXT-SRV-ATTR:hypervisor_hostname '
 
   # check installed cloud
@@ -226,6 +232,18 @@ function run_os_checks() {
   return $ret
 }
 
+function _access_undercloud() {
+  if [[ -n "$UNDERCLOUDRC_FILE" && -f "$UNDERCLOUDRC_FILE" ]] ; then
+    source $UNDERCLOUDRC_FILE
+  fi
+}
+
+function _access_overcloud() {
+  if [[ -n "$OVERCLOUDRC_FILE" && -f "$OVERCLOUDRC_FILE"  ]] ; then
+    source $OVERCLOUDRC_FILE
+  fi
+}
+
 function _check_instance_log() {
   local id=$1
   # wait for console-log
@@ -244,26 +262,41 @@ function _check_instance_log() {
 
 function _get_machine_by_ip() {
   local ip=$1
-  #juju status $ip --format tabular | grep -A 1 "^Machine" | tail -1 | awk '{print $1}'
-  #echo root@$ip
-  echo TODO: impl
-  return -1
+  if [[ "$SSH_CMD" == 'juju-ssh' ]] ; then
+    juju status $ip --format tabular | grep -A 1 "^Machine" | tail -1 | awk '{print $1}'
+  else
+    echo heat-admin@$ip
+  fi
 }
 
-function _get_machine_index_by_service() {
+function _get_machines_by_service() {
   local srv=$1
-  #juju-status-tabular $srv | awk "/^$srv\//{print \$4}"
-  #TODO: impl
+  if [[ "$SSH_CMD" == 'juju-ssh' ]] ; then
+    juju-status-tabular $srv | awk "/^$srv\//{print \$4}"
+  else
+    _access_undercloud
+    if [[ "$srv" == 'nova-compute' ]] ; then
+      openstack --insecure server list | grep compute | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+'
+    else
+      echo "ERROR: _get_machines_by_service not implemented for service $srv"
+      return -1
+    fi
+    _access_overcloud
+  fi
 }
 
 function _get_instance_machine() {
   local id=$1
-  # TODO: make version for juju
-  #local host=`openstack --insecure server list --long -c ID -c Host | grep $id | awk '{print $4}'`
-  #local ip=`nslookup $host | awk '/Address/{print $2}' | tail -1 | sed 's/#.*$//'`
-  #_get_machine_by_ip $ip
-  echo TODO: impl
-  return -1
+  local host=`openstack --insecure server list --long -c ID -c Host | grep $id | awk '{print $4}'`
+  local ip=''
+  if [[ "$SSH_CMD" == 'juju-ssh' ]] ; then
+    ip=`nslookup $host | awk '/Address/{print $2}' | tail -1 | sed 's/#.*$//'`
+  else
+    _access_undercloud
+    ip=`openstack --insecure server list | grep $host | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+' | head -n 1`
+    _access_overcloud
+  fi
+  _get_machine_by_ip $ip
 }
 
 function _get_current_routes() {
@@ -329,7 +362,7 @@ function check_instance_simple() {
   local fip=$2
 
   declare -a rts
-  for mch in `_get_machine_index_by_service nova-compute` ; do
+  for mch in `_get_machines_by_service nova-compute` ; do
     rts[$mch]=`_get_current_routes $mch`
   done
 
@@ -369,7 +402,7 @@ function check_instance_simple() {
     _check_instance_ssh_and_metadata $mch $new_route $fip || ret=1
 
     # add VGW to second compute host and check ping/ssh from there
-    local another_compute_host=`_get_machine_index_by_service nova-compute | grep -v $mch`
+    local another_compute_host=`_get_machines_by_service nova-compute | grep -v $mch`
     echo "INFO: Adding vgw to another compute: $another_compute_host"
     $SSH_CMD $another_compute_host sudo /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx
 
