@@ -1,4 +1,17 @@
-#!/bin/bash -x
+#!/bin/bash
+
+DEBUG=${DEBUG:-1}
+
+if (( DBEUG == 1 )) ; then
+  set -x ;
+fi
+
+function set_x() {
+  if (( DBEUG == 1 )) ; then
+    return
+  fi
+  set $@
+}
 
 MAX_FAIL=${MAX_FAIL:-30}
 USE_VENV=${USE_VENV:-'true'}
@@ -105,10 +118,12 @@ function wait_image() {
 
 function create_image() {
   local image_name=${1:-cirros}
+  local output=''
   activate_venv
-  if ! local output=`openstack --insecure image show $image_name 2>/dev/null` ; then
+  if ! output=`openstack --insecure image show $image_name 2>/dev/null` ; then
     rm -f cirros-0.3.4-x86_64-disk.img
     wget -t 2 -T 60 -q http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+    sleep 1
     if ! output=`openstack --insecure image create --public --file cirros-0.3.4-x86_64-disk.img $image_name` ; then
       return 1
     fi
@@ -164,16 +179,17 @@ function run_os_checks() {
   activate_venv
 
   echo "INFO: Check CLI versions:"
-  set -x
+  set_x -x
   openstack --version
-  set +x
+  set_x +x
 
   echo "INFO: Check OpenStack catalog first"
   openstack --insecure catalog list || keystone catalog || /bin/true
   deactivate_venv
 
   echo "INFO: Check/create image"
-  if ! local image_id=`create_image` ; then
+  local image_id=''
+  if ! image_id=`create_image` ; then
     return 1
   fi
   echo "INFO: Check/create flavor"
@@ -200,9 +216,9 @@ function run_os_checks() {
   echo ''
 
   sleep 5
-  set -x
+  set_x -x
   openstack --insecure server list
-  set +x
+  set_x +x
 
   openstack --insecure catalog list || keystone catalog || /bin/true
   deactivate_venv
@@ -335,9 +351,10 @@ function check_instance_simple() {
 
     local routes_to_skip="${rts[mch]}"
     local rt=`_get_current_routes $mch`
+    local new_route=''
     for r in $rt ; do
       echo "$routes_to_skip" | grep -q "$r" && continue
-      local new_route="$r"
+      new_route="$r"
       break
     done
     if [[ -n $new_route ]] ; then

@@ -62,13 +62,13 @@ virsh pool-info $poolname &> /dev/null || create_pool $poolname
 pool_path=$(get_pool_path $poolname)
 
 function create_root_volume() {
-  name=$1
+  local name=$1
   delete_volume $name.qcow2 $poolname
   qemu-img create -f qcow2 -o preallocation=metadata $pool_path/$name.qcow2 $vm_disk_size
 }
 
 function create_store_volume() {
-  name=$1
+  local name=$1
   delete_volume $name-store.qcow2 $poolname
   qemu-img create -f qcow2 -o preallocation=metadata $pool_path/$name-store.qcow2 100G
 }
@@ -96,12 +96,11 @@ function define_overcloud_vms() {
   local count=$2
   local do_create_storage=${3:-'false'}
   local number_re='^[0-9]+$'
-  local disk_opts=''
   if [[ $count =~ $number_re ]] ; then
     for (( i=1 ; i<=count; i++ )) ; do
-      vol_name="overcloud-$NUM-${name}-$i"
+      local vol_name="overcloud-$NUM-${name}-$i"
       create_root_volume $vol_name
-      disk_opts="--disk path=${pool_path}/${vol_name}.qcow2,device=disk,bus=virtio,format=qcow2"
+      local disk_opts="--disk path=${pool_path}/${vol_name}.qcow2,device=disk,bus=virtio,format=qcow2"
       if [[ "$do_create_storage" == 'true' ]] ; then
         create_store_volume $vol_name
         disk_opts+=" --disk path=${pool_path}/${name}-store.qcow2,device=disk,bus=virtio,format=qcow2"

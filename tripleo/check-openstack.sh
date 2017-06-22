@@ -1,4 +1,8 @@
-#!/bin/bash -ex
+#!/bin/bash -e
+
+DEBUG=${DEBUG:-1}
+
+if (( DBEUG == 1 )) ; then set -x ; fi
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
