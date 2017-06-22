@@ -326,18 +326,46 @@ if (( ANALYTICSDB_COUNT == 0 )) ; then
   sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalyticsDatabase" $role_file
 fi
 
-# other options:
+cat <<EOF > enable_ext_puppet_syntax.yaml
+heat_template_version: 2014-10-16
+parameters:
+  server:
+    description: ID of the controller node to apply this config to
+    type: string
+resources:
+  NodeConfig:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config: |
+        #!/bin/bash
+        sed -i '/\[main\]/a \ \ \ \ \parser = future' /etc/puppet/puppet.conf
+  NodeDeployment:
+    type: OS::Heat::SoftwareDeployment
+    properties:
+      config: {get_resource: NodeConfig}
+      server: {get_param: server}
+outputs:
+  deploy_stdout:
+    description: Deployment reference, used to trigger post-deploy on changes
+    value: {get_attr: [NodeDeployment, deploy_stdout]}
+EOF
+
+# other options
 misc_opts='misc_opts.yaml'
-echo "parameter_defaults:" > $misc_opts
-# IMPORTANT: The DNS domain used for the hosts should match the dhcp_domain configured in the Undercloud neutron.
-if (( CONT_COUNT < 2 )) ; then
-  echo "  EnableGalera: false" >> $misc_opts
-fi
-cat <<EOF >> $misc_opts
+cat <<EOF > $misc_opts
+resource_registry:
+  OS::TripleO::ControllerExtraConfigPre: enable_ext_puppet_syntax.yaml
+
+parameter_defaults:
   CloudDomain: $CLOUD_DOMAIN_NAME
   RabbitUserName: contrail
   RabbitPassword: contrail
 EOF
+# IMPORTANT: The DNS domain used for the hosts should match the dhcp_domain configured in the Undercloud neutron.
+if (( CONT_COUNT < 2 )) ; then
+  echo "  EnableGalera: false" >> $misc_opts
+fi
 
 ha_opts=""
 if (( CONT_COUNT > 1 )) ; then

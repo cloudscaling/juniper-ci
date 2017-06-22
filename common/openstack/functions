@@ -2,12 +2,12 @@
 
 DEBUG=${DEBUG:-1}
 
-if (( DBEUG == 1 )) ; then
+if (( DEBUG == 1 )) ; then
   set -x ;
 fi
 
 function set_x() {
-  if (( DBEUG == 1 )) ; then
+  if (( DEBUG == 1 )) ; then
     return
   fi
   set $@
@@ -361,7 +361,7 @@ function check_instance_simple() {
   local net_id=$1
   local fip=$2
 
-  declare -a rts
+  declare -A rts
   for mch in `_get_machines_by_service nova-compute` ; do
     rts[$mch]=`_get_current_routes $mch`
   done
@@ -382,7 +382,7 @@ function check_instance_simple() {
 
     _check_instance_log $instance_id || ret=1
 
-    local routes_to_skip="${rts[mch]}"
+    local routes_to_skip="${rts[${mch}]}"
     local rt=`_get_current_routes $mch`
     local new_route=''
     for r in $rt ; do
