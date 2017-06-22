@@ -234,15 +234,19 @@ else
   exit -1
 fi
 
-contrail_vip='contrail_vip.yaml'
-cat <<EOF > $contrail_vip
+# Create ports for Contrail Controller and/or Analytis if any is installed on own node.
+# In that case OS controller will host VIP and haproxy will forward requests.
+contrail_vip_env='contrail_controller_vip_env.yaml'
+  cat <<EOF > $contrail_vip_env
+resource_registry:
+EOF
+if (( CONTRAIL_CONTROLLER_COUNT > 0 )) ; then
+  echo INFO: contrail controllers are installed on own nodes, prepare VIPs env file
+  contrail_controller_vip='contrail_controller_vip.yaml'
+  cat <<EOF > $contrail_controller_vip
 heat_template_version: 2016-10-14
 parameters:
   ContrailControllerVirtualFixedIPs:
-    default: []
-    description: Should be used for arbitrary ips.
-    type: json
-  ContrailAnalyticsVirtualFixedIPs:
     default: []
     description: Should be used for arbitrary ips.
     type: json
@@ -257,6 +261,33 @@ resources:
       network: {get_param: NeutronControlPlaneID}
       fixed_ips: {get_param: ContrailControllerVirtualFixedIPs}
       replacement_policy: AUTO
+outputs:
+  ContrailConfigVIP:
+    value: {get_attr: [ContrailControllerVirtualIP, fixed_ips, 0, ip_address]}
+  ContrailVIP:
+    value: {get_attr: [ContrailControllerVirtualIP, fixed_ips, 0, ip_address]}
+  ContrailWebuiVIP:
+    value: {get_attr: [ContrailControllerVirtualIP, fixed_ips, 0, ip_address]}
+EOF
+  cat <<EOF >> $contrail_vip_env
+  OS::TripleO::ContrailControllerVirtualIPs: $contrail_controller_vip
+EOF
+else
+  echo INFO: contrail controllers are installed on OS controller nodes
+fi
+if (( ANALYTICS_COUNT > 0 )) ; then
+  echo INFO: contrail analytics are installed on own nodes, prepare VIPs env file
+  contrail_analytics_vip='contrail_analytics_vip.yaml'
+  cat <<EOF > $contrail_analytics_vip
+heat_template_version: 2016-10-14
+parameters:
+  ContrailAnalyticsVirtualFixedIPs:
+    default: []
+    description: Should be used for arbitrary ips.
+    type: json
+resources:
+  Networks:
+    type: OS::TripleO::Network
   ContrailAnalyticsVirtualIP:
     type: OS::Neutron::Port
     depends_on: Networks
@@ -266,21 +297,16 @@ resources:
       fixed_ips: {get_param: ContrailAnalyticsVirtualFixedIPs}
       replacement_policy: AUTO
 outputs:
-  ContrailConfigVIP:
-    value: {get_attr: [ContrailControllerVirtualIP, fixed_ips, 0, ip_address]}
-  ContrailVIP:
-    value: {get_attr: [ContrailControllerVirtualIP, fixed_ips, 0, ip_address]}
-  ContrailWebuiVIP:
-    value: {get_attr: [ContrailControllerVirtualIP, fixed_ips, 0, ip_address]}
   ContrailAnalyticsVIP:
     value: {get_attr: [ContrailAnalyticsVirtualIP, fixed_ips, 0, ip_address]}
 EOF
-
-contrail_vip_env='contrail_vip_env.yaml'
-cat <<EOF >$contrail_vip_env
-resource_registry:
-  OS::TripleO::ContrailVirtualIPs: $contrail_vip
+  cat <<EOF >> $contrail_vip_env
+  OS::TripleO::ContrailAnalyticsVirtualIPs: $contrail_analytics_vip
 EOF
+else
+  echo INFO: contrail analytics are installed on OS controller nodes
+fi
+
 
 # other options:
 misc_opts='misc_opts.yaml'
