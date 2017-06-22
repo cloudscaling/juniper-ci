@@ -103,7 +103,7 @@ function define_overcloud_vms() {
       local disk_opts="--disk path=${pool_path}/${vol_name}.qcow2,device=disk,bus=virtio,format=qcow2"
       if [[ "$do_create_storage" == 'true' ]] ; then
         create_store_volume $vol_name
-        disk_opts+=" --disk path=${pool_path}/${name}-store.qcow2,device=disk,bus=virtio,format=qcow2"
+        disk_opts+=" --disk path=${pool_path}/${vol_name}-store.qcow2,device=disk,bus=virtio,format=qcow2"
       fi
       define-machine "rd-$vol_name" "$disk_opts"
     done
