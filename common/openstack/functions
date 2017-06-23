@@ -415,6 +415,9 @@ function check_instance_simple() {
   fi
 
   openstack --insecure server show $instance_id
-  openstack --insecure server delete $instance_id
+  if (( ret == 0 )) ; then
+    openstack --insecure server delete $instance_id
+  fi
+
   return $ret
 }

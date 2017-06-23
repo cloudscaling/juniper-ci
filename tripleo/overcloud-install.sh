@@ -371,7 +371,7 @@ fi
 
 ha_opts=""
 if (( CONT_COUNT > 1 )) ; then
-  ha_opts="-e /usr/share/openstack-tripleo-heat-templates/environments/puppet-pacemaker.yaml"
+  ha_opts="-e tripleo-heat-templates/environments/puppet-pacemaker.yaml"
 fi
 
 if [[ "$DEPLOY" != '1' ]] ; then
