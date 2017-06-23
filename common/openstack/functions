@@ -126,7 +126,6 @@ function create_image() {
   if ! output=`openstack --insecure image show $image_name 2>/dev/null` ; then
     rm -f cirros-0.3.4-x86_64-disk.img
     wget -t 2 -T 60 -q http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
-    sleep 1
     if ! output=`openstack --insecure image create --public --file cirros-0.3.4-x86_64-disk.img $image_name` ; then
       return 1
     fi

@@ -361,6 +361,7 @@ fi
 cat <<EOF >> $misc_opts
 parameter_defaults:
   CloudDomain: $CLOUD_DOMAIN_NAME
+  GlanceBackend: file
   RabbitUserName: contrail
   RabbitPassword: contrail
 EOF
