@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-DEBUG=${DEBUG:-1}
+DEBUG=${DEBUG:-0}
 
 if (( DEBUG == 1 )) ; then set -x ; fi
 
