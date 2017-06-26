@@ -20,14 +20,8 @@ delete_network external
 delete_domains
 
 delete_volume undercloud-$NUM.qcow2 $poolname
-# TODO: calculate real count of existing volumes
-for (( i=1; i<=10; i++ )) ; do
-  delete_volume overcloud-$NUM-cont-$i.qcow2 $poolname
-  delete_volume overcloud-$NUM-comp-$i.qcow2 $poolname
-  delete_volume overcloud-$NUM-comp-$i-store.qcow2 $poolname
-  delete_volume overcloud-$NUM-stor-$i.qcow2 $poolname
-  delete_volume overcloud-$NUM-stor-$i-store.qcow2 $poolname
-  delete_volume overcloud-$NUM-ctrlcont-$i.qcow2 $poolname
+for vol in `virsh vol-list $poolname | awk "/overcloud-$NUM-/ {print \$1}"` ; do
+  delete_volume $vol $poolname
 done
 
 rm -f "$ssh_key_dir/kp-$NUM" "$ssh_key_dir/kp-$NUM.pub"
