@@ -10,9 +10,9 @@ function check_containers() {
   elif [[ "$SERIES" == "xenial" ]] ; then
     local uver="16.04"
   fi
-  image_controller="contrail-controller-ubuntu${uver}-4.0.0.0-${BUILD}.tar.gz"
-  image_analytics="contrail-analytics-ubuntu${uver}-4.0.0.0-${BUILD}.tar.gz"
-  image_analyticsdb="contrail-analyticsdb-ubuntu${uver}-4.0.0.0-${BUILD}.tar.gz"
+  image_controller="contrail-controller-ubuntu${uver}-${CONTRAIL_VERSION}-${BUILD}.tar.gz"
+  image_analytics="contrail-analytics-ubuntu${uver}-${CONTRAIL_VERSION}-${BUILD}.tar.gz"
+  image_analyticsdb="contrail-analyticsdb-ubuntu${uver}-${CONTRAIL_VERSION}-${BUILD}.tar.gz"
 
   for ff in "$packages" "$image_controller"  "$image_analytics" "$image_analyticsdb" ; do
     if [ -f "$HOME/docker/$ff" ] ; then
