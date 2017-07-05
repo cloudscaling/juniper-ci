@@ -79,7 +79,7 @@ function catch_errors() {
     $my_dir/contrail/save-logs.sh
   fi
 
-  if [[ $CLEAN_ENV != 'false' ]] ; then
+  if [[ "$CLEAN_ENV" == 'always' ]] ; then
     cleanup_environment
   fi
 
@@ -100,7 +100,7 @@ if [ -f $my_dir/contrail/save-logs.sh ] ; then
   $my_dir/contrail/save-logs.sh
 fi
 
-if [[ $CLEAN_ENV != 'false' ]] ; then
+if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
   cleanup_environment
 fi
 

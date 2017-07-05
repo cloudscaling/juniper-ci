@@ -3,9 +3,12 @@
     description: "Deploys cluster(manual) with OpenStack/Contrail and checks it. Can be used for debug purposes."
     defaults: global
     parameters:
-      - bool:
+      - choice:
           name: CLEAN_ENV
-          default: true
+          choices:
+            - always
+            - on_success
+            - never
       - choice:
           name: VERSION
           description: "Version of the OpenStack. mitaka implies trusty and newton implaies xenial."
