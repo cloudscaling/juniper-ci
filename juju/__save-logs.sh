@@ -44,14 +44,14 @@ if docker ps | grep -q contrail ; then
       mv "$ldir/contrail" "$ldir/var-log-contrail"
       docker cp "contrail-$cnt:/etc/contrail" "./$ldir"
       mv "$ldir/contrail" "$ldir/etc-contrail"
-      if [[ "$cnt" == "controller" ]] ; then
-        for srv in rabbitmq cassandra zookeeper ; do
-          docker cp "contrail-$cnt:/etc/$srv" "./$ldir"
+      for srv in rabbitmq cassandra zookeeper ; do
+        if docker cp "contrail-$cnt:/etc/$srv" "./$ldir" ; then
           mv "$ldir/$srv" "$ldir/etc-$srv"
-          docker cp "contrail-$cnt:/var/log/$srv" "./$ldir"
+        fi
+        if docker cp "contrail-$cnt:/var/log/$srv" "./$ldir" ; then
           mv "$ldir/$srv" "$ldir/var-log-$srv"
-        done
-      fi
+        fi
+      done
 
       tar -rf logs.tar "$ldir"
     fi
