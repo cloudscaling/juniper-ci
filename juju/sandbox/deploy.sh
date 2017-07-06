@@ -9,8 +9,8 @@ fi
 
 # base constants for SandBox
 
-export VERSION=${VERSION:-'20'}
-export CHARMS_VERSION=${CHARMS_VERSION:-'a6f9616380f6c997e46500fa4df873838402af6d'}
+export VERSION=${VERSION:-'22'}
+export CHARMS_VERSION=${CHARMS_VERSION:-'5092cdefd1992a2f29088ec931be907c070a14bc'}
 # here must be trusty-mitaka or xenial-newton
 export SERIES=${SERIES:-'trusty'}
 export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
@@ -18,7 +18,7 @@ export PASSWORD=${PASSWORD:-'password'}
 OPENSTACK_ORIGIN="cloud:${SERIES}-${OPENSTACK_VERSION}"
 addresses_store_file="$HOME/.addresses"
 base_url='https://s3-us-west-2.amazonaws.com/contrailpkgs'
-suffix='ubuntu14.04-4.0.0.0'
+suffix='ubuntu14.04-4.0.1.0'
 export WORKSPACE="$HOME"
 export SANDBOX_MODE='true'
 
