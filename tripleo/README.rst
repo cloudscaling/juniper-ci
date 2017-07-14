@@ -67,13 +67,29 @@ KVM Host (it is usually a jenkins slave)
 Images
 ======
 Undercloud images:
+For RHEL undercloud image must be changed before usage, RHEL subscription is requried.
 ```
-      root@contrail-ci:~# ls -lh /home/root/images/
-      total 5.0G
+      cd /home/root/images
+      export LIBGUESTFS_BACKEND=direct
+      qemu-img create -f qcow2 undercloud-rhel-image.qcow2 100G
+      virt-resize --expand /dev/sda1 rhel-guest-image-7.3-36.x86_64.qcow2 undercloud-rhel-image.qcow2
+      virt-customize -a undercloud-rhel-image.qcow2 \
+            --run-command 'xfs_growfs /' \
+            --sm-credentials <your_rhel_user>:password:<your_rhel_password> --sm-register --sm-attach auto \
+            --run-command 'subscription-manager repos --enable=rhel-7-server-rpms --enable=rhel-7-server-extras-rpms --enable=rhel-7-server-rh-common-rpms --enable=rhel-ha-for-rhel-7-server-rpms --enable=rhel-7-server-openstack-10-rpms' \
+            --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
+            --run-command 'systemctl enable sshd' \
+            --run-command 'yum remove -y cloud-init' \
+            --selinux-relabel
+
+      ln -s /home/root/images/undercloud-rhel-image.qcow2 undercloud-rhel.qcow2
+      ln -s /home/root/images/undercloud-centos7.qcow2 undercloud-centos.qcow2
+
+      ls -lh /home/root/images/
       -rw-r--r-- 1 root root 561M Jul 14 21:06 rhel-guest-image-7.3-36.x86_64.qcow2
       -rw-r--r-- 1 root root 2.8G Mar 11 13:20 undercloud-centos7.qcow2
       lrwxrwxrwx 1 root root   42 Jul 14 20:56 undercloud-centos.qcow2 -> /home/root/images/undercloud-centos7.qcow2
-      lrwxrwxrwx 1 root root   54 Jul 14 20:56 undercloud-rhel.qcow2 -> /home/root/images/rhel-guest-image-7.3-36.x86_64.qcow2
+      lrwxrwxrwx 1 root root   54 Jul 14 20:56 undercloud-rhel.qcow2 -> /home/root/images/undercloud-rhel-image.qcow2
 ```
 Overcloud image archive:
 ```
@@ -82,19 +98,6 @@ Overcloud image archive:
       lrwxrwxrwx 1 stack stack   30 Jul 14 21:11 images-centos-newton.tar -> /home/stack/images-centos7.tar
       -rw-r--r-- 1 stack stack 1.6G Jul 14 15:31 images-rhel73.tar
       lrwxrwxrwx 1 stack stack   29 Jul 14 21:11 images-rhel-newton.tar -> /home/stack/images-rhel73.tar
-```
-
-For RHEL undercloud image must be changed before usage, RHEL subscription is requried.
-```
-      qemu-img resize undercloud-rhel.qcow2  +40GB
-      virt-customize -a undercloud-rhel.qcow2 \
-            --run-command 'xfs_growfs /' \
-            --sm-credentials <your_rhel_user>:password:<your_rhel_password> --sm-register --sm-attach auto \
-            --run-command 'subscription-manager repos --enable=rhel-7-server-rpms --enable=rhel-7-server-extras-rpms --enable=rhel-7-server-rh-common-rpms --enable=rhel-ha-for-rhel-7-server-rpms --enable=rhel-7-server-openstack-10-rpms' \
-            --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
-            --run-command 'systemctl enable sshd' \
-            --run-command 'yum remove -y cloud-init' \
-            --selinux-relabel
 ```
 
 Files and parameters
