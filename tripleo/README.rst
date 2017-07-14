@@ -86,6 +86,7 @@ Overcloud image archive:
 
 For RHEL undercloud image must be changed before usage, RHEL subscription is requried.
 ```
+      qemu-img resize undercloud-rhel.qcow2  +40GB
       virt-customize -a undercloud-rhel.qcow2 \
             --run-command 'xfs_growfs /' \
             --sm-credentials <your_rhel_user>:password:<your_rhel_password> --sm-register --sm-attach auto \
