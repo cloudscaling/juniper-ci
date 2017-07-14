@@ -28,7 +28,29 @@ KVM Host (it is usually a jenkins slave)
   jenkins ALL=(ALL) NOPASSWD:SETENV: /opt/jenkins/deploy_all.sh
   jenkins ALL=(ALL) NOPASSWD:SETENV: /opt/jenkins/clean_env.sh
   ```
-  These scripts should point to jenkins scripts in a worskace
+  These scripts should point to jenkins scripts in a worskace.
+  Example:
+  ```
+      root@contrail-ci:~# ls  /opt/jenkins/
+      tripleo_contrail_clean_env.sh  tripleo_contrail_deploy_all.sh
+
+      root@contrail-ci:~# cat /opt/jenkins/tripleo_contrail_deploy_all.sh
+      #!/bin/bash -ex
+
+      dir=$WORKSPACE/juniper-ci/tripleo
+      ${dir}/deploy_all.sh ${dir}/check-contrail-proxy.sh
+      root@contrail-ci:~# ls  /opt/jenkins/
+      tripleo_contrail_clean_env.sh  tripleo_contrail_deploy_all.sh
+      root@contrail-ci:~# cat /opt/jenkins/tripleo_contrail_deploy_all.sh
+      #!/bin/bash -ex
+
+      dir=$WORKSPACE/juniper-ci/tripleo
+      ${dir}/deploy_all.sh ${dir}/check-contrail-proxy.sh
+      root@contrail-ci:~# cat /opt/jenkins/tripleo_contrail_clean_env.sh
+      #!/bin/bash -ex
+      dir=$WORKSPACE/juniper-ci/tripleo
+      ${dir}/clean_env.sh
+```
 
 - On the Jenkins master add new builder, with options:
   * limit number of executor processess with reasonable number, e.g. 3 for the server with 128GB RAM, 32 logical CPUs and a RAID on 2 SSD disks.
@@ -42,6 +64,37 @@ KVM Host (it is usually a jenkins slave)
 
 - Checkout this project
 
+Images
+======
+Undercloud images:
+```
+      root@contrail-ci:~# ls -lh /home/root/images/
+      total 5.0G
+      -rw-r--r-- 1 root root 561M Jul 14 21:06 rhel-guest-image-7.3-36.x86_64.qcow2
+      -rw-r--r-- 1 root root 2.8G Mar 11 13:20 undercloud-centos7.qcow2
+      lrwxrwxrwx 1 root root   42 Jul 14 20:56 undercloud-centos.qcow2 -> /home/root/images/undercloud-centos7.qcow2
+      lrwxrwxrwx 1 root root   54 Jul 14 20:56 undercloud-rhel.qcow2 -> /home/root/images/rhel-guest-image-7.3-36.x86_64.qcow2
+```
+Overcloud image archive:
+```
+      root@contrail-ci:~# ls -lh /home/stack/
+      -rw-r--r-- 1 stack stack 1.4G Jun 15 16:47 images-centos7.tar
+      lrwxrwxrwx 1 stack stack   30 Jul 14 21:11 images-centos-newton.tar -> /home/stack/images-centos7.tar
+      -rw-r--r-- 1 stack stack 1.6G Jul 14 15:31 images-rhel73.tar
+      lrwxrwxrwx 1 stack stack   29 Jul 14 21:11 images-rhel-newton.tar -> /home/stack/images-rhel73.tar
+```
+
+For RHEL undercloud image must be changed before usage, RHEL subscription is requried.
+```
+      virt-customize -a undercloud-rhel.qcow2 \
+            --run-command 'xfs_growfs /' \
+            --sm-credentials <your_rhel_user>:password:<your_rhel_password> --sm-register --sm-attach auto \
+            --run-command 'subscription-manager repos --enable=rhel-7-server-rpms --enable=rhel-7-server-extras-rpms --enable=rhel-7-server-rh-common-rpms --enable=rhel-ha-for-rhel-7-server-rpms --enable=rhel-7-server-openstack-10-rpms' \
+            --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
+            --run-command 'systemctl enable sshd' \
+            --run-command 'yum remove -y cloud-init' \
+            --selinux-relabel
+```
 
 Files and parameters
 ====================
