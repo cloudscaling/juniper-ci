@@ -201,7 +201,9 @@ upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
 rm -rf ~/tripleo-heat-templates
 cp -r /usr/share/openstack-tripleo-heat-templates/ ~/tripleo-heat-templates
 rm -rf ~/contrail-tripleo-heat-templates
-git clone https://github.com/Juniper/contrail-tripleo-heat-templates -b stable/newton
+# TODO: replace personal repo with Juniper one
+#git clone https://github.com/Juniper/contrail-tripleo-heat-templates -b stable/newton
+git clone https://github.com/alexey-mr/contrail-tripleo-heat-templates -b stable/newton
 cp -r ~/contrail-tripleo-heat-templates/environments/contrail ~/tripleo-heat-templates/environments
 cp -r ~/contrail-tripleo-heat-templates/puppet/services/network/* ~/tripleo-heat-templates/puppet/services/network
 
