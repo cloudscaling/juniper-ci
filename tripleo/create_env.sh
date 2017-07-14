@@ -12,7 +12,8 @@ my_dir="$(dirname $my_file)"
 ssh_key_dir="/home/jenkins"
 
 # base image for VMs
-BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-'undercloud.qcow2'}
+ENVIRONMENT_OS=${ENVIRONMENT_OS:-'centos'}
+BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-"undercloud-${ENVIRONMENT_OS}.qcow2"}
 BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
 mkdir -p ${BASE_IMAGE_DIR}
 BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
@@ -31,7 +32,12 @@ CONTRAIL_PACKAGES_DIR=${CONTRAIL_PACKAGES_DIR:-'/home/root/contrail/latest'}
 
 # ready image for undercloud - using CentOS cloud image. just run and ssh into it.
 if [[ ! -f ${BASE_IMAGE} ]] ; then
-  wget -O ${BASE_IMAGE} https://cloud.centos.org/centos/7/images/${BASE_IMAGE_NAME}
+  if [[ "$ENVIRONMENT_OS" == "centos" ]] ; then
+    wget -O ${BASE_IMAGE} https://cloud.centos.org/centos/7/images/${BASE_IMAGE_NAME}
+  else
+    echo Download of image is implemented only for CentOS based environment
+    exit 1
+  fi
 fi
 
 # disk size for overcloud machines

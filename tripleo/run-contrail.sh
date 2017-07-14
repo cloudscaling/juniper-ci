@@ -11,6 +11,7 @@ if [[ -z "$WORKSPACE" ]] ; then
 fi
 
 export NUM=${NUM:-0}
+export ENVIRONMENT_OS=${ENVIRONMENT_OS:-'centos'}
 export CLEAN_ENV=${CLEAN_ENV:-'auto'}
 export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'newton'}
 export CONTROLLER_COUNT=${CONTROLLER_COUNT:-1}

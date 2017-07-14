@@ -11,8 +11,18 @@ if [[ -z "$NUM" ]] ; then
   exit 1
 fi
 
+if [[ -z "$OPENSTACK_VERSION" ]] ; then
+  echo "OPENSTACK_VERSION is expected (e.g. export OPENSTACK_VERSION=newton)"
+  exit 1
+fi
+
+if [[ -z "$ENVIRONMENT_OS" ]] ; then
+  echo "ENVIRONMENT_OS is expected (e.g. export ENVIRONMENT_OS=centos)"
+  exit 1
+fi
+
 BASE_ADDR=${BASE_ADDR:-172}
-IMAGES=${IMAGES:-"/home/stack/images-$OPENSTACK_VERSION.tar"}
+IMAGES=${IMAGES:-"/home/stack/images-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}.tar"}
 NETDEV=${NETDEV:-'eth1'}
 
 # on kvm host do once: create stack user, create home directory, add him to libvirtd group
