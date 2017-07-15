@@ -73,6 +73,7 @@ For RHEL undercloud image must be changed before usage, RHEL subscription is req
       export LIBGUESTFS_BACKEND=direct
       qemu-img create -f qcow2 undercloud-rhel-image.qcow2 100G
       virt-resize --expand /dev/sda1 rhel-guest-image-7.3-36.x86_64.qcow2 undercloud-rhel-image.qcow2
+      virt-customize -a undercloud-rhel-image.qcow2 --root-password password:qwe123QWE
       virt-customize -a undercloud-rhel-image.qcow2 \
             --run-command 'xfs_growfs /' \
             --sm-credentials <your_rhel_user>:password:<your_rhel_password> --sm-register --sm-attach auto \
@@ -91,6 +92,11 @@ For RHEL undercloud image must be changed before usage, RHEL subscription is req
       lrwxrwxrwx 1 root root   42 Jul 14 20:56 undercloud-centos.qcow2 -> /home/root/images/undercloud-centos7.qcow2
       lrwxrwxrwx 1 root root   54 Jul 14 20:56 undercloud-rhel.qcow2 -> /home/root/images/undercloud-rhel-image.qcow2
 ```
+Overcloud image: for debug purposes set root password via
+```
+      virt-customize -a overcloud-full.qcow2 --root-password password:qwe123QWE
+```
+and re-create archive with images.
 Overcloud image archive:
 ```
       root@contrail-ci:~# ls -lh /home/stack/
