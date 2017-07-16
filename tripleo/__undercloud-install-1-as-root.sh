@@ -10,8 +10,17 @@ if [[ -z "$NUM" ]] ; then
   exit 1
 fi
 
+if [[ -z "$OPENSTACK_VERSION" ]] ; then
+  echo "OPENSTACK_VERSION is expected (e.g. export OPENSTACK_VERSION=newton)"
+  exit 1
+fi
+
+if [[ -z "$ENVIRONMENT_OS" ]] ; then
+  echo "ENVIRONMENT_OS is expected (e.g. export ENVIRONMENT_OS=centos)"
+  exit 1
+fi
+
 NETDEV=${NETDEV:-'eth1'}
-OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
 CLOUD_DOMAIN_NAME=${CLOUD_DOMAIN_NAME:-'localdomain'}
 
 # allow ip forwarding
@@ -62,9 +71,11 @@ chmod 644 /home/stack/.ssh/config
 
 # install useful utils
 yum install -y yum-utils screen mc deltarpm createrepo bind-utils
-# add OpenStack repositories
-curl -L -o /etc/yum.repos.d/delorean-$OPENSTACK_VERSION.repo https://trunk.rdoproject.org/centos7-$OPENSTACK_VERSION/current/delorean.repo
-curl -L -o /etc/yum.repos.d/delorean-deps-$OPENSTACK_VERSION.repo http://trunk.rdoproject.org/centos7-$OPENSTACK_VERSION/delorean-deps.repo
+# add OpenStack repositories for centos, for rhel it is added in images
+if [[ "$ENVIRONMENT_OS" != 'rhel' ]] ; then
+  curl -L -o /etc/yum.repos.d/delorean-$OPENSTACK_VERSION.repo https://trunk.rdoproject.org/centos7-$OPENSTACK_VERSION/current/delorean.repo
+  curl -L -o /etc/yum.repos.d/delorean-deps-$OPENSTACK_VERSION.repo http://trunk.rdoproject.org/centos7-$OPENSTACK_VERSION/delorean-deps.repo
+fi
 # install tripleo clients
 yum -y install yum-plugin-priorities python-tripleoclient python-rdomanager-oscplugin sshpass openstack-utils
 

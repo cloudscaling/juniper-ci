@@ -9,8 +9,17 @@ if [[ -z "$NUM" ]] ; then
   exit 1
 fi
 
+if [[ -z "$OPENSTACK_VERSION" ]] ; then
+  echo "OPENSTACK_VERSION is expected (e.g. export OPENSTACK_VERSION=newton)"
+  exit 1
+fi
+
+if [[ -z "$ENVIRONMENT_OS" ]] ; then
+  echo "ENVIRONMENT_OS is expected (e.g. export ENVIRONMENT_OS=centos)"
+  exit 1
+fi
+
 NETDEV=${NETDEV:-'eth1'}
-OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
 
 ((addr=176+NUM*10))
 prov_ip="192.168.$addr"
@@ -39,6 +48,11 @@ openstack undercloud install
 
 # function to build images if needed
 function create_images() {
+  if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+    echo "Image creation works for ContOS based only for now"
+    exit 1
+  fi
+
   mkdir -p images
   cd images
 
