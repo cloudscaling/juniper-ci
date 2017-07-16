@@ -287,7 +287,7 @@ function _get_machines_by_service() {
 
 function _get_instance_machine() {
   local id=$1
-  local host=`openstack --insecure server list --long -c ID -c Host | grep $id | awk '{print $4}'`
+  local host=`openstack --insecure server list --long -c ID -c Host | grep $id | awk '{print $4}' | cut -d '.' -f 1`
   local ip=''
   if [[ "$SSH_CMD" == 'juju-ssh' ]] ; then
     ip=`nslookup $host | awk '/Address/{print $2}' | tail -1 | sed 's/#.*$//'`
