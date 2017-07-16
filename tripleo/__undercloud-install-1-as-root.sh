@@ -78,6 +78,9 @@ if [[ "$ENVIRONMENT_OS" != 'rhel' ]] ; then
 else
   # osp10 has no preinstalled utils
   yum install -y openstack-utils
+  # install pip for future run of OS checks
+  curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+  python get-pip.py
 fi
 
 # install tripleo clients
