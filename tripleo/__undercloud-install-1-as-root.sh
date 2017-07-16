@@ -75,9 +75,14 @@ yum install -y yum-utils screen mc deltarpm createrepo bind-utils
 if [[ "$ENVIRONMENT_OS" != 'rhel' ]] ; then
   curl -L -o /etc/yum.repos.d/delorean-$OPENSTACK_VERSION.repo https://trunk.rdoproject.org/centos7-$OPENSTACK_VERSION/current/delorean.repo
   curl -L -o /etc/yum.repos.d/delorean-deps-$OPENSTACK_VERSION.repo http://trunk.rdoproject.org/centos7-$OPENSTACK_VERSION/delorean-deps.repo
+else
+  # osp10 has no preinstalled utils
+  yum install -y openstack-utils
 fi
+
 # install tripleo clients
 yum -y install yum-plugin-priorities python-tripleoclient python-rdomanager-oscplugin sshpass openstack-utils
+
 
 # add Ceph repos to workaround bug with redhat-lsb-core package
 # todo: there is enabled ceph repo jewel

@@ -77,7 +77,7 @@ For RHEL undercloud image must be changed before usage, RHEL subscription is req
       virt-customize -a undercloud-rhel-image.qcow2 \
             --run-command 'xfs_growfs /' \
             --sm-credentials <your_rhel_user>:password:<your_rhel_password> --sm-register --sm-attach auto \
-            --run-command 'subscription-manager repos --enable=rhel-7-server-rpms --enable=rhel-7-server-extras-rpms --enable=rhel-7-server-rh-common-rpms --enable=rhel-ha-for-rhel-7-server-rpms --enable=rhel-7-server-openstack-10-rpms' \
+            --run-command 'subscription-manager repos --enable=rhel-7-server-rpms --enable=rhel-7-server-extras-rpms --enable=rhel-7-server-rh-common-rpms --enable=rhel-ha-for-rhel-7-server-rpms --enable=rhel-7-server-openstack-10-rpms --enable=rhel-7-server-openstack-10-devtools-rpms' \
             --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
             --run-command 'systemctl enable sshd' \
             --run-command 'yum remove -y cloud-init' \
