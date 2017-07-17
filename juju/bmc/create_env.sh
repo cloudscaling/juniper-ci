@@ -18,6 +18,8 @@ vm_disk_size="30G"
 # volume's poolname
 poolname="jujuimages"
 net_driver=${net_driver:-e1000}
+nname="juju"
+addr="10.0.0"
 
 source "$my_dir/functions"
 
@@ -28,8 +30,6 @@ if virsh list --all | grep -q "juju-cont" ; then
   exit 1
 fi
 
-nname="juju"
-addr="10.0.0"
 create_network $nname $addr
 
 # create pool
@@ -54,8 +54,10 @@ function run_machine() {
   local ram="$3"
   local mac_suffix="$4"
 
-  cp $BASE_IMAGE $pool_path/juju-$name.qcow2
-  qemu-img resize $pool_path/juju-$name.qcow2 +32G
+  echo "INFO: running  machine $name $(date)"
+
+  cp $BASE_IMAGE $pool_path/$name.qcow2
+  qemu-img resize $pool_path/$name.qcow2 +32G
 
   virt-install --name $name \
     --ram $ram \
@@ -63,7 +65,7 @@ function run_machine() {
     --virt-type kvm \
     --os-type=linux \
     --os-variant ubuntuxenial \
-    --disk path=$pool_path/juju-$name.qcow2,cache=writeback,bus=virtio,serial=$(uuidgen) \
+    --disk path=$pool_path/$name.qcow2,cache=writeback,bus=virtio,serial=$(uuidgen) \
     --noautoconsole \
     --graphics vnc,listen=0.0.0.0 \
     --network network=$nname,model=$net_driver,mac=52:54:00:10:00:$mac_suffix \
@@ -75,7 +77,7 @@ function get_machine_ip() {
   python -c "import libvirt; conn = libvirt.open('qemu:///system'); ip = [lease['ipaddr'] for lease in conn.networkLookupByName('$nname').DHCPLeases() if lease['mac'] == '52:54:00:10:00:$mac_suffix'][0]; print ip"
 }
 
-run_machine cont 1 2048 01
+run_machine juju-cont 1 2048 01
 cont_ip=`get_machine_ip 01`
 
 # wait for controller machine
@@ -91,5 +93,25 @@ while ! scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -B ./tmp
   ((++iter))
 done
 
-# juju bootstrap manual/$cont_ip test-cloud
+echo "INFO: bootstraping juju controller $(date)"
+juju bootstrap manual/$cont_ip test-cloud
 
+run_machine juju-os-comp-1 2 8192 02
+ip=`get_machine_ip 02`
+juju add-machine ssh:ubuntu@$ip
+run_machine juju-os-comp-1 2 8192 03
+ip=`get_machine_ip 03`
+juju add-machine ssh:ubuntu@$ip
+
+run_machine juju-os-cont-1 4 16384 05
+ip=`get_machine_ip 05`
+juju add-machine ssh:ubuntu@$ip
+
+if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
+  run_machine juju-os-cont-2 4 16384 06
+  ip=`get_machine_ip 06`
+  juju add-machine ssh:ubuntu@$ip
+  run_machine juju-os-cont-3 4 16384 07
+  ip=`get_machine_ip 07`
+  juju add-machine ssh:ubuntu@$ip
+fi

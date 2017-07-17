@@ -35,17 +35,11 @@ function get_pool_path() {
 }
 
 function delete_domains() {
-  for name in `virsh list --all | grep "rd-overcloud-$NUM-" | awk '{print $2}'` ; do
+  for name in `virsh list --all | grep "juju-" | awk '{print $2}'` ; do
     virsh destroy $name || true
     sleep 2
     virsh undefine $name || true
   done
-
-  if virsh dominfo rd-undercloud-$NUM 2>/dev/null ; then
-    virsh destroy rd-undercloud-$NUM || true
-    sleep 2
-    virsh undefine rd-undercloud-$NUM || true
-  fi
 }
 
 function delete_volume() {
