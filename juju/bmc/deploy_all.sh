@@ -8,7 +8,6 @@ fi
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
-source "$my_dir/common/functions"
 
 log_dir="$WORKSPACE/logs"
 if [ -d $log_dir ] ; then
