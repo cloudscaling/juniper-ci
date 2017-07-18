@@ -36,6 +36,26 @@ export USE_ADDITIONAL_INTERFACE="${USE_ADDITIONAL_INTERFACE:-false}"
 
 export PASSWORD=${PASSWORD:-'password'}
 
+trap 'catch_errors $LINENO' ERR EXIT
+
+function catch_errors() {
+  local exit_code=$?
+  echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
+  trap - ERR EXIT
+
+#  $my_dir/save-logs.sh
+#  if [ -f $my_dir/contrail/save-logs.sh ] ; then
+#    $my_dir/contrail/save-logs.sh
+#  fi
+
+  if [[ "$CLEAN_ENV" == 'always' ]] ; then
+    echo "INFO: cleaning environment $(date)"
+    sudo "$my_dir"/clean_env.sh
+  fi
+
+  exit $exit_code
+}
+
 echo "INFO: Date: $(date)"
 echo "INFO: Starting deployment process with vars:"
 env|sort
@@ -45,7 +65,7 @@ env|sort
 
 
 echo "INFO: creating environment $(date)"
-"$my_dir"/create_env.sh
+sudo "$my_dir"/create_env.sh
 echo "INFO: installing juju controller $(date)"
 
 #deploy bundle/manual
@@ -54,16 +74,17 @@ juju status
 
 
 #check it
-$my_dir/../contrail/check-openstack.sh
+#$my_dir/../contrail/check-openstack.sh
+
 
 #$my_dir/save-logs.sh
 #if [ -f $my_dir/contrail/save-logs.sh ] ; then
 #  $my_dir/contrail/save-logs.sh
 #fi
 
+trap - ERR EXIT
+
 if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
   echo "INFO: cleaning environment $(date)"
-  "$my_dir"/clean_env.sh
+  sudo "$my_dir"/clean_env.sh
 fi
-
-trap - ERR EXIT

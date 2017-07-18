@@ -28,6 +28,14 @@ function create_pool() {
   virsh pool-autostart $poolname
 }
 
+function delete_pool() {
+  local poolname="$1"
+  local path=`get_pool_path $poolname`
+  virsh pool-destroy $poolname
+  virsh pool-undefine $poolname
+  rm -rf "$poolpath" || /bin/true
+}
+
 function get_pool_path() {
   local poolname=$1
   virsh pool-info $poolname &>/dev/null || return
@@ -36,9 +44,9 @@ function get_pool_path() {
 
 function delete_domains() {
   for name in `virsh list --all | grep "juju-" | awk '{print $2}'` ; do
-    virsh destroy $name || true
+    virsh destroy $name || /bin/true
     sleep 2
-    virsh undefine $name || true
+    virsh undefine $name || /bin/true
   done
 }
 

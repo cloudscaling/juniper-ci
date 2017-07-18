@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -64,17 +64,23 @@ function run_machine() {
     --vcpus $cpu \
     --virt-type kvm \
     --os-type=linux \
-    --os-variant ubuntuxenial \
+    --os-variant ubuntu16.04 \
     --disk path=$pool_path/$name.qcow2,cache=writeback,bus=virtio,serial=$(uuidgen) \
     --noautoconsole \
     --graphics vnc,listen=0.0.0.0 \
     --network network=$nname,model=$net_driver,mac=52:54:00:10:00:$mac_suffix \
-    --cpu SandyBridge,+vmx
+    --cpu SandyBridge,+vmx \
+    --boot hd
 }
 
 function get_machine_ip() {
   local mac_suffix="$1"
-  python -c "import libvirt; conn = libvirt.open('qemu:///system'); ip = [lease['ipaddr'] for lease in conn.networkLookupByName('$nname').DHCPLeases() if lease['mac'] == '52:54:00:10:00:$mac_suffix'][0]; print ip"
+  for i in {1..10} ; do
+    if python -c "import libvirt; conn = libvirt.open('qemu:///system'); ip = [lease['ipaddr'] for lease in conn.networkLookupByName('$nname').DHCPLeases() if lease['mac'] == '52:54:00:10:00:$mac_suffix'][0]; print ip" 2>/dev/null ; then
+      break
+    fi
+    sleep 10
+  done
 }
 
 run_machine juju-cont 1 2048 01
@@ -85,10 +91,10 @@ iter=0
 truncate -s 0 ./tmp_file
 while ! scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -B ./tmp_file ubuntu@$cont_ip:/tmp/tmp_file ; do
   if (( iter >= 20 )) ; then
-    echo "Could not connect to controller"
+    echo "ERROR: Could not connect to controller"
     exit 1
   fi
-  echo "Waiting for controller..."
+  echo "INFO: Waiting for controller... $(date)"
   sleep 30
   ((++iter))
 done
@@ -96,21 +102,26 @@ done
 echo "INFO: bootstraping juju controller $(date)"
 juju bootstrap manual/$cont_ip test-cloud
 
+echo "INFO: creating compute 1 $(date)"
 run_machine juju-os-comp-1 2 8192 02
 ip=`get_machine_ip 02`
 juju add-machine ssh:ubuntu@$ip
-run_machine juju-os-comp-1 2 8192 03
+echo "INFO: creating compute 2 $(date)"
+run_machine juju-os-comp-2 2 8192 03
 ip=`get_machine_ip 03`
 juju add-machine ssh:ubuntu@$ip
 
+echo "INFO: creating controller 1 $(date)"
 run_machine juju-os-cont-1 4 16384 05
 ip=`get_machine_ip 05`
 juju add-machine ssh:ubuntu@$ip
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
+  echo "INFO: creating controller 2 $(date)"
   run_machine juju-os-cont-2 4 16384 06
   ip=`get_machine_ip 06`
   juju add-machine ssh:ubuntu@$ip
+  echo "INFO: creating controller 3 $(date)"
   run_machine juju-os-cont-3 4 16384 07
   ip=`get_machine_ip 07`
   juju add-machine ssh:ubuntu@$ip
