@@ -42,12 +42,6 @@ function create_root_volume() {
   qemu-img create -f qcow2 -o preallocation=metadata $pool_path/$name.qcow2 $vm_disk_size
 }
 
-function create_store_volume() {
-  local name=$1
-  delete_volume $name-store.qcow2 $poolname
-  qemu-img create -f qcow2 -o preallocation=metadata $pool_path/$name-store.qcow2 100G
-}
-
 function run_machine() {
   local name="$1"
   local cpu="$2"
@@ -73,18 +67,8 @@ function run_machine() {
     --boot hd
 }
 
-function get_machine_ip() {
-  local mac_suffix="$1"
-  for i in {1..10} ; do
-    if python -c "import libvirt; conn = libvirt.open('$LIBVIRT_DEFAULT_URI'); ip = [lease['ipaddr'] for lease in conn.networkLookupByName('$nname').DHCPLeases() if lease['mac'] == '52:54:00:10:00:$mac_suffix'][0]; print ip" 2>/dev/null ; then
-      break
-    fi
-    sleep 10
-  done
-}
-
-run_machine juju-cont 1 2048 01
-cont_ip=`get_machine_ip 01`
+run_machine juju-cont 1 2048 $juju_cont_mac
+cont_ip=`get_machine_ip $juju_cont_mac`
 
 # wait for controller machine
 iter=0
@@ -103,28 +87,31 @@ echo "INFO: bootstraping juju controller $(date)"
 juju bootstrap manual/$cont_ip test-cloud
 
 echo "INFO: creating compute 1 $(date)"
-run_machine juju-os-comp-1 2 8192 02
-ip=`get_machine_ip 02`
+run_machine juju-os-comp-1 2 8192 $juju_os_comp_1_mac
+ip=`get_machine_ip $juju_os_comp_1_mac`
 juju add-machine ssh:ubuntu@$ip
-juju ssh ubuntu:$ip "sudo add-apt-repository cloud-archive:newton ; sudo apt-get -fy update ; sudo apt-get -fy install dpdk-igb-uio-dkms"
+juju ssh ubuntu@$ip "sudo add-apt-repository -yu cloud-archive:newton ; sudo apt-get -fy install dpdk-igb-uio-dkms mc wget"
 echo "INFO: creating compute 2 $(date)"
-run_machine juju-os-comp-2 2 8192 03
-ip=`get_machine_ip 03`
+run_machine juju-os-comp-2 2 8192 $juju_os_comp_2_mac
+ip=`get_machine_ip $juju_os_comp_2_mac`
 juju add-machine ssh:ubuntu@$ip
-juju ssh ubuntu@$ip "sudo add-apt-repository cloud-archive:newton ; sudo apt-get -fy update ; sudo apt-get -fy install dpdk-igb-uio-dkms"
+juju ssh ubuntu@$ip "sudo add-apt-repository -yu cloud-archive:newton ; sudo apt-get -fy install dpdk-igb-uio-dkms mc wget"
 
 echo "INFO: creating controller 1 $(date)"
-run_machine juju-os-cont-1 4 16384 05
-ip=`get_machine_ip 05`
+run_machine juju-os-cont-1 4 16384 $juju_os_cont_1_mac
+ip=`get_machine_ip $juju_os_cont_1_mac`
 juju add-machine ssh:ubuntu@$ip
+juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget"
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   echo "INFO: creating controller 2 $(date)"
-  run_machine juju-os-cont-2 4 16384 06
-  ip=`get_machine_ip 06`
+  run_machine juju-os-cont-2 4 16384 $juju_os_cont_2_mac
+  ip=`get_machine_ip $juju_os_cont_2_mac`
   juju add-machine ssh:ubuntu@$ip
+  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget"
   echo "INFO: creating controller 3 $(date)"
-  run_machine juju-os-cont-3 4 16384 07
-  ip=`get_machine_ip 07`
+  run_machine juju-os-cont-3 4 16384 $juju_os_cont_3_mac
+  ip=`get_machine_ip $juju_os_cont_3_mac`
   juju add-machine ssh:ubuntu@$ip
+  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget"
 fi

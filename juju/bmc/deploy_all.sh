@@ -75,12 +75,9 @@ env|sort
 
 echo "INFO: creating environment $(date)"
 "$my_dir"/create_env.sh
-echo "INFO: installing juju controller $(date)"
-
-#deploy bundle/manual
-
 juju status
 
+"$my_dir"/deploy_manual.sh
 
 #check it
 #$my_dir/../contrail/check-openstack.sh

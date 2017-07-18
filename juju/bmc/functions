@@ -3,6 +3,23 @@
 export LIBVIRT_DEFAULT_URI=qemu:///system
 virsh_cmd="virsh"
 
+juju_cont_mac='01'
+juju_os_comp_1_mac='02'
+juju_os_comp_2_mac='03'
+juju_os_cont_1_mac='05'
+juju_os_cont_2_mac='06'
+juju_os_cont_3_mac='07'
+
+function get_machine_ip() {
+  local mac_suffix="$1"
+  for i in {1..10} ; do
+    if python -c "import libvirt; conn = libvirt.open('$LIBVIRT_DEFAULT_URI'); ip = [lease['ipaddr'] for lease in conn.networkLookupByName('$nname').DHCPLeases() if lease['mac'] == '52:54:00:10:00:$mac_suffix'][0]; print ip" 2>/dev/null ; then
+      break
+    fi
+    sleep 10
+  done
+}
+
 function delete_network() {
   local network_name="$1"
   $virsh_cmd net-destroy $network_name 2> /dev/null || true
