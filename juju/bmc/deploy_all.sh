@@ -52,6 +52,7 @@ function catch_errors() {
   echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
   trap - ERR EXIT
 
+  juju status || /bin/true
 #  $my_dir/save-logs.sh
 #  if [ -f $my_dir/contrail/save-logs.sh ] ; then
 #    $my_dir/contrail/save-logs.sh
@@ -78,6 +79,7 @@ echo "INFO: creating environment $(date)"
 juju status
 
 "$my_dir"/deploy_manual.sh
+juju status
 
 #check it
 #$my_dir/../contrail/check-openstack.sh
