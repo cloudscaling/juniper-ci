@@ -7,7 +7,7 @@ poolname="jujuimages"
 
 source "$my_dir/functions"
 
-juju destroy-controller -y --destroy-all-models test-cloud
+juju destroy-controller -y --destroy-all-models test-cloud || /bin/true
 
 delete_network juju
 
