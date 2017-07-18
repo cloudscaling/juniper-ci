@@ -3,6 +3,11 @@
 export LIBVIRT_DEFAULT_URI=qemu:///system
 virsh_cmd="virsh"
 
+poolname="jujuimages"
+net_driver=${net_driver:-e1000}
+nname="juju"
+addr="10.0.0"
+
 juju_cont_mac='01'
 juju_os_comp_1_mac='02'
 juju_os_comp_2_mac='03'

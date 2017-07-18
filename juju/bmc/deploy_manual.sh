@@ -12,13 +12,11 @@ check_containers
 # version 2
 PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
 
-echo "---------------------------------------------------- From: $deploy_from  Version: $VERSION"
-
 repo_ip=`get_kvm_machine_ip $juju_cont_mac`
 mrepo="ubuntu@$repo_ip"
 echo "INFO: Prepare apt-repo on $mrepo"
 scp "$HOME/docker/$packages" "$mrepo:contrail_debs.tgz"
-scp "$my_dir/create-aptrepo.sh" $mrepo:create-aptrepo.sh
+scp "$my_dir/../contrail/create-aptrepo.sh" $mrepo:create-aptrepo.sh
 ssh $mrepo ./create-aptrepo.sh $SERIES
 echo "INFO: apt-repo is ready"
 repo_key=`curl -s http://$repo_ip/ubuntu/repo.key`

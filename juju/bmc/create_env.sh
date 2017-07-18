@@ -11,16 +11,6 @@ BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-'ubuntu-xenial.qcow2'}
 BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
 BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
 
-# DEPLOY_AS_HA_MODE = false/true
-
-# disk size for overcloud machines
-vm_disk_size="30G"
-# volume's poolname
-poolname="jujuimages"
-net_driver=${net_driver:-e1000}
-nname="juju"
-addr="10.0.0"
-
 source "$my_dir/functions"
 
 # check if environment is present
