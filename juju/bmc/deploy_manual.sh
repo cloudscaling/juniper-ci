@@ -103,7 +103,7 @@ juju-expose contrail-analytics
 #  juju-add-unit contrail-analyticsdb --to $m8
 #fi
 
-cp "$my_dir/repo_config.yaml.tmpl" "repo_config_co.yaml"
+cp "$my_dir/../contrail/repo_config.yaml.tmpl" "repo_config_co.yaml"
 sed -i -e "s|{{charm_name}}|contrail-openstack|m" "repo_config_co.yaml"
 sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_co.yaml"
 sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_co.yaml"
@@ -111,7 +111,7 @@ sed -i -e "s|{{series}}|$SERIES|m" "repo_config_co.yaml"
 sed -i "s/\r/\n/g" "repo_config_co.yaml"
 juju-deploy $PLACE/contrail-openstack --config repo_config_co.yaml
 
-cp "$my_dir/repo_config.yaml.tmpl" "repo_config_cv.yaml"
+cp "$my_dir/../contrail/repo_config.yaml.tmpl" "repo_config_cv.yaml"
 sed -i -e "s|{{charm_name}}|contrail-agent|m" "repo_config_cv.yaml"
 sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_cv.yaml"
 sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_cv.yaml"
