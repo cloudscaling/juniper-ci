@@ -34,6 +34,7 @@
           description: "Deploy Contrail with additional interfaces that is used for control-network"
           default: false
     scm:
+      - juniper-contrail-charms
       - juniper-ci
     builders:
       - shell: |
