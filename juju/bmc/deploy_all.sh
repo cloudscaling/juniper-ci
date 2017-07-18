@@ -50,7 +50,7 @@ function catch_errors() {
 
   if [[ "$CLEAN_ENV" == 'always' ]] ; then
     echo "INFO: cleaning environment $(date)"
-    sudo "$my_dir"/clean_env.sh
+    "$my_dir"/clean_env.sh
   fi
 
   exit $exit_code
@@ -65,7 +65,7 @@ env|sort
 
 
 echo "INFO: creating environment $(date)"
-sudo "$my_dir"/create_env.sh
+"$my_dir"/create_env.sh
 echo "INFO: installing juju controller $(date)"
 
 #deploy bundle/manual
@@ -86,5 +86,5 @@ trap - ERR EXIT
 
 if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
   echo "INFO: cleaning environment $(date)"
-  sudo "$my_dir"/clean_env.sh
+  "$my_dir"/clean_env.sh
 fi
