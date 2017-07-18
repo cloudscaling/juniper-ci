@@ -4,8 +4,8 @@ virsh_cmd="virsh -c qemu:///system"
 
 function delete_network() {
   local network_name="$1"
-  virsh_cmd net-destroy $network_name 2> /dev/null || true
-  virsh_cmd net-undefine $network_name 2> /dev/null || true
+  $virsh_cmd net-destroy $network_name 2> /dev/null || true
+  $virsh_cmd net-undefine $network_name 2> /dev/null || true
 }
 
 function create_network() {
@@ -15,40 +15,40 @@ function create_network() {
   delete_network $network_name
 
   echo "<network><name>$network_name</name><forward mode=\"nat\"><nat><port start=\"1024\" end=\"65535\"/></nat></forward><ip address=\"$addr.1\" netmask=\"255.255.255.0\"><dhcp><range start=\"$addr.10\" end=\"$addr.254\"/></dhcp></ip></network>" > /tmp/juju-net.xml
-  virsh_cmd net-define /tmp/juju-net.xml
+  $virsh_cmd net-define /tmp/juju-net.xml
   rm /tmp/juju-net.xml
-  virsh_cmd net-autostart $network_name
-  virsh_cmd -c qemu:///system net-start $network_name
+  $virsh_cmd net-autostart $network_name
+  $virsh_cmd -c qemu:///system net-start $network_name
 }
 
 function create_pool() {
   local poolname="$1"
   local path="/var/lib/libvirt/$poolname"
-  virsh_cmd pool-define-as $poolname dir - - - - "$path"
-  virsh_cmd pool-build $poolname
-  virsh_cmd pool-start $poolname
-  virsh_cmd pool-autostart $poolname
+  $virsh_cmd pool-define-as $poolname dir - - - - "$path"
+  $virsh_cmd pool-build $poolname
+  $virsh_cmd pool-start $poolname
+  $virsh_cmd pool-autostart $poolname
 }
 
 function delete_pool() {
   local poolname="$1"
   local path=`get_pool_path $poolname`
-  virsh_cmd pool-destroy $poolname
-  virsh_cmd pool-undefine $poolname
+  $virsh_cmd pool-destroy $poolname
+  $virsh_cmd pool-undefine $poolname
   rm -rf "$poolpath" || /bin/true
 }
 
 function get_pool_path() {
   local poolname=$1
-  virsh_cmd pool-info $poolname &>/dev/null || return
-  virsh_cmd pool-dumpxml $poolname | sed -n '/path/{s/.*<path>\(.*\)<\/path>.*/\1/;p}'
+  $virsh_cmd pool-info $poolname &>/dev/null || return
+  $virsh_cmd pool-dumpxml $poolname | sed -n '/path/{s/.*<path>\(.*\)<\/path>.*/\1/;p}'
 }
 
 function delete_domains() {
-  for name in `virsh_cmd list --all | grep "juju-" | awk '{print $2}'` ; do
-    virsh_cmd destroy $name || /bin/true
+  for name in `$virsh_cmd list --all | grep "juju-" | awk '{print $2}'` ; do
+    $virsh_cmd destroy $name || /bin/true
     sleep 2
-    virsh_cmd undefine $name || /bin/true
+    $virsh_cmd undefine $name || /bin/true
   done
 }
 
@@ -56,6 +56,5 @@ function delete_volume() {
   volname=$1
   poolname=$2
   pool_path=$(get_pool_path $poolname)
-  virsh_cmd 
-vol-delete $volname --pool $poolname 2>/dev/null || rm -f $pool_path/$volname 2>/dev/null
+  $virsh_cmd vol-delete $volname --pool $poolname 2>/dev/null || rm -f $pool_path/$volname 2>/dev/null
 }
