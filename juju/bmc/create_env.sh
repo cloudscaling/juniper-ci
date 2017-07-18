@@ -76,7 +76,7 @@ function run_machine() {
 function get_machine_ip() {
   local mac_suffix="$1"
   for i in {1..10} ; do
-    if python -c "import libvirt; conn = libvirt.open('qemu:///system'); ip = [lease['ipaddr'] for lease in conn.networkLookupByName('$nname').DHCPLeases() if lease['mac'] == '52:54:00:10:00:$mac_suffix'][0]; print ip" 2>/dev/null ; then
+    if python -c "import libvirt; conn = libvirt.open('$LIBVIRT_DEFAULT_URI'); ip = [lease['ipaddr'] for lease in conn.networkLookupByName('$nname').DHCPLeases() if lease['mac'] == '52:54:00:10:00:$mac_suffix'][0]; print ip" 2>/dev/null ; then
       break
     fi
     sleep 10
@@ -106,10 +106,12 @@ echo "INFO: creating compute 1 $(date)"
 run_machine juju-os-comp-1 2 8192 02
 ip=`get_machine_ip 02`
 juju add-machine ssh:ubuntu@$ip
+juju ssh $ip "sudo add-apt-repository cloud-archive:newton ; sudo apt-get -fy update ; sudo apt-get -fy install dpdk-igb-uio-dkms"
 echo "INFO: creating compute 2 $(date)"
 run_machine juju-os-comp-2 2 8192 03
 ip=`get_machine_ip 03`
 juju add-machine ssh:ubuntu@$ip
+juju ssh $ip "sudo add-apt-repository cloud-archive:newton ; sudo apt-get -fy update ; sudo apt-get -fy install dpdk-igb-uio-dkms"
 
 echo "INFO: creating controller 1 $(date)"
 run_machine juju-os-cont-1 4 16384 05
