@@ -53,10 +53,7 @@ function catch_errors() {
   trap - ERR EXIT
 
   juju status || /bin/true
-#  $my_dir/save-logs.sh
-#  if [ -f $my_dir/contrail/save-logs.sh ] ; then
-#    $my_dir/contrail/save-logs.sh
-#  fi
+  $my_dir/../save-logs.sh
 
   if [[ "$CLEAN_ENV" == 'always' ]] ; then
     echo "INFO: cleaning environment $(date)"
@@ -79,16 +76,13 @@ echo "INFO: creating environment $(date)"
 juju status
 
 "$my_dir"/deploy_manual.sh
-juju status
+
 
 #check it
 #$my_dir/../contrail/check-openstack.sh
 
 
-#$my_dir/save-logs.sh
-#if [ -f $my_dir/contrail/save-logs.sh ] ; then
-#  $my_dir/contrail/save-logs.sh
-#fi
+$my_dir/../save-logs.sh
 
 trap - ERR EXIT
 
