@@ -20,14 +20,6 @@ if [[ "$jver" == 1 ]] ; then
   echo "ERROR: only juju 2.0 and higher supports resources. Please install and use juju 2.0 or higher."
   exit 1
 fi
-if [[ "$SERIES" != "xenial" ]] ; then
-  echo "ERROR: only xenial series is supported."
-  exit 1
-fi
-if [[ "$VERSION" != "newton" ]] ; then
-  echo "ERROR: only newton version is supported."
-  exit 1
-fi
 
 declare -A BUILDS
 BUILDS=([mitaka]=22 [newton]=22)
@@ -43,6 +35,15 @@ export USE_SSL_CONTRAIL="${USE_SSL_CONTRAIL:-false}"
 export USE_ADDITIONAL_INTERFACE="${USE_ADDITIONAL_INTERFACE:-false}"
 
 export PASSWORD=${PASSWORD:-'password'}
+
+if [[ "$SERIES" != "xenial" ]] ; then
+  echo "ERROR: only xenial series is supported."
+  exit 1
+fi
+if [[ "$VERSION" != "newton" ]] ; then
+  echo "ERROR: only newton version is supported."
+  exit 1
+fi
 
 trap 'catch_errors $LINENO' ERR EXIT
 
