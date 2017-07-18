@@ -20,13 +20,21 @@ if [[ "$jver" == 1 ]] ; then
   echo "ERROR: only juju 2.0 and higher supports resources. Please install and use juju 2.0 or higher."
   exit 1
 fi
+if [[ "$SERIES" != "xenial" ]] ; then
+  echo "ERROR: only xenial series is supported."
+  exit 1
+fi
+if [[ "$VERSION" != "newton" ]] ; then
+  echo "ERROR: only newton version is supported."
+  exit 1
+fi
 
 declare -A BUILDS
 BUILDS=([mitaka]=22 [newton]=22)
 # for builds of R4.0 from 1 to 20 version is 4.0.0.0
 export CONTRAIL_VERSION="${CONTRAIL_VERSION:-4.0.1.0}"
-export SERIES="${SERIES:-trusty}"
-export VERSION="${VERSION:-mitaka}"
+export SERIES="${SERIES:-xenial}"
+export VERSION="${VERSION:-newton}"
 export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
 export BUILD="${BUILD:-${BUILDS[$VERSION]}}"
 export DEPLOY_AS_HA_MODE="${DEPLOY_AS_HA_MODE:-false}"

@@ -15,8 +15,8 @@
           name: VERSION
           description: "Version of the OpenStack. mitaka implies trusty and newton implaies xenial."
           choices:
-            - mitaka
             - newton
+            - mitaka
       - bool:
           name: DEPLOY_AS_HA_MODE
           description: "Deploy 3 controllers instead of 1"
@@ -38,6 +38,20 @@
     builders:
       - shell: |
           #!/bin/bash -e
+          desc="$VERSION $DEPLOY_TYPE"
+          if [[ "$DEPLOY_AS_HA_MODE" == "true" ]] ; then desc="$desc +HA" ; fi
+          if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
+          if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
+          if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
+          echo "DESCRIPTION $desc"
+      - description-setter:
+          regexp: "DESCRIPTION (.*)"
+      - shell: |
+          #!/bin/bash -e
+          export SERIES='trusty'
+          if [[ "$VERSION" == "newton" ]] ; then
+            export SERIES='xenial'
+          fi
           ./juniper-ci/juju/bmc/deploy_all.sh
     publishers:
       - archive:
