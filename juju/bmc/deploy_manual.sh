@@ -14,7 +14,7 @@ PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
 
 echo "---------------------------------------------------- From: $deploy_from  Version: $VERSION"
 
-repo_ip=`get_machine_ip $juju_cont_mac`
+repo_ip=`get_kvm_machine_ip $juju_cont_mac`
 mrepo="ubuntu@$repo_ip"
 echo "INFO: Prepare apt-repo on $mrepo"
 scp "$HOME/docker/$packages" "$mrepo:contrail_debs.tgz"
@@ -28,20 +28,20 @@ repo_key=`echo "$repo_key" | awk '{printf("      %s\r", $0)}'`
 #  detect_subnet
 #fi
 
-comp1_ip=`get_machine_ip $juju_os_comp_1_mac`
+comp1_ip=`get_kvm_machine_ip $juju_os_comp_1_mac`
 comp1=`juju status | grep $comp1_ip | awk '{print $1}'`
 echo "INFO: compute 1: $comp1 / $comp1_ip"
-comp2_ip=`get_machine_ip $juju_os_comp_2_mac`
+comp2_ip=`get_kvm_machine_ip $juju_os_comp_2_mac`
 comp2=`juju status | grep $comp2_ip | awk '{print $1}'`
 echo "INFO: compute 2: $comp2 / $comp2_ip"
-cont1_ip=`get_machine_ip $juju_os_cont_1_mac`
+cont1_ip=`get_kvm_machine_ip $juju_os_cont_1_mac`
 cont1=`juju status | grep $cont1_ip | awk '{print $1}'`
 echo "INFO: controller 1: $cont1 / $cont1_ip"
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
-  cont2_ip=`get_machine_ip $juju_os_cont_2_mac`
+  cont2_ip=`get_kvm_machine_ip $juju_os_cont_2_mac`
   cont2=`juju status | grep $cont2_ip | awk '{print $1}'`
   echo "INFO: controller 2: $cont2 / $cont3_ip"
-  cont3_ip=`get_machine_ip $juju_os_cont_3_mac`
+  cont3_ip=`get_kvm_machine_ip $juju_os_cont_3_mac`
   cont3=`juju status | grep $cont3_ip | awk '{print $1}'`
   echo "INFO: controller 3: $cont3 / $cont3_ip"
 fi
