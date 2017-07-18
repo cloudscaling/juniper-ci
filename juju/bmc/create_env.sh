@@ -24,16 +24,16 @@ addr="10.0.0"
 source "$my_dir/functions"
 
 # check if environment is present
-if virsh list --all | grep -q "juju-cont" ; then
+if virsh_cmd list --all | grep -q "juju-cont" ; then
   echo 'ERROR: environment present. please clean up first'
-  virsh list --all | grep "juju-"
+  virsh_cmd list --all | grep "juju-"
   exit 1
 fi
 
 create_network $nname $addr
 
 # create pool
-virsh pool-info $poolname &> /dev/null || create_pool $poolname
+virsh_cmd pool-info $poolname &> /dev/null || create_pool $poolname
 pool_path=$(get_pool_path $poolname)
 
 function create_root_volume() {
