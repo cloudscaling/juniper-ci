@@ -9,7 +9,7 @@ fi
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
-log_dir="$WORKSPACE/logs"
+export log_dir="$WORKSPACE/logs"
 if [ -d $log_dir ] ; then
   chmod -R u+w "$log_dir"
   rm -rf "$log_dir"

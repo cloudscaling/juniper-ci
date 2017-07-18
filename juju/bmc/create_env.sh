@@ -90,28 +90,28 @@ echo "INFO: creating compute 1 $(date)"
 run_machine juju-os-comp-1 2 8192 $juju_os_comp_1_mac
 ip=`get_machine_ip $juju_os_comp_1_mac`
 juju add-machine ssh:ubuntu@$ip
-juju ssh ubuntu@$ip "sudo add-apt-repository -yu cloud-archive:newton ; sudo apt-get -fy install dpdk-igb-uio-dkms mc wget"
+juju ssh ubuntu@$ip "sudo add-apt-repository -yu cloud-archive:newton ; sudo apt-get -fy install dpdk-igb-uio-dkms mc wget" &>>$log_dir/apt.log
 echo "INFO: creating compute 2 $(date)"
 run_machine juju-os-comp-2 2 8192 $juju_os_comp_2_mac
 ip=`get_machine_ip $juju_os_comp_2_mac`
 juju add-machine ssh:ubuntu@$ip
-juju ssh ubuntu@$ip "sudo add-apt-repository -yu cloud-archive:newton ; sudo apt-get -fy install dpdk-igb-uio-dkms mc wget"
+juju ssh ubuntu@$ip "sudo add-apt-repository -yu cloud-archive:newton ; sudo apt-get -fy install dpdk-igb-uio-dkms mc wget" &>>$log_dir/apt.log
 
 echo "INFO: creating controller 1 $(date)"
 run_machine juju-os-cont-1 4 16384 $juju_os_cont_1_mac
 ip=`get_machine_ip $juju_os_cont_1_mac`
 juju add-machine ssh:ubuntu@$ip
-juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget"
+juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget" &>>$log_dir/apt.log
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   echo "INFO: creating controller 2 $(date)"
   run_machine juju-os-cont-2 4 16384 $juju_os_cont_2_mac
   ip=`get_machine_ip $juju_os_cont_2_mac`
   juju add-machine ssh:ubuntu@$ip
-  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget"
+  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget" &>>$log_dir/apt.log
   echo "INFO: creating controller 3 $(date)"
   run_machine juju-os-cont-3 4 16384 $juju_os_cont_3_mac
   ip=`get_machine_ip $juju_os_cont_3_mac`
   juju add-machine ssh:ubuntu@$ip
-  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget"
+  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget" &>>$log_dir/apt.log
 fi
