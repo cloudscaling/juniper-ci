@@ -150,10 +150,13 @@ for m in ${!machines[@]} ; do
   echo "${machines[$m]}    $m" >> hosts
 done
 cat hosts
-echo "INFO: Applying hosts file $(date)"
-for ip in ${machines[@]} ; do
+echo "INFO: Applying hosts file and hostnames $(date)"
+for m in ${!machines[@]} ; do
+  ip=${machines[$m]}
   juju scp hosts ubuntu@$ip:hosts 2>/dev/null
   juju ssh ubuntu@$ip 'sudo bash -c "cat ./hosts >> /etc/hosts"' 2>/dev/null
+  juju ssh ubuntu@$ip "sudo bash -c 'echo $m > /etc/hostname'" 2>/dev/null
+  juju ssh ubuntu@$ip "sudo hostname $m" 2>/dev/null
 done
 
 echo "INFO: Environment created $(date)"
