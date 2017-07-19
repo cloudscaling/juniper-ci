@@ -73,10 +73,8 @@ juju status
 
 "$my_dir"/deploy_manual.sh
 
-
 #check it
-#$my_dir/../contrail/check-openstack.sh
-
+$my_dir/../contrail/check-openstack.sh
 
 $my_dir/../save-logs.sh
 
