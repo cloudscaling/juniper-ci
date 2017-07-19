@@ -63,10 +63,11 @@ function run_machine() {
     --boot hd
 }
 
+wait_cmd="ssh"
 function wait_kvm_machine() {
   local ip=$1
   local iter=0
-  while ! juju ssh ubuntu@$ip "uname -a" &>/dev/null ; do
+  while ! $wait_cmd ubuntu@$ip "uname -a" &>/dev/null ; do
     ((++iter))
     if (( iter > 9 )) ; then
       echo "ERROR: machine $ip is not accessible $(date)"
@@ -95,6 +96,7 @@ done
 
 echo "INFO: bootstraping juju controller $(date)"
 juju bootstrap manual/$cont_ip test-cloud
+wait_cmd="juju ssh"
 
 declare -A machines
 
