@@ -99,6 +99,8 @@ done
 echo "INFO: bootstraping juju controller $(date)"
 juju bootstrap manual/$cont_ip test-cloud
 
+declare -A machines
+
 function run_compute() {
   local index=$1
   local mac_var_name="juju_os_comp_${1}_mac"
@@ -106,6 +108,7 @@ function run_compute() {
   echo "INFO: creating compute $index (mac $mac) $(date)"
   run_machine juju-os-comp-$index 2 8192 $mac
   local ip=`get_kvm_machine_ip $mac`
+  machines["comp-$i"]=$ip
   wait_kvm_machine $ip
   juju add-machine ssh:ubuntu@$ip
   echo "INFO: preparing compute $index $(date)"
@@ -119,15 +122,16 @@ function run_controller() {
   echo "INFO: creating controller $index (mac $mac) $(date)"
   run_machine juju-os-cont-$index 4 16384 $mac
   local ip=`get_kvm_machine_ip $mac`
+  machines["cont-$i"]=$ip
   wait_kvm_machine $ip
   juju add-machine ssh:ubuntu@$ip
   echo "INFO: preparing controller $index $(date)"
   juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget bridge-utils" &>>$log_dir/apt.log
-  juju ssh ubuntu@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge"
-  juju ssh ubuntu@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-ens3\"/m' /etc/default/lxd-bridge"
-  juju scp "$my_dir/50-cloud-init.cfg" ubuntu@$ip:50-cloud-init.cfg
-  juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg"
-  juju ssh ubuntu@$ip "sudo reboot" || /bin/true
+  juju ssh ubuntu@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge" 2>/dev/null
+  juju ssh ubuntu@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-ens3\"/m' /etc/default/lxd-bridge" 2>/dev/null
+  juju scp "$my_dir/50-cloud-init.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
+  juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
+  juju ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
 }
 
 run_compute 1
@@ -139,6 +143,18 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   run_controller 2
   run_controller 3
 fi
+
+echo "INFO: creating hosts file $(date)"
+truncate -s 0 hosts
+for m in ${!machines[@]} ; do
+  echo "${machines[$m]}    $m" >> hosts
+done
+cat hosts
+echo "INFO: Applying hosts file $(date)"
+for ip in ${machines[@]} ; do
+  juju scp hosts ubuntu@$ip:hosts 2>/dev/null
+  juju ssh ubuntu@$ip 'sudo bash -c "cat ./hosts >> /etc/hosts"' 2>/dev/null
+done
 
 echo "INFO: Environment created $(date)"
 
