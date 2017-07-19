@@ -66,7 +66,7 @@ function run_machine() {
 function wait_kvm_machine() {
   local ip=$1
   local iter=0
-  while ! ssh ubuntu@$ip "uname -a" &>/dev/null ; do
+  while ! juju ssh ubuntu@$ip "uname -a" &>/dev/null ; do
     ((++iter))
     if (( iter > 9 )) ; then
       echo "ERROR: machine $ip is not accessible $(date)"
