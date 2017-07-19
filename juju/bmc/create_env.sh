@@ -117,6 +117,7 @@ function run_controller() {
 run_compute 1
 run_compute 2
 
+run_controller 0
 run_controller 1
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   run_controller 2

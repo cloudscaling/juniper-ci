@@ -40,16 +40,19 @@ echo "INFO: compute 1: $comp1 / $comp1_ip"
 comp2_ip=`get_kvm_machine_ip $juju_os_comp_2_mac`
 comp2=`juju status | grep $comp2_ip | awk '{print $1}'`
 echo "INFO: compute 2: $comp2 / $comp2_ip"
+cont0_ip=`get_kvm_machine_ip $juju_os_cont_0_mac`
+cont0=`juju status | grep $cont0_ip | awk '{print $1}'`
+echo "INFO: controller 0 (OpenStack): $cont0 / $cont0_ip"
 cont1_ip=`get_kvm_machine_ip $juju_os_cont_1_mac`
 cont1=`juju status | grep $cont1_ip | awk '{print $1}'`
-echo "INFO: controller 1: $cont1 / $cont1_ip"
+echo "INFO: controller 1 (Contrail): $cont1 / $cont1_ip"
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   cont2_ip=`get_kvm_machine_ip $juju_os_cont_2_mac`
   cont2=`juju status | grep $cont2_ip | awk '{print $1}'`
-  echo "INFO: controller 2: $cont2 / $cont3_ip"
+  echo "INFO: controller 2 (Contrail): $cont2 / $cont3_ip"
   cont3_ip=`get_kvm_machine_ip $juju_os_cont_3_mac`
   cont3=`juju status | grep $cont3_ip | awk '{print $1}'`
-  echo "INFO: controller 3: $cont3 / $cont3_ip"
+  echo "INFO: controller 3 (Contrail): $cont3 / $cont3_ip"
 fi
 
 #if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
@@ -63,23 +66,23 @@ fi
 echo "INFO: Deploy all $(date)"
 juju-deploy cs:$SERIES/ntp
 
-juju-deploy cs:$SERIES/rabbitmq-server --to lxd:$cont1
-juju-deploy cs:$SERIES/percona-cluster mysql --to lxd:$cont1
+juju-deploy cs:$SERIES/rabbitmq-server --to lxd:$cont0
+juju-deploy cs:$SERIES/percona-cluster mysql --to lxd:$cont0
 juju-set mysql "root-password=$PASSWORD" "max-connections=1500"
 
-juju-deploy cs:$SERIES/openstack-dashboard --to lxd:$cont1
+juju-deploy cs:$SERIES/openstack-dashboard --to lxd:$cont0
 juju-set openstack-dashboard "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose openstack-dashboard
 
-juju-deploy cs:$SERIES/nova-cloud-controller --to lxd:$cont1
+juju-deploy cs:$SERIES/nova-cloud-controller --to lxd:$cont0
 juju-set nova-cloud-controller "console-access-protocol=novnc" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose nova-cloud-controller
 
-juju-deploy cs:$SERIES/glance --to lxd:$cont1
+juju-deploy cs:$SERIES/glance --to lxd:$cont0
 juju-set glance "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose glance
 
-juju-deploy cs:$SERIES/keystone --to lxd:$cont1
+juju-deploy cs:$SERIES/keystone --to lxd:$cont0
 juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose keystone
 
@@ -88,7 +91,7 @@ juju-add-unit nova-compute --to $comp2
 juju-set nova-compute "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "virt-type=qemu" "enable-resize=True" "enable-live-migration=True" "migration-auth-type=ssh"
 
 # Neutron
-juju-deploy cs:$SERIES/neutron-api --to lxd:$cont1
+juju-deploy cs:$SERIES/neutron-api --to lxd:$cont0
 juju-set neutron-api "debug=true" "manage-neutron-plugin-legacy-mode=false" "openstack-origin=$OPENSTACK_ORIGIN" "neutron-security-groups=true"
 juju-set nova-cloud-controller "network-manager=Neutron"
 juju-expose neutron-api
@@ -102,14 +105,14 @@ juju-deploy $PLACE/contrail-analyticsdb --to $cont1
 juju-deploy $PLACE/contrail-analytics --to $cont1
 juju-expose contrail-analytics
 
-#if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
-#  juju-add-unit contrail-controller --to $m7
-#  juju-add-unit contrail-controller --to $m8
-#  juju-add-unit contrail-analytics --to $m7
-#  juju-add-unit contrail-analytics --to $m8
-#  juju-add-unit contrail-analyticsdb --to $m7
-#  juju-add-unit contrail-analyticsdb --to $m8
-#fi
+if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
+  juju-add-unit contrail-controller --to $cont2
+  juju-add-unit contrail-controller --to $cont3
+  juju-add-unit contrail-analytics --to $cont2
+  juju-add-unit contrail-analytics --to $cont3
+  juju-add-unit contrail-analyticsdb --to $cont2
+  juju-add-unit contrail-analyticsdb --to $cont3
+fi
 
 cp "$my_dir/../contrail/repo_config.yaml.tmpl" "repo_config_co.yaml"
 sed -i -e "s|{{charm_name}}|contrail-openstack|m" "repo_config_co.yaml"
@@ -176,6 +179,7 @@ juju-add-relation "neutron-api:identity-service" "keystone:identity-service"
 juju-add-relation "neutron-api:amqp" "rabbitmq-server:amqp"
 
 juju-add-relation "contrail-controller" "ntp"
+juju-add-relation "neutron-api" "ntp"
 juju-add-relation "nova-compute:juju-info" "ntp:juju-info"
 
 juju-add-relation "contrail-controller" "contrail-keystone-auth"
