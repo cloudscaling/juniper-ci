@@ -13,6 +13,14 @@ BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
 
 source "$my_dir/functions"
 
+trap 'catch_errors_ce $LINENO' ERR EXIT
+function catch_errors_ce() {
+  local exit_code=$?
+  echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
+  trap - ERR EXIT
+  exit $exit_code
+}
+
 # check if environment is present
 if $virsh_cmd list --all | grep -q "juju-cont" ; then
   echo 'ERROR: environment present. please clean up first'
@@ -101,7 +109,7 @@ function run_controller() {
   juju ssh ubuntu@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge"
   juju ssh ubuntu@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-ens3\"/m' /etc/default/lxd-bridge"
   juju scp 50-cloud-init.cfg ubuntu@$ip:50-cloud-init.cfg
-  juju ssh ubuntu@$ip "sudo cp 50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg ; sudo reboot"
+  juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg ; sudo reboot"
 }
 
 run_compute 1
@@ -114,3 +122,5 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
 fi
 
 echo "INFO: Environment created $(date)"
+
+trap - ERR EXIT

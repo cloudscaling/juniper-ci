@@ -24,38 +24,40 @@ if which vif ; then
   tar -rf logs.tar if.log
 fi
 
-if docker ps | grep -q contrail ; then
-  DL='docker-logs'
-  mkdir -p "$DL"
-  for cnt in agent controller analytics analyticsdb ; do
-    if docker ps | grep -qw "contrail-$cnt" ; then
-      ldir="$DL/contrail-$cnt"
-      mkdir -p "$ldir"
-      if grep -q trusty /etc/lsb-release ; then
-        docker logs "contrail-$cnt" &>"./$ldir/$cnt.log"
-      else
-        docker exec "contrail-$cnt" journalctl -u contrail-ansible.service --no-pager --since "2017-01-01" &>"./$ldir/$cnt.log"
-      fi
-      docker exec contrail-$cnt contrail-status &>"./$ldir/contrail-status.log"
-      if [[ "$cnt" == "controller" ]] ; then
-        docker exec contrail-controller rabbitmqctl cluster_status &>"./$ldir/rabbitmq-cluster-status.log"
-      fi
-      docker cp "contrail-$cnt:/var/log/contrail" "./$ldir"
-      mv "$ldir/contrail" "$ldir/var-log-contrail"
-      docker cp "contrail-$cnt:/etc/contrail" "./$ldir"
-      mv "$ldir/contrail" "$ldir/etc-contrail"
-      for srv in rabbitmq cassandra zookeeper ; do
-        if docker cp "contrail-$cnt:/etc/$srv" "./$ldir" ; then
-          mv "$ldir/$srv" "$ldir/etc-$srv"
+if which docker ; then
+  if docker ps | grep -q contrail ; then
+    DL='docker-logs'
+    mkdir -p "$DL"
+    for cnt in agent controller analytics analyticsdb ; do
+      if docker ps | grep -qw "contrail-$cnt" ; then
+        ldir="$DL/contrail-$cnt"
+        mkdir -p "$ldir"
+        if grep -q trusty /etc/lsb-release ; then
+          docker logs "contrail-$cnt" &>"./$ldir/$cnt.log"
+        else
+          docker exec "contrail-$cnt" journalctl -u contrail-ansible.service --no-pager --since "2017-01-01" &>"./$ldir/$cnt.log"
         fi
-        if docker cp "contrail-$cnt:/var/log/$srv" "./$ldir" ; then
-          mv "$ldir/$srv" "$ldir/var-log-$srv"
+        docker exec contrail-$cnt contrail-status &>"./$ldir/contrail-status.log"
+        if [[ "$cnt" == "controller" ]] ; then
+          docker exec contrail-controller rabbitmqctl cluster_status &>"./$ldir/rabbitmq-cluster-status.log"
         fi
-      done
+        docker cp "contrail-$cnt:/var/log/contrail" "./$ldir"
+        mv "$ldir/contrail" "$ldir/var-log-contrail"
+        docker cp "contrail-$cnt:/etc/contrail" "./$ldir"
+        mv "$ldir/contrail" "$ldir/etc-contrail"
+        for srv in rabbitmq cassandra zookeeper ; do
+          if docker cp "contrail-$cnt:/etc/$srv" "./$ldir" ; then
+            mv "$ldir/$srv" "$ldir/etc-$srv"
+          fi
+          if docker cp "contrail-$cnt:/var/log/$srv" "./$ldir" ; then
+            mv "$ldir/$srv" "$ldir/var-log-$srv"
+          fi
+        done
 
-      tar -rf logs.tar "$ldir"
-    fi
-  done
+        tar -rf logs.tar "$ldir"
+      fi
+    done
+  fi
 fi
 
 gzip logs.tar
