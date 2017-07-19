@@ -6,6 +6,14 @@ source "$my_dir/functions"
 source "$my_dir/../common/functions"
 source "$my_dir/../contrail/functions"
 
+trap 'catch_errors_ce $LINENO' ERR EXIT
+function catch_errors_ce() {
+  local exit_code=$?
+  echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
+  trap - ERR EXIT
+  exit $exit_code
+}
+
 # it also sets variables with names
 check_containers
 
@@ -184,3 +192,5 @@ juju-add-relation "contrail-agent:juju-info" "nova-compute:juju-info"
 juju-add-relation "contrail-agent" "contrail-controller"
 
 post_deploy
+
+trap - ERR EXIT
