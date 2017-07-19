@@ -7,6 +7,14 @@ source "$my_dir/functions"
 
 BUNDLE="$my_dir/openstack-contrail-amazon.yaml"
 
+trap 'catch_errors_ce $LINENO' ERR EXIT
+function catch_errors_ce() {
+  local exit_code=$?
+  echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
+  trap - ERR EXIT
+  exit $exit_code
+}
+
 # it also sets variables with names
 check_containers
 
@@ -67,3 +75,5 @@ echo "INFO: Attach contrail-analytics container $(date)"
 juju-attach contrail-analytics contrail-analytics="$HOME/docker/$image_analytics"
 
 post_deploy
+
+trap - ERR EXIT

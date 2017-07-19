@@ -1,27 +1,27 @@
 #!/bin/bash
 
 rm -f logs.*
-tar -cf logs.tar /var/log/juju
+tar -cf logs.tar /var/log/juju 2>/dev/null
 for ldir in '/etc/apache2' '/etc/apt' '/etc/contrail' '/etc/contrailctl' '/etc/neutron' '/etc/nova' '/etc/haproxy' '/var/log/upstart' '/var/log/neutron' '/var/log/nova' '/var/log/contrail' '/etc/keystone' '/var/log/keystone' ; do
   if [ -d "$ldir" ] ; then
-    tar -rf logs.tar "$ldir"
+    tar -rf logs.tar "$ldir" 2>/dev/null
   fi
 done
 
 ps ax -H &> ps.log
 netstat -lpn &> netstat.log
-tar -rf logs.tar ps.log netstat.log
+tar -rf logs.tar ps.log netstat.log 2>/dev/null
 
-if which contrail-status ; then
+if which contrail-status &>/dev/null ; then
   contrail-status &>contrail-status.log
-  tar -rf logs.tar contrail-status.log
+  tar -rf logs.tar contrail-status.log 2>/dev/null
 fi
 
-if which vif ; then
+if which vif &>/dev/null ; then
   vif --list &>vif.log
-  tar -rf logs.tar vif.log
+  tar -rf logs.tar vif.log 2>/dev/null
   ifconfig &>if.log
-  tar -rf logs.tar if.log
+  tar -rf logs.tar if.log 2>/dev/null
 fi
 
 if which docker ; then
@@ -54,7 +54,7 @@ if which docker ; then
           fi
         done
 
-        tar -rf logs.tar "$ldir"
+        tar -rf logs.tar "$ldir" 2>/dev/null
       fi
     done
   fi

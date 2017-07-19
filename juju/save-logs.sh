@@ -22,15 +22,15 @@ for unit in `juju status --format oneline | awk '{print $2}' | sed 's/://g'` ; d
 done
 
 for mch in $(juju-get-machines) ; do
-  juju-ssh $mch "df -hT"
-  juju-scp "$my_dir/__save-logs.sh" $mch:save_logs.sh
+  mkdir -p "$log_dir/$mch"
+  juju-ssh $mch "df -hT" &>"$log_dir/$mch/df.log"
+  juju-scp "$my_dir/__save-logs.sh" $mch:save_logs.sh 2>/dev/null
   juju-ssh $mch "sudo ./save_logs.sh" 2>/dev/null
   rm -f logs.tar.gz
-  juju-scp $mch:logs.tar.gz logs.tar.gz
+  juju-scp $mch:logs.tar.gz logs.tar.gz 2>/dev/null
   cdir=`pwd`
-  mkdir -p $log_dir/$mch
-  pushd $log_dir/$mch
-  tar -xf $cdir/logs.tar.gz
+  pushd "$log_dir/$mch"
+  tar -xf "$cdir/logs.tar.gz"
   popd
   rm -f logs.tar.gz
 done
