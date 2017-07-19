@@ -108,7 +108,7 @@ function run_compute() {
   echo "INFO: creating compute $index (mac $mac) $(date)"
   run_machine juju-os-comp-$index 2 8192 $mac
   local ip=`get_kvm_machine_ip $mac`
-  machines["comp-$i"]=$ip
+  machines["comp-$index"]=$ip
   wait_kvm_machine $ip
   juju add-machine ssh:ubuntu@$ip
   echo "INFO: preparing compute $index $(date)"
@@ -122,7 +122,7 @@ function run_controller() {
   echo "INFO: creating controller $index (mac $mac) $(date)"
   run_machine juju-os-cont-$index 4 16384 $mac
   local ip=`get_kvm_machine_ip $mac`
-  machines["cont-$i"]=$ip
+  machines["cont-$index"]=$ip
   wait_kvm_machine $ip
   juju add-machine ssh:ubuntu@$ip
   echo "INFO: preparing controller $index $(date)"
