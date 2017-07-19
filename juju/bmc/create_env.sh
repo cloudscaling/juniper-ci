@@ -7,6 +7,7 @@ my_dir="$(dirname $my_file)"
 # 1) removed cloud-init
 # 2) added jenkins's key to authorized keys for ubuntu user
 # 3) added password '123' for user ubuntu
+# 4) root disk resized to 60G ( truncate -s 60G temp.raw ; virt-resize virt-resize --expand /dev/vda1 ubuntu-xenial.qcow2 temp.raw ; qemu-img convert -O qcow2 temp.raw ubuntu-xenial-new.qcow2 )
 BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-'ubuntu-xenial.qcow2'}
 BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
 BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
