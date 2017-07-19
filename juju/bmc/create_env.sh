@@ -48,6 +48,7 @@ function run_machine() {
   local mac_suffix="$4"
 
   echo "INFO: running  machine $name $(date)"
+  cp $BASE_IMAGE $pool_path/$name.qcow2
   virt-install --name $name \
     --ram $ram \
     --vcpus $cpu \
