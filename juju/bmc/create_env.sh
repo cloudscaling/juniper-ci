@@ -66,8 +66,22 @@ function run_machine() {
     --boot hd
 }
 
+function wait_kvm_machine() {
+  local ip=$1
+  local iter=0
+  while ! ssh ubuntu@$ip "uname -a" &>/dev/null ; do
+    ((++iter))
+    if (( iter > 9 )) ; then
+      echo "ERROR: machine $ip is not accessible $(date)"
+      exit 2
+    fi
+    sleep 10
+  done
+}
+
 run_machine juju-cont 1 2048 $juju_cont_mac
 cont_ip=`get_kvm_machine_ip $juju_cont_mac`
+wait_kvm_machine $cont_ip
 
 # wait for controller machine
 iter=0
@@ -92,6 +106,7 @@ function run_compute() {
   echo "INFO: creating compute $index (mac $mac) $(date)"
   run_machine juju-os-comp-$index 2 8192 $mac
   local ip=`get_kvm_machine_ip $mac`
+  wait_kvm_machine $ip
   juju add-machine ssh:ubuntu@$ip
   echo "INFO: preparing compute $index $(date)"
   juju ssh ubuntu@$ip "sudo add-apt-repository -yu cloud-archive:newton ; sudo apt-get -fy install dpdk-igb-uio-dkms mc wget" &>>$log_dir/apt.log
@@ -104,6 +119,7 @@ function run_controller() {
   echo "INFO: creating controller $index (mac $mac) $(date)"
   run_machine juju-os-cont-$index 4 16384 $mac
   local ip=`get_kvm_machine_ip $mac`
+  wait_kvm_machine $ip
   juju add-machine ssh:ubuntu@$ip
   echo "INFO: preparing controller $index $(date)"
   juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget bridge-utils" &>>$log_dir/apt.log
