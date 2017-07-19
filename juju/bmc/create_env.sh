@@ -48,10 +48,6 @@ function run_machine() {
   local mac_suffix="$4"
 
   echo "INFO: running  machine $name $(date)"
-
-  cp $BASE_IMAGE $pool_path/$name.qcow2
-  qemu-img resize $pool_path/$name.qcow2 +32G
-
   virt-install --name $name \
     --ram $ram \
     --vcpus $cpu \
@@ -132,6 +128,7 @@ function run_controller() {
   juju scp "$my_dir/50-cloud-init.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
   juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
   juju ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
+  wait_kvm_machine $ip
 }
 
 run_compute 1
