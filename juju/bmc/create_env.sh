@@ -108,7 +108,7 @@ function run_controller() {
   juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget bridge-utils" &>>$log_dir/apt.log
   juju ssh ubuntu@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge"
   juju ssh ubuntu@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-ens3\"/m' /etc/default/lxd-bridge"
-  juju scp 50-cloud-init.cfg ubuntu@$ip:50-cloud-init.cfg
+  juju scp "$my_dir/50-cloud-init.cfg" ubuntu@$ip:50-cloud-init.cfg
   juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg ; sudo reboot"
 }
 
