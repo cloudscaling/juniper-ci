@@ -145,19 +145,20 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
 fi
 
 echo "INFO: creating hosts file $(date)"
-truncate -s 0 hosts
+truncate -s 0 $WORKSPACE/hosts
 for m in ${!machines[@]} ; do
-  echo "${machines[$m]}    $m" >> hosts
+  echo "${machines[$m]}    $m" >> $WORKSPACE/hosts
 done
-cat hosts
+cat $WORKSPACE/hosts
 echo "INFO: Applying hosts file and hostnames $(date)"
 for m in ${!machines[@]} ; do
   ip=${machines[$m]}
-  juju scp hosts ubuntu@$ip:hosts 2>/dev/null
+  juju scp $WORKSPACE/hosts ubuntu@$ip:hosts
   juju ssh ubuntu@$ip 'sudo bash -c "cat ./hosts >> /etc/hosts"' 2>/dev/null
   juju ssh ubuntu@$ip "sudo bash -c 'echo $m > /etc/hostname'" 2>/dev/null
   juju ssh ubuntu@$ip "sudo hostname $m" 2>/dev/null
 done
+rm $WORKSPACE/hosts
 
 echo "INFO: Environment created $(date)"
 
