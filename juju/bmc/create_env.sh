@@ -76,39 +76,41 @@ done
 echo "INFO: bootstraping juju controller $(date)"
 juju bootstrap manual/$cont_ip test-cloud
 
-echo "INFO: creating compute 1 $(date)"
-run_machine juju-os-comp-1 2 8192 $juju_os_comp_1_mac
-ip=`get_kvm_machine_ip $juju_os_comp_1_mac`
-juju add-machine ssh:ubuntu@$ip
-echo "INFO: preparing compute 1 $(date)"
-juju ssh ubuntu@$ip "sudo add-apt-repository -yu cloud-archive:newton ; sudo apt-get -fy install dpdk-igb-uio-dkms mc wget" &>>$log_dir/apt.log
-echo "INFO: creating compute 2 $(date)"
-run_machine juju-os-comp-2 2 8192 $juju_os_comp_2_mac
-ip=`get_kvm_machine_ip $juju_os_comp_2_mac`
-juju add-machine ssh:ubuntu@$ip
-echo "INFO: preparing compute 2 $(date)"
-juju ssh ubuntu@$ip "sudo add-apt-repository -yu cloud-archive:newton ; sudo apt-get -fy install dpdk-igb-uio-dkms mc wget" &>>$log_dir/apt.log
+function run_compute() {
+  local index=$1
+  local mac_var_name="juju_os_comp_${1}_mac"
+  local mac=${!mac_var_name}
+  echo "INFO: creating compute $index (mac $mac) $(date)"
+  run_machine juju-os-comp-$index 2 8192 $mac
+  local ip=`get_kvm_machine_ip $mac`
+  juju add-machine ssh:ubuntu@$ip
+  echo "INFO: preparing compute $index $(date)"
+  juju ssh ubuntu@$ip "sudo add-apt-repository -yu cloud-archive:newton ; sudo apt-get -fy install dpdk-igb-uio-dkms mc wget" &>>$log_dir/apt.log
+}
 
-echo "INFO: creating controller 1 $(date)"
-run_machine juju-os-cont-1 4 16384 $juju_os_cont_1_mac
-ip=`get_kvm_machine_ip $juju_os_cont_1_mac`
-juju add-machine ssh:ubuntu@$ip
-echo "INFO: preparing controller 1 $(date)"
-juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget" &>>$log_dir/apt.log
+function run_controller() {
+  local index=$1
+  local mac_var_name="juju_os_cont_${1}_mac"
+  local mac=${!mac_var_name}
+  echo "INFO: creating controller $index (mac $mac) $(date)"
+  run_machine juju-os-cont-$index 4 16384 $mac
+  local ip=`get_kvm_machine_ip $mac`
+  juju add-machine ssh:ubuntu@$ip
+  echo "INFO: preparing controller $index $(date)"
+  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget bridge-utils" &>>$log_dir/apt.log
+  juju ssh ubuntu@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge"
+  juju ssh ubuntu@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-ens3\"/m' /etc/default/lxd-bridge"
+  juju scp 50-cloud-init.cfg ubuntu@$ip:50-cloud-init.cfg
+  juju ssh ubuntu@$ip "sudo cp 50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg ; sudo reboot"
+}
 
+run_compute 1
+run_compute 2
+
+run_controller 1
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
-  echo "INFO: creating controller 2 $(date)"
-  run_machine juju-os-cont-2 4 16384 $juju_os_cont_2_mac
-  ip=`get_kvm_machine_ip $juju_os_cont_2_mac`
-  juju add-machine ssh:ubuntu@$ip
-  echo "INFO: preparing controller 2 $(date)"
-  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget" &>>$log_dir/apt.log
-  echo "INFO: creating controller 3 $(date)"
-  run_machine juju-os-cont-3 4 16384 $juju_os_cont_3_mac
-  ip=`get_kvm_machine_ip $juju_os_cont_3_mac`
-  juju add-machine ssh:ubuntu@$ip
-  echo "INFO: preparing controller 3 $(date)"
-  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget" &>>$log_dir/apt.log
+  run_controller 2
+  run_controller 3
 fi
 
 echo "INFO: Environment created $(date)"

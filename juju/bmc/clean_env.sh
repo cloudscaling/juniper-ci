@@ -7,6 +7,11 @@ poolname="jujuimages"
 
 source "$my_dir/functions"
 
+juju remove-machine 2 || /bin/true
+if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
+  juju remove-machine 3 || /bin/true
+  juju remove-machine 4 || /bin/true
+fi
 juju destroy-controller -y --destroy-all-models test-cloud || /bin/true
 
 delete_network juju

@@ -67,10 +67,6 @@ echo "INFO: Date: $(date)"
 echo "INFO: Starting deployment process with vars:"
 env|sort
 
-
-
-
-
 echo "INFO: creating environment $(date)"
 "$my_dir"/create_env.sh
 juju status
