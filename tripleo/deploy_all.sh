@@ -51,7 +51,7 @@ echo "INFO: installing undercloud $(date)"
 
 echo "INFO: installing overcloud $(date)"
 oc=1
-ssh -t $ssh_opts $ssh_addr "sudo -u stack NUM=$NUM DEPLOY=1 NETWORK_ISOLATION=$NETWORK_ISOLATION /home/stack/overcloud-install.sh"
+ssh -t $ssh_opts $ssh_addr "sudo -u stack NUM=$NUM DEPLOY=1 NETWORK_ISOLATION=$NETWORK_ISOLATION OPENSTACK_VERSION=$OPENSTACK_VERSION /home/stack/overcloud-install.sh"
 
 echo "INFO: checking overcloud $(date)"
 if [[ -n "$check_script" ]] ; then

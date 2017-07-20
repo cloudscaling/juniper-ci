@@ -3,7 +3,16 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
-NUM=${NUM:-0}
+if [[ -z "$NUM" ]] ; then
+  echo "Please set NUM variable to specific environment wber. (export NUM=4)"
+  exit 1
+fi
+
+if [[ -z "$OPENSTACK_VERSION" ]] ; then
+  echo "OPENSTACK_VERSION is expected (e.g. export OPENSTACK_VERSION=newton)"
+  exit 1
+fi
+
 DEPLOY=${DEPLOY:-0}
 NETWORK_ISOLATION=${NETWORK_ISOLATION:-'single'}
 
@@ -188,11 +197,13 @@ openstack baremetal introspection bulk start
 
 
 # prepare Contrail puppet modules via uploading artifacts to swift
+git_branch="stable/${OPENSTACK_VERSION}"
+# TODO: replace personal repo with Juniper
+git_repo="alexey-mr"
 rm -rf usr/share/openstack-puppet/modules
 mkdir -p usr/share/openstack-puppet/modules
-git clone https://github.com/Juniper/contrail-tripleo-puppet -b stable/newton usr/share/openstack-puppet/modules/tripleo
-#TODO: replace personal repo with Juniper ones
-git clone https://github.com/alexey-mr/puppet-contrail -b stable/newton usr/share/openstack-puppet/modules/contrail
+git clone https://github.com/${git_repo}/contrail-tripleo-puppet -b $git_branch usr/share/openstack-puppet/modules/tripleo
+git clone https://github.com/${git_repo}/puppet-contrail -b $git_branch usr/share/openstack-puppet/modules/contrail
 tar czvf puppet-modules.tgz usr/
 upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
 
@@ -201,9 +212,7 @@ upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
 rm -rf ~/tripleo-heat-templates
 cp -r /usr/share/openstack-tripleo-heat-templates/ ~/tripleo-heat-templates
 rm -rf ~/contrail-tripleo-heat-templates
-# TODO: replace personal repo with Juniper one
-#git clone https://github.com/Juniper/contrail-tripleo-heat-templates -b stable/newton
-git clone https://github.com/alexey-mr/contrail-tripleo-heat-templates -b stable/newton
+git clone https://github.com/${git_repo}/contrail-tripleo-heat-templates -b $git_branch
 cp -r ~/contrail-tripleo-heat-templates/environments/contrail ~/tripleo-heat-templates/environments
 cp -r ~/contrail-tripleo-heat-templates/puppet/services/network/* ~/tripleo-heat-templates/puppet/services/network
 
