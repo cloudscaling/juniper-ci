@@ -207,7 +207,8 @@ function change_undercloud_image() {
   echo "PermitRootLogin yes" > $tmpdir/etc/ssh/sshd_config
   rm -rf $tmpdir/root/contrail_packages
   mkdir -p $tmpdir/root/contrail_packages
-  cp $CONTRAIL_PACKAGES_DIR/* $tmpdir/root/contrail_packages/
+  cp $CONTRAIL_PACKAGES_DIR/*.tgz $tmpdir/root/contrail_packages/
+  cp $CONTRAIL_PACKAGES_DIR/*${OPENSTACK_VERSION}*.rpm $tmpdir/root/contrail_packages/
 }
 
 # patch image
