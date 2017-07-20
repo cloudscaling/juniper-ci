@@ -1,0 +1,44 @@
+#!/bin/bash -x
+
+if [[ -z "$RHEL_USER" || -z "$RHEL_PASSWORD" ]] ; then
+  echo "ERROR: provide RHEL_USER and RHEL_PASSWORD env variables to subscribe image"
+  exit -1
+fi
+
+image=$1
+if [[ -z "$image" ]] ; then
+  echo "ERROR: the first argument is expected to be the path to image"
+  exit -1
+fi
+
+if [[ ! -f $image ]] ; then
+  echo "ERROR: failed to find $image"
+  exit -1
+fi
+
+dst_image=${2:-${image}}
+dst_image_size=${3:-'100G'}
+
+common_repos="rhel-7-server-rpms rhel-7-server-extras-rpms rhel-7-server-rh-common-rpms rhel-ha-for-rhel-7-server-rpms"
+
+enable_repos_opts=""
+for i in $common_repos ; do
+  enable_repos_opts+=" --enable=${i}"
+done
+
+export LIBGUESTFS_BACKEND=direct
+if [[ "$image" != "dst_image" ]] ; then
+  qemu-img create -f qcow2 $dst_image $dst_image_size
+  virt-resize --expand /dev/sda1 $image $dst_image
+fi
+
+virt-customize -a $dst_image \
+	--run-command 'xfs_growfs /' \
+	--sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
+	--run-command "subscription-manager repos ${enable_repos_opts}" \
+	--run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
+	--run-command 'systemctl enable sshd' \
+	--run-command 'yum remove -y cloud-init' \
+        --root-password password:qwe123QWE \
+	--selinux-relabel
+

@@ -6,13 +6,22 @@ if [[ -z "$NUM" ]] ; then
   exit 1
 fi
 
+if [[ -z "$OPENSTACK_VERSION" ]] ; then
+  echo "OPENSTACK_VERSION is expected (e.g. export OPENSTACK_VERSION=newton)"
+  exit 1
+fi
+
+if [[ -z "$ENVIRONMENT_OS" ]] ; then
+  echo "ENVIRONMENT_OS is expected (e.g. export ENVIRONMENT_OS=centos)"
+  exit 1
+fi
+
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
 ssh_key_dir="/home/jenkins"
 
 # base image for VMs
-ENVIRONMENT_OS=${ENVIRONMENT_OS:-'centos'}
 BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-"undercloud-${ENVIRONMENT_OS}.qcow2"}
 BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
 mkdir -p ${BASE_IMAGE_DIR}
@@ -129,7 +138,25 @@ define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT
 
 # copy image for undercloud and resize them
 cp $BASE_IMAGE $pool_path/undercloud-$NUM.qcow2
-qemu-img resize $pool_path/undercloud-$NUM.qcow2 +32G
+
+# for RHEL env enable repos appropriate to OpenStack version
+# TODO: code duplication with __undercloud-install-2-as-stack-user.sh
+if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+  enable_repo=""
+  if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
+    enable_repo="10"
+  elif [[ "$OPENSTACK_VERSION" == 'ocata' ]] ; then
+    enable_repo="11"
+  else
+    echo "ERROR: unsupported OS $OPENSTACK_VERSION for $ENVIRONMENT_OS environment"
+    exit 1
+  fi
+  enable_repo_opts="--enable=rhel-7-server-openstack-${enable_repo}-rpms"
+  enable_repo_opts+=" --enable=rhel-7-server-openstack-${enable_repo}-devtools-rpms"
+  virt-customize -a $pool_path/undercloud-$NUM.qcow2 \
+        --run-command "subscription-manager repos $enable_repo_opts"
+fi
+
 
 # define MAC's
 mgmt_ip=$(get_network_ip "management")

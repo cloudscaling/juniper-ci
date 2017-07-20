@@ -23,6 +23,7 @@
           name: OPENSTACK_VERSION
           description: "Version of the OpenStack"
           choices:
+            - 'ocata'
             - 'newton'
             - 'mitaka'
       - choice:

@@ -69,32 +69,26 @@ Images
 Undercloud images:
 For RHEL undercloud image must be changed before usage, RHEL subscription is requried.
 ```
-      cd /home/root/images
-      export LIBGUESTFS_BACKEND=direct
-      qemu-img create -f qcow2 undercloud-rhel-image.qcow2 100G
-      virt-resize --expand /dev/sda1 rhel-guest-image-7.3-36.x86_64.qcow2 undercloud-rhel-image.qcow2
-      virt-customize -a undercloud-rhel-image.qcow2 --root-password password:qwe123QWE
-      virt-customize -a undercloud-rhel-image.qcow2 \
-            --run-command 'xfs_growfs /' \
-            --sm-credentials <your_rhel_user>:password:<your_rhel_password> --sm-register --sm-attach auto \
-            --run-command 'subscription-manager repos --enable=rhel-7-server-rpms --enable=rhel-7-server-extras-rpms --enable=rhel-7-server-rh-common-rpms --enable=rhel-ha-for-rhel-7-server-rpms --enable=rhel-7-server-openstack-10-rpms --enable=rhel-7-server-openstack-10-devtools-rpms' \
-            --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
-            --run-command 'systemctl enable sshd' \
-            --run-command 'yum remove -y cloud-init' \
-            --selinux-relabel
+      # example
+      export RHEL_USER=<redhat_user>
+      export RHEL_PASSWORD=<redhat password>
+      ./customize_rhel  /root/rhel_7_3_images_org/rhel-guest-image-7.3-36.x86_64.qcow2 \
+                         /home/root/images/rhel-guest-image-7.3-36.x86_64.qcow2
 
-      ln -s /home/root/images/undercloud-rhel-image.qcow2 undercloud-rhel.qcow2
-      ln -s /home/root/images/undercloud-centos7.qcow2 undercloud-centos.qcow2
+      ln -s /home/root/images/rhel-guest-image-7.3-36.x86_64.qcow2 /home/root/images/undercloud-rhel.qcow2
+      ln -s /home/root/images/undercloud-centos7.qcow2 /home/root/images/undercloud-centos.qcow2
 
       ls -lh /home/root/images/
       -rw-r--r-- 1 root root 561M Jul 14 21:06 rhel-guest-image-7.3-36.x86_64.qcow2
       -rw-r--r-- 1 root root 2.8G Mar 11 13:20 undercloud-centos7.qcow2
       lrwxrwxrwx 1 root root   42 Jul 14 20:56 undercloud-centos.qcow2 -> /home/root/images/undercloud-centos7.qcow2
-      lrwxrwxrwx 1 root root   54 Jul 14 20:56 undercloud-rhel.qcow2 -> /home/root/images/undercloud-rhel-image.qcow2
+      lrwxrwxrwx 1 root root   54 Jul 14 20:56 undercloud-rhel.qcow2 -> /home/root/images/rhel-guest-image-7.3-36.x86_64.qcow2
 ```
 Overcloud image: for debug purposes set root password via
 ```
-      virt-customize -a overcloud-full.qcow2 --root-password password:qwe123QWE
+      export RHEL_USER=<redhat_user>
+      export RHEL_PASSWORD=<redhat password>
+      customize_rhel overcloud-full.qcow2
 ```
 and re-create archive with images.
 Overcloud image archive:
@@ -111,6 +105,8 @@ Files and parameters
 
 most of script files has definition of 'NUM' variable at start.
 It allows to use several environments.
+
+customize_rhel - to preapare images for rhel (subscribe image, set root password, etc)
 
 create_env.sh - creates machines/networks/volumes on host regarding to 'NUM' environment variable. Also it defines machines counts for each role.
 
