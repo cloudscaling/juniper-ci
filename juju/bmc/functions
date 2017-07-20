@@ -1,9 +1,39 @@
 #!/bin/bash
 
+export LIBVIRT_DEFAULT_URI=qemu:///system
+virsh_cmd="virsh"
+
+poolname="jujuimages"
+net_driver=${net_driver:-e1000}
+nname="juju"
+addr="10.0.0"
+
+# juju controller
+juju_cont_mac='01'
+# openstack compute
+juju_os_comp_1_mac='02'
+juju_os_comp_2_mac='03'
+# openstack components (controllers + rabbit + db)
+juju_os_cont_0_mac='04'
+# contrail controllers
+juju_os_cont_1_mac='05'
+juju_os_cont_2_mac='06'
+juju_os_cont_3_mac='07'
+
+function get_kvm_machine_ip() {
+  local mac_suffix="$1"
+  for i in {1..10} ; do
+    if python -c "import libvirt; conn = libvirt.open('$LIBVIRT_DEFAULT_URI'); ip = [lease['ipaddr'] for lease in conn.networkLookupByName('$nname').DHCPLeases() if lease['mac'] == '52:54:00:10:00:$mac_suffix'][0]; print ip" 2>/dev/null ; then
+      break
+    fi
+    sleep 10
+  done
+}
+
 function delete_network() {
   local network_name="$1"
-  virsh net-destroy $network_name 2> /dev/null || true
-  virsh net-undefine $network_name 2> /dev/null || true
+  $virsh_cmd net-destroy $network_name 2> /dev/null || true
+  $virsh_cmd net-undefine $network_name 2> /dev/null || true
 }
 
 function create_network() {
@@ -13,44 +43,46 @@ function create_network() {
   delete_network $network_name
 
   echo "<network><name>$network_name</name><forward mode=\"nat\"><nat><port start=\"1024\" end=\"65535\"/></nat></forward><ip address=\"$addr.1\" netmask=\"255.255.255.0\"><dhcp><range start=\"$addr.10\" end=\"$addr.254\"/></dhcp></ip></network>" > /tmp/juju-net.xml
-  virsh net-define /tmp/juju-net.xml
+  $virsh_cmd net-define /tmp/juju-net.xml
   rm /tmp/juju-net.xml
-  virsh net-autostart $network_name
-  virsh net-start $network_name
+  $virsh_cmd net-autostart $network_name
+  $virsh_cmd -c qemu:///system net-start $network_name
 }
 
 function create_pool() {
   local poolname="$1"
-  local path="/var/lib/libvirt/$poolname"
-  virsh pool-define-as $poolname dir - - - - "$path"
-  virsh pool-build $poolname
-  virsh pool-start $poolname
-  virsh pool-autostart $poolname
+  local path="$HOME/libvirt/$poolname"
+  $virsh_cmd pool-define-as $poolname dir - - - - "$path"
+  $virsh_cmd pool-build $poolname
+  $virsh_cmd pool-start $poolname
+  $virsh_cmd pool-autostart $poolname
+}
+
+function delete_pool() {
+  local poolname="$1"
+  local path=`get_pool_path $poolname`
+  $virsh_cmd pool-destroy $poolname
+  $virsh_cmd pool-undefine $poolname
+  rm -rf "$poolpath" || /bin/true
 }
 
 function get_pool_path() {
   local poolname=$1
-  virsh pool-info $poolname &>/dev/null || return
-  virsh pool-dumpxml $poolname | sed -n '/path/{s/.*<path>\(.*\)<\/path>.*/\1/;p}'
+  $virsh_cmd pool-info $poolname &>/dev/null || return
+  $virsh_cmd pool-dumpxml $poolname | sed -n '/path/{s/.*<path>\(.*\)<\/path>.*/\1/;p}'
 }
 
 function delete_domains() {
-  for name in `virsh list --all | grep "rd-overcloud-$NUM-" | awk '{print $2}'` ; do
-    virsh destroy $name || true
+  for name in `$virsh_cmd list --all | grep "juju-" | awk '{print $2}'` ; do
+    $virsh_cmd destroy $name || /bin/true
     sleep 2
-    virsh undefine $name || true
+    $virsh_cmd undefine $name || /bin/true
   done
-
-  if virsh dominfo rd-undercloud-$NUM 2>/dev/null ; then
-    virsh destroy rd-undercloud-$NUM || true
-    sleep 2
-    virsh undefine rd-undercloud-$NUM || true
-  fi
 }
 
 function delete_volume() {
   volname=$1
   poolname=$2
   pool_path=$(get_pool_path $poolname)
-  virsh vol-delete $volname --pool $poolname 2>/dev/null || rm -f $pool_path/$volname 2>/dev/null
+  $virsh_cmd vol-delete $volname --pool $poolname 2>/dev/null || rm -f $pool_path/$volname 2>/dev/null
 }

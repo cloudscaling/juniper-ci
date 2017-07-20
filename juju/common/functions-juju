@@ -51,3 +51,8 @@ function juju-add-machine () {
 function juju-resolved () {
   juju resolved "$@"
 }
+
+function get_machine_index_by_service() {
+  local srv=$1
+  juju-status-tabular $srv | awk "/^$srv\//{print \$4}"
+}

@@ -2,8 +2,35 @@
 
 MAX_FAIL=30
 
-instance_status() { openstack --insecure server show $1 | awk '/ status / {print $4}'; }
-function image_status() { openstack --insecure image show $1 | awk '/ status / {print $4}'; }
+function activate_venv() {
+  if [ -d .venv ]; then
+    source .venv/bin/activate
+  fi
+}
+
+function deactivate_venv() {
+  if [ -d .venv ]; then
+    deactivate
+  fi
+}
+
+function create_virtualenv() {
+  rm -rf .venv
+  virtualenv .venv
+  source .venv/bin/activate
+  pip install -q python-openstackclient 2>/dev/null
+  # NOTE: version 9.0 always writes debug output if run via openstack
+  pip install -q "python-novaclient<9.0" 2>/dev/null
+  deactivate
+}
+
+function instance_status() {
+  openstack --insecure server show $1 | awk '/ status / {print $4}'
+}
+
+function image_status() {
+  openstack --insecure image show $1 | awk '/ status / {print $4}'
+}
 
 function wait_instance() {
   local instance_id=$1
@@ -65,28 +92,6 @@ function wait_image() {
     ((timeout+=5))
     ((++fail))
   done
-}
-
-function activate_venv() {
-  if [ -d .venv ]; then
-    source .venv/bin/activate
-  fi
-}
-
-function deactivate_venv() {
-  if [ -d .venv ]; then
-    deactivate
-  fi
-}
-
-function create_virtualenv() {
-  rm -rf .venv
-  virtualenv .venv
-  source .venv/bin/activate
-  pip install -q python-openstackclient 2>/dev/null
-  # NOTE: version 9.0 always writes debug output if run via openstack
-  pip install -q "python-novaclient<9.0" 2>/dev/null
-  deactivate
 }
 
 function create_image() {
@@ -217,7 +222,7 @@ function _check_instance_log() {
 function _get_instance_machine() {
   local id=$1
   local host=`openstack --insecure server list --long -c ID -c Host | grep $id | awk '{print $4}'`
-  local ip=`nslookup $host | awk '/Address/{print $2}' | tail -1`
+  local ip=`openstack hypervisor list | grep $host | awk '{print $8}'`
   get_machine_by_ip $ip
 }
 

@@ -1,0 +1,60 @@
+- job:
+    name: Contrail-Juju-OpenStack-BMC
+    description: 'Contrail+OpenStack on KVM by Juju'
+    defaults: global
+    node: slave1
+    concurrent: true
+    parameters:
+      - choice:
+          name: CLEAN_ENV
+          choices:
+            - always
+            - on_success
+            - never
+      - choice:
+          name: VERSION
+          description: "Version of the OpenStack. mitaka implies trusty and newton implaies xenial."
+          choices:
+            - newton
+            - mitaka
+      - bool:
+          name: DEPLOY_AS_HA_MODE
+          description: "Deploy 3 controllers instead of 1"
+          default: false
+      - bool:
+          name: USE_SSL_OS
+          description: "Deploy OpenStack with certificates"
+          default: false
+      - bool:
+          name: USE_SSL_CONTRAIL
+          description: "Deploy Contrail with certificates"
+          default: false
+      - bool:
+          name: USE_ADDITIONAL_INTERFACE
+          description: "Deploy Contrail with additional interfaces that is used for control-network"
+          default: false
+    scm:
+      - juniper-contrail-charms
+      - juniper-ci
+    builders:
+      - shell: |
+          #!/bin/bash -e
+          desc="$VERSION $DEPLOY_TYPE"
+          if [[ "$DEPLOY_AS_HA_MODE" == "true" ]] ; then desc="$desc +HA" ; fi
+          if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
+          if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
+          if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
+          echo "DESCRIPTION $desc"
+      - description-setter:
+          regexp: "DESCRIPTION (.*)"
+      - shell: |
+          #!/bin/bash -e
+          export SERIES='trusty'
+          if [[ "$VERSION" == "newton" ]] ; then
+            export SERIES='xenial'
+          fi
+          ./juniper-ci/juju/bmc/deploy_all.sh
+    publishers:
+      - archive:
+          artifacts: 'logs/**'
+          allow-empty: 'true'
