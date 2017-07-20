@@ -9,6 +9,8 @@ fi
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
+source "$my_dir/functions"
+
 export log_dir="$WORKSPACE/logs"
 if [ -d $log_dir ] ; then
   chmod -R u+w "$log_dir"
@@ -42,6 +44,13 @@ if [[ "$SERIES" != "xenial" ]] ; then
 fi
 if [[ "$VERSION" != "newton" ]] ; then
   echo "ERROR: only newton version is supported."
+  exit 1
+fi
+
+# check if environment is present
+if $virsh_cmd list --all | grep -q "juju-cont" ; then
+  echo 'ERROR: environment present. please clean up first'
+  $virsh_cmd list --all | grep "juju-"
   exit 1
 fi
 
