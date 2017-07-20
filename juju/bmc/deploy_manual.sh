@@ -55,9 +55,6 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   echo "INFO: controller 3 (Contrail): $cont3 / $cont3_ip"
 fi
 
-cont0_ip=$cont1_ip
-cont0=$cont1
-
 #if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
 #  for mch in ${machines[@]} ; do
 #    add_interface $mch
@@ -152,8 +149,8 @@ juju-deploy $PLACE/contrail-agent --config repo_config_cv.yaml
 
 #echo "INFO: Update endpoints $(date)"
 #hack_openstack
-#echo "INFO: Apply SSL flag if set $(date)"
-#apply_ssl
+echo "INFO: Apply SSL flag if set $(date)"
+apply_ssl
 
 echo "INFO: Attach contrail-controller container $(date)"
 juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
