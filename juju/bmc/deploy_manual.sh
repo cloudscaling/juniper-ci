@@ -55,6 +55,9 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   echo "INFO: controller 3 (Contrail): $cont3 / $cont3_ip"
 fi
 
+cont0_ip=cont1_ip
+cont0=cont1
+
 #if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
 #  for mch in ${machines[@]} ; do
 #    add_interface $mch
