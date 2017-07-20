@@ -63,7 +63,7 @@
     scm:
       - juniper-ci
     builders:
-     - shell: |
+      - shell: |
           #!/bin/bash -e
           desc="$OPENSTACK_VERSION $ENVIRONMENT_OS"
           desc+="(num=$NUM osc=$CONTROLLER_COUNT cc=$CONTRAIL_CONTROLLER_COUNT ca=$CONTRAIL_ANALYTICS_COUNT cadb=$CONTRAIL_ANALYTICSDB_COUNT)"
