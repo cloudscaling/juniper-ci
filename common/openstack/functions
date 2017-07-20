@@ -290,7 +290,7 @@ function _get_instance_machine() {
   local host=`openstack --insecure server list --long -c ID -c Host | grep $id | awk '{print $4}' | cut -d '.' -f 1`
   local ip=''
   if [[ "$SSH_CMD" == 'juju-ssh' ]] ; then
-    ip=`nslookup $host | awk '/Address/{print $2}' | tail -1 | sed 's/#.*$//'`
+    ip=`openstack hypervisor list | grep $host | awk '{print $8}'`
   else
     _access_undercloud
     ip=`openstack --insecure server list | grep $host | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+' | head -n 1`
