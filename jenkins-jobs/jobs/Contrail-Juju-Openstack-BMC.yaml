@@ -22,14 +22,6 @@
           description: "Deploy 3 controllers instead of 1"
           default: false
       - bool:
-          name: USE_SSL_OS
-          description: "Deploy OpenStack with certificates"
-          default: false
-      - bool:
-          name: USE_SSL_CONTRAIL
-          description: "Deploy Contrail with certificates"
-          default: false
-      - bool:
           name: USE_ADDITIONAL_INTERFACE
           description: "Deploy Contrail with additional interfaces that is used for control-network"
           default: false

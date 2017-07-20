@@ -9,6 +9,8 @@ fi
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
+source "$my_dir/functions"
+
 export log_dir="$WORKSPACE/logs"
 if [ -d $log_dir ] ; then
   chmod -R u+w "$log_dir"
@@ -30,8 +32,8 @@ export VERSION="${VERSION:-newton}"
 export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
 export BUILD="${BUILD:-${BUILDS[$VERSION]}}"
 export DEPLOY_AS_HA_MODE="${DEPLOY_AS_HA_MODE:-false}"
-export USE_SSL_OS="${USE_SSL_OS:-false}"
-export USE_SSL_CONTRAIL="${USE_SSL_CONTRAIL:-false}"
+export USE_SSL_OS="false"
+export USE_SSL_CONTRAIL="false"
 export USE_ADDITIONAL_INTERFACE="${USE_ADDITIONAL_INTERFACE:-false}"
 
 export PASSWORD=${PASSWORD:-'password'}
@@ -42,6 +44,13 @@ if [[ "$SERIES" != "xenial" ]] ; then
 fi
 if [[ "$VERSION" != "newton" ]] ; then
   echo "ERROR: only newton version is supported."
+  exit 1
+fi
+
+# check if environment is present
+if $virsh_cmd list --all | grep -q "juju-cont" ; then
+  echo 'ERROR: environment present. please clean up first'
+  $virsh_cmd list --all | grep "juju-"
   exit 1
 fi
 

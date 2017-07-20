@@ -137,20 +137,17 @@ juju-deploy $PLACE/contrail-agent --config repo_config_cv.yaml
 #  juju-set contrail-agent control-network=$subnet_cidr
 #fi
 
-#if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
-#  juju-deploy cs:$SERIES/haproxy --to $m0
-#  juju-expose haproxy
-#  juju-add-relation "contrail-analytics" "haproxy"
-#  juju-add-relation "contrail-controller:http-services" "haproxy"
-#  juju-add-relation "contrail-controller:https-services" "haproxy"
-#  ip=`get-machine-ip-by-number $m0`
-#  juju-set contrail-controller vip=$ip
-#fi
-
-#echo "INFO: Update endpoints $(date)"
-#hack_openstack
-echo "INFO: Apply SSL flag if set $(date)"
-apply_ssl
+if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
+  juju-deploy cs:$SERIES/haproxy --to lxd:$cont0
+  juju-expose haproxy
+  juju-add-relation "contrail-analytics" "haproxy"
+  juju-add-relation "contrail-controller:http-services" "haproxy"
+  juju-add-relation "contrail-controller:https-services" "haproxy"
+  mch=`get_machine_index_by_service haproxy/0`
+  ip=`get-machine-ip-by-number $mch`
+  echo "INFO: HAProxy for Contrail services is on machine $mch / IP $ip"
+  juju-set contrail-controller vip=$ip
+fi
 
 echo "INFO: Attach contrail-controller container $(date)"
 juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
