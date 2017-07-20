@@ -203,7 +203,7 @@ git_repo="alexey-mr"
 rm -rf usr/share/openstack-puppet/modules
 mkdir -p usr/share/openstack-puppet/modules
 git clone https://github.com/${git_repo}/contrail-tripleo-puppet -b $git_branch usr/share/openstack-puppet/modules/tripleo
-git clone https://github.com/${git_repo}/puppet-contrail -b $git_branch usr/share/openstack-puppet/modules/contrail
+git clone https://github.com/${git_repo}/puppet-contrail -b R4.0 usr/share/openstack-puppet/modules/contrail
 tar czvf puppet-modules.tgz usr/
 upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
 
