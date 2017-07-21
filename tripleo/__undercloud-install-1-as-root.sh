@@ -124,7 +124,7 @@ for i in `ls /root/contrail_packages/*.rpm` ; do
   rpm -ivh ${i}
 done
 mkdir -p /var/www/html/contrail
-tar -zxvf /opt/contrail/contrail_packages/contrail_rpms.tgz -C /var/www/html/contrail
+tar -xvf /opt/contrail/contrail_packages/contrail_rpms.tgz -C /var/www/html/contrail
 
 # hack: centos images don have openstack-utilities packages
 if [[ "$ENVIRONMENT_OS" == 'centos' ]] ; then
