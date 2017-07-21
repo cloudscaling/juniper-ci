@@ -98,7 +98,7 @@ sed -i -e 's/Defaults[ \t]*requiretty.*/#Defaults    requiretty/g' /etc/sudoers
 
 cp "$my_dir/__undercloud-install-2-as-stack-user.sh" /home/stack/
 chown stack:stack /home/stack/__undercloud-install-2-as-stack-user.sh
-sudo -u stack NUM=$NUM NETDEV=$NETDEV OPENSTACK_VERSION=$OPENSTACK_VERSION ENVIRONMENT_OS=$ENVIRONMENT_OS /home/stack/__undercloud-install-2-as-stack-user.sh
+sudo -u stack NUM=$NUM NETDEV=$NETDEV OPENSTACK_VERSION=$OPENSTACK_VERSION ENVIRONMENT_OS=$ENVIRONMENT_OS RHEL_CERT_TEST=$RHEL_CERT_TEST /home/stack/__undercloud-install-2-as-stack-user.sh
 
 # increase timeouts due to virtual installation
 openstack-config --set /etc/nova/nova.conf DEFAULT rpc_response_timeout 600

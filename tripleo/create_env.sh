@@ -16,6 +16,8 @@ if [[ -z "$ENVIRONMENT_OS" ]] ; then
   exit 1
 fi
 
+RHEL_CERT_TEST=${RHEL_CERT_TEST:-'no'}
+
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
@@ -153,16 +155,27 @@ if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   fi
   enable_repo_opts="--enable=rhel-7-server-openstack-${enable_repo}-rpms"
   enable_repo_opts+=" --enable=rhel-7-server-openstack-${enable_repo}-devtools-rpms"
+  if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+    enable_repo_opts+=' --enable=rhel-7-server-cert-rpms'
+  fi
   virt-customize -a $pool_path/undercloud-$NUM.qcow2 \
         --run-command "subscription-manager repos $enable_repo_opts"
-fi
 
+  # make a copy of disk to run one more VM for test server
+  if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+    cp $pool_path/undercloud-$NUM.qcow2 $pool_path/undercloud-$NUM-cert-test.qcow2
+  fi
+fi
 
 # define MAC's
 mgmt_ip=$(get_network_ip "management")
 mgmt_mac="00:16:00:00:0$NUM:02"
+mgmt_mac_cert="00:16:00:01:0$NUM:02"
+
 prov_ip=$(get_network_ip "provisioning")
 prov_mac="00:16:00:00:0$NUM:06"
+prov_mac_cert="00:16:00:01:0$NUM:06"
+
 # generate password/key for undercloud's root
 rm -f "$ssh_key_dir/kp-$NUM" "$ssh_key_dir/kp-$NUM.pub"
 ssh-keygen -b 2048 -t rsa -f "$ssh_key_dir/kp-$NUM" -q -N ""
@@ -173,28 +186,33 @@ if ! lsmod |grep '^nbd ' ; then
   modprobe nbd max_part=8
 fi
 
-# TODO: use guestfish instead of manual attachment
-# mount undercloud root disk. (it helps to create multienv)
-# !!! WARNING !!! in case of errors you need to unmount/disconnect it manually!!!
-nbd_dev="/dev/nbd${NUM}"
-qemu-nbd -d $nbd_dev || true
-qemu-nbd -n -c $nbd_dev $pool_path/undercloud-$NUM.qcow2
-sleep 5
-ret=0
-tmpdir=$(mktemp -d)
-mount ${nbd_dev}p1 $tmpdir || ret=1
-sleep 2
+function _change_iface() {
+  local templ=$1
+  local iface=$2
+  local network=$3
+  local mac=$4
+  local iface_file=$tmpdir/etc/sysconfig/network-scripts/ifcfg-$iface
+  cp "$my_dir/$templ" $iface_file
+  sed -i "s/{{network}}/$network/g" $iface_file
+  sed -i "s/{{mac-address}}/$mac/g" $iface_file
+  sed -i "s/{{num}}/$NUM/g" $iface_file
+}
 
-function change_undercloud_image() {
+function _change_image() {
+  local mgmt_templ=$1
+  local mgmt_network=$2
+  local mgmt_mac=$3
+  local prov_templ=$4
+  local prov_network=$5
+  local prov_mac=$6
+  local prepare_contrail_pkgs=$7
+
   # configure eth0 - management
-  cp "$my_dir/ifcfg-ethM" $tmpdir/etc/sysconfig/network-scripts/ifcfg-eth0
-  sed -i "s/{{network}}/$mgmt_ip/g" $tmpdir/etc/sysconfig/network-scripts/ifcfg-eth0
-  sed -i "s/{{mac-address}}/$mgmt_mac/g" $tmpdir/etc/sysconfig/network-scripts/ifcfg-eth0
-  sed -i "s/{{num}}/$NUM/g" $tmpdir/etc/sysconfig/network-scripts/ifcfg-eth0
+  _change_iface $mgmt_templ 'eth0' $mgmt_network $mgmt_mac
+
   # configure eth1 - provisioning
-  cp "$my_dir/ifcfg-ethA" $tmpdir/etc/sysconfig/network-scripts/ifcfg-eth1
-  sed -i "s/{{network}}/$prov_ip/g" $tmpdir/etc/sysconfig/network-scripts/ifcfg-eth1
-  sed -i "s/{{mac-address}}/$prov_mac/g" $tmpdir/etc/sysconfig/network-scripts/ifcfg-eth1
+  _change_iface $prov_templ 'eth1' $prov_network $prov_mac
+
   # configure root access
   mkdir -p $tmpdir/root/.ssh
   cp "$ssh_key_dir/kp-$NUM.pub" $tmpdir/root/.ssh/authorized_keys
@@ -205,52 +223,114 @@ function change_undercloud_image() {
   sed -i "s root:\!\!: root:$rootpass: " $tmpdir/etc/shadow
   grep root $tmpdir/etc/shadow
   echo "PermitRootLogin yes" > $tmpdir/etc/ssh/sshd_config
-  rm -rf $tmpdir/root/contrail_packages
-  mkdir -p $tmpdir/root/contrail_packages
-  cp $CONTRAIL_PACKAGES_DIR/*.tgz $tmpdir/root/contrail_packages/
-  cp $CONTRAIL_PACKAGES_DIR/*${OPENSTACK_VERSION}*.rpm $tmpdir/root/contrail_packages/
+
+  # prepare contrail pkgs
+  if [[ "$prepare_contrail_pkgs" == 'yes' ]] ; then
+    rm -rf $tmpdir/root/contrail_packages
+    mkdir -p $tmpdir/root/contrail_packages
+    cp $CONTRAIL_PACKAGES_DIR/*.tgz $tmpdir/root/contrail_packages/
+    cp $CONTRAIL_PACKAGES_DIR/*${OPENSTACK_VERSION}*.rpm $tmpdir/root/contrail_packages/
+  fi
 }
 
-# patch image
-[ $ret == 0 ] && change_undercloud_image || ret=2
+function _patch_image() {
 
-# unmount disk
-[ $ret != 1 ] && umount ${nbd_dev}p1 || ret=2
-sleep 2
-rm -rf $tmpdir || ret=3
-qemu-nbd -d $nbd_dev || ret=4
-sleep 2
+  local image=$1
+  local mgmt_templ=$2
+  local mgmt_network=$3
+  local mgmt_mac=$4
+  local prov_templ=$5
+  local prov_network=$6
+  local prov_mac=$7
+  local prepare_contrail_pkgs=${8:-'yes'}
 
-if [[ $ret != 0 ]] ; then
-  echo "ERROR: there were errors in changing undercloud image, ret=$ret"
-  exit 1
-fi
+  # TODO: use guestfish instead of manual attachment
+  # mount undercloud root disk. (it helps to create multienv)
+  # !!! WARNING !!! in case of errors you need to unmount/disconnect it manually!!!
+  local nbd_dev="/dev/nbd${NUM}"
+  qemu-nbd -d $nbd_dev || true
+  qemu-nbd -n -c $nbd_dev $image
+  sleep 5
+  local ret=0
+  local tmpdir=$(mktemp -d)
+  mount ${nbd_dev}p1 $tmpdir || ret=1
+  sleep 2
 
-# define and start undercloud machine
-virt-install --name=rd-undercloud-$NUM \
-  --ram=8192 \
-  --vcpus=1,cores=1 \
-  --os-type=linux \
-  --os-variant=rhel7 \
-  --virt-type=kvm \
-  --disk "path=$pool_path/undercloud-$NUM.qcow2",size=40,cache=writeback,bus=virtio,serial=$(uuidgen) \
-  --boot hd \
-  --noautoconsole \
-  --network network=$mgmt_net,model=$net_driver,mac=$mgmt_mac \
-  --network network=$prov_net,model=$net_driver,mac=$prov_mac \
-  --network network=$ext_net,model=$net_driver \
-  --graphics vnc,listen=0.0.0.0
+  # patch image
+  [ $ret == 0 ] && _change_image \
+    $mgmt_templ $mgmt_network $mgmt_mac \
+    $prov_templ $prov_network $prov_mac \
+    $prepare_contrail_pkgs || ret=2
 
+  # unmount disk
+  [ $ret != 1 ] && umount ${nbd_dev}p1 || ret=2
+  sleep 2
+  rm -rf $tmpdir || ret=3
+  qemu-nbd -d $nbd_dev || ret=4
+  sleep 2
 
-# wait for undercloud machine
-iter=0
-truncate -s 0 ./tmp_file
-while ! scp -i "$ssh_key_dir/kp-$NUM" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -B ./tmp_file root@${mgmt_ip}.2:/tmp/tmp_file ; do
-  if (( iter >= 20 )) ; then
-    echo "Could not connect to undercloud"
+  if [[ $ret != 0 ]] ; then
+    echo "ERROR: there were errors in changing image $image, ret=$ret"
     exit 1
   fi
-  echo "Waiting for undercloud..."
-  sleep 30
-  ((++iter))
-done
+}
+
+function _start_vm() {
+  local name=$1
+  local image=$2
+  local mgmt_mac=$3
+  local prov_mac=$4
+
+  # define and start machine
+  virt-install --name=$name \
+    --ram=8192 \
+    --vcpus=1,cores=1 \
+    --os-type=linux \
+    --os-variant=rhel7 \
+    --virt-type=kvm \
+    --disk "path=$image",size=40,cache=writeback,bus=virtio,serial=$(uuidgen) \
+    --boot hd \
+    --noautoconsole \
+    --network network=$mgmt_net,model=$net_driver,mac=$mgmt_mac \
+    --network network=$prov_net,model=$net_driver,mac=$prov_mac \
+    --network network=$ext_net,model=$net_driver \
+    --graphics vnc,listen=0.0.0.0
+
+}
+
+_patch_image "$pool_path/undercloud-$NUM.qcow2" \
+  'ifcfg-ethM' $mgmt_ip $mgmt_mac \
+  'ifcfg-ethA' $prov_ip $prov_mac
+
+_start_vm "rd-undercloud-$NUM" "$pool_path/undercloud-$NUM.qcow2" $mgmt_mac $prov_mac
+
+if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+  _patch_image "$pool_path/undercloud-$NUM-cert-test.qcow2" \
+    'ifcfg-ethMC' $mgmt_ip $mgmt_mac_cert \
+    'ifcfg-ethAC' $prov_ip $prov_mac_cert \
+    'no'
+
+  _start_vm "rd-undercloud-$NUM" "$pool_path/undercloud-$NUM-cert-test.qcow2" $mgmt_mac_cert $prov_mac_cert
+fi
+
+# wait for undercloud machine
+function _wait_machine() {
+  local addr=$1
+  local iter=${2:-30}
+  truncate -s 0 ./tmp_file
+  while ! scp -i "$ssh_key_dir/kp-$NUM" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -B ./tmp_file root@${addr}:/tmp/tmp_file ; do
+    if (( iter >= 20 )) ; then
+      echo "Could not connect to undercloud"
+      exit 1
+    fi
+    echo "Waiting for undercloud..."
+    sleep 30
+    ((++iter))
+  done
+}
+
+_wait_machine "${mgmt_ip}.2"
+
+if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+  _wait_machine "${mgmt_ip}.3"
+fi

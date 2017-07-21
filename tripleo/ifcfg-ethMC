@@ -1,0 +1,15 @@
+DEVICE=eth0
+BOOTPROTO=none
+HWADDR={{mac-address}}
+ONBOOT=yes
+TYPE=Ethernet
+USERCTL=yes
+PEERDNS=yes
+IPV6INIT=no
+NM_CONTROLLED=no
+NETMASK=255.255.255.0
+IPADDR={{network}}.3
+GATEWAY={{network}}.1
+DNS1=8.8.8.8
+DNS2=8.8.4.4
+DOMAIN=myhost.my{{num}}domain

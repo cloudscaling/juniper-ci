@@ -60,13 +60,26 @@
             - 'auto'
             - 'always'
             - 'never'
+      - choice:
+          name: RHEL_CERT_TEST
+          choices:
+            - 'no'
+            - 'yes'
+
     scm:
       - juniper-ci
     builders:
       - shell: |
           #!/bin/bash -e
           desc="$OPENSTACK_VERSION $ENVIRONMENT_OS"
-          desc+="(num=$NUM osc=$CONTROLLER_COUNT cc=$CONTRAIL_CONTROLLER_COUNT ca=$CONTRAIL_ANALYTICS_COUNT cadb=$CONTRAIL_ANALYTICSDB_COUNT)"
+          if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+            if [[ "$ENVIRONMENT_OS" != 'rhel' ]] ; then
+              echo "RedHat Certification is available only for RHEL environment"
+              exit -1
+            fi
+            desc+=" RedHat Certification"
+          fi
+          desc+="\n(num=$NUM osc=$CONTROLLER_COUNT cc=$CONTRAIL_CONTROLLER_COUNT ca=$CONTRAIL_ANALYTICS_COUNT cadb=$CONTRAIL_ANALYTICSDB_COUNT)"
           echo "DESCRIPTION $desc"
       - description-setter:
           regexp: "DESCRIPTION (.*)"

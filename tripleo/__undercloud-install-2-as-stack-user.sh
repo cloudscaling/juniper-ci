@@ -104,6 +104,9 @@ if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   fi
   enable_repo_opts="--enable=rhel-7-server-openstack-${enable_repo}-rpms"
   enable_repo_opts+=" --enable=rhel-7-server-openstack-${enable_repo}-devtools-rpms"
+  if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+    enable_repo_opts+=' --enable=rhel-7-server-cert-rpms'
+  fi
   virt-customize -a ./overcloud-full.qcow2 \
         --run-command "subscription-manager repos $enable_repo_opts"
 fi
