@@ -216,7 +216,13 @@ git clone https://github.com/${git_repo}/contrail-tripleo-heat-templates -b $git
 cp -r ~/contrail-tripleo-heat-templates/environments/contrail ~/tripleo-heat-templates/environments
 cp -r ~/contrail-tripleo-heat-templates/puppet/services/network/* ~/tripleo-heat-templates/puppet/services/network
 
-role_file='tripleo-heat-templates/environments/contrail/roles_data.yaml'
+if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
+  role_file='tripleo-heat-templates/environments/contrail/roles_data.yaml'
+  contrail_net_file='tripleo-heat-templates/environments/contrail/contrail-net-single.yaml'
+else
+  role_file='tripleo-heat-templates/environments/contrail/roles_data_contrail.yaml'
+  contrail_net_file='tripleo-heat-templates/environments/contrail/contrail-net.yaml'
+fi
 
 contrail_services_file='tripleo-heat-templates/environments/contrail/contrail-services.yaml'
 sed -i "s/ContrailRepo:.*/ContrailRepo:  http:\/\/${prov_ip}\/contrail/g" $contrail_services_file
@@ -227,8 +233,7 @@ sed -i "s/ContrailAnalyticsDatabaseCount:.*/ContrailAnalyticsDatabaseCount: $ANA
 sed -i "s/ComputeCount:.*/ComputeCount: $COMP_COUNT/g" $contrail_services_file
 sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_services_file
 
-if [[ $NETWORK_ISOLATION == "single" ]] ; then
-  contrail_net_file='tripleo-heat-templates/environments/contrail/contrail-net-single.yaml'
+if [[ "$NETWORK_ISOLATION" == 'single' ]] ; then
   sed -i "s/ControlPlaneDefaultRoute:.*/ControlPlaneDefaultRoute: ${prov_ip}/g" $contrail_net_file
   sed -i "s/EC2MetadataIp:.*/EC2MetadataIp: ${prov_ip}/g" $contrail_net_file
   sed -i "s/VrouterPhysicalInterface:.*/VrouterPhysicalInterface: ens3/g" $contrail_net_file
