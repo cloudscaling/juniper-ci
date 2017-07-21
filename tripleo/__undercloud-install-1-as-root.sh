@@ -134,5 +134,5 @@ fi
 
 # prepare docker images
 for i in `ls /root/contrail_packages/*.tgz` ; do
-  tar -zxvf ${i} -C /var/www/html/contrail
+  tar -xvf ${i} -C /var/www/html/contrail
 done
