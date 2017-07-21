@@ -316,10 +316,11 @@ fi
 # wait for undercloud machine
 function _wait_machine() {
   local addr=$1
-  local iter=${2:-30}
+  local max_iter=${2:-20}
+  local iter=0
   truncate -s 0 ./tmp_file
   while ! scp -i "$ssh_key_dir/kp-$NUM" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -B ./tmp_file root@${addr}:/tmp/tmp_file ; do
-    if (( iter >= 20 )) ; then
+    if (( iter >= max_iter )) ; then
       echo "Could not connect to undercloud"
       exit 1
     fi
