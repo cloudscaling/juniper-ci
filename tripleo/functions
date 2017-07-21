@@ -91,18 +91,22 @@ function get_pool_path() {
   virsh pool-dumpxml $poolname | sed -n '/path/{s/.*<path>\(.*\)<\/path>.*/\1/;p}'
 }
 
-function delete_domains() {
-  for name in `virsh list --all | grep "rd-overcloud-$NUM-" | awk '{print $2}'` ; do
+function _delete_domain() {
+  local name=$1
+  if virsh dominfo $name 2>/dev/null ; then
     virsh destroy $name || true
     sleep 2
     virsh undefine $name || true
+  fi
+}
+
+function delete_domains() {
+  for name in `virsh list --all | grep "rd-overcloud-$NUM-" | awk '{print $2}'` ; do
+    _delete_domain $name
   done
 
-  if virsh dominfo rd-undercloud-$NUM 2>/dev/null ; then
-    virsh destroy rd-undercloud-$NUM || true
-    sleep 2
-    virsh undefine rd-undercloud-$NUM || true
-  fi
+  _delete_domain rd-undercloud-$NUM
+  _delete_domain rd-undercloud-$NUM-cert-test
 }
 
 function delete_volume() {
