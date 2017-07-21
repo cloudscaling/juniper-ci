@@ -44,10 +44,10 @@ if which docker ; then
           docker exec contrail-controller rabbitmqctl cluster_status &>"./$ldir/rabbitmq-cluster-status.log"
         fi
 
-        docker exec $cnt service --status-all &>"./$ldir/service-status-all.log"
+        docker exec "contrail-$cnt" service --status-all &>"./$ldir/service-status-all.log"
         for srv in 'cassandra' 'zookeeper' 'kafka' 'rabbitmq-server' ; do
           if grep -q $srv "./$ldir/service-status-all.log" ; then
-            docker exec $cnt service $srv status &>"./$ldir/service-$srv-status.log"
+            docker exec "contrail-$cnt" service $srv status &>"./$ldir/service-$srv-status.log"
           fi
         done
 
