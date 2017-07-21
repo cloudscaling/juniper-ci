@@ -43,6 +43,14 @@ if which docker ; then
         if [[ "$cnt" == "controller" ]] ; then
           docker exec contrail-controller rabbitmqctl cluster_status &>"./$ldir/rabbitmq-cluster-status.log"
         fi
+
+        docker exec service --status-all &>"./$ldir/service-status-all.log"
+        for srv in 'cassandra' 'zookeeper' 'kafka' 'rabbitmq-server' ; do
+          if grep -q $srv "./$ldir/service-status-all.log" ; then
+            docker exec service $srv status &>"./$ldir/service-$srv-status.log"
+          fi
+        done
+
         docker cp "contrail-$cnt:/var/log/contrail" "./$ldir"
         mv "$ldir/contrail" "$ldir/var-log-contrail"
         docker cp "contrail-$cnt:/etc/contrail" "./$ldir"
