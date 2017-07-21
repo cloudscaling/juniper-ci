@@ -89,28 +89,6 @@ fi
 # upload images to undercloud
 source ./stackrc
 cd ~/images
-
-# for RHEL env enable repos appropriate to OpenStack version
-# TODO: code duplication with create_env.sh
-if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-  enable_repo=""
-  if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
-    enable_repo="10"
-  elif [[ "$OPENSTACK_VERSION" == 'ocata' ]] ; then
-    enable_repo="11"
-  else
-    echo "ERROR: unsupported OS $OPENSTACK_VERSION for $ENVIRONMENT_OS environment"
-    exit 1
-  fi
-  enable_repo_opts="--enable=rhel-7-server-openstack-${enable_repo}-rpms"
-  enable_repo_opts+=" --enable=rhel-7-server-openstack-${enable_repo}-devtools-rpms"
-  if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
-    enable_repo_opts+=' --enable=rhel-7-server-cert-rpms'
-  fi
-  virt-customize -a ./overcloud-full.qcow2 \
-        --run-command "subscription-manager repos $enable_repo_opts"
-fi
-
 openstack overcloud image upload
 cd ..
 

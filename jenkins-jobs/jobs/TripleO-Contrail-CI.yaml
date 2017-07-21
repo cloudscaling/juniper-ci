@@ -79,7 +79,7 @@
             fi
             desc+=" RedHat Certification"
           fi
-          desc+="\n(num=$NUM osc=$CONTROLLER_COUNT cc=$CONTRAIL_CONTROLLER_COUNT ca=$CONTRAIL_ANALYTICS_COUNT cadb=$CONTRAIL_ANALYTICSDB_COUNT)"
+          desc+="\\n(num=$NUM osc=$CONTROLLER_COUNT cc=$CONTRAIL_CONTROLLER_COUNT ca=$CONTRAIL_ANALYTICS_COUNT cadb=$CONTRAIL_ANALYTICSDB_COUNT)"
           echo "DESCRIPTION $desc"
       - description-setter:
           regexp: "DESCRIPTION (.*)"

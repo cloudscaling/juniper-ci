@@ -24,7 +24,7 @@ my_dir="$(dirname $my_file)"
 ssh_key_dir="/home/jenkins"
 
 # base image for VMs
-BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-"undercloud-${ENVIRONMENT_OS}.qcow2"}
+BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-"undercloud-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}.qcow2"}
 BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
 mkdir -p ${BASE_IMAGE_DIR}
 BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
@@ -137,31 +137,11 @@ define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT
 define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT
 define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT
 
-
 # copy image for undercloud and resize them
 cp $BASE_IMAGE $pool_path/undercloud-$NUM.qcow2
 
-# for RHEL env enable repos appropriate to OpenStack version
-# TODO: code duplication with __undercloud-install-2-as-stack-user.sh
+# for RHEL make a copy of disk to run one more VM for test server
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-  enable_repo=""
-  if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
-    enable_repo="10"
-  elif [[ "$OPENSTACK_VERSION" == 'ocata' ]] ; then
-    enable_repo="11"
-  else
-    echo "ERROR: unsupported OS $OPENSTACK_VERSION for $ENVIRONMENT_OS environment"
-    exit 1
-  fi
-  enable_repo_opts="--enable=rhel-7-server-openstack-${enable_repo}-rpms"
-  enable_repo_opts+=" --enable=rhel-7-server-openstack-${enable_repo}-devtools-rpms"
-  if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
-    enable_repo_opts+=' --enable=rhel-7-server-cert-rpms'
-  fi
-  virt-customize -a $pool_path/undercloud-$NUM.qcow2 \
-        --run-command "subscription-manager repos $enable_repo_opts"
-
-  # make a copy of disk to run one more VM for test server
   if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
     cp $pool_path/undercloud-$NUM.qcow2 $pool_path/undercloud-$NUM-cert-test.qcow2
   fi

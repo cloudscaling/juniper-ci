@@ -6,8 +6,14 @@ if [[ -z "$RHEL_USER" || -z "$RHEL_PASSWORD" ]] ; then
 fi
 
 image=$1
+openstack=$2
 if [[ -z "$image" ]] ; then
   echo "ERROR: the first argument is expected to be the path to image"
+  exit -1
+fi
+
+if [[ -z "$openstack" ]] ; then
+  echo "ERROR: the second argument is expected to be the openstack version newton/ocata"
   exit -1
 fi
 
@@ -16,10 +22,20 @@ if [[ ! -f $image ]] ; then
   exit -1
 fi
 
-dst_image=${2:-${image}}
-dst_image_size=${3:-'100G'}
+dst_image=${3:-${image}}
+dst_image_size=${4:-'100G'}
 
-common_repos="rhel-7-server-rpms rhel-7-server-extras-rpms rhel-7-server-rh-common-rpms rhel-ha-for-rhel-7-server-rpms"
+common_repos="rhel-7-server-rpms rhel-7-server-extras-rpms rhel-7-server-rh-common-rpms rhel-ha-for-rhel-7-server-rpms rhel-7-server-cert-rpms"
+if [[ "$openstack" == 'newton' ]] ; then
+  enable_repo="10"
+elif [[ "$openstack" == 'ocata' ]] ; then
+  enable_repo="11"
+else
+  echo "ERROR: unsupported OS $openstack"
+  exit 1
+fi
+common_repos+=" rhel-7-server-openstack-${enable_repo}-rpms"
+common_repos+=" rhel-7-server-openstack-${enable_repo}-devtools-rpms"
 
 enable_repos_opts=""
 for i in $common_repos ; do
@@ -27,7 +43,7 @@ for i in $common_repos ; do
 done
 
 export LIBGUESTFS_BACKEND=direct
-if [[ "$image" != "dst_image" ]] ; then
+if [[ "$image" != "$dst_image" ]] ; then
   qemu-img create -f qcow2 $dst_image $dst_image_size
   virt-resize --expand /dev/sda1 $image $dst_image
 fi
