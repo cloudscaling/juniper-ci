@@ -310,7 +310,7 @@ if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
     'ifcfg-ethAC' $prov_ip $prov_mac_cert \
     'no'
 
-  _start_vm "rd-undercloud-$NUM" "$pool_path/undercloud-$NUM-cert-test.qcow2" $mgmt_mac_cert $prov_mac_cert
+  _start_vm "rd-undercloud-$NUM-cert-test" "$pool_path/undercloud-$NUM-cert-test.qcow2" $mgmt_mac_cert $prov_mac_cert
 fi
 
 # wait for undercloud machine
