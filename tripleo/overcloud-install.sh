@@ -213,8 +213,12 @@ rm -rf ~/tripleo-heat-templates
 cp -r /usr/share/openstack-tripleo-heat-templates/ ~/tripleo-heat-templates
 rm -rf ~/contrail-tripleo-heat-templates
 git clone https://github.com/${git_repo}/contrail-tripleo-heat-templates -b $git_branch
-cp -r ~/contrail-tripleo-heat-templates/environments/contrail ~/tripleo-heat-templates/environments
-cp -r ~/contrail-tripleo-heat-templates/puppet/services/network/* ~/tripleo-heat-templates/puppet/services/network
+if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
+  cp -r ~/contrail-tripleo-heat-templates/environments/contrail ~/tripleo-heat-templates/environments
+  cp -r ~/contrail-tripleo-heat-templates/puppet/services/network/* ~/tripleo-heat-templates/puppet/services/network
+else
+  cp -r ~/contrail-tripleo-heat-templates/* ~/tripleo-heat-templates
+fi
 
 if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
   role_file='tripleo-heat-templates/environments/contrail/roles_data.yaml'
