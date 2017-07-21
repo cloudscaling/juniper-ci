@@ -10,7 +10,8 @@ done
 
 ps ax -H &> ps.log
 netstat -lpn &> netstat.log
-tar -rf logs.tar ps.log netstat.log 2>/dev/null
+free -hw &> mem.log
+tar -rf logs.tar ps.log netstat.log mem.log 2>/dev/null
 
 if which contrail-status &>/dev/null ; then
   contrail-status &>contrail-status.log
@@ -38,6 +39,7 @@ if which docker ; then
           docker exec "contrail-$cnt" journalctl -u contrail-ansible.service --no-pager --since "2017-01-01" &>"./$ldir/$cnt.log"
         fi
         docker exec contrail-$cnt contrail-status &>"./$ldir/contrail-status.log"
+        docker exec contrail-$cnt free -hw &>"./$ldir/mem.log"
         if [[ "$cnt" == "controller" ]] ; then
           docker exec contrail-controller rabbitmqctl cluster_status &>"./$ldir/rabbitmq-cluster-status.log"
         fi
