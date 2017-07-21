@@ -391,6 +391,13 @@ if (( CONT_COUNT < 2 )) ; then
   echo "  EnableGalera: false" >> $misc_opts
 fi
 
+if [[ "$OPENSTACK_VERSION" != 'newton' ]] ; then
+  cat <<EOF >> $misc_opts
+  ContrailControlRNDCSecret: rndc_secret
+EOF
+fi
+
+
 ha_opts=""
 if (( CONT_COUNT > 1 )) ; then
   ha_opts="-e tripleo-heat-templates/environments/puppet-pacemaker.yaml"
