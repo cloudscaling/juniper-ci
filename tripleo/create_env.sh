@@ -260,10 +260,11 @@ function _start_vm() {
   local image=$2
   local mgmt_mac=$3
   local prov_mac=$4
+  local ram=${5:-16384}
 
   # define and start machine
   virt-install --name=$name \
-    --ram=8192 \
+    --ram=$ram \
     --vcpus=1,cores=1 \
     --os-type=linux \
     --os-variant=rhel7 \
@@ -290,7 +291,7 @@ if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
     'ifcfg-ethAC' $prov_ip $prov_mac_cert \
     'no'
 
-  _start_vm "rd-undercloud-$NUM-cert-test" "$pool_path/undercloud-$NUM-cert-test.qcow2" $mgmt_mac_cert $prov_mac_cert
+  _start_vm "rd-undercloud-$NUM-cert-test" "$pool_path/undercloud-$NUM-cert-test.qcow2" $mgmt_mac_cert $prov_mac_cert 4096
 fi
 
 # wait for undercloud machine
