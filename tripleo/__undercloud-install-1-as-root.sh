@@ -91,6 +91,7 @@ if [[ "$OPENSTACK_VERSION" == 'ocata' && "$ENVIRONMENT_OS" == 'centos' ]] ; then
   # workaround for https://bugs.launchpad.net/tripleo/+bug/1692899
   # correct fix is in the review
   # (https://review.openstack.org/#/c/467248/1/heat-config-docker-cmd/os-refresh-config/configure.d/50-heat-config-docker-cmd)
+  mkdir -p /var/run/heat-config
   echo {} > /var/run/heat-config/heat-config
 fi
 
