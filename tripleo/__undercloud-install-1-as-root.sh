@@ -87,7 +87,7 @@ fi
 # install tripleo clients
 yum -y install yum-plugin-priorities python-tripleoclient python-rdomanager-oscplugin sshpass openstack-utils
 
-if [[ "$OPENSTACK_VERSION" == 'ocata' && "$ENVIRONMENT_OS" == 'centos' ]]
+if [[ "$OPENSTACK_VERSION" == 'ocata' && "$ENVIRONMENT_OS" == 'centos' ]] ; then
   # workaround for https://bugs.launchpad.net/tripleo/+bug/1692899
   # correct fix is in the review
   # (https://review.openstack.org/#/c/467248/1/heat-config-docker-cmd/os-refresh-config/configure.d/50-heat-config-docker-cmd)
