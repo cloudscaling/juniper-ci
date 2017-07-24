@@ -87,6 +87,12 @@ fi
 # install tripleo clients
 yum -y install yum-plugin-priorities python-tripleoclient python-rdomanager-oscplugin sshpass openstack-utils
 
+if [[ "$OPENSTACK_VERSION" == 'ocata' && "$ENVIRONMENT_OS" == 'centos' ]]
+  # workaround for https://bugs.launchpad.net/tripleo/+bug/1692899
+  # correct fix is in the review
+  # (https://review.openstack.org/#/c/467248/1/heat-config-docker-cmd/os-refresh-config/configure.d/50-heat-config-docker-cmd)
+  echo {} > /var/run/heat-config/heat-config
+fi
 
 # add Ceph repos to workaround bug with redhat-lsb-core package
 # todo: there is enabled ceph repo jewel
@@ -105,6 +111,7 @@ openstack-config --set /etc/nova/nova.conf DEFAULT rpc_response_timeout 600
 openstack-config --set /etc/nova/nova.conf DEFAULT dhcp_domain $CLOUD_DOMAIN_NAME
 openstack-config --set /etc/ironic/ironic.conf DEFAULT rpc_response_timeout 600
 openstack-config --set /etc/neutron/neutron.conf DEFAULT  dns_domain $CLOUD_DOMAIN_NAME
+openstack-config --set /etc/neutron/neutron.conf DEFAULT rpc_response_timeout 300
 
 # despite the field is depricated it is still important to set it
 # https://bugs.launchpad.net/neutron/+bug/1657814
