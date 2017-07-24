@@ -59,7 +59,8 @@ function run_machine() {
     --noautoconsole \
     --graphics vnc,listen=0.0.0.0 \
     --network network=$nname,model=$net_driver,mac=52:54:00:10:00:$mac_suffix \
-    --cpu SandyBridge,+vmx \
+    --cpu SandyBridge,+vmx,+ssse3 \
+    --memorybacking hugepages=on \
     --boot hd
 }
 
