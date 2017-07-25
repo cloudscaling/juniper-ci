@@ -58,6 +58,7 @@
           name: CLEAN_ENV
           choices:
             - 'auto'
+            - 'before_only'
             - 'always'
             - 'never'
       - choice:
