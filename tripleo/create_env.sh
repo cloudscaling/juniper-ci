@@ -315,4 +315,10 @@ _wait_machine "${mgmt_ip}.2"
 
 if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
   _wait_machine "${mgmt_ip}.3"
+
+  ssh_cmd="ssh -i '$ssh_key_dir/kp-$NUM' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${mgmt_ip}.3"
+  $ssh_cmd "yum install -y redhat-certification && systemctl start httpd && rhcertd start"
+
+  $ssh_cmd "sed -i \"s/ALLOWED_HOSTS =.*/ALLOWED_HOSTS = ['192.168.212.3', '192.168.216.200', 'localhost.localdomain', 'localhost', '127.0.0.1']/\" /var/www/rhcert/project/settings.py"
+  $ssh_cmd systemctl restart httpd
 fi
