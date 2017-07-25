@@ -44,8 +44,7 @@ fi
 
 general_type="mem=8G cores=2 root-disk=40G"
 compute_type="mem=7G cores=4 root-disk=40G"
-# NOTE: temporary use 32G ram - https://bugs.launchpad.net/juniperopenstack/+bug/1702624
-contrail_type="mem=32G cores=2 root-disk=40G"
+contrail_type="mem=15G cores=2 root-disk=40G"
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   m0=$(create_machine $general_type)
@@ -104,7 +103,7 @@ juju-set glance "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose glance
 
 juju-deploy cs:$SERIES/keystone --to $m3
-juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "preferred-api-version=3"
+juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose keystone
 
 juju-deploy cs:$SERIES/nova-compute --to $m2
