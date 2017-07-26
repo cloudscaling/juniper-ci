@@ -30,6 +30,7 @@ if $virsh_cmd list --all | grep -q "juju-cont" ; then
 fi
 
 create_network $nname $addr
+create_network $nname-vm $addr-vm
 
 # create pool
 $virsh_cmd pool-info $poolname &> /dev/null || create_pool $poolname
@@ -47,6 +48,12 @@ function run_machine() {
   local ram="$3"
   local mac_suffix="$4"
 
+  local params=""
+  if echo "$name" | grep -q comp ; then
+    params="--memorybacking hugepages=on"
+    params="$params --network network=$nname-vm,model=$net_driver,mac=52:54:00:11:00:$mac_suffix"
+  fi
+
   echo "INFO: running  machine $name $(date)"
   cp $BASE_IMAGE $pool_path/$name.qcow2
   virt-install --name $name \
@@ -60,8 +67,8 @@ function run_machine() {
     --graphics vnc,listen=0.0.0.0 \
     --network network=$nname,model=$net_driver,mac=52:54:00:10:00:$mac_suffix \
     --cpu SandyBridge,+vmx,+ssse3 \
-    --memorybacking hugepages=on \
-    --boot hd
+    --boot hd \
+    $params
 }
 
 wait_cmd="ssh"
