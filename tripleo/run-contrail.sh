@@ -55,7 +55,7 @@ function catch_errors() {
   sleep 20
   save_logs
 
-  if [[ $CLEAN_ENV == 'always' ||  $CLEAN_ENV == 'before_only' ]] ; then
+  if [[ $CLEAN_ENV == 'always' ]] ; then
     cleanup_environment
   fi
 
