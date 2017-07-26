@@ -54,7 +54,6 @@ virt-customize -a $dst_image \
 	--run-command "subscription-manager repos ${enable_repos_opts}" \
 	--run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
 	--run-command 'systemctl enable sshd' \
-	--run-command 'yum remove -y cloud-init' \
-        --root-password password:qwe123QWE \
+  --root-password password:qwe123QWE \
 	--selinux-relabel
 
