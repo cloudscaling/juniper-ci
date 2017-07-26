@@ -30,7 +30,7 @@ if $virsh_cmd list --all | grep -q "juju-cont" ; then
 fi
 
 create_network $nname $addr
-create_network $nname-vm $addr-vm
+create_network $nname_vm $addr_vm
 
 # create pool
 $virsh_cmd pool-info $poolname &> /dev/null || create_pool $poolname

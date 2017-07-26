@@ -7,8 +7,8 @@ poolname="jujuimages"
 net_driver=${net_driver:-e1000}
 nname="juju"
 addr="10.0.0"
-nname-vm="juju-vm"
-addr-vm="10.5.0"
+nname_vm="juju-vm"
+addr_vm="10.5.0"
 
 # juju controller
 juju_cont_mac='01'
