@@ -30,7 +30,7 @@ if $virsh_cmd list --all | grep -q "juju-cont" ; then
 fi
 
 create_network $nname $addr
-create_network $nname-vm $addr-vm
+create_network $nname_vm $addr_vm
 
 # create pool
 $virsh_cmd pool-info $poolname &> /dev/null || create_pool $poolname
@@ -119,7 +119,8 @@ function run_compute() {
   wait_kvm_machine $ip
   juju add-machine ssh:ubuntu@$ip
   echo "INFO: preparing compute $index $(date)"
-  juju ssh ubuntu@$ip "sudo add-apt-repository -yu cloud-archive:newton ; sudo apt-get -fy install dpdk-igb-uio-dkms mc wget" &>>$log_dir/apt.log
+  kernel_version=`juju ssh ubuntu@$ip uname -r 2>/dev/null`
+  juju ssh ubuntu@$ip "sudo apt-get -fy install linux-image-extra-$kernel_version dpdk mc wget" &>>$log_dir/apt.log
 }
 
 function run_controller() {
