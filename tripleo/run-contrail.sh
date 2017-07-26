@@ -77,6 +77,6 @@ trap - ERR
 
 save_logs
 
-if [[ $CLEAN_ENV != 'never' ]] ; then
+if [[ $CLEAN_ENV != 'never' && $CLEAN_ENV != 'before_only' ]] ; then
   cleanup_environment
 fi
