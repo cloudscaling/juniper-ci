@@ -462,3 +462,17 @@ done
 if (( errors > 0 )) ; then
   exit 1
 fi
+
+if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+  if  ! openstack role list | grep -q Member ; then
+    openstack role create Member
+  fi
+  for ip in `openstack server list  | awk '/compute|contrail/ {print($8)}' | cut -d '=' -f 2` ; do
+    cat << EOF  | ssh -T heat-admin@${ip}
+    sudo iptables -I INPUT 1 -p tcp -m multiport --dports 8009 -m comment --comment \"rhcertd\" -m state --state NEW -j ACCEPT
+    sudo iptables -I INPUT 2 -p udp -m multiport --dports 8009 -m comment --comment \"rhcertd\" -m state --state NEW -j ACCEPT
+    sudo yum install -y redhat-certification-openstack
+    sudo rhcertd restart
+EOF
+  done
+fi
