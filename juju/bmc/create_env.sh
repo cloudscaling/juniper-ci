@@ -121,6 +121,9 @@ function run_compute() {
   echo "INFO: preparing compute $index $(date)"
   kernel_version=`juju ssh ubuntu@$ip uname -r 2>/dev/null`
   juju ssh ubuntu@$ip "sudo apt-get -fy install linux-image-extra-$kernel_version dpdk mc wget" &>>$log_dir/apt.log
+  juju scp "$my_dir/50-cloud-init-compute.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
+  juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
+  juju ssh ubuntu@$ip "sudo ifup ens4" 2>/dev/null
 }
 
 function run_controller() {
@@ -138,7 +141,7 @@ function run_controller() {
   juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget bridge-utils" &>>$log_dir/apt.log
   juju ssh ubuntu@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge" 2>/dev/null
   juju ssh ubuntu@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-ens3\"/m' /etc/default/lxd-bridge" 2>/dev/null
-  juju scp "$my_dir/50-cloud-init.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
+  juju scp "$my_dir/50-cloud-init-controller.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
   juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
   juju ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $ip
