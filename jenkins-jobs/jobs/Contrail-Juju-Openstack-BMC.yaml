@@ -41,11 +41,9 @@
     builders:
       - shell: |
           #!/bin/bash -e
-          desc="$VERSION $DEPLOY_TYPE"
-          if [[ "$DEPLOY_AS_HA_MODE" == "true" ]] ; then desc="$desc +HA" ; fi
-          if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
-          if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
+          desc="$VERSION $DEPLOY_TYPE mode=$DEPLOY_MODE"
           if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
+          if [[ "$USE_DPDK" == "true" ]] ; then desc="$desc +DPDK" ; fi
           echo "DESCRIPTION $desc"
       - description-setter:
           regexp: "DESCRIPTION (.*)"
