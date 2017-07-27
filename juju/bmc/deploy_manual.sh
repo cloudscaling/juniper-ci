@@ -40,13 +40,21 @@ echo "INFO: compute 1: $comp1 / $comp1_ip"
 comp2_ip=`get_kvm_machine_ip $juju_os_comp_2_mac`
 comp2=`juju status | grep $comp2_ip | awk '{print $1}'`
 echo "INFO: compute 2: $comp2 / $comp2_ip"
+
 cont0_ip=`get_kvm_machine_ip $juju_os_cont_0_mac`
 cont0=`juju status | grep $cont0_ip | awk '{print $1}'`
 echo "INFO: controller 0 (OpenStack): $cont0 / $cont0_ip"
-cont1_ip=`get_kvm_machine_ip $juju_os_cont_1_mac`
-cont1=`juju status | grep $cont1_ip | awk '{print $1}'`
+
+if [[ "$DEPLOY_MODE" == "one" ]] ; then
+  cont1_ip="$cont0_ip"
+  cont1="$cont0"
+else
+  cont1_ip=`get_kvm_machine_ip $juju_os_cont_1_mac`
+  cont1=`juju status | grep $cont1_ip | awk '{print $1}'`
+fi
 echo "INFO: controller 1 (Contrail): $cont1 / $cont1_ip"
-if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
+
+if [ "$DEPLOY_MODE" == 'ha' ] ; then
   cont2_ip=`get_kvm_machine_ip $juju_os_cont_2_mac`
   cont2=`juju status | grep $cont2_ip | awk '{print $1}'`
   echo "INFO: controller 2 (Contrail): $cont2 / $cont3_ip"
@@ -105,7 +113,7 @@ juju-deploy $PLACE/contrail-analyticsdb --to $cont1
 juju-deploy $PLACE/contrail-analytics --to $cont1
 juju-expose contrail-analytics
 
-if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
+if [ "$DEPLOY_MODE" == 'ha' ] ; then
   juju-add-unit contrail-controller --to $cont2
   juju-add-unit contrail-controller --to $cont3
   juju-add-unit contrail-analytics --to $cont2
@@ -137,7 +145,7 @@ juju-deploy $PLACE/contrail-agent --config repo_config_cv.yaml
 #  juju-set contrail-agent control-network=$subnet_cidr
 #fi
 
-if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
+if [ "$DEPLOY_MODE" == 'ha' ] ; then
   juju-deploy cs:$SERIES/haproxy --to lxd:$cont0
   juju-expose haproxy
   juju-add-relation "contrail-analytics" "haproxy"

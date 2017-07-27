@@ -17,10 +17,16 @@
           choices:
             - newton
             - mitaka
-      - bool:
-          name: DEPLOY_AS_HA_MODE
-          description: "Deploy 3 controllers instead of 1"
-          default: false
+      - choice:
+          name: DEPLOY_MODE
+          description: |
+            one: Deploy OpenStack and Contrail to one machine
+            two: Deploy OpenStack and Contrail to different machines
+            ha: Deploy one machine for OpenStack and three machines for Contrail
+          choices:
+            - two
+            - one
+            - ha
       - bool:
           name: USE_ADDITIONAL_INTERFACE
           description: "Deploy Contrail with additional interfaces that is used for control-network"

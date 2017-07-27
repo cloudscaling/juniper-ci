@@ -125,10 +125,11 @@ function run_compute() {
 
 function run_controller() {
   local index=$1
+  local mem=$2
   local mac_var_name="juju_os_cont_${1}_mac"
   local mac=${!mac_var_name}
   echo "INFO: creating controller $index (mac $mac) $(date)"
-  run_machine juju-os-cont-$index 4 16384 $mac
+  run_machine juju-os-cont-$index 4 $mem $mac
   local ip=`get_kvm_machine_ip $mac`
   machines["cont-$index"]=$ip
   wait_kvm_machine $ip
@@ -146,12 +147,25 @@ function run_controller() {
 run_compute 1
 run_compute 2
 
-run_controller 0
-run_controller 1
-if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
-  run_controller 2
-  run_controller 3
-fi
+case "$DEPLOY_MODE" in
+  "one")
+    run_controller 0 16384
+    ;;
+  "two")
+    run_controller 0 8192
+    run_controller 1 8192
+    ;;
+  "ha")
+    run_controller 0 8192
+    run_controller 1 8192
+    run_controller 2 8192
+    run_controller 3 8192
+    ;;
+  *)
+    echo "ERROR: Invalid mode: $DEPLOY_MODE (must be 'one', 'two' or 'ha')"
+    exit 1
+    ;;
+esac
 
 echo "INFO: creating hosts file $(date)"
 truncate -s 0 $WORKSPACE/hosts
