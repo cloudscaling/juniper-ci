@@ -13,6 +13,11 @@ if [[ -z "$OPENSTACK_VERSION" ]] ; then
   exit 1
 fi
 
+if [[ -z "$DPDK" ]] ; then
+  echo "DPDK is expected (e.g. export DPDK=yes/no)"
+  exit 1
+fi
+
 DEPLOY=${DEPLOY:-0}
 NETWORK_ISOLATION=${NETWORK_ISOLATION:-'single'}
 
@@ -30,6 +35,14 @@ SWAP=${SWAP:-0}
 SSH_USER=${SSH_USER:-'stack'}
 CPU_COUNT=${CPU_COUNT:-2}
 DISK_SIZE=${DISK_SIZE:-29}
+
+if [[ "$DPDK" != 'yes' ]] ; then
+  compute_machine_name='comp'
+  compute_flavor_name='compute'
+else
+  compute_machine_name='compdpdk'
+  compute_flavor_name='compute-dpdk'
+fi
 
 # su - stack
 cd ~
@@ -54,11 +67,19 @@ else
 fi
 
 CONT_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-cont- | wc -l)
-COMP_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-comp- | wc -l)
+COMP_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-$compute_machine_name- | wc -l)
 CONTRAIL_CONTROLLER_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-ctrlcont- | wc -l)
 ANALYTICS_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-ctrlanalytics- | wc -l)
 ANALYTICSDB_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-ctrlanalyticsdb- | wc -l)
 ((OCM_COUNT=CONT_COUNT+COMP_COUNT+CONTRAIL_CONTROLLER_COUNT+ANALYTICS_COUNT+ANALYTICSDB_COUNT))
+
+if [[ "$DPDK" != 'yes' ]] ; then
+  comp_scale_count=$COMP_COUNT
+  dpdk_scale_count=0
+else
+  comp_scale_count=0
+  dpdk_scale_count=$COMP_COUNT
+fi
 
 # collect MAC addresses of overcloud machines
 function get_macs() {
@@ -77,7 +98,7 @@ function get_macs() {
 }
 
 get_macs cont $CONT_COUNT
-get_macs comp $COMP_COUNT
+get_macs $compute_machine_name $COMP_COUNT
 get_macs ctrlcont $CONTRAIL_CONTROLLER_COUNT
 get_macs ctrlanalytics $ANALYTICS_COUNT
 get_macs ctrlanalyticsdb $ANALYTICSDB_COUNT
@@ -129,7 +150,7 @@ function define_vms() {
 }
 
 define_vms 'cont' $CONT_COUNT 'profile:controller,boot_option:local'
-define_vms 'comp' $COMP_COUNT 'profile:compute,boot_option:local'
+define_vms $compute_machine_name $COMP_COUNT "profile:$compute_flavor_name,boot_option:local"
 define_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT 'profile:contrail-controller,boot_option:local'
 define_vms 'ctrlanalytics' $ANALYTICS_COUNT 'profile:contrail-analytics,boot_option:local'
 define_vms 'ctrlanalyticsdb' $ANALYTICSDB_COUNT 'profile:contrail-analyticsdb,boot_option:local'
@@ -177,7 +198,7 @@ function create_flavor() {
 }
 create_flavor 'baremetal' 1
 create_flavor 'control' $CONT_COUNT 'controller'
-create_flavor 'compute' $COMP_COUNT 'compute'
+create_flavor $compute_flavor_name $COMP_COUNT $compute_flavor_name
 create_flavor 'contrail-controller' $CONTRAIL_CONTROLLER_COUNT 'contrail-controller'
 create_flavor 'contrail-analytics' $ANALYTICS_COUNT 'contrail-analytics'
 create_flavor 'contrail-analytics-database' $ANALYTICSDB_COUNT 'contrail-analyticsdb'
@@ -232,7 +253,8 @@ sed -i "s/ControllerCount:.*/ControllerCount: $CONT_COUNT/g" $contrail_services_
 sed -i "s/ContrailControllerCount:.*/ContrailControllerCount: $CONTRAIL_CONTROLLER_COUNT/g" $contrail_services_file
 sed -i "s/ContrailAnalyticsCount:.*/ContrailAnalyticsCount: $ANALYTICS_COUNT/g" $contrail_services_file
 sed -i "s/ContrailAnalyticsDatabaseCount:.*/ContrailAnalyticsDatabaseCount: $ANALYTICSDB_COUNT/g" $contrail_services_file
-sed -i "s/ComputeCount:.*/ComputeCount: $COMP_COUNT/g" $contrail_services_file
+sed -i "s/ComputeCount:.*/ComputeCount: $comp_scale_count/g" $contrail_services_file
+sed -i "s/ContrailDpdkCount:.*/ContrailDpdkCount: $dpdk_scale_count/g" $contrail_services_file
 sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_services_file
 
 if [[ "$NETWORK_ISOLATION" == 'single' ]] ; then
@@ -467,7 +489,7 @@ if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
   if  ! openstack role list | grep -q Member ; then
     openstack role create Member
   fi
-  for ip in `openstack server list  | awk '/compute|contrail/ {print($8)}' | cut -d '=' -f 2` ; do
+  for ip in `openstack server list  | awk '/overcloud/ {print($8)}' | cut -d '=' -f 2` ; do
     cat << EOF  | ssh -T heat-admin@${ip}
     sudo iptables -I INPUT 1 -p tcp -m multiport --dports 8009 -m comment --comment \"rhcertd\" -m state --state NEW -j ACCEPT
     sudo iptables -I INPUT 2 -p udp -m multiport --dports 8009 -m comment --comment \"rhcertd\" -m state --state NEW -j ACCEPT

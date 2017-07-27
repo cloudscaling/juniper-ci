@@ -16,6 +16,17 @@ if [[ -z "$ENVIRONMENT_OS" ]] ; then
   exit 1
 fi
 
+if [[ -z "$DPDK" ]] ; then
+  echo "DPDK is expected (e.g. export DPDK=yes/no)"
+  exit 1
+fi
+
+if [[ "$DPDK" != 'yes' ]] ; then
+compute_machine_name='comp'
+else
+compute_machine_name='compdpdk'
+fi
+
 RHEL_CERT_TEST=${RHEL_CERT_TEST:-'no'}
 
 my_file="$(readlink -e "$0")"
@@ -131,7 +142,7 @@ function define_overcloud_vms() {
 
 # just define overcloud machines
 define_overcloud_vms 'cont' $CONTROLLER_COUNT
-define_overcloud_vms 'comp' $COMPUTE_COUNT 'true'
+define_overcloud_vms $compute_machine_name $COMPUTE_COUNT 'true'
 define_overcloud_vms 'stor' $STORAGE_COUNT 'true'
 define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT
 define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT

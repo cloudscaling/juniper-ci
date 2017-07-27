@@ -12,6 +12,7 @@ fi
 
 export NUM=${NUM:-0}
 export ENVIRONMENT_OS=${ENVIRONMENT_OS:-'centos'}
+export DPDK=${DPDK:-'no'}
 export CLEAN_ENV=${CLEAN_ENV:-'auto'}
 export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'newton'}
 export RHEL_CERT_TEST=${RHEL_CERT_TEST:-'no'}

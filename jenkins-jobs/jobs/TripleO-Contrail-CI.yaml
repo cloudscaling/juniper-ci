@@ -27,6 +27,11 @@
             - 'newton'
             - 'mitaka'
       - choice:
+          name: DPDK
+          choices:
+            - 'no'
+            - 'yes'
+      - choice:
           name: CONTROLLER_COUNT
           description: "Count of OS controllers to deploy"
           choices:
