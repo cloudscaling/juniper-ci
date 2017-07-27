@@ -37,6 +37,7 @@ if which docker ; then
           docker logs "contrail-$cnt" &>"./$ldir/$cnt.log"
         else
           docker exec "contrail-$cnt" journalctl -u contrail-ansible.service --no-pager --since "2017-01-01" &>"./$ldir/$cnt.log"
+          docker exec "contrail-$cnt" systemctl -a &>"./$ldir/systemctl-status-all.log"
         fi
         docker exec contrail-$cnt contrail-status &>"./$ldir/contrail-status.log"
         docker exec contrail-$cnt free -hw &>"./$ldir/mem.log"
