@@ -44,7 +44,7 @@ fi
 
 general_type="mem=8G cores=2 root-disk=40G"
 compute_type="mem=7G cores=4 root-disk=40G"
-contrail_type="mem=32G cores=2 root-disk=40G"
+contrail_type="mem=15G cores=2 root-disk=40G"
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   m0=$(create_machine $general_type)
