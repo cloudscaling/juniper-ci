@@ -39,7 +39,7 @@ fi
 for fff in __undercloud-install-1-as-root.sh __undercloud-install-2-as-stack-user.sh ; do
   scp $ssh_opts -B "$my_dir/$fff" ${ssh_addr}:/root/$fff
 done
-ssh -t $ssh_opts $ssh_addr "NUM=$NUM NETDEV=$NETDEV OPENSTACK_VERSION=$OPENSTACK_VERSION ENVIRONMENT_OS=$ENVIRONMENT_OS RHEL_CERT_TEST=$RHEL_CERT_TEST /root/__undercloud-install-1-as-root.sh"
+ssh -t $ssh_opts $ssh_addr "NUM=$NUM NETDEV=$NETDEV OPENSTACK_VERSION=$OPENSTACK_VERSION ENVIRONMENT_OS=$ENVIRONMENT_OS DPDK=$DPDK RHEL_CERT_TEST=$RHEL_CERT_TEST /root/__undercloud-install-1-as-root.sh"
 
 scp $ssh_opts "$my_dir/overcloud-install.sh" ${ssh_addr}:/home/stack/overcloud-install.sh
 scp $ssh_opts "$my_dir/save_logs.sh" ${ssh_addr}:/home/stack/save_logs.sh
