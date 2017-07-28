@@ -46,6 +46,8 @@ function save_logs() {
     mkdir logs/$nm
     tar xf $nm -C logs/$nm
   done
+  # patch +x flag for next archiving, rhcert doesnt have it
+  chmod -R +x logs
 }
 
 function catch_errors() {
