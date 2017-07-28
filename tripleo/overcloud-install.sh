@@ -409,7 +409,7 @@ EOF
 fi
 if [[ "$DPDK" == 'yes' && "$OPENSTACK_VERSION" == 'newton' ]] ; then
   cat <<EOF >> $misc_opts
-  OS::TripleO::ContrailDpdk::Net::SoftwareConfig: tripleo-heat-templates/environments/contrail-nic-config-single.yaml
+  OS::TripleO::ContrailDpdk::Net::SoftwareConfig: tripleo-heat-templates/environments/contrail/contrail-nic-config-compute-single.yaml
 EOF
 fi
 cat <<EOF >> $misc_opts
