@@ -375,6 +375,9 @@ fi
 # other options
 misc_opts='misc_opts.yaml'
 rm -f $misc_opts
+cat <<EOF >> $misc_opts
+resource_registry:
+EOF
 if [[ "$enable_ext_puppet_syntax" == 'true' ]] ; then
   cat <<EOF > enable_ext_puppet_syntax.yaml
 heat_template_version: 2014-10-16
@@ -401,8 +404,12 @@ outputs:
     value: {get_attr: [NodeDeployment, deploy_stdout]}
 EOF
   cat <<EOF >> $misc_opts
-resource_registry:
   OS::TripleO::ControllerExtraConfigPre: enable_ext_puppet_syntax.yaml
+EOF
+fi
+if [[ "$DPDK" == 'yes' && "$OPENSTACK_VERSION" == 'newton' ]] ; then
+  cat <<EOF >> $misc_opts
+  OS::TripleO::ContrailDpdk::Net::SoftwareConfig: tripleo-heat-templates/environments/contrail-nic-config-single.yaml
 EOF
 fi
 cat <<EOF >> $misc_opts
