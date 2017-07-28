@@ -261,8 +261,13 @@ if [[ "$NETWORK_ISOLATION" == 'single' ]] ; then
   contrail_net_file='tripleo-heat-templates/environments/contrail/contrail-net-single.yaml'
   sed -i "s/ControlPlaneDefaultRoute:.*/ControlPlaneDefaultRoute: ${prov_ip}/g" $contrail_net_file
   sed -i "s/EC2MetadataIp:.*/EC2MetadataIp: ${prov_ip}/g" $contrail_net_file
-  sed -i "s/VrouterPhysicalInterface:.*/VrouterPhysicalInterface: ens3/g" $contrail_net_file
-  sed -i "s/VrouterGateway:.*/VrouterGateway: ${prov_ip}/g" $contrail_net_file
+  if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
+    sed -i "s/VrouterPhysicalInterface:.*/VrouterPhysicalInterface: ens3/g" $contrail_net_file
+    sed -i "s/VrouterGateway:.*/VrouterGateway: ${prov_ip}/g" $contrail_net_file
+  else
+    sed -i "s/ContrailVrouterPhysicalInterface:.*/ContrailVrouterPhysicalInterface: ens3/g" $contrail_net_file
+    sed -i "s/ContrailVrouterGateway:.*/ContrailVrouterGateway: ${prov_ip}/g" $contrail_net_file
+  fi
   sed -i "s/ControlVirtualInterface:.*/ControlVirtualInterface: ens3/g" $contrail_net_file
   sed -i "s/PublicVirtualInterface:.*/PublicVirtualInterface: ens4/g" $contrail_net_file
   sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_net_file
