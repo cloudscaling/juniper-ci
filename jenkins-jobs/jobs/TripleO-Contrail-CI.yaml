@@ -77,15 +77,18 @@
     builders:
       - shell: |
           #!/bin/bash -e
-          desc="$OPENSTACK_VERSION $ENVIRONMENT_OS"
+          desc="$ENVIRONMENT_OS $OPENSTACK_VERSION"
+          if [[ "$DPDK" == 'yes' ]] ; then
+            desc+=' dpdk'
+          fi
           if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
             if [[ "$ENVIRONMENT_OS" != 'rhel' ]] ; then
               echo "RedHat Certification is available only for RHEL environment"
               exit -1
             fi
-            desc+=" RedHat Certification"
+            desc+=" rhcert"
           fi
-          desc+=" (num=$NUM osc=$CONTROLLER_COUNT cc=$CONTRAIL_CONTROLLER_COUNT ca=$CONTRAIL_ANALYTICS_COUNT cadb=$CONTRAIL_ANALYTICSDB_COUNT)"
+          desc+=" (num=$NUM osc=$CONTROLLER_COUNT cc=$CONTRAIL_CONTROLLER_COUNT ca=$CONTRAIL_ANALYTICS_COUNT cadb=$CONTRAIL_ANALYTICSDB_COUNT, $CLEAN_ENV)"
           echo "DESCRIPTION $desc"
       - description-setter:
           regexp: "DESCRIPTION (.*)"
