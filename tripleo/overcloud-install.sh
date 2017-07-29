@@ -104,16 +104,6 @@ get_macs ctrlanalytics $ANALYTICS_COUNT
 get_macs ctrlanalyticsdb $ANALYTICSDB_COUNT
 
 id_rsa=$(awk 1 ORS='\\n' ~/.ssh/id_rsa)
-# create overcloud machines definition
-cat << EOF > ~/instackenv.json
-{
-  "ssh-user": "$SSH_USER",
-  "ssh-key": "$id_rsa",
-  "host-ip": "$virt_host_ip",
-  "power_manager": "nova.virt.baremetal.virtual_power_driver.VirtualPowerManager",
-  "arch": "x86_64",
-  "nodes": [
-EOF
 
 function define_machine() {
   local caps=$1
@@ -149,12 +139,21 @@ function define_vms() {
   done
 }
 
+# create overcloud machines definition
+cat << EOF > ~/instackenv.json
+{
+  "ssh-user": "$SSH_USER",
+  "ssh-key": "$id_rsa",
+  "host-ip": "$virt_host_ip",
+  "power_manager": "nova.virt.baremetal.virtual_power_driver.VirtualPowerManager",
+  "arch": "x86_64",
+  "nodes": [
+EOF
 define_vms 'cont' $CONT_COUNT 'profile:controller,boot_option:local'
 define_vms $compute_machine_name $COMP_COUNT "profile:$compute_flavor_name,boot_option:local"
 define_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT 'profile:contrail-controller,boot_option:local'
 define_vms 'ctrlanalytics' $ANALYTICS_COUNT 'profile:contrail-analytics,boot_option:local'
 define_vms 'ctrlanalyticsdb' $ANALYTICSDB_COUNT 'profile:contrail-analyticsdb,boot_option:local'
-
 # remove last comma
 head -n -1 ~/instackenv.json > ~/instackenv.json.tmp
 mv ~/instackenv.json.tmp ~/instackenv.json
@@ -259,17 +258,22 @@ sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_services_fi
 
 if [[ "$NETWORK_ISOLATION" == 'single' ]] ; then
   contrail_net_file='tripleo-heat-templates/environments/contrail/contrail-net-single.yaml'
+  if [[ "$DPDK" != 'yes' ]] ;
+    vrouter_iface='ens3'
+  else
+    vrouter_iface='ens4'
+  fi
   sed -i "s/ControlPlaneDefaultRoute:.*/ControlPlaneDefaultRoute: ${prov_ip}/g" $contrail_net_file
   sed -i "s/EC2MetadataIp:.*/EC2MetadataIp: ${prov_ip}/g" $contrail_net_file
   if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
-    sed -i "s/VrouterPhysicalInterface:.*/VrouterPhysicalInterface: ens3/g" $contrail_net_file
+    sed -i "s/VrouterPhysicalInterface:.*/VrouterPhysicalInterface: ${vrouter_iface}/g" $contrail_net_file
     sed -i "s/VrouterGateway:.*/VrouterGateway: ${prov_ip}/g" $contrail_net_file
   else
-    sed -i "s/ContrailVrouterPhysicalInterface:.*/ContrailVrouterPhysicalInterface: ens3/g" $contrail_net_file
+    sed -i "s/ContrailVrouterPhysicalInterface:.*/ContrailVrouterPhysicalInterface: ${vrouter_iface}/g" $contrail_net_file
     sed -i "s/ContrailVrouterGateway:.*/ContrailVrouterGateway: ${prov_ip}/g" $contrail_net_file
   fi
   sed -i "s/ControlVirtualInterface:.*/ControlVirtualInterface: ens3/g" $contrail_net_file
-  sed -i "s/PublicVirtualInterface:.*/PublicVirtualInterface: ens4/g" $contrail_net_file
+  sed -i "s/PublicVirtualInterface:.*/PublicVirtualInterface: ens3/g" $contrail_net_file
   sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_net_file
 else
   echo TODO: not implemented
