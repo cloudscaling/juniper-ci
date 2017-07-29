@@ -258,7 +258,7 @@ sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_services_fi
 
 if [[ "$NETWORK_ISOLATION" == 'single' ]] ; then
   contrail_net_file='tripleo-heat-templates/environments/contrail/contrail-net-single.yaml'
-  if [[ "$DPDK" != 'yes' ]] ;
+  if [[ "$DPDK" != 'yes' ]] ; then
     vrouter_iface='ens3'
   else
     vrouter_iface='ens4'
