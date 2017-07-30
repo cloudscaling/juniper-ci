@@ -246,6 +246,13 @@ else
   role_file='tripleo-heat-templates/environments/contrail/roles_data_contrail.yaml'
 fi
 
+# disable ceilometer
+# there is the bug with 'ceilometer-upgrade --skipt-metering-database'
+# https://bugs.launchpad.net/tripleo/+bug/1693339
+# wich cause the deployement fails
+sed -i  's/\(.*Ceilometer.*\)/#\1/g' $role_file
+
+# set common deploy parameters for services
 contrail_services_file='tripleo-heat-templates/environments/contrail/contrail-services.yaml'
 sed -i "s/ContrailRepo:.*/ContrailRepo:  http:\/\/${prov_ip}\/contrail/g" $contrail_services_file
 sed -i "s/ControllerCount:.*/ControllerCount: $CONT_COUNT/g" $contrail_services_file
@@ -256,6 +263,7 @@ sed -i "s/ComputeCount:.*/ComputeCount: $comp_scale_count/g" $contrail_services_
 sed -i "s/ContrailDpdkCount:.*/ContrailDpdkCount: $dpdk_scale_count/g" $contrail_services_file
 sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_services_file
 
+# set network parameters
 if [[ "$NETWORK_ISOLATION" == 'single' ]] ; then
   contrail_net_file='tripleo-heat-templates/environments/contrail/contrail-net-single.yaml'
   if [[ "$DPDK" != 'yes' ]] ; then
