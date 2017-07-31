@@ -218,4 +218,6 @@ esac
 
 echo "INFO: Environment created $(date)"
 
+virsh net-dhcp-leases $nname
+
 trap - ERR EXIT
