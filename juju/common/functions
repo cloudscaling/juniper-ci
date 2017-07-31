@@ -73,8 +73,15 @@ function wait_for_machines() {
       fi
       sleep 10
       ((++fail))
-      local status=`juju-status-json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']['$machine']['juju-status']['current'])"`
-      local iid=`juju-status-json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']['$machine']['instance-id'])"`
+      if echo "$machine" | grep -q '/lxd/' ; then
+        # lxd container case
+        local mch=`echo "$machine" | cut -d '/' -f 1`
+        local status=`juju-status-json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']['$mch']['containers']['$machine']['juju-status']['current'])"`
+        local iid=`juju-status-json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']['$mch']['containers']['$machine']['instance-id'])"`
+      else
+        local status=`juju-status-json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']['$mch']['juju-status']['current'])"`
+        local iid=`juju-status-json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']['$machine']['instance-id'])"`
+      fi
       if [[ "$status" == "down" && "$iid" == "pending" ]] ; then
         echo "ERROR: Machine $machine went to 'down' state."
         juju-status

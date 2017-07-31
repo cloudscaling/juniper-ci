@@ -13,6 +13,7 @@ BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
 BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
 
 source "$my_dir/functions"
+source "$my_dir/../common/functions"
 
 trap 'catch_errors_ce $LINENO' ERR EXIT
 function catch_errors_ce() {
@@ -144,6 +145,7 @@ function run_compute() {
 function run_controller() {
   local index=$1
   local mem=$2
+  local prepare_for_openstack=$3
   local mac_var_name="juju_os_cont_${1}_mac"
   local mac=${!mac_var_name}
   echo "INFO: creating controller $index (mac $mac) $(date)"
@@ -151,14 +153,18 @@ function run_controller() {
   local ip=`get_kvm_machine_ip $mac`
   machines["cont-$index"]=$ip
   wait_kvm_machine $ip
-  juju add-machine ssh:ubuntu@$ip
+  local output=`juju add-machine ssh:ubuntu@$ip 2>&1`
+  echo "$output"
+  mch=`echo "$output" | tail -1 | awk '{print $3}'`
   echo "INFO: preparing controller $index $(date)"
-  if [[ "$SERIES" == 'trusty' ]]; then
-    juju ssh ubuntu@$ip "sudo add-apt-repository -y cloud-archive:mitaka ; sudo apt-get update ; sudo apt-get -fy install lxd" &>>$log_dir/apt.log
-  fi
   juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget bridge-utils" &>>$log_dir/apt.log
-  juju ssh ubuntu@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge" 2>/dev/null
-  juju ssh ubuntu@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-$IF1\"/m' /etc/default/lxd-bridge" 2>/dev/null
+  if [[ "$prepare_for_openstack" == '1' ]]; then
+    if [[ "$SERIES" == 'trusty' ]]; then
+      juju ssh ubuntu@$ip "sudo add-apt-repository -y cloud-archive:mitaka ; sudo apt-get update ; sudo apt-get install -fy lxd" &>>$log_dir/apt.log
+    fi
+    juju ssh ubuntu@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge" 2>/dev/null
+    juju ssh ubuntu@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-$IF1\"/m' /etc/default/lxd-bridge" 2>/dev/null
+  fi
   juju scp "$my_dir/50-cloud-init-controller-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
   juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
   if [[ "$SERIES" == 'trusty' ]]; then
@@ -166,6 +172,14 @@ function run_controller() {
   fi
   juju ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $ip
+  if [[ "$prepare_for_openstack" == '1' && "$SERIES" == 'trusty' ]]; then
+    # NOTE: run juju processes to install/configure lxd and then reconfigure it again
+    local lxd_mch=`juju add-machine lxd:$mch 2>&1 | tail -1 | awk '{print $3}'`
+    wait_for_machines $lxd_mch
+    juju remove-machine $lxd_mch
+    juju ssh ubuntu@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge" 2>/dev/null
+    juju ssh ubuntu@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-$IF1\"/m' /etc/default/lxd-bridge" 2>/dev/null
+  fi
 }
 
 run_compute 1
@@ -173,17 +187,17 @@ run_compute 2
 
 case "$DEPLOY_MODE" in
   "one")
-    run_controller 0 16384
+    run_controller 0 16384 1
     ;;
   "two")
-    run_controller 0 8192
-    run_controller 1 8192
+    run_controller 0 8192 1
+    run_controller 1 8192 0
     ;;
   "ha")
-    run_controller 0 8192
-    run_controller 1 8192
-    run_controller 2 8192
-    run_controller 3 8192
+    run_controller 0 8192 1
+    run_controller 1 8192 0
+    run_controller 2 8192 0
+    run_controller 3 8192 0
     ;;
   *)
     echo "ERROR: Invalid mode: $DEPLOY_MODE (must be 'one', 'two' or 'ha')"
