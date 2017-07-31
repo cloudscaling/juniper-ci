@@ -1,0 +1,18 @@
+sudo apt-get install linux-image-extra-`uname -r` dpdk
+
+sudo add-apt-repository -y cloud-archive:newton
+curl -fsSL http://52.14.140.94/ubuntu/repo.key | sudo apt-key add -
+sudo add-apt-repository "deb http://52.14.140.94/ubuntu xenial main"
+sudo apt-get update
+
+sudo apt-get install linux-image-extra-`uname -r` dpdk nova-compute  contrail-setup contrail-utils contrail-vrouter-dpdk contrail-vrouter-agent contrail-vrouter-common contrail-vrouter-dpdk-init
+
+dpdk-igb-uio-dkms 
+
+sudo /opt/contrail/bin/dpdk_nic_bind.py --status
+sudo contrail-compute-setup --self_ip 10.0.0.181 --dpdk huge_pages=1,coremask=1,uio_driver=uio_pci_generic
+
+uio_pci_generic / igb_uio / vfio-pci
+
+
+testpmd -n 1 -d librte_pmd_virtio.so -- --disable-hw-vlan --disable-rss -i --rxq=1 --txq=1 --rxd=256 --txd=256
