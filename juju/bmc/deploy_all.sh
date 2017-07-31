@@ -39,6 +39,14 @@ export USE_DPDK="${USE_DPDK:-false}"
 
 export PASSWORD=${PASSWORD:-'password'}
 
+if [[ "$SERIES" == 'xenial' ]]; then
+  export IF1='ens3'
+  export IF2='ens4'
+else
+  export IF1='eth0'
+  export IF2='eth1'
+fi
+
 # check if environment is present
 if $virsh_cmd list --all | grep -q "juju-cont" ; then
   echo 'ERROR: environment present. please clean up first'

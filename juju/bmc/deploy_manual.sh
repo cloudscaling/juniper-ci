@@ -138,7 +138,7 @@ sed -i -e "s|{{series}}|$SERIES|m" "repo_config_cv.yaml"
 sed -i "s/\r/\n/g" "repo_config_cv.yaml"
 juju-deploy $PLACE/contrail-agent --config repo_config_cv.yaml
 if [[ "$USE_DPDK" == "true" ]] ; then
-  juju-set contrail-agent dpdk=True physical-interface=ens4 control-network=10.0.0.0/24 dpdk-coremask=1,2
+  juju-set contrail-agent dpdk=True physical-interface=$IF2 control-network=10.0.0.0/24 dpdk-coremask=1,2
 fi
 
 #if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
