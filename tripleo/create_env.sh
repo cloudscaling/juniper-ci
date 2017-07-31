@@ -84,6 +84,8 @@ create_network provisioning
 prov_net=`get_network_name provisioning`
 create_network external
 ext_net=`get_network_name external`
+create_network dpdk
+dpdk_net=`get_network_name dpdk`
 
 # create pool
 virsh pool-info $poolname &> /dev/null || create_pool $poolname
@@ -113,6 +115,7 @@ function define-machine() {
     --noautoconsole \
     --vnc \
     --network network=$prov_net,model=$net_driver \
+    --network network=$dpdk_net,model=$net_driver \
     --network network=$ext_net,model=$net_driver \
     --cpu SandyBridge,+vmx \
     --dry-run --print-xml > /tmp/oc-$name.xml

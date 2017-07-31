@@ -264,29 +264,28 @@ sed -i "s/ContrailDpdkCount:.*/ContrailDpdkCount: $dpdk_scale_count/g" $contrail
 sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_services_file
 
 # set network parameters
-if [[ "$NETWORK_ISOLATION" == 'single' ]] ; then
-  contrail_net_file='tripleo-heat-templates/environments/contrail/contrail-net-single.yaml'
-  if [[ "$DPDK" != 'yes' ]] ; then
-    vrouter_iface='ens3'
-  else
-    vrouter_iface='ens4'
-  fi
-  sed -i "s/ControlPlaneDefaultRoute:.*/ControlPlaneDefaultRoute: ${prov_ip}/g" $contrail_net_file
-  sed -i "s/EC2MetadataIp:.*/EC2MetadataIp: ${prov_ip}/g" $contrail_net_file
-  if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
-    sed -i "s/VrouterPhysicalInterface:.*/VrouterPhysicalInterface: ${vrouter_iface}/g" $contrail_net_file
-    sed -i "s/VrouterGateway:.*/VrouterGateway: ${prov_ip}/g" $contrail_net_file
-  else
-    sed -i "s/ContrailVrouterPhysicalInterface:.*/ContrailVrouterPhysicalInterface: ${vrouter_iface}/g" $contrail_net_file
-    sed -i "s/ContrailVrouterGateway:.*/ContrailVrouterGateway: ${prov_ip}/g" $contrail_net_file
-  fi
-  sed -i "s/ControlVirtualInterface:.*/ControlVirtualInterface: ens3/g" $contrail_net_file
-  sed -i "s/PublicVirtualInterface:.*/PublicVirtualInterface: ens3/g" $contrail_net_file
-  sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_net_file
+if [[ "$NETWORK_ISOLATION" != 'single' || "$DPDK" == 'yes' ]] ; then
+  use_multi_nic='yes'
+  contrail_net_file='tripleo-heat-templates/environments/contrail/contrail-net.yaml'
+  vrouter_iface='ens4'
 else
-  echo TODO: not implemented
-  exit -1
+  use_multi_nic='no'
+  vrouter_iface='ens3'
+  contrail_net_file='tripleo-heat-templates/environments/contrail/contrail-net-single.yaml'
 fi
+
+sed -i "s/ControlPlaneDefaultRoute:.*/ControlPlaneDefaultRoute: ${prov_ip}/g" $contrail_net_file
+sed -i "s/EC2MetadataIp:.*/EC2MetadataIp: ${prov_ip}/g" $contrail_net_file
+if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
+  sed -i "s/VrouterPhysicalInterface:.*/VrouterPhysicalInterface: ${vrouter_iface}/g" $contrail_net_file
+  sed -i "s/VrouterGateway:.*/VrouterGateway: ${prov_ip}/g" $contrail_net_file
+else
+  sed -i "s/ContrailVrouterPhysicalInterface:.*/ContrailVrouterPhysicalInterface: ${vrouter_iface}/g" $contrail_net_file
+  sed -i "s/ContrailVrouterGateway:.*/ContrailVrouterGateway: ${prov_ip}/g" $contrail_net_file
+fi
+sed -i "s/ControlVirtualInterface:.*/ControlVirtualInterface: ens3/g" $contrail_net_file
+sed -i "s/PublicVirtualInterface:.*/PublicVirtualInterface: ens3/g" $contrail_net_file
+sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_net_file
 
 # Create ports for Contrail Controller and/or Analytis if any is installed on own node.
 # In that case OS controller will host VIP and haproxy will forward requests.
@@ -418,16 +417,16 @@ resource_registry:
   OS::TripleO::ControllerExtraConfigPre: enable_ext_puppet_syntax.yaml
 EOF
 fi
-if [[ "$DPDK" == 'yes' && "$OPENSTACK_VERSION" == 'newton' ]] ; then
-  if ! grep -q 'resource_registry:' $misc_opts ;  then
-  cat <<EOF >> $misc_opts
-resource_registry:
-EOF
-  fi
-  cat <<EOF >> $misc_opts
-  OS::TripleO::ContrailDpdk::Net::SoftwareConfig: tripleo-heat-templates/environments/contrail/contrail-nic-config-compute-single.yaml
-EOF
-fi
+# if [[ "$DPDK" == 'yes' && "$OPENSTACK_VERSION" == 'newton' ]] ; then
+#   if ! grep -q 'resource_registry:' $misc_opts ;  then
+#   cat <<EOF >> $misc_opts
+# resource_registry:
+# EOF
+#   fi
+#   cat <<EOF >> $misc_opts
+#   OS::TripleO::ContrailDpdk::Net::SoftwareConfig: tripleo-heat-templates/environments/contrail/contrail-nic-config-compute-single.yaml
+# EOF
+# fi
 cat <<EOF >> $misc_opts
 parameter_defaults:
   CloudDomain: $CLOUD_DOMAIN_NAME
@@ -453,6 +452,12 @@ if [[ "$DPDK" == 'yes' ]] ; then
 EOF
 fi
 
+multi_nic_opts=''
+if [[ "$use_multi_nic" == 'yes' ]] ; then
+  multi_nic_opts+=' -e tripleo-heat-templates/environments/network-management.yaml'
+  multi_nic_opts+=' -e tripleo-heat-templates/environments/contrail/network-isolation.yaml'
+fi
+
 ha_opts=""
 if (( CONT_COUNT > 1 )) ; then
   ha_opts="-e tripleo-heat-templates/environments/puppet-pacemaker.yaml"
@@ -467,7 +472,7 @@ if [[ "$DEPLOY" != '1' ]] ; then
       -e $contrail_net_file \
       -e $contrail_vip_env \
       -e $misc_opts \
-      $ha_opts"
+      $multi_nic_opts $ha_opts"
   echo "Add '-e templates/firstboot/firstboot.yaml' if you use swap"
   exit
 fi
@@ -482,7 +487,7 @@ openstack overcloud deploy --templates tripleo-heat-templates/ \
   -e $contrail_net_file \
   -e $contrail_vip_env \
   -e $misc_opts \
-  $ha_opts
+  $multi_nic_opts $ha_opts
 
 errors=$?
 
