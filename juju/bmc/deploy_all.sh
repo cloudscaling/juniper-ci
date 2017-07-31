@@ -39,15 +39,6 @@ export USE_DPDK="${USE_DPDK:-false}"
 
 export PASSWORD=${PASSWORD:-'password'}
 
-if [[ "$SERIES" != "xenial" ]] ; then
-  echo "ERROR: only xenial series is supported."
-  exit 1
-fi
-if [[ "$VERSION" != "newton" ]] ; then
-  echo "ERROR: only newton version is supported."
-  exit 1
-fi
-
 # check if environment is present
 if $virsh_cmd list --all | grep -q "juju-cont" ; then
   echo 'ERROR: environment present. please clean up first'

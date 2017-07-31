@@ -3,12 +3,12 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
-# base image for VMs is a xenial ubuntu cloud image with:
-# 1) removed cloud-init
+# base image for VMs is a ubuntu cloud image with:
+# 1) removed cloud-init (echo 'datasource_list: [ None ]' | sudo -s tee /etc/cloud/cloud.cfg.d/90_dpkg.cfg ; sudo apt-get purge cloud-init ; sudo rm -rf /etc/cloud/; sudo rm -rf /var/lib/cloud/ )
 # 2) added jenkins's key to authorized keys for ubuntu user
 # 3) added password '123' for user ubuntu
-# 4) root disk resized to 60G ( truncate -s 60G temp.raw ; virt-resize virt-resize --expand /dev/vda1 ubuntu-xenial.qcow2 temp.raw ; qemu-img convert -O qcow2 temp.raw ubuntu-xenial-new.qcow2 )
-BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-'ubuntu-xenial.qcow2'}
+# 4) root disk resized to 60G ( truncate -s 60G temp.raw ; virt-resize --expand /dev/vda1 ubuntu-xenial.qcow2 temp.raw ; qemu-img convert -O qcow2 temp.raw ubuntu-xenial-new.qcow2 )
+BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-"ubuntu-$SERIES.qcow2"}
 BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
 BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
 
@@ -54,6 +54,12 @@ function run_machine() {
     params="$params --network network=$nname-vm,model=$net_driver,mac=52:54:00:11:00:$mac_suffix"
   fi
 
+  if [[ $SERIES == 'xenial' ]] ; then
+    local osv='ubuntu16.04'
+  else
+    local osv='ubuntu14.04'
+  fi
+
   echo "INFO: running  machine $name $(date)"
   cp $BASE_IMAGE $pool_path/$name.qcow2
   virt-install --name $name \
@@ -61,7 +67,7 @@ function run_machine() {
     --vcpus $cpu \
     --virt-type kvm \
     --os-type=linux \
-    --os-variant ubuntu16.04 \
+    --os-variant $osv \
     --disk path=$pool_path/$name.qcow2,cache=writeback,bus=virtio,serial=$(uuidgen) \
     --noautoconsole \
     --graphics vnc,listen=0.0.0.0 \
@@ -120,8 +126,11 @@ function run_compute() {
   juju add-machine ssh:ubuntu@$ip
   echo "INFO: preparing compute $index $(date)"
   kernel_version=`juju ssh ubuntu@$ip uname -r 2>/dev/null | tr -d '\r'`
+  if [[ "$SERIES" == 'trusty' ]]; then
+    juju ssh ubuntu@$ip "sudo add-apt-repository -y cloud-archive:mitaka ; sudo apt-get update" &>>$log_dir/apt.log
+  fi
   juju ssh ubuntu@$ip "sudo apt-get -fy install linux-image-extra-$kernel_version dpdk mc wget apparmor-profiles" &>>$log_dir/apt.log
-  juju scp "$my_dir/50-cloud-init-compute.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
+  juju scp "$my_dir/50-cloud-init-compute-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
   juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
   juju ssh ubuntu@$ip "sudo ifup ens4" 2>/dev/null
   juju ssh ubuntu@$ip "echo 'supersede routers 10.0.0.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
@@ -141,10 +150,13 @@ function run_controller() {
   wait_kvm_machine $ip
   juju add-machine ssh:ubuntu@$ip
   echo "INFO: preparing controller $index $(date)"
+  if [[ "$SERIES" == 'trusty' ]]; then
+    juju ssh ubuntu@$ip "sudo add-apt-repository -y cloud-archive:mitaka ; sudo apt-get update ; sudo apt-get -fy install lxd" &>>$log_dir/apt.log
+  fi
   juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget bridge-utils" &>>$log_dir/apt.log
   juju ssh ubuntu@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge" 2>/dev/null
   juju ssh ubuntu@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-ens3\"/m' /etc/default/lxd-bridge" 2>/dev/null
-  juju scp "$my_dir/50-cloud-init-controller.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
+  juju scp "$my_dir/50-cloud-init-controller-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
   juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
   juju ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $ip
