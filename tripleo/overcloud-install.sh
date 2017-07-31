@@ -447,6 +447,11 @@ if [[ "$OPENSTACK_VERSION" != 'newton' ]] ; then
 EOF
 fi
 
+if [[ "$DPDK" == 'yes' ]] ; then
+  cat <<EOF >> $misc_opts
+  ContrailDpdkCoremask: '1,2'
+EOF
+fi
 
 ha_opts=""
 if (( CONT_COUNT > 1 )) ; then
