@@ -132,6 +132,9 @@ function run_compute() {
   juju ssh ubuntu@$ip "sudo apt-get -fy install linux-image-extra-$kernel_version dpdk mc wget apparmor-profiles" &>>$log_dir/apt.log
   juju scp "$my_dir/50-cloud-init-compute-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
   juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
+  if [[ "$SERIES" == 'trusty' ]]; then
+    juju ssh ubuntu@$ip "sudo rm /etc/network/interfaces.d/eth0.cfg" 2>/dev/null
+  fi
   juju ssh ubuntu@$ip "sudo ifup $IF2" 2>/dev/null
   juju ssh ubuntu@$ip "echo 'supersede routers 10.0.0.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
   juju ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
@@ -158,6 +161,9 @@ function run_controller() {
   juju ssh ubuntu@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-$IF1\"/m' /etc/default/lxd-bridge" 2>/dev/null
   juju scp "$my_dir/50-cloud-init-controller-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
   juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
+  if [[ "$SERIES" == 'trusty' ]]; then
+    juju ssh ubuntu@$ip "sudo rm /etc/network/interfaces.d/eth0.cfg" 2>/dev/null
+  fi
   juju ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $ip
 }
