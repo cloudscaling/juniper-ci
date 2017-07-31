@@ -126,6 +126,9 @@ function run_compute() {
   juju add-machine ssh:ubuntu@$ip
   echo "INFO: preparing compute $index $(date)"
   kernel_version=`juju ssh ubuntu@$ip uname -r 2>/dev/null | tr -d '\r'`
+  if [[ "$SERIES" == 'trusty' ]]; then
+    juju ssh ubuntu@$ip "sudo add-apt-repository -y cloud-archive:mitaka ; sudo apt-get update" &>>$log_dir/apt.log
+  fi
   juju ssh ubuntu@$ip "sudo apt-get -fy install linux-image-extra-$kernel_version dpdk mc wget apparmor-profiles" &>>$log_dir/apt.log
   juju scp "$my_dir/50-cloud-init-compute-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
   juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
@@ -147,6 +150,9 @@ function run_controller() {
   wait_kvm_machine $ip
   juju add-machine ssh:ubuntu@$ip
   echo "INFO: preparing controller $index $(date)"
+  if [[ "$SERIES" == 'trusty' ]]; then
+    juju ssh ubuntu@$ip "sudo add-apt-repository -y cloud-archive:mitaka ; sudo apt-get update ; sudo apt-get -fy install lxd" &>>$log_dir/apt.log
+  fi
   juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget bridge-utils" &>>$log_dir/apt.log
   juju ssh ubuntu@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge" 2>/dev/null
   juju ssh ubuntu@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-ens3\"/m' /etc/default/lxd-bridge" 2>/dev/null
