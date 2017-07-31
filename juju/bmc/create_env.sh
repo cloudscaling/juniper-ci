@@ -72,7 +72,7 @@ function run_machine() {
     --disk path=$pool_path/$name.qcow2,cache=writeback,bus=virtio,serial=$(uuidgen) \
     --noautoconsole \
     --graphics vnc,listen=0.0.0.0 \
-    --network network=$nname,model=$net_driver,mac=52:54:00:10:00:$mac_suffix \
+    --network network=$nname,model=$net_driver,mac=$mac_base:$mac_suffix \
     --cpu SandyBridge,+vmx,+ssse3 \
     --boot hd \
     $params
@@ -113,18 +113,20 @@ echo "INFO: bootstraping juju controller $(date)"
 juju bootstrap manual/$cont_ip test-cloud
 wait_cmd="juju ssh"
 
-declare -A machines
-
 function run_compute() {
   local index=$1
-  local mac_var_name="juju_os_comp_${1}_mac"
+  local mac_var_name="juju_os_comp_${index}_mac"
   local mac=${!mac_var_name}
   echo "INFO: creating compute $index (mac $mac) $(date)"
   run_machine juju-os-comp-$index 2 4096 $mac
   local ip=`get_kvm_machine_ip $mac`
-  machines["comp-$index"]=$ip
   wait_kvm_machine $ip
   juju add-machine ssh:ubuntu@$ip
+
+  juju ssh ubuntu@$ip "sudo bash -c 'echo comp-$index > /etc/hostname'" 2>/dev/null
+  juju ssh ubuntu@$ip "sudo hostname comp-$index" 2>/dev/null
+  virsh net-update juju add ip-dhcp-host "<host mac='$mac_base:$mac' name='comp-$index' ip='$ip' />"
+
   echo "INFO: preparing compute $index $(date)"
   kernel_version=`juju ssh ubuntu@$ip uname -r 2>/dev/null | tr -d '\r'`
   if [[ "$SERIES" == 'trusty' ]]; then
@@ -147,16 +149,20 @@ function run_controller() {
   local index=$1
   local mem=$2
   local prepare_for_openstack=$3
-  local mac_var_name="juju_os_cont_${1}_mac"
+  local mac_var_name="juju_os_cont_${index}_mac"
   local mac=${!mac_var_name}
   echo "INFO: creating controller $index (mac $mac) $(date)"
   run_machine juju-os-cont-$index 4 $mem $mac
   local ip=`get_kvm_machine_ip $mac`
-  machines["cont-$index"]=$ip
   wait_kvm_machine $ip
   local output=`juju add-machine ssh:ubuntu@$ip 2>&1`
   echo "$output"
   mch=`echo "$output" | tail -1 | awk '{print $3}'`
+
+  juju ssh ubuntu@$ip "sudo bash -c 'echo cont-$index > /etc/hostname'" 2>/dev/null
+  juju ssh ubuntu@$ip "sudo hostname cont-$index" 2>/dev/null
+  virsh net-update juju add ip-dhcp-host "<host mac='$mac_base:$mac' name='cont-$index' ip='$ip' />"
+
   echo "INFO: preparing controller $index $(date)"
   juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget bridge-utils" &>>$log_dir/apt.log
   if [[ "$prepare_for_openstack" == '1' ]]; then
@@ -174,6 +180,7 @@ function run_controller() {
   fi
   juju ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $ip
+
   if [[ "$prepare_for_openstack" == '1' && "$SERIES" == 'trusty' ]]; then
     # NOTE: run juju processes to install/configure lxd and then reconfigure it again
     local lxd_mch=`juju add-machine lxd:$mch 2>&1 | tail -1 | awk '{print $3}'`
@@ -208,22 +215,6 @@ case "$DEPLOY_MODE" in
     exit 1
     ;;
 esac
-
-echo "INFO: creating hosts file $(date)"
-truncate -s 0 $WORKSPACE/hosts
-for m in ${!machines[@]} ; do
-  echo "${machines[$m]}    $m" >> $WORKSPACE/hosts
-done
-cat $WORKSPACE/hosts
-echo "INFO: Applying hosts file and hostnames $(date)"
-for m in ${!machines[@]} ; do
-  ip=${machines[$m]}
-  juju scp $WORKSPACE/hosts ubuntu@$ip:hosts
-  juju ssh ubuntu@$ip 'sudo bash -c "cat ./hosts >> /etc/hosts"' 2>/dev/null
-  juju ssh ubuntu@$ip "sudo bash -c 'echo $m > /etc/hostname'" 2>/dev/null
-  juju ssh ubuntu@$ip "sudo hostname $m" 2>/dev/null
-done
-rm $WORKSPACE/hosts
 
 echo "INFO: Environment created $(date)"
 
