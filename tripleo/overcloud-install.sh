@@ -449,7 +449,7 @@ fi
 
 if [[ "$DPDK" == 'yes' ]] ; then
   cat <<EOF >> $misc_opts
-  ContrailDpdkCoremask: '1,2'
+  ContrailDpdkCoremask: '1'
 EOF
 fi
 
