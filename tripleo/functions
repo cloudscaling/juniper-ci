@@ -9,6 +9,9 @@ function get_network_name() {
     provisioning)
       echo "rd-prov-$NUM"
       ;;
+    dpdk)
+      echo "rd-dpdk-$NUM"
+      ;;
     external)
       echo "rd-ext-$NUM"
       ;;
@@ -25,6 +28,9 @@ function get_network_ip() {
       ;;
     provisioning)
       ((addr=176+NUM*10))
+      ;;
+    dpdk)
+      ((addr=178+NUM*10))
       ;;
     external)
       ((addr=175+NUM*10))
@@ -45,6 +51,9 @@ function build_network_xml() {
       echo "<network><name>$nname</name><bridge name=\"$nname\" /><forward mode=\"nat\"/><ip address=\"$addr.1\" netmask=\"255.255.255.0\"/></network>" > $fname
       ;;
     provisioning)
+      echo "<network><name>$nname</name><bridge name=\"$nname\" /><ip address=\"$addr.1\" netmask=\"255.255.255.0\"/></network>" > $fname
+      ;;
+    dpdk)
       echo "<network><name>$nname</name><bridge name=\"$nname\" /><ip address=\"$addr.1\" netmask=\"255.255.255.0\"/></network>" > $fname
       ;;
     external)

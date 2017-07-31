@@ -103,7 +103,7 @@ function create_store_volume() {
   qemu-img create -f qcow2 -o preallocation=metadata $pool_path/$name-store.qcow2 100G
 }
 
-function define-machine() {
+function define_machine() {
   local name="$1"
   shift
   local disk_opt="$@"
@@ -136,7 +136,7 @@ function define_overcloud_vms() {
         create_store_volume $vol_name
         disk_opts+=" --disk path=${pool_path}/${vol_name}-store.qcow2,device=disk,bus=virtio,format=qcow2"
       fi
-      define-machine "rd-$vol_name" "$disk_opts"
+      define_machine "rd-$vol_name" "$disk_opts"
     done
   else
     echo Skip VM $name creation, count=$count
