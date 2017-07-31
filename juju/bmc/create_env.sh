@@ -134,6 +134,7 @@ function run_compute() {
   juju scp "$my_dir/50-cloud-init-compute-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
   juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
   if [[ "$SERIES" == 'trusty' ]]; then
+    # '50-cloud-init.cfg' is default name for xenial and it is overwritten
     juju ssh ubuntu@$ip "sudo rm /etc/network/interfaces.d/eth0.cfg" 2>/dev/null
   fi
   juju ssh ubuntu@$ip "sudo ifup $IF2" 2>/dev/null
@@ -168,6 +169,7 @@ function run_controller() {
   juju scp "$my_dir/50-cloud-init-controller-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
   juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
   if [[ "$SERIES" == 'trusty' ]]; then
+    # '50-cloud-init.cfg' is default name for xenial and it is overwritten
     juju ssh ubuntu@$ip "sudo rm /etc/network/interfaces.d/eth0.cfg" 2>/dev/null
   fi
   juju ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
@@ -179,6 +181,8 @@ function run_controller() {
     juju remove-machine $lxd_mch
     juju ssh ubuntu@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge" 2>/dev/null
     juju ssh ubuntu@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-$IF1\"/m' /etc/default/lxd-bridge" 2>/dev/null
+    juju ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
+    wait_kvm_machine $ip
   fi
 }
 
