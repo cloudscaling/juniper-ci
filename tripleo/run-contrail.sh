@@ -75,7 +75,7 @@ fi
 # /opt/jenkins/tripleo_contrail_deploy_all.sh is available for modifying only for root,
 # this script should point to correct deploy_all.sh.
 # It should be set manually once during jenkins slave preparation.
-sudo -E /opt/jenkins/tripleo_contrail_deploy_all.sh
+sudo -E /opt/jenkins/tripleo_contrail_deploy_all.sh "check-contrail-proxy.sh"
 
 trap - ERR
 

@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ -z "$OPENSTACK_VERSION" ]] ; then
+  echo "OPENSTACK_VERSION is expected (e.g. export OPENSTACK_VERSION=newton)"
+  exit 1
+fi
+
 DEBUG=${DEBUG:-0}
 
 if (( DEBUG == 1 )) ; then
@@ -166,8 +171,16 @@ function create_network() {
   openstack --insecure router add subnet $router_id $private_subnet_id
 
   echo "INFO: Add rules to default security group"
-  local project_id=`openstack --insecure project list | awk '/ admin /{print $2}'`
-  local group_id=`openstack --insecure security group list -c ID -c Project | grep $project_id | awk '{print $2}'`
+  local group_id=''
+  case $OPENSTACK_VERSION in
+    liberty|mitaka|newton)
+      local project_id=`openstack --insecure project list | awk '/ admin /{print $2}'`
+      group_id=`openstack --insecure security group list -c ID -c Project | grep $project_id | awk '{print $2}'`
+      ;;
+    *)
+      group_id=`openstack --insecure security group list | grep 'default' | awk '{print $2}'`
+      ;;
+  esac
   openstack --insecure security group rule create $group_id --protocol tcp --dst-port 22:22
   openstack --insecure security group rule create $group_id --protocol icmp
 
