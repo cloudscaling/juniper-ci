@@ -10,6 +10,7 @@ addr="10.0.0"
 nname_vm="juju-vm"
 addr_vm="10.5.0"
 
+mac_base='52:54:00:10:00'
 # juju controller
 juju_cont_mac='01'
 # openstack compute
@@ -25,7 +26,7 @@ juju_os_cont_3_mac='07'
 function get_kvm_machine_ip() {
   local mac_suffix="$1"
   for i in {1..10} ; do
-    if python -c "import libvirt; conn = libvirt.open('$LIBVIRT_DEFAULT_URI'); ip = [lease['ipaddr'] for lease in conn.networkLookupByName('$nname').DHCPLeases() if lease['mac'] == '52:54:00:10:00:$mac_suffix'][0]; print ip" 2>/dev/null ; then
+    if python -c "import libvirt; conn = libvirt.open('$LIBVIRT_DEFAULT_URI'); ip = [lease['ipaddr'] for lease in conn.networkLookupByName('$nname').DHCPLeases() if lease['mac'] == '$mac_base:$mac_suffix'][0]; print ip" 2>/dev/null ; then
       break
     fi
     sleep 10
