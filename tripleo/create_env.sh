@@ -391,7 +391,8 @@ function _rhel_register_system() {
   . $RHEL_ACCOUNT_FILE
   cat <<EOF | $ssh_cmd root@${addr}
 subscription-manager unregister || true
-subscription-manager register --auto-attach --release=7Server --username=$RHEL_USER --password=$RHEL_PASSWORD
+release=`grep -o '[0-9]\+\.[0-9]\+' /etc/redhat-release`
+subscription-manager register --auto-attach --release=\$release --username=$RHEL_USER --password=$RHEL_PASSWORD
 subscription-manager repos $enable_repos_opts
 yum update -y
 EOF
