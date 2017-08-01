@@ -1,29 +1,31 @@
 #!/bin/bash -x
 
-if [[ -z "$RHEL_USER" || -z "$RHEL_PASSWORD" ]] ; then
-  echo "ERROR: provide RHEL_USER and RHEL_PASSWORD env variables to subscribe image"
-  exit -1
-fi
+# if [[ -z "$RHEL_USER" || -z "$RHEL_PASSWORD" ]] ; then
+#   echo "ERROR: provide RHEL_USER and RHEL_PASSWORD env variables to subscribe image"
+#   exit -1
+# fi
 
 image=$1
-openstack=$2
-if [[ -z "$image" ]] ; then
-  echo "ERROR: the first argument is expected to be the path to image"
-  exit -1
-fi
+# openstack=$2
+# if [[ -z "$image" ]] ; then
+#   echo "ERROR: the first argument is expected to be the path to image"
+#   exit -1
+# fi
 
-if [[ -z "$openstack" ]] ; then
-  echo "ERROR: the second argument is expected to be the openstack version newton/ocata"
-  exit -1
-fi
+# if [[ -z "$openstack" ]] ; then
+#   echo "ERROR: the second argument is expected to be the openstack version newton/ocata"
+#   exit -1
+# fi
 
 if [[ ! -f $image ]] ; then
   echo "ERROR: failed to find $image"
   exit -1
 fi
 
-dst_image=${3:-${image}}
-dst_image_size=${4:-'100G'}
+# dst_image=${3:-${image}}
+# dst_image_size=${4:-'100G'}
+dst_image=${2:-${image}}
+dst_image_size=${3:-'100G'}
 
 export LIBGUESTFS_BACKEND=direct
 if [[ "$image" != "$dst_image" ]] ; then
