@@ -393,7 +393,7 @@ function _rhel_register_system() {
 subscription-manager unregister || true
 subscription-manager register --auto-attach --username=$RHEL_USER --password=$RHEL_PASSWORD
 subscription-manager repos $enable_repos_opts
-yum udate -y
+yum update -y
 EOF
   eval "$oldflags"
 }

@@ -30,16 +30,18 @@ function save_overcloud_logs() {
 
 function unregister_rhel_system() {
   if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-    cat <<EOF > ssh $ssh_opts $ssh_addr
+    cat <<EOF | ssh -T $ssh_opts $ssh_addr
 subscription-manager unregister || true
 su - stack
-. stackrc
-while openstack stack list | grep -q overcloud ; do
-  if openstack stack list | grep overcloud | grep -i delete | grep -iq progress ; then
-    openstack stack delete --yes overcloud
-  fi
-  sleep 5
-done
+if [[ -f stackrc ]] ; then
+  . stackrc
+  while openstack stack list | grep -q overcloud ; do
+    if openstack stack list | grep overcloud | grep -i delete | grep -iq progress ; then
+      openstack stack delete --yes overcloud
+    fi
+    sleep 5
+  done
+fi
 EOF
   fi
 }
