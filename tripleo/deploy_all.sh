@@ -30,7 +30,7 @@ function save_overcloud_logs() {
 
 function unregister_rhel_system() {
   if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-    cat <<EOF > ssh -T $ssh_opts $ssh_addr
+    cat <<EOF > ssh $ssh_opts $ssh_addr
 subscription-manager unregister || true
 su - stack
 . stackrc
