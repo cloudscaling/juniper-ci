@@ -21,6 +21,18 @@ if [[ -z "$DPDK" ]] ; then
   exit 1
 fi
 
+if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+  if [[ -z "$RHEL_ACCOUNT_FILE" ]] ; then
+    echo "ERROR: for rhel environemnt the environment variable RHEL_ACCOUNT_FILE is required"
+    exit 1
+  fi
+else
+  if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+    echo "ERROR: RHEL_CERT_TEST is supported only for RHEL environment"
+    exit 1
+  fi
+fi
+
 if [[ "$DPDK" != 'yes' ]] ; then
 compute_machine_name='comp'
 else
@@ -225,10 +237,16 @@ function _change_image() {
     cp $CONTRAIL_PACKAGES_DIR/*.tgz $tmpdir/root/contrail_packages/
     cp $CONTRAIL_PACKAGES_DIR/*${OPENSTACK_VERSION}*.rpm $tmpdir/root/contrail_packages/
   fi
+
+  # cp rhel account file
+  if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+    local rhel_account_file_dir=$(dirname "$RHEL_ACCOUNT_FILE")
+    mkdir -p $tmpdir/$rhel_account_file_dir
+    cp $RHEL_ACCOUNT_FILE $tmpdir/$rhel_account_file_dir/
+  fi
 }
 
 function _patch_image() {
-
   local image=$1
   local mgmt_templ=$2
   local mgmt_network=$3
@@ -325,10 +343,55 @@ function _wait_machine() {
   done
 }
 
+function _rhel_register_system() {
+  local addr=$1
+  local common_repos="rhel-7-server-rpms rhel-7-server-extras-rpms rhel-7-server-rh-common-rpms rhel-ha-for-rhel-7-server-rpms"
+  if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+    common_repos+=" rhel-7-server-cert-rpms"
+  fi
+  local enable_repo=''
+  case "$OPENSTACK_VERSION" in
+    newton)
+      enable_repo='10'
+      ;;
+    ocata)
+      enable_repo='11'
+      ;;
+    pike)
+      enable_repo='12'
+      ;;
+    *)
+      echo "ERROR: unsupported OS $OPENSTACK_VERSION"
+      exit 1
+  esac
+  common_repos+=" rhel-7-server-openstack-${enable_repo}-rpms"
+  common_repos+=" rhel-7-server-openstack-${enable_repo}-devtools-rpms"
+  local enable_repos_opts=''
+  for i in $common_repos ; do
+    enable_repos_opts+=" --enable=${i}"
+  done
+  local oldflags="$(shopt -po xtrace)"
+  set +x
+  . $RHEL_ACCOUNT_FILE
+  ssh_cmd="ssh -T -i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${addr}"
+  cat <<EOF > $ssh_cmd
+subscription-manager unregister || true
+subscription-manager register --auto-attach --username=$RHEL_USER --password=$RHEL_PASSWORD
+subscription-manager repos $enable_repos_opts
+yum udate -y
+EOF
+  eval "$oldflags"
+}
+
+# wait udnercloud and register it in redhat if rhel env
 _wait_machine "${mgmt_ip}.2"
+if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+  _rhel_register_system "${mgmt_ip}.2"
+fi
 
 if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
   _wait_machine "${mgmt_ip}.3"
+  _rhel_register_system "${mgmt_ip}.3"
 
   ssh_cmd="ssh -i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${mgmt_ip}.3"
   $ssh_cmd "yum install -y redhat-certification && systemctl start httpd && rhcertd start"

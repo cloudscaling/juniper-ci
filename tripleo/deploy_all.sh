@@ -24,7 +24,23 @@ trap 'catch_errors $LINENO' ERR
 oc=0
 function save_overcloud_logs() {
   if [[ $oc == 1 ]] ; then
-    ssh -t $ssh_opts $ssh_addr "sudo -u stack /home/stack/save_logs.sh"
+    ssh -T $ssh_opts $ssh_addr "sudo -u stack /home/stack/save_logs.sh"
+  fi
+}
+
+function unregister_rhel_system() {
+  if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+    cat <<EOF > ssh -T $ssh_opts $ssh_addr
+subscription-manager unregister || true
+su - stack
+. stackrc
+while openstack stack list | grep -q overcloud ; do
+  if openstack stack list | grep overcloud | grep -i delete | grep -iq progress ; then
+    openstack stack delete --yes overcloud
+  fi
+  sleep 5
+done
+EOF
   fi
 }
 
@@ -35,11 +51,23 @@ function catch_errors() {
 
   # sleep some time to flush logs
   sleep 20
+
   save_overcloud_logs
+  unregister_rhel_system
 
   exit $exit_code
 }
 
+ssh_env="NUM=$NUM DEPLOY=1 NETWORK_ISOLATION=$NETWORK_ISOLATION ENVIRONMENT_OS=$ENVIRONMENT_OS"
+ssh_env+=" OPENSTACK_VERSION=$OPENSTACK_VERSION RHEL_CERT_TEST=$RHEL_CERT_TEST DPDK=$DPDK"
+if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+  if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+    export RHEL_ACCOUNT_FILE=${RHEL_ACCOUNT_FILE:-'/home/root/rhel/rhel-account-cert'}
+  else
+    export RHEL_ACCOUNT_FILE=${RHEL_ACCOUNT_FILE:-'/home/root/rhel/rhel-account'}
+  fi
+  ssh_env+=" RHEL_ACCOUNT_FILE=$RHEL_ACCOUNT_FILE"
+fi
 
 echo "INFO: creating environment $(date)"
 "$my_dir"/create_env.sh
@@ -51,7 +79,7 @@ echo "INFO: installing undercloud $(date)"
 
 echo "INFO: installing overcloud $(date)"
 oc=1
-ssh -t $ssh_opts $ssh_addr "sudo -u stack NUM=$NUM DEPLOY=1 NETWORK_ISOLATION=$NETWORK_ISOLATION OPENSTACK_VERSION=$OPENSTACK_VERSION RHEL_CERT_TEST=$RHEL_CERT_TEST DPDK=$DPDK /home/stack/overcloud-install.sh"
+ssh -T $ssh_opts $ssh_addr "sudo -u stack $ssh_env /home/stack/overcloud-install.sh"
 
 echo "INFO: checking overcloud $(date)"
 if [[ -n "$check_script" ]] ; then
@@ -60,6 +88,7 @@ else
   echo "WARNING: Deployment will not be checked!"
 fi
 
-
 trap - ERR
+
 save_overcloud_logs
+unregister_rhel_system

@@ -21,7 +21,6 @@ function set_x() {
 MAX_FAIL=${MAX_FAIL:-30}
 USE_VENV=${USE_VENV:-'true'}
 SSH_CMD=${SSH_CMD:-'ssh'}
-PKT_MANAGER=${PKT_MANAGER:-'yum'}
 
 OVERCLOUDRC_FILE=${OVERCLOUDRC_FILE:-"${WORKSPACE}/overcloudrc"}
 UNDERCLOUDRC_FILE=${UNDERCLOUDRC_FILE:-"${WORKSPACE}/stackrc"}
@@ -345,10 +344,7 @@ function _check_instance_ssh_and_metadata() {
   local ip=$2
   local fip=$3
   local ssh_opts='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5'
-  if [[ "$SSH_CMD" != 'juju-ssh' ]] ; then
-    $SSH_CMD $mch sudo $PKT_MANAGER -y install epel-release &>/dev/null
-  fi
-  $SSH_CMD $mch sudo $PKT_MANAGER -y install sshpass &>/dev/null
+
   echo "INFO: Trying to ssh into instance with ip $ip and run ifconfig"
   if ! $SSH_CMD $mch sshpass -p 'cubswin:\)' ssh $ssh_opts cirros@$ip /sbin/ifconfig 2>/dev/null ; then
     echo "ERROR: Can't ssh into instance by ip $ip"

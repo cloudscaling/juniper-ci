@@ -66,6 +66,24 @@ KVM Host (it is usually a jenkins slave)
 
 Images
 ======
+
+For RHEL environemnt create files with appropriate rhel accounts.
+Account for regular testing
+```
+cat <<EOF >/home/root/rhel/rhel-account
+export RHEL_USER=user
+export RHEL_PASSWORD=password
+EOF
+```
+
+Account for rhel certification with certification rights
+```
+cat <<EOF > /home/root/rhel/rhel-account-cert
+export RHEL_USER=user-cert
+export RHEL_PASSWORD=password-cert
+EOF
+```
+
 Undercloud images:
 For RHEL undercloud image must be changed before usage, RHEL subscription is requried.
 ```

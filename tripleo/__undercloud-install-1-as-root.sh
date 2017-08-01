@@ -34,6 +34,7 @@ systemctl restart network
 
 # update OS
 yum update -y
+yum install -y epel-release
 
 # install ntpd - it is needed for correct work of OS services
 # (particulary neutron services may not work properly)
@@ -70,7 +71,7 @@ chown stack:stack /home/stack/.ssh/config
 chmod 644 /home/stack/.ssh/config
 
 # install useful utils
-yum install -y yum-utils screen mc deltarpm createrepo bind-utils
+yum install -y yum-utils screen mc deltarpm createrepo bind-utils sshpass
 # add OpenStack repositories for centos, for rhel it is added in images
 if [[ "$ENVIRONMENT_OS" != 'rhel' ]] ; then
   curl -L -o /etc/yum.repos.d/delorean-$OPENSTACK_VERSION.repo https://trunk.rdoproject.org/centos7-$OPENSTACK_VERSION/current/delorean.repo
