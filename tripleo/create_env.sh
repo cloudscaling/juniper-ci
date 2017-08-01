@@ -388,12 +388,12 @@ function _rhel_register_system() {
   done
   local oldflags="$(shopt -po xtrace)"
   set +x
-  . $RHEL_ACCOUNT_FILE
   cat <<EOF | $ssh_cmd root@${addr}
+. $RHEL_ACCOUNT_FILE
 subscription-manager unregister || true
 release=\$(grep -o '[0-9]\\+\\.[0-9]\\+' /etc/redhat-release)
 echo release=\$release
-subscription-manager register --auto-attach --release=\$release --username=$RHEL_USER --password=$RHEL_PASSWORD
+subscription-manager register --auto-attach --release=\$release --username=\$RHEL_USER --password=\$RHEL_PASSWORD
 subscription-manager repos $enable_repos_opts
 yum update -y
 EOF
