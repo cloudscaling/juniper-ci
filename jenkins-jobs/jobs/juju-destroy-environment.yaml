@@ -1,6 +1,6 @@
 - job:
-    name: juju-destroy-environment
-    description: "Destroys existing default Juju environment"
+    name: juju-destroy-environment-aws
+    description: "Destroys existing AWS Juju environment"
     defaults: global
     properties:
       - build-discarder:
@@ -9,3 +9,18 @@
       - shell: |
           #!/bin/bash -e
           juju destroy-controller -y --destroy-all-models amazon
+- job:
+    name: juju-destroy-environment-kvm
+    description: "Destroys existing KVM Juju environment"
+    defaults: global
+    properties:
+      - build-discarder:
+          num-to-keep: 3
+    node: slave1
+    concurrent: true
+    scm:
+      - juniper-ci
+    builders:
+      - shell: |
+          #!/bin/bash -e
+          ./juniper-ci/juju/bmc/clean_env.sh

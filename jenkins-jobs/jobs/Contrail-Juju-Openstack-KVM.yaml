@@ -1,5 +1,5 @@
 - job:
-    name: Contrail-Juju-OpenStack-BMC
+    name: Contrail-Juju-OpenStack-KVM
     description: 'Contrail+OpenStack on KVM by Juju'
     defaults: global
     node: slave1

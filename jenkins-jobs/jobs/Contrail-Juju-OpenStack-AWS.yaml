@@ -1,5 +1,5 @@
 - job:
-    name: Contrail-Juju-OpenStack-dev
+    name: Contrail-Juju-OpenStack-AWS
     description: "Deploys cluster(manual) with OpenStack/Contrail and checks it. Can be used for debug purposes."
     defaults: global
     parameters:
