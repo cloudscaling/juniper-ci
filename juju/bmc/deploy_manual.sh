@@ -96,7 +96,7 @@ juju-expose keystone
 
 juju-deploy cs:$SERIES/nova-compute --to $comp1
 juju-add-unit nova-compute --to $comp2
-juju-set nova-compute "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "virt-type=qemu" "enable-resize=True" "enable-live-migration=True" "migration-auth-type=ssh"
+juju-set nova-compute "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "virt-type=kvm" "enable-resize=True" "enable-live-migration=True" "migration-auth-type=ssh"
 
 # Neutron
 juju-deploy cs:$SERIES/neutron-api --to lxd:$cont0

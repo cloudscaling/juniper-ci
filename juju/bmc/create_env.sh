@@ -118,7 +118,7 @@ function run_compute() {
   local mac_var_name="juju_os_comp_${index}_mac"
   local mac=${!mac_var_name}
   echo "INFO: creating compute $index (mac $mac) $(date)"
-  run_machine juju-os-comp-$index 2 4096 $mac
+  run_machine juju-os-comp-$index 4 8192 $mac
   local ip=`get_kvm_machine_ip $mac`
   wait_kvm_machine $ip
   juju add-machine ssh:ubuntu@$ip

@@ -8,7 +8,7 @@ net_driver=${net_driver:-e1000}
 nname="juju"
 addr="10.0.0"
 nname_vm="juju-vm"
-addr_vm="10.5.0"
+addr_vm="10.0.1"
 
 mac_base='52:54:00:10:00'
 # juju controller
