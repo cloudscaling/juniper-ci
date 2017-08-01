@@ -373,7 +373,7 @@ function _rhel_register_system() {
   local oldflags="$(shopt -po xtrace)"
   set +x
   . $RHEL_ACCOUNT_FILE
-  ssh_cmd="ssh -T -i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${addr}"
+  ssh_cmd="ssh -t -i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${addr}"
   cat <<EOF > $ssh_cmd
 subscription-manager unregister || true
 subscription-manager register --auto-attach --username=$RHEL_USER --password=$RHEL_PASSWORD

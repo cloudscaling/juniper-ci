@@ -24,7 +24,7 @@ trap 'catch_errors $LINENO' ERR
 oc=0
 function save_overcloud_logs() {
   if [[ $oc == 1 ]] ; then
-    ssh -T $ssh_opts $ssh_addr "sudo -u stack /home/stack/save_logs.sh"
+    ssh -t $ssh_opts $ssh_addr "sudo -u stack /home/stack/save_logs.sh"
   fi
 }
 
@@ -79,7 +79,7 @@ echo "INFO: installing undercloud $(date)"
 
 echo "INFO: installing overcloud $(date)"
 oc=1
-ssh -T $ssh_opts $ssh_addr "sudo -u stack $ssh_env /home/stack/overcloud-install.sh"
+ssh -t $ssh_opts $ssh_addr "sudo -u stack $ssh_env /home/stack/overcloud-install.sh"
 
 echo "INFO: checking overcloud $(date)"
 if [[ -n "$check_script" ]] ; then
