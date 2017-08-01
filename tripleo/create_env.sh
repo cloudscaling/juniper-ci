@@ -326,13 +326,17 @@ if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
   _start_vm "rd-undercloud-$NUM-cert-test" "$pool_path/undercloud-$NUM-cert-test.qcow2" $mgmt_mac_cert $prov_mac_cert 4096
 fi
 
+
+ssh_opts="-i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+ssh_cmd="ssh -T $ssh_opts"
+
 # wait for undercloud machine
 function _wait_machine() {
   local addr=$1
   local max_iter=${2:-20}
   local iter=0
   truncate -s 0 ./tmp_file
-  while ! scp -i "$ssh_key_dir/kp-$NUM" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -B ./tmp_file root@${addr}:/tmp/tmp_file ; do
+  while ! scp $ssh_opts -B ./tmp_file root@${addr}:/tmp/tmp_file ; do
     if (( iter >= max_iter )) ; then
       echo "Could not connect to undercloud"
       exit 1
@@ -341,6 +345,18 @@ function _wait_machine() {
     sleep 30
     ((++iter))
   done
+}
+
+function _prepare_network() {
+  local addr=$1
+  cat <<EOF | $ssh_cmd root@${addr}
+echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
+sysctl -p /etc/sysctl.conf
+hostnamectl set-hostname myhost.my${NUM}domain
+hostnamectl set-hostname --transient myhost.my${NUM}domain
+echo "127.0.0.1   localhost myhost myhost.my${NUM}domain" > /etc/hosts
+systemctl restart network
+EOF
 }
 
 function _rhel_register_system() {
@@ -373,8 +389,7 @@ function _rhel_register_system() {
   local oldflags="$(shopt -po xtrace)"
   set +x
   . $RHEL_ACCOUNT_FILE
-  ssh_cmd="ssh -T -i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${addr}"
-  cat <<EOF | $ssh_cmd
+  cat <<EOF | $ssh_cmd root@${addr}
 subscription-manager unregister || true
 subscription-manager register --auto-attach --username=$RHEL_USER --password=$RHEL_PASSWORD
 subscription-manager repos $enable_repos_opts
@@ -385,17 +400,22 @@ EOF
 
 # wait udnercloud and register it in redhat if rhel env
 _wait_machine "${mgmt_ip}.2"
+_prepare_network "${mgmt_ip}.2"
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   _rhel_register_system "${mgmt_ip}.2"
 fi
 
 if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
   _wait_machine "${mgmt_ip}.3"
+  _prepare_network "${mgmt_ip}.3"
   _rhel_register_system "${mgmt_ip}.3"
 
-  ssh_cmd="ssh -i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${mgmt_ip}.3"
-  $ssh_cmd "yum install -y redhat-certification && systemctl start httpd && rhcertd start"
+  cat <<EOF | $ssh_cmd ${mgmt_ip}.3
+yum install -y redhat-certification
+systemctl start httpd
+rhcertd start
+sed -i "s/ALLOWED_HOSTS =.*/ALLOWED_HOSTS = ['${mgmt_ip}.3', '${prov_ip}.201', 'localhost.localdomain', 'localhost', '127.0.0.1']/" /var/www/rhcert/project/settings.py
+systemctl restart httpd
+EOF
 
-  $ssh_cmd "sed -i \"s/ALLOWED_HOSTS =.*/ALLOWED_HOSTS = ['${mgmt_ip}.3', '${prov_ip}.201', 'localhost.localdomain', 'localhost', '127.0.0.1']/\" /var/www/rhcert/project/settings.py"
-  $ssh_cmd systemctl restart httpd
 fi

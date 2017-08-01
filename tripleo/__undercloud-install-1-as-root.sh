@@ -23,15 +23,6 @@ fi
 NETDEV=${NETDEV:-'eth1'}
 CLOUD_DOMAIN_NAME=${CLOUD_DOMAIN_NAME:-'localdomain'}
 
-# allow ip forwarding
-echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
-sysctl -p /etc/sysctl.conf
-# set static hostname
-hostnamectl set-hostname myhost.my${NUM}domain
-hostnamectl set-hostname --transient myhost.my${NUM}domain
-echo "127.0.0.1   localhost myhost myhost.my${NUM}domain" > /etc/hosts
-systemctl restart network
-
 # update OS
 yum update -y
 yum install -y epel-release
