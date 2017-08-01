@@ -374,7 +374,7 @@ function _rhel_register_system() {
   set +x
   . $RHEL_ACCOUNT_FILE
   ssh_cmd="ssh -t -i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${addr}"
-  cat <<EOF > $ssh_cmd
+  cat <<EOF | $ssh_cmd
 subscription-manager unregister || true
 subscription-manager register --auto-attach --username=$RHEL_USER --password=$RHEL_PASSWORD
 subscription-manager repos $enable_repos_opts
