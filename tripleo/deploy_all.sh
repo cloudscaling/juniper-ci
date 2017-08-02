@@ -71,7 +71,10 @@ function catch_errors() {
   sleep 20
 
   save_overcloud_logs
-  unregister_rhel_system
+
+  if [[ $CLEAN_ENV == 'always' ]] ; then
+    unregister_rhel_system
+  fi
 
   exit $exit_code
 }
@@ -109,4 +112,7 @@ fi
 trap - ERR
 
 save_overcloud_logs
-unregister_rhel_system
+if [[ $CLEAN_ENV != 'never' && $CLEAN_ENV != 'before_only' ]] ; then
+  unregister_rhel_system
+fi
+
