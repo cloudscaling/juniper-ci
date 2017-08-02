@@ -510,10 +510,10 @@ if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   else
     sed -i "s/rhel_reg_user:.*/rhel_reg_user: ${RHEL_USER}/g" $reg_file
     sed -i "s/rhel_reg_password:.*/rhel_reg_password: ${RHEL_PASSWORD}/g" $reg_file
+    sed -i "s/rhel_reg_auto_attach:.*/rhel_reg_auto_attach: true/g" $reg_file
   fi
   set -x
   sed -i "s/rhel_reg_force:.*/rhel_reg_force: true/g" $reg_file
-  sed -i "s/rhel_reg_auto_attach:.*/rhel_reg_auto_attach: true/g" $reg_file
   sed -i "s/rhel_reg_method:.*/rhel_reg_method: portal/g" $reg_file
   sed -i "s/rhel_reg_repos:.*/rhel_reg_repos: $repos_list/g" $reg_file
 #  sed -i "s/rhel_reg_machine_name:.*/rhel_reg_machine_name: 'rhel-${NUM}-%{::hostname}'/g" $reg_file
