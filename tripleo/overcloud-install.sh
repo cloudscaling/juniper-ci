@@ -338,8 +338,14 @@ EOF
   to_add+='    - OS::TripleO::Services::ContrailDatabase\n    - OS::TripleO::Services::ContrailWebUI'
   sed -i "${pos_to_insert} a\\$to_add" $role_file
 fi
-if (( ANALYTICS_COUNT > 0 )) ; then
-  echo INFO: contrail analytics are installed on own nodes, prepare VIPs env file
+if (( ANALYTICS_COUNT > 0 || CONTRAIL_CONTROLLER_COUNT > 0 )) ; then
+  if (( ANALYTICS_COUNT > 0 )) ; then
+    echo INFO: contrail analytics is installed on own nodes, prepare VIPs env file
+  else
+    echo INFO: contrail analytics is installed on contrail controller nodes, prepare VIPs env file and put analytics service into ContralController role
+    pos_to_insert=`sed "=" $role_file | sed -n '/^- name: ContrailController$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
+    sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalytics" $role_file
+  fi
   contrail_analytics_vip='contrail_analytics_vip.yaml'
   cat <<EOF > $contrail_analytics_vip
 heat_template_version: 2016-10-14
@@ -376,7 +382,15 @@ EOF
   pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
   sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalytics" $role_file
 fi
-if (( ANALYTICSDB_COUNT == 0 )) ; then
+if (( ANALYTICSDB_COUNT > 0 || CONTRAIL_CONTROLLER_COUNT > 0 )) ; then
+  if (( ANALYTICSDB_COUNT > 0 )) ; then
+    echo INFO: contrail analyticsdb is installed on the own node
+  else
+    echo INFO: contrail analyticsdb is installed on contrail controller nodes, put analyticsdb service into ContralController role
+    pos_to_insert=`sed "=" $role_file | sed -n '/^- name: ContrailController$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
+    sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalyticsDatabase" $role_file
+  fi
+else
   echo INFO: add contrail analyticsdb services to OS Controller role
   enable_ext_puppet_syntax='true'
   pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
