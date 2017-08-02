@@ -504,14 +504,19 @@ if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   repos_list+=",rhel-7-server-openstack-${repo_number}-rpms,rhel-7-server-openstack-${repo_number}-devtools-rpms"
   set +x
   . $RHEL_ACCOUNT_FILE
-  sed -i "s/rhel_reg_user:.*/rhel_reg_user: ${RHEL_USER}/g" $reg_file
-  sed -i "s/rhel_reg_password:.*/rhel_reg_password: ${RHEL_PASSWORD}/g" $reg_file
+  if [[ -n "$RHEL_ACTIVATION_KEY"]] ; then
+    sed -i "s/rhel_reg_org:.*/rhel_reg_org: ${RHEL_ORG}/g" $reg_file
+    sed -i "s/rhel_reg_activation_key:.*/rhel_reg_activation_key: ${RHEL_ACTIVATION_KEY}/g" $reg_file
+  else
+    sed -i "s/rhel_reg_user:.*/rhel_reg_user: ${RHEL_USER}/g" $reg_file
+    sed -i "s/rhel_reg_password:.*/rhel_reg_password: ${RHEL_PASSWORD}/g" $reg_file
+  fi
   set -x
   sed -i "s/rhel_reg_force:.*/rhel_reg_force: true/g" $reg_file
   sed -i "s/rhel_reg_auto_attach:.*/rhel_reg_auto_attach: true/g" $reg_file
   sed -i "s/rhel_reg_method:.*/rhel_reg_method: portal/g" $reg_file
   sed -i "s/rhel_reg_repos:.*/rhel_reg_repos: $repos_list/g" $reg_file
-  sed -i "s/rhel_reg_machine_name:.*/rhel_reg_machine_name: 'rhel-${NUM}-%{::hostname}'/g" $reg_file
+#  sed -i "s/rhel_reg_machine_name:.*/rhel_reg_machine_name: 'rhel-${NUM}-%{::hostname}'/g" $reg_file
 fi
 
 if [[ "$DEPLOY" != '1' ]] ; then

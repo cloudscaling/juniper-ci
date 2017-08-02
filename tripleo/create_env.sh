@@ -396,7 +396,13 @@ subscription-manager unregister || true
 release=\$(grep -o '[0-9]\\+\\.[0-9]\\+' /etc/redhat-release)
 set +x
 . $RHEL_ACCOUNT_FILE
-subscription-manager register --auto-attach --release=\$release --username=\$RHEL_USER --password=\$RHEL_PASSWORD
+if [[ -n "\$RHEL_ACTIVATION_KEY"]] ; then
+  echo Use activation key for registration
+  subscription-manager register --release=\$release --activationkey=\$RHEL_ACTIVATION_KEY --org=\$RHEL_ORG
+else
+  echo Use user and password for registration
+  subscription-manager register --auto-attach --release=\$release --username=\$RHEL_USER --password=\$RHEL_PASSWORD
+fi
 set -x
 subscription-manager repos $enable_repos_opts
 yum update -y
