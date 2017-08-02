@@ -244,6 +244,7 @@ function _change_image() {
     mkdir -p $tmpdir/$rhel_account_file_dir
     cp $RHEL_ACCOUNT_FILE $tmpdir/$rhel_account_file_dir/
     chmod -R 644 $tmpdir/$rhel_account_file_dir
+    chmod +x $tmpdir/$rhel_account_file_dir
   fi
 }
 
