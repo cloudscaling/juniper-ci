@@ -286,6 +286,7 @@ fi
 sed -i "s/ControlVirtualInterface:.*/ControlVirtualInterface: ens3/g" $contrail_net_file
 sed -i "s/PublicVirtualInterface:.*/PublicVirtualInterface: ens3/g" $contrail_net_file
 sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_net_file
+sed -i 's/DnsServers:.*/DnsServers: ["8.8.8.8","8.8.4.4"]/g' $contrail_net_file
 
 # Create ports for Contrail Controller and/or Analytis if any is installed on own node.
 # In that case OS controller will host VIP and haproxy will forward requests.
