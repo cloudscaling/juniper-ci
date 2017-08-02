@@ -97,6 +97,8 @@ services:
     charm: "%JUJU_REPO%/contrail-controller"
     series: %SERIES%
     num_units: 1
+    options:
+      use-external-rabbitmq: "%USE_EXTERNAL_RABBITMQ%"
     expose: true
     to:
       - "5"

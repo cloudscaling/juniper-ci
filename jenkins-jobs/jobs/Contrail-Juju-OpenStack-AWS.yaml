@@ -43,6 +43,10 @@
           name: USE_ADDITIONAL_INTERFACE
           description: "Deploy Contrail with additional interfaces that is used for control-network"
           default: false
+      - bool:
+          name: USE_EXTERNAL_RABBITMQ
+          description: "Use external RabbitMQ"
+          default: false
     scm:
       - juniper-contrail-charms
       - juniper-ci
