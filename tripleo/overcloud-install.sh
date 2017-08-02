@@ -504,7 +504,7 @@ if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   repos_list+=",rhel-7-server-openstack-${repo_number}-rpms,rhel-7-server-openstack-${repo_number}-devtools-rpms"
   set +x
   . $RHEL_ACCOUNT_FILE
-  if [[ -n "$RHEL_ACTIVATION_KEY"]] ; then
+  if [[ -n "$RHEL_ACTIVATION_KEY" ]] ; then
     sed -i "s/rhel_reg_org:.*/rhel_reg_org: ${RHEL_ORG}/g" $reg_file
     sed -i "s/rhel_reg_activation_key:.*/rhel_reg_activation_key: ${RHEL_ACTIVATION_KEY}/g" $reg_file
   else
