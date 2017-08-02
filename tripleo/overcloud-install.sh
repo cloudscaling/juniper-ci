@@ -491,8 +491,8 @@ if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   set +x
   . $RHEL_ACCOUNT_FILE
   sed -i "s/rhel_reg_user:.*/rhel_reg_user: ${RHEL_USER}/g" $reg_file
-  sed -i "s/rhel_reg_password:.*/rhel_reg_user: ${RHEL_PASSWORD}/g" $reg_file
-  eval "$oldflags"
+  sed -i "s/rhel_reg_password:.*/rhel_reg_password: ${RHEL_PASSWORD}/g" $reg_file
+  set -x
   sed -i "s/rhel_reg_force:.*/rhel_reg_force: true/g" $reg_file
   sed -i "s/rhel_reg_auto_attach:.*/rhel_reg_auto_attach: true/g" $reg_file
   sed -i "s/rhel_reg_method:.*/rhel_reg_method: portal/g" $reg_file
