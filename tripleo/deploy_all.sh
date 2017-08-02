@@ -31,6 +31,7 @@ function save_overcloud_logs() {
 function _unregister_rhel_system() {
   local addr=$1
   cat <<EOF | ssh -T $ssh_opts $addr
+set -x
 subscription-manager unregister || true
 if grep -q stack /etc/passwd ; then
   su - stack

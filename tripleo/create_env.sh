@@ -243,6 +243,7 @@ function _change_image() {
     local rhel_account_file_dir=$(dirname "$RHEL_ACCOUNT_FILE")
     mkdir -p $tmpdir/$rhel_account_file_dir
     cp $RHEL_ACCOUNT_FILE $tmpdir/$rhel_account_file_dir/
+    chmod -R 644 $tmpdir/$rhel_account_file_dir
   fi
 }
 
@@ -349,12 +350,14 @@ function _wait_machine() {
 
 function _prepare_network() {
   local addr=$1
+  local my_host=$2
   cat <<EOF | $ssh_cmd root@${addr}
+set -x
 echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
 sysctl -p /etc/sysctl.conf
-hostnamectl set-hostname myhost.my${NUM}domain
-hostnamectl set-hostname --transient myhost.my${NUM}domain
-echo "127.0.0.1   localhost myhost myhost.my${NUM}domain" > /etc/hosts
+hostnamectl set-hostname $my_host
+hostnamectl set-hostname --transient $my_host
+echo "127.0.0.1   localhost myhost $my_host" > /etc/hosts
 systemctl restart network
 EOF
 }
@@ -386,33 +389,33 @@ function _rhel_register_system() {
   for i in $common_repos ; do
     enable_repos_opts+=" --enable=${i}"
   done
-  local oldflags="$(shopt -po xtrace)"
-  set +x
   cat <<EOF | $ssh_cmd root@${addr}
-. $RHEL_ACCOUNT_FILE
+set -x
 subscription-manager unregister || true
 release=\$(grep -o '[0-9]\\+\\.[0-9]\\+' /etc/redhat-release)
-echo release=\$release
+set +x
+. $RHEL_ACCOUNT_FILE
 subscription-manager register --auto-attach --release=\$release --username=\$RHEL_USER --password=\$RHEL_PASSWORD
+set -x
 subscription-manager repos $enable_repos_opts
 yum update -y
 EOF
-  eval "$oldflags"
 }
 
 # wait udnercloud and register it in redhat if rhel env
 _wait_machine "${mgmt_ip}.2"
-_prepare_network "${mgmt_ip}.2"
+_prepare_network "${mgmt_ip}.2"  "myhost.my${NUM}domain"
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   _rhel_register_system "${mgmt_ip}.2"
 fi
 
 if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
   _wait_machine "${mgmt_ip}.3"
-  _prepare_network "${mgmt_ip}.3"
+  _prepare_network "${mgmt_ip}.3"  "myhost.my${NUM}certdomain"
   _rhel_register_system "${mgmt_ip}.3"
 
   cat <<EOF | $ssh_cmd ${mgmt_ip}.3
+set -x
 yum install -y redhat-certification
 systemctl start httpd
 rhcertd start
