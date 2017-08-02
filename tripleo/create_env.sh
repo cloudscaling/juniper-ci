@@ -396,7 +396,7 @@ subscription-manager unregister || true
 release=\$(grep -o '[0-9]\\+\\.[0-9]\\+' /etc/redhat-release)
 set +x
 . $RHEL_ACCOUNT_FILE
-if [[ -n "\$RHEL_ACTIVATION_KEY"]] ; then
+if [[ -n "\$RHEL_ACTIVATION_KEY" ]] ; then
   echo Use activation key for registration
   subscription-manager register --release=\$release --activationkey=\$RHEL_ACTIVATION_KEY --org=\$RHEL_ORG
 else
