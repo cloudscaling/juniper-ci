@@ -25,7 +25,10 @@ CLOUD_DOMAIN_NAME=${CLOUD_DOMAIN_NAME:-'localdomain'}
 
 # update OS
 yum update -y
-yum install -y epel-release
+
+if [[ "$ENVIRONMENT_OS" == 'centos' ]] ; then
+  yum install -y epel-release
+fi
 
 # install ntpd - it is needed for correct work of OS services
 # (particulary neutron services may not work properly)
