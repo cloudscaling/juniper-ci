@@ -67,6 +67,15 @@
           repo: contrail-charms
 
 
+- scm:
+    name: juniper-contrail-charms-branch
+    scm:
+      - github-branch:
+          organization: Juniper
+          repo: contrail-charms
+          branch: ${CHARMS_BRANCH}
+
+
 # temporary definition while we use unreleased OpenStack charms
 #- scm:
 #    name: github-tmp

@@ -121,6 +121,9 @@ juju-deploy $PLACE/contrail-keystone-auth --to $m6
 
 juju-deploy $PLACE/contrail-controller --to $m6
 juju-expose contrail-controller
+if [ "$USE_EXTERNAL_RABBITMQ" == 'true' ]; then
+  juju-set contrail-controller "use-external-rabbitmq=true"
+fi
 juju-deploy $PLACE/contrail-analyticsdb --to $m6
 juju-deploy $PLACE/contrail-analytics --to $m6
 juju-expose contrail-analytics
@@ -213,6 +216,10 @@ juju-add-relation "contrail-openstack" "contrail-controller"
 
 juju-add-relation "contrail-agent:juju-info" "nova-compute:juju-info"
 juju-add-relation "contrail-agent" "contrail-controller"
+
+if [ "$USE_EXTERNAL_RABBITMQ" == 'true' ]; then
+  juju-add-relation "contrail-controller" "rabbitmq-server:amqp"
+fi
 
 post_deploy
 

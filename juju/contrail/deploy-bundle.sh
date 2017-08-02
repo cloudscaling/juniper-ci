@@ -56,10 +56,19 @@ sed -i -e "s/%PASSWORD%/$PASSWORD/m" $BUNDLE
 sed -i -e "s|%JUJU_REPO%|$JUJU_REPO|m" $BUNDLE
 sed -i -e "s|%REPO_IP%|$repo_ip|m" $BUNDLE
 sed -i -e "s|%REPO_KEY%|$repo_key|m" $BUNDLE
+if [ "$USE_EXTERNAL_RABBITMQ" == 'true' ]; then
+  sed -i -e "s|%USE_EXTERNAL_RABBITMQ%|true|m" $BUNDLE
+else
+  sed -i -e "s|%USE_EXTERNAL_RABBITMQ%|false|m" $BUNDLE
+fi
 sed -i "s/\r/\n/g" $BUNDLE
 
 echo "INFO: Deploy bundle $(date)"
 juju-deploy-bundle $BUNDLE
+
+if [ "$USE_EXTERNAL_RABBITMQ" == 'true' ]; then
+  juju-add-relation "contrail-controller" "rabbitmq-server:amqp"
+fi
 
 echo "INFO: Set endpoints $(date)"
 detect_machines

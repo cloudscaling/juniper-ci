@@ -43,10 +43,24 @@
           name: USE_ADDITIONAL_INTERFACE
           description: "Deploy Contrail with additional interfaces that is used for control-network"
           default: false
+      - bool:
+          name: USE_EXTERNAL_RABBITMQ
+          description: "Use external RabbitMQ"
+          default: false
+      - string:
+          name: CHARMS_BRANCH
+          default: 'master'
     scm:
-      - juniper-contrail-charms
+      - juniper-contrail-charms-branch
       - juniper-ci
     builders:
+      - shell: |
+          #!/bin/bash -e
+          if [[ "$CHARMS_BRANCH" != "master" ]]; then
+            cd contrail-charms
+            git checkout "$CHARMS_BRANCH"
+            cd ..
+          fi
       - shell: |
           #!/bin/bash -e
           desc="$VERSION $DEPLOY_TYPE"
