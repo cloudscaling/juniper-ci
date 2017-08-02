@@ -51,7 +51,7 @@
           name: CHARMS_BRANCH
           default: 'master'
     scm:
-      - juniper-contrail-charms
+      - juniper-contrail-charms-branch
       - juniper-ci
     builders:
       - shell: |
