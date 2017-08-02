@@ -47,10 +47,20 @@
           name: USE_EXTERNAL_RABBITMQ
           description: "Use external RabbitMQ"
           default: false
+      - string:
+          name: CHARMS_BRANCH
+          default: 'master'
     scm:
       - juniper-contrail-charms
       - juniper-ci
     builders:
+      - shell: |
+          #!/bin/bash -e
+          if [[ "$CHARMS_BRANCH" != "master" ]]; then
+            cd contrail-charms
+            git checkout "$CHARMS_BRANCH"
+            cd ..
+          fi
       - shell: |
           #!/bin/bash -e
           desc="$VERSION $DEPLOY_TYPE"
