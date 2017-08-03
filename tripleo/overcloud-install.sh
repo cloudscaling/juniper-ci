@@ -335,7 +335,7 @@ EOF
 else
   echo INFO: contrail controllers are installed on OS controller nodes
   cat <<EOF >> $contrail_vip_env
-  OS::TripleO::ContrailAnalyticsVirtualIPs: OS::Heat::None
+  OS::TripleO::ContrailControllerVirtualIPs: OS::Heat::None
 EOF
   echo INFO: add contrail controller services to OS Controller role
   enable_ext_puppet_syntax='true'

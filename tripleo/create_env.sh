@@ -363,6 +363,7 @@ systemctl restart network
 EOF
 }
 
+#TODO: rework to avoid duplication between undercloud and overcloud
 function _rhel_register_system() {
   local addr=$1
   local common_repos="rhel-7-server-rpms rhel-7-server-extras-rpms rhel-7-server-rh-common-rpms rhel-ha-for-rhel-7-server-rpms"

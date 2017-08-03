@@ -50,8 +50,6 @@ if [[ "$unreg_overcloud" == 'yes' ]] ; then
         fi
         sleep 10
       done
-      cd images
-      sudo -E virt-customize -a overcloud-full.qcow2 --sm-unregister || true
     fi
   fi
 fi
