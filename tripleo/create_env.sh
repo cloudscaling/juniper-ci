@@ -427,7 +427,7 @@ set -x
 yum install -y redhat-certification
 systemctl start httpd
 rhcertd start
-sed -i "s/ALLOWED_HOSTS =.*/ALLOWED_HOSTS = ['myhost.my${NUM}certdomain', ${mgmt_ip}.3', '${prov_ip}.201', 'localhost.localdomain', 'localhost', '127.0.0.1']/" /var/www/rhcert/project/settings.py
+sed -i "s/ALLOWED_HOSTS =.*/ALLOWED_HOSTS = ['myhost.my${NUM}certdomain', '${mgmt_ip}.3', '${prov_ip}.201', 'localhost.localdomain', 'localhost', '127.0.0.1']/" /var/www/rhcert/project/settings.py
 systemctl restart httpd
 EOF
 
