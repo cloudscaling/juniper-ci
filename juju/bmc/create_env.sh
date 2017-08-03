@@ -52,7 +52,6 @@ function run_machine() {
   local params=""
   if echo "$name" | grep -q comp ; then
     params="--memorybacking hugepages=on"
-    params="$params --network network=$nname-vm,model=$net_driver,mac=52:54:00:11:00:$mac_suffix"
   fi
 
   if [[ $SERIES == 'xenial' ]] ; then
@@ -73,6 +72,7 @@ function run_machine() {
     --noautoconsole \
     --graphics vnc,listen=0.0.0.0 \
     --network network=$nname,model=$net_driver,mac=$mac_base:$mac_suffix \
+    --network network=$nname_vm,model=$net_driver,mac=52:54:00:11:00:$mac_suffix \
     --cpu SandyBridge,+vmx,+ssse3 \
     --boot hd \
     $params
