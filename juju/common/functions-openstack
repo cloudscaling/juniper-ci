@@ -16,12 +16,18 @@ function deactivate_venv() {
 
 function create_virtualenv() {
   rm -rf .venv
-  virtualenv .venv
-  source .venv/bin/activate
+  if [[ "$USE_VENV" == 'true' ]] ; then
+    echo "INFO: Create venv"
+    virtualenv .venv
+  else
+    echo "INFO: Skip venv creation"
+  fi
+
+  activate_venv
   pip install -q "python-openstackclient==3.11" 2>/dev/null
   # NOTE: version 9.0 always writes debug output if run via openstack
   pip install -q "python-novaclient<9.0" 2>/dev/null
-  deactivate
+  deactivate_venv
 }
 
 function instance_status() {
@@ -95,10 +101,9 @@ function wait_image() {
 }
 
 function create_image() {
-  image_name=${1:-cirros}
-
+  local image_name=${1:-cirros}
+  local output=''
   activate_venv
-
   if ! output=`openstack --insecure image show $image_name 2>/dev/null` ; then
     rm -f cirros-0.3.4-x86_64-disk.img
     wget -t 2 -T 60 -q http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
@@ -106,8 +111,7 @@ function create_image() {
       return 1
     fi
   fi
-  image_id=`echo "$output" | awk '/ id /{print $4}'`
-
+  local image_id=`echo "$output" | awk '/ id /{print $4}'`
   deactivate_venv
   echo $image_id
 }
@@ -154,8 +158,6 @@ function create_network() {
 }
 
 function run_os_checks() {
-  host_attr='OS-EXT-SRV-ATTR:hypervisor_hostname '
-
   # check installed cloud
   activate_venv
 
@@ -169,18 +171,19 @@ function run_os_checks() {
   deactivate_venv
 
   echo "INFO: Check/create image"
+  local image_id=''
   if ! image_id=`create_image` ; then
     return 1
   fi
   echo "INFO: Check/create flavor"
   create_flavors
 
-  netsfx=$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 4)
+  local netsfx=$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 4)
   create_network $netsfx
 
   activate_venv
-  public_net_id=`openstack --insecure network show public-$netsfx -f value -c id`
-  private_net_id=`openstack --insecure network show private-$netsfx -f value -c id`
+  local public_net_id=`openstack --insecure network show public-$netsfx -f value -c id`
+  local private_net_id=`openstack --insecure network show private-$netsfx -f value -c id`
   openstack --insecure floating ip create --floating-ip-address 10.5.0.10 $public_net_id
   openstack --insecure floating ip create --floating-ip-address 10.5.0.11 $public_net_id
   deactivate_venv
@@ -231,15 +234,15 @@ function _get_instance_machine() {
 
 function _get_current_routes() {
   local mch=$1
-  juju-ssh $mch ip route 2>/dev/null | awk '/169.254/{print $1}'
+  $SSH_CMD $mch ip route 2>/dev/null | awk '/169.254/{print $1}'
 }
 
 function _check_new_route() {
   local mch=$1
   local route=$2
-  if ! juju-ssh $mch ip route 2>/dev/null | grep -q "$route" ; then
+  if ! $SSH_CMD $mch ip route 2>/dev/null | grep -q "$route" ; then
     echo "ERROR: Route $route is absent on host:"
-    juju-ssh $mch ip route
+    $SSH_CMD $mch ip route
     return 1
   fi
   return 0
@@ -249,7 +252,7 @@ function _check_instance_ping() {
   local mch=$1
   local ip=$2
   echo "INFO: Trying to ping instance with ip $ip"
-  if ! juju-ssh $mch ping -c 2 $ip 2>/dev/null ; then
+  if ! $SSH_CMD $mch ping -c 2 $ip 2>/dev/null ; then
     echo "ERROR: Can't ping instance by ip $ip"
     return 1
   fi
@@ -262,15 +265,14 @@ function _check_instance_ssh_and_metadata() {
   local ip=$2
   local fip=$3
   local ssh_opts='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5'
-  juju-ssh $mch sudo apt-get -y install sshpass &>/dev/null
   echo "INFO: Trying to ssh into instance with ip $ip and run ifconfig"
-  if ! juju-ssh $mch sshpass -p 'cubswin:\)' ssh $ssh_opts cirros@$ip /sbin/ifconfig 2>/dev/null ; then
+  if ! $SSH_CMD $mch sshpass -p 'cubswin:\)' ssh $ssh_opts cirros@$ip /sbin/ifconfig 2>/dev/null ; then
     echo "ERROR: Can't ssh into instance by ip $ip"
     return 1
   fi
 
   echo "INFO: Trying to ssh into instance with ip $ip and get meta-data/public-ipv4"
-  if ! output=`juju-ssh $mch sshpass -p 'cubswin:\)' ssh $ssh_opts cirros@$ip curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null` ; then
+  if ! output=`$SSH_CMD $mch sshpass -p 'cubswin:\)' ssh $ssh_opts cirros@$ip curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null` ; then
     echo ""
     echo "ERROR: Can't get instance metadata by ssh into ip $ip"
     return 1
@@ -291,8 +293,8 @@ function check_instance_simple() {
   local net_id=$1
   local fip=$2
 
-  declare -a rts
-  for mch in `get_machine_index_by_service nova-compute` ; do
+  declare -A rts
+  for mch in `get_machines_index_by_service nova-compute` ; do
     rts[$mch]=`_get_current_routes $mch`
   done
 
@@ -307,42 +309,43 @@ function check_instance_simple() {
   wait_instance $instance_id $((3*MAX_FAIL)) || ret=1
   openstack --insecure server add floating ip $instance_id $fip
   if [[ $ret == 0 ]] ; then
-    mch=`_get_instance_machine $instance_id`
+    local mch=`_get_instance_machine $instance_id`
     echo "INFO: Instance is on machine $mch"
 
     _check_instance_log $instance_id || ret=1
 
-    local routes_to_skip="${rts[mch]}"
+    local routes_to_skip="${rts[${mch}]}"
     local rt=`_get_current_routes $mch`
+    local new_route=''
     for r in $rt ; do
       echo "$routes_to_skip" | grep -q "$r" && continue
-      local new_route="$r"
+      new_route="$r"
       break
     done
     if [[ -n $new_route ]] ; then
       echo "INFO: Instance's new route is $new_route"
       _check_new_route $mch $new_route || ret=1
+      _check_instance_ping $mch $new_route || ret=1
+      _check_instance_ssh_and_metadata $mch $new_route $fip || ret=1
     else
       echo "INFO: Couldn't find new route 169.254.0.*"
       ret=1
     fi
 
-    _check_instance_ping $mch $new_route || ret=1
-    _check_instance_ssh_and_metadata $mch $new_route $fip || ret=1
-
     # add VGW to second compute host and check ping/ssh from there
-    another_compute_host=`get_machine_index_by_service nova-compute | grep -v $mch`
+    local another_compute_host=`get_machines_index_by_service nova-compute | grep -v $mch`
     echo "INFO: Adding vgw to another compute: $another_compute_host"
-    juju-ssh $another_compute_host sudo /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx
+    $SSH_CMD $another_compute_host sudo /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx
 
     _check_instance_ping $another_compute_host $fip || ret=1
     _check_instance_ssh_and_metadata $another_compute_host $fip $fip || ret=1
 
     # remove VGW
-    juju-ssh $another_compute_host sudo /opt/contrail/utils/provision_vgw_interface.py --oper delete --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx
+    $SSH_CMD $another_compute_host sudo /opt/contrail/utils/provision_vgw_interface.py --oper delete --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx
   fi
 
   openstack --insecure server show $instance_id
   openstack --insecure server delete $instance_id
   return $ret
 }
+

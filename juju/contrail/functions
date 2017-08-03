@@ -105,12 +105,12 @@ function add_interface() {
 }
 
 function detect_machines() {
-  m1=`get_machine_index_by_service openstack-dashboard`
-  m2=`get_machine_index_by_service glance`
-  m3=`get_machine_index_by_service keystone`
-  m4=`get_machine_index_by_service nova-cloud-controller`
-  m5=`get_machine_index_by_service neutron-api`
-  m6=`get_machine_index_by_service contrail-controller`
+  m1=`get_machines_index_by_service openstack-dashboard`
+  m2=`get_machines_index_by_service glance`
+  m3=`get_machines_index_by_service keystone`
+  m4=`get_machines_index_by_service nova-cloud-controller`
+  m5=`get_machines_index_by_service neutron-api`
+  m6=`get_machines_index_by_service contrail-controller`
 }
 
 function hack_openstack() {

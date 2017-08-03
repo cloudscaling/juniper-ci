@@ -11,6 +11,7 @@ if [ -z "$WORKSPACE" ] ; then
   export WORKSPACE="$HOME"
 fi
 
+source ${WORKSPACE}/stackrc
 for mid in `nova list | awk '/-novacompute-/{print $12}'` ; do
   mip="`echo $mid | cut -d '=' -f 2`"
   ssh heat-admin@$mip sudo yum install -y sshpass
