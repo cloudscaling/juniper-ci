@@ -134,7 +134,10 @@ function create_network() {
   echo "INFO: Create public network and subnet"
   openstack --insecure network create --external public-$netsfx
   local public_net_id=`openstack --insecure network show public-$netsfx -f value -c id`
-  openstack --insecure subnet create --no-dhcp --network $public_net_id --subnet-range 10.5.0.0/24 --gateway 0.0.0.0 public-$netsfx
+  if ! openstack --insecure subnet create --no-dhcp --network $public_net_id --subnet-range 10.5.0.0/24 --gateway 0.0.0.0 public-$netsfx ; then
+    echo "WARNING: Subnet couldn't created. Trying again..."
+    openstack --insecure subnet create --no-dhcp --network $public_net_id --subnet-range 10.5.0.0/24 --gateway 0.0.0.0 public-$netsfx
+  fi
 
   echo "INFO: Create private network and subnet"
   openstack --insecure network create --internal private-$netsfx
