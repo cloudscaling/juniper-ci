@@ -455,6 +455,7 @@ parameter_defaults:
   RabbitPassword: contrail
   ContrailInsecure: true
   AAAMode: cloud-admin
+  ContrailWebuiHttp: 8180
 EOF
 # IMPORTANT: The DNS domain used for the hosts should match the dhcp_domain configured in the Undercloud neutron.
 if (( CONT_COUNT < 2 )) ; then
