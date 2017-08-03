@@ -113,19 +113,27 @@ echo "INFO: bootstraping juju controller $(date)"
 juju bootstrap manual/$cont_ip test-cloud
 wait_cmd="juju ssh"
 
+declare -A machines
+
+function run_cloud_machine() {
+  local name=$1
+  local mac=$2
+  local mem=$3
+  run_machine juju-os-$name 4 $mem $mac
+  local ip=`get_kvm_machine_ip $mac`
+  machines["$name"]=$ip
+  wait_kvm_machine $ip
+  virsh net-update juju add ip-dhcp-host "<host mac='$mac_base:$mac' name='$name' ip='$ip' />"
+}
+
 function run_compute() {
   local index=$1
   local mac_var_name="juju_os_comp_${index}_mac"
   local mac=${!mac_var_name}
   echo "INFO: creating compute $index (mac $mac) $(date)"
-  run_machine juju-os-comp-$index 4 8192 $mac
+  run_cloud_machine comp-$index $mac 8192
   local ip=`get_kvm_machine_ip $mac`
-  wait_kvm_machine $ip
   juju add-machine ssh:ubuntu@$ip
-
-  juju ssh ubuntu@$ip "sudo bash -c 'echo comp-$index > /etc/hostname'" 2>/dev/null
-  juju ssh ubuntu@$ip "sudo hostname comp-$index" 2>/dev/null
-  virsh net-update juju add ip-dhcp-host "<host mac='$mac_base:$mac' name='comp-$index' ip='$ip' />"
 
   echo "INFO: preparing compute $index $(date)"
   kernel_version=`juju ssh ubuntu@$ip uname -r 2>/dev/null | tr -d '\r'`
@@ -151,16 +159,11 @@ function run_controller() {
   local mac_var_name="juju_os_cont_${index}_mac"
   local mac=${!mac_var_name}
   echo "INFO: creating controller $index (mac $mac) $(date)"
-  run_machine juju-os-cont-$index 4 $mem $mac
+  run_cloud_machine cont-$index $mac $mem
   local ip=`get_kvm_machine_ip $mac`
-  wait_kvm_machine $ip
   local output=`juju add-machine ssh:ubuntu@$ip 2>&1`
   echo "$output"
   mch=`echo "$output" | tail -1 | awk '{print $3}'`
-
-  juju ssh ubuntu@$ip "sudo bash -c 'echo cont-$index > /etc/hostname'" 2>/dev/null
-  juju ssh ubuntu@$ip "sudo hostname cont-$index" 2>/dev/null
-  virsh net-update juju add ip-dhcp-host "<host mac='$mac_base:$mac' name='cont-$index' ip='$ip' />"
 
   echo "INFO: preparing controller $index $(date)"
   juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget bridge-utils" &>>$log_dir/apt.log
@@ -215,6 +218,22 @@ case "$DEPLOY_MODE" in
     exit 1
     ;;
 esac
+
+echo "INFO: creating hosts file $(date)"
+truncate -s 0 $WORKSPACE/hosts
+for m in ${!machines[@]} ; do
+  echo "${machines[$m]}    $m" >> $WORKSPACE/hosts
+done
+cat $WORKSPACE/hosts
+echo "INFO: Applying hosts file and hostnames $(date)"
+for m in ${!machines[@]} ; do
+  ip=${machines[$m]}
+  juju scp $WORKSPACE/hosts ubuntu@$ip:hosts
+  juju ssh ubuntu@$ip 'sudo bash -c "cat ./hosts >> /etc/hosts"' 2>/dev/null
+  juju ssh ubuntu@$ip "sudo bash -c 'echo $m > /etc/hostname'" 2>/dev/null
+  juju ssh ubuntu@$ip "sudo hostname $m" 2>/dev/null
+done
+rm $WORKSPACE/hosts
 
 echo "INFO: Environment created $(date)"
 
