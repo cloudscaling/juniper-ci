@@ -437,16 +437,23 @@ resource_registry:
   OS::TripleO::ControllerExtraConfigPre: enable_ext_puppet_syntax.yaml
 EOF
 fi
-# if [[ "$DPDK" == 'yes' && "$OPENSTACK_VERSION" == 'newton' ]] ; then
-#   if ! grep -q 'resource_registry:' $misc_opts ;  then
-#   cat <<EOF >> $misc_opts
-# resource_registry:
-# EOF
-#   fi
-#   cat <<EOF >> $misc_opts
-#   OS::TripleO::ContrailDpdk::Net::SoftwareConfig: tripleo-heat-templates/environments/contrail/contrail-nic-config-compute-single.yaml
-# EOF
-# fi
+
+if [[ "$DPDK" == 'yes' && "$OPENSTACK_VERSION" == 'newton' ]] ; then
+  if ! grep -q 'resource_registry:' $misc_opts ;  then
+  cat <<EOF >> $misc_opts
+resource_registry:
+EOF
+  fi
+  if [[ "$NETWORK_ISOLATION" == 'single' ]] ; then
+    cat <<EOF >> $misc_opts
+  OS::TripleO::ContrailDpdk::Net::SoftwareConfig: tripleo-heat-templates/environments/contrail/contrail-nic-config-compute-single.yaml
+EOF
+  else
+    echo "Error: DPDK is not supported for $NETWORK_ISOLATION"
+    exit -1
+  fi
+fi
+
 cat <<EOF >> $misc_opts
 parameter_defaults:
   CloudDomain: $CLOUD_DOMAIN_NAME
