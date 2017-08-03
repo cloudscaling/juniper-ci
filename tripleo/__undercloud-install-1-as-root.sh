@@ -77,10 +77,11 @@ else
   # install pip for future run of OS checks
   curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
   python get-pip.py
+  pip install -y virtualenv
 fi
 
 # install tripleo clients
-yum -y install yum-plugin-priorities python-tripleoclient python-rdomanager-oscplugin sshpass openstack-utils
+yum -y install gcc make yum-plugin-priorities python-tripleoclient python-rdomanager-oscplugin sshpass openstack-utils
 
 if [[ "$OPENSTACK_VERSION" == 'ocata' && "$ENVIRONMENT_OS" == 'centos' ]] ; then
   yum update -y

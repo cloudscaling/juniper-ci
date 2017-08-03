@@ -12,7 +12,7 @@ shift
 ssh_opts=$@
 
 MAX_FAIL=${MAX_FAIL:-30}
-USE_VENV=${USE_VENV:-'false'}
+USE_VENV=${USE_VENV:-'true'}
 SSH_CMD=${SSH_CMD:-'ssh'}
 
 cos_dir='/home/stack/check-openstack'
