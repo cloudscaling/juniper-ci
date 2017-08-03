@@ -483,48 +483,6 @@ if (( CONT_COUNT > 1 )) ; then
   ha_opts="-e tripleo-heat-templates/environments/puppet-pacemaker.yaml"
 fi
 
-rhel_reg_opts=''
-if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-  reg_file='tripleo-heat-templates/extraconfig/pre_deploy/rhel-registration/environment-rhel-registration.yaml'
-  rhel_reg_opts+="-e $reg_file"
-  rhel_reg_opts+=' -e tripleo-heat-templates/extraconfig/pre_deploy/rhel-registration/rhel-registration-resource-registry.yaml'
-  repos_list="rhel-7-server-rpms,rhel-7-server-extras-rpms,rhel-7-server-rh-common-rpms,rhel-ha-for-rhel-7-server-rpms"
-  if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
-    repos_list+=",rhel-7-server-cert-rpms"
-  fi
-  repo_number=''
-  case "$OPENSTACK_VERSION" in
-    newton)
-      repo_number='10'
-      ;;
-    ocata)
-      repo_number='11'
-      ;;
-    pike)
-      repo_number='12'
-      ;;
-    *)
-      echo "ERROR: unsupported OS $OPENSTACK_VERSION"
-      exit 1
-  esac
-  repos_list+=",rhel-7-server-openstack-${repo_number}-rpms,rhel-7-server-openstack-${repo_number}-devtools-rpms"
-  set +x
-  . $RHEL_ACCOUNT_FILE
-  if [[ -n "$RHEL_ACTIVATION_KEY" ]] ; then
-    sed -i "s/rhel_reg_org:.*/rhel_reg_org: ${RHEL_ORG}/g" $reg_file
-    sed -i "s/rhel_reg_activation_key:.*/rhel_reg_activation_key: ${RHEL_ACTIVATION_KEY}/g" $reg_file
-  else
-    sed -i "s/rhel_reg_user:.*/rhel_reg_user: ${RHEL_USER}/g" $reg_file
-    sed -i "s/rhel_reg_password:.*/rhel_reg_password: ${RHEL_PASSWORD}/g" $reg_file
-    sed -i "s/rhel_reg_auto_attach:.*/rhel_reg_auto_attach: true/g" $reg_file
-  fi
-  set -x
-  sed -i "s/rhel_reg_force:.*/rhel_reg_force: true/g" $reg_file
-  sed -i "s/rhel_reg_method:.*/rhel_reg_method: portal/g" $reg_file
-  sed -i "s/rhel_reg_repos:.*/rhel_reg_repos: $repos_list/g" $reg_file
-#  sed -i "s/rhel_reg_machine_name:.*/rhel_reg_machine_name: 'rhel-${NUM}-%{::hostname}'/g" $reg_file
-fi
-
 if [[ "$DEPLOY" != '1' ]] ; then
   # deploy overcloud. if you do it manually then I recommend to do it in screen.
   echo "openstack overcloud deploy --templates tripleo-heat-templates/ \
@@ -534,7 +492,7 @@ if [[ "$DEPLOY" != '1' ]] ; then
       -e $contrail_net_file \
       -e $contrail_vip_env \
       -e $misc_opts \
-      $multi_nic_opts $ha_opts $rhel_reg_opts"
+      $multi_nic_opts $ha_opts"
   echo "Add '-e templates/firstboot/firstboot.yaml' if you use swap"
   exit
 fi
@@ -549,7 +507,7 @@ openstack overcloud deploy --templates tripleo-heat-templates/ \
   -e $contrail_net_file \
   -e $contrail_vip_env \
   -e $misc_opts \
-  $multi_nic_opts $ha_opts $rhel_reg_opts
+  $multi_nic_opts $ha_opts
 
 errors=$?
 

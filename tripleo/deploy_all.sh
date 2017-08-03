@@ -30,24 +30,29 @@ function save_overcloud_logs() {
 
 function _unregister_rhel_system() {
   local addr=$1
+  local unreg_overcloud=${2:-'yes'}
   cat <<EOF | ssh -T $ssh_opts $addr
 set -x
 subscription-manager unregister || true
-if grep -q stack /etc/passwd ; then
-  su - stack
-  if [[ -f stackrc ]] ; then
-    . stackrc
-    count=0
-    while openstack stack list | grep -q overcloud ; do
-      if ! openstack stack list | grep overcloud | grep -i delete | grep -iq progress ; then
-        openstack stack delete --yes overcloud || true
-        ((count+= 1))
-      fi
-      if (( count > 5 )) ; then
-        break
-      fi
-      sleep 5
-    done
+if [[ "$unreg_overcloud" == 'yes' ]] ; then
+  if grep -q stack /etc/passwd ; then
+    su - stack
+    if [[ -f stackrc ]] ; then
+      . stackrc
+      count=0
+      while openstack stack list | grep -q overcloud ; do
+        if ! openstack stack list | grep overcloud | grep -i delete | grep -iq progress ; then
+          openstack stack delete --yes overcloud || true
+          ((count+= 1))
+        fi
+        if (( count > 5 )) ; then
+          break
+        fi
+        sleep 10
+      done
+      cd images
+      sudo -E virt-customize -a overcloud-full.qcow2 --sm-unregister || true
+    fi
   fi
 fi
 EOF
@@ -57,7 +62,7 @@ function unregister_rhel_system() {
   if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
     _unregister_rhel_system $ssh_addr
     if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
-      _unregister_rhel_system  192.168.${env_addr}.3
+      _unregister_rhel_system  192.168.${env_addr}.3 'no'
     fi
   fi
 }

@@ -86,9 +86,45 @@ else
   tar -cf images.tar images
 fi
 
-# upload images to undercloud
 source ./stackrc
 cd ~/images
+
+# register rhel overcloud image
+if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+  common_repos="rhel-7-server-rpms rhel-7-server-extras-rpms rhel-7-server-rh-common-rpms rhel-ha-for-rhel-7-server-rpms"
+  if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+    common_repos+=" rhel-7-server-cert-rpms"
+  fi
+  enable_repo=''
+  case "$OPENSTACK_VERSION" in
+    newton)
+      enable_repo='10'
+      ;;
+    ocata)
+      enable_repo='11'
+      ;;
+    pike)
+      enable_repo='12'
+      ;;
+    *)
+      echo "ERROR: unsupported OS $OPENSTACK_VERSION"
+      exit 1
+  esac
+  common_repos+=" rhel-7-server-openstack-${enable_repo}-rpms"
+  common_repos+=" rhel-7-server-openstack-${enable_repo}-devtools-rpms"
+  enable_repos_opts=''
+  for i in $common_repos ; do
+    enable_repos_opts+=" --enable=${i}"
+  done
+  set +x
+  . $RHEL_ACCOUNT_FILE
+  # virt-customize doesn support activation keys
+  sudo -E virt-customize -a overcloud-full.qcow2 \
+    --sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
+    --run-command "subscription-manager repos ${enable_repos_opts}"
+  set -x
+fi
+
 openstack overcloud image upload
 cd ..
 
