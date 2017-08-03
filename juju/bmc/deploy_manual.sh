@@ -154,7 +154,7 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   juju-add-relation "contrail-analytics" "haproxy"
   juju-add-relation "contrail-controller:http-services" "haproxy"
   juju-add-relation "contrail-controller:https-services" "haproxy"
-  mch=`get_machine_index_by_service haproxy`
+  mch=`get_machines_index_by_service haproxy`
   ip=`get-machine-ip-by-number $mch`
   echo "INFO: HAProxy for Contrail services is on machine $mch / IP $ip"
   juju-set contrail-controller vip=$ip

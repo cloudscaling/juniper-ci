@@ -3,7 +3,6 @@
 my_file="${BASH_SOURCE[0]}"
 my_dir="$(dirname $my_file)"
 source "$my_dir/../common/functions"
-source "$my_dir/../common/functions-openstack"
 
 trap 'catch_errors_ce $LINENO' ERR EXIT
 function catch_errors_ce() {
@@ -20,6 +19,17 @@ function catch_errors_ce() {
 if [ -z "$WORKSPACE" ] ; then
   export WORKSPACE="$HOME"
 fi
+
+# prepare environment for common openstack functions
+OPENSTACK_VERSION="$VERSION"
+USE_VENV=true
+SSH_CMD="juju-ssh"
+
+for mch in `get_machines_index_by_service nova-compute` ; do
+  juju-ssh $mch sudo apt-get -y install sshpass &>/dev/null
+done
+
+source "$my_dir/../common/functions-openstack"
 
 cd $WORKSPACE
 create_stackrc

@@ -40,14 +40,14 @@ function deactivate_venv() {
 function create_virtualenv() {
   rm -rf .venv
   if [[ "$USE_VENV" == 'true' ]] ; then
-    echo INFO: Create venv
+    echo "INFO: Create venv"
     virtualenv .venv
   else
-    echo INFO: Skip venv creation
+    echo "INFO: Skip venv creation"
   fi
 
   activate_venv
-  pip install -q python-openstackclient 2>/dev/null
+  pip install -q "python-openstackclient==3.11" 2>/dev/null
   # NOTE: version 9.0 always writes debug output if run via openstack
   pip install -q "python-novaclient<9.0" 2>/dev/null
   deactivate_venv
@@ -192,8 +192,6 @@ function create_network() {
 function run_os_checks() {
   _access_overcloud
 
-  local host_attr='OS-EXT-SRV-ATTR:hypervisor_hostname '
-
   # check installed cloud
   activate_venv
 
@@ -316,15 +314,15 @@ function _get_instance_machine() {
 
 function _get_current_routes() {
   local mch=$1
-  $SSH_CMD $mch "PATH=\$PATH:/usr/sbin ip route 2>/dev/null | awk '/169.254/{print \$1}'"
+  $SSH_CMD $mch "PATH=\$PATH:/usr/sbin ip route" 2>/dev/null | awk '/169.254/{print $1}'
 }
 
 function _check_new_route() {
   local mch=$1
   local route=$2
-  if ! $SSH_CMD $mch "PATH=\$PATH:/usr/sbin route 2>/dev/null | grep -q '$route'" ; then
+  if ! $SSH_CMD $mch "PATH=\$PATH:/usr/sbin ip route" 2>/dev/null | grep -q "$route" ; then
     echo "ERROR: Route $route is absent on host:"
-    $SSH_CMD $mch "PATH=\$PATH:/usr/sbin ip route"
+    $SSH_CMD $mch "PATH=\$PATH:/usr/sbin ip route" 2>/dev/null
     return 1
   fi
   return 0
@@ -408,13 +406,12 @@ function check_instance_simple() {
     if [[ -n $new_route ]] ; then
       echo "INFO: Instance's new route is $new_route"
       _check_new_route $mch $new_route || ret=1
+      _check_instance_ping $mch $new_route || ret=1
+      _check_instance_ssh_and_metadata $mch $new_route $fip || ret=1
     else
       echo "INFO: Couldn't find new route 169.254.0.*"
       ret=1
     fi
-
-    _check_instance_ping $mch $new_route || ret=1
-    _check_instance_ssh_and_metadata $mch $new_route $fip || ret=1
 
     # add VGW to second compute host and check ping/ssh from there
     local another_compute_host=`_get_machines_by_service nova-compute | grep -v $mch`
