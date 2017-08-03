@@ -360,6 +360,7 @@ hostnamectl set-hostname $my_host
 hostnamectl set-hostname --transient $my_host
 echo "127.0.0.1   localhost myhost $my_host" > /etc/hosts
 systemctl restart network
+sleep 5
 EOF
 }
 
