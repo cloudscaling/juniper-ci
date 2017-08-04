@@ -433,9 +433,9 @@ if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
 
   cat <<EOF | $ssh_cmd ${mgmt_ip}.3
 set -x
+iptables -I INPUT 1 -p udp -m multiport --dports 8009 -m comment --comment \"rhcertd\" -m state --state NEW -j ACCEPT
 iptables -I INPUT 1 -p tcp -m multiport --dports 8009 -m comment --comment \"rhcertd\" -m state --state NEW -j ACCEPT
-iptables -I INPUT 2 -p udp -m multiport --dports 8009 -m comment --comment \"rhcertd\" -m state --state NEW -j ACCEPT
-iptables -I INPUT 3 -p tcp -m multiport --dports 80,443 -m comment --comment \"http, https\" -m state --state NEW -j ACCEPT
+iptables -I INPUT 1 -p tcp -m multiport --dports 80,443 -m comment --comment \"http_https" -m state --state NEW -j ACCEPT
 yum install -y redhat-certification
 systemctl start httpd
 rhcertd start
