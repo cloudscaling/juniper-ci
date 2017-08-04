@@ -79,7 +79,7 @@ function wait_for_machines() {
         local status=`juju-status-json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']['$mch']['containers']['$machine']['juju-status']['current'])"`
         local iid=`juju-status-json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']['$mch']['containers']['$machine']['instance-id'])"`
       else
-        local status=`juju-status-json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']['$mch']['juju-status']['current'])"`
+        local status=`juju-status-json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']['$machine']['juju-status']['current'])"`
         local iid=`juju-status-json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']['$machine']['instance-id'])"`
       fi
       if [[ "$status" == "down" && "$iid" == "pending" ]] ; then
