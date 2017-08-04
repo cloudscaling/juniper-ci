@@ -10,7 +10,7 @@ done
 
 ps ax -H &> ps.log
 netstat -lpn &> netstat.log
-free -hw &> mem.log
+free -h &> mem.log
 tar -rf logs.tar ps.log netstat.log mem.log 2>/dev/null
 
 if which contrail-status &>/dev/null ; then
@@ -40,7 +40,7 @@ if which docker ; then
           docker exec "contrail-$cnt" systemctl -a &>"./$ldir/systemctl-status-all.log"
         fi
         docker exec contrail-$cnt contrail-status &>"./$ldir/contrail-status.log"
-        docker exec contrail-$cnt free -hw &>"./$ldir/mem.log"
+        docker exec contrail-$cnt free -h &>"./$ldir/mem.log"
         if [[ "$cnt" == "controller" ]] ; then
           docker exec contrail-controller rabbitmqctl cluster_status &>"./$ldir/rabbitmq-cluster-status.log"
         fi

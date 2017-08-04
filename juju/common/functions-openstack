@@ -135,8 +135,14 @@ function create_network() {
   openstack --insecure network create --external public-$netsfx
   local public_net_id=`openstack --insecure network show public-$netsfx -f value -c id`
   if ! openstack --insecure subnet create --no-dhcp --network $public_net_id --subnet-range 10.5.0.0/24 --gateway 0.0.0.0 public-$netsfx ; then
-    echo "WARNING: Subnet couldn't created. Trying again..."
-    openstack --insecure subnet create --no-dhcp --network $public_net_id --subnet-range 10.5.0.0/24 --gateway 0.0.0.0 public-$netsfx
+    echo "WARNING: Subnet creation is too long. Waiting..."
+    for i in {1..24} ; do
+      sleep 10
+      echo "INFO: subnet poll #$i from 24"
+      if openstack --insecure subnet list --network $public_net_id ; then
+        break
+      fi
+    done
   fi
 
   echo "INFO: Create private network and subnet"
