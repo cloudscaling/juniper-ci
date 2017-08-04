@@ -117,10 +117,11 @@ function create_store_volume() {
 
 function define_machine() {
   local name="$1"
-  shift
+  local mem="$2"
+  shift 2
   local disk_opt="$@"
   virt-install --name $name \
-    --ram 8192 \
+    --ram $mem \
     --vcpus 2 \
     --os-variant rhel7 \
     $disk_opt \
@@ -137,7 +138,8 @@ function define_machine() {
 function define_overcloud_vms() {
   local name=$1
   local count=$2
-  local do_create_storage=${3:-'false'}
+  local mem=$3
+  local do_create_storage=${4:-'false'}
   local number_re='^[0-9]+$'
   if [[ $count =~ $number_re ]] ; then
     for (( i=1 ; i<=count; i++ )) ; do
@@ -148,7 +150,7 @@ function define_overcloud_vms() {
         create_store_volume $vol_name
         disk_opts+=" --disk path=${pool_path}/${vol_name}-store.qcow2,device=disk,bus=virtio,format=qcow2"
       fi
-      define_machine "rd-$vol_name" "$disk_opts"
+      define_machine "rd-$vol_name" "$mem" "$disk_opts"
     done
   else
     echo Skip VM $name creation, count=$count
@@ -156,12 +158,13 @@ function define_overcloud_vms() {
 }
 
 # just define overcloud machines
-define_overcloud_vms 'cont' $CONTROLLER_COUNT
-define_overcloud_vms $compute_machine_name $COMPUTE_COUNT 'true'
-define_overcloud_vms 'stor' $STORAGE_COUNT 'true'
-define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT
-define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT
-define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT
+define_overcloud_vms 'cont' 8192 $CONTROLLER_COUNT
+define_overcloud_vms $compute_machine_name 8192 $COMPUTE_COUNT 'true'
+define_overcloud_vms 'stor' $STORAGE_COUNT 4096 'true'
+# TODO: change memory constraints to 8192 if all containers on one node
+define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT 3072
+define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT 3072
+define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT 3072
 
 # copy image for undercloud and resize them
 cp $BASE_IMAGE $pool_path/undercloud-$NUM.qcow2
