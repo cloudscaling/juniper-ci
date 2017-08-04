@@ -50,6 +50,10 @@
       - string:
           name: CHARMS_BRANCH
           default: 'master'
+      - bool:
+          name: RUN_TEMPEST
+          description: "Run neutron tests from tempest"
+          default: false
     scm:
       - juniper-contrail-charms-branch
       - juniper-ci

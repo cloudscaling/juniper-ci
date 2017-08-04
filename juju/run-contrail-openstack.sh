@@ -92,9 +92,9 @@ $my_dir/contrail/$inner_script $script_params
 
 $my_dir/contrail/check-openstack.sh
 
-#if [[ "$RUN_TEMPEST" == 'true' ]] ; then
-#  $my_dir/contrail/run-tempest.sh
-#fi
+if [[ "$RUN_TEMPEST" == 'true' ]] ; then
+  $my_dir/contrail/run-tempest.sh
+fi
 
 $my_dir/save-logs.sh
 if [ -f $my_dir/contrail/save-logs.sh ] ; then
