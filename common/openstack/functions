@@ -19,7 +19,6 @@ function set_x() {
 }
 
 MAX_FAIL=${MAX_FAIL:-30}
-USE_VENV=${USE_VENV:-'true'}
 SSH_CMD=${SSH_CMD:-'ssh'}
 
 OVERCLOUDRC_FILE=${OVERCLOUDRC_FILE:-"${WORKSPACE}/overcloudrc"}
@@ -39,12 +38,8 @@ function deactivate_venv() {
 
 function create_virtualenv() {
   rm -rf .venv
-  if [[ "$USE_VENV" == 'true' ]] ; then
-    echo "INFO: Create venv"
-    virtualenv .venv
-  else
-    echo "INFO: Skip venv creation"
-  fi
+  echo "INFO: Create venv"
+  virtualenv .venv
 
   activate_venv
   pip install -q "python-openstackclient==3.11" 2>/dev/null
@@ -143,7 +138,7 @@ function create_flavors() {
   activate_venv
   if ! openstack --insecure flavor show 51 &>/dev/null ; then
     openstack --insecure flavor create --disk 1 --vcpus 1 --ram 128 --id 51 test_flavor >/dev/null
-    if [[ "$USE_DPDK" == "true" ]]; then
+    if [[ "$DPDK" == 'yes' ]]; then
       openstack flavor set --property hw:mem_page_size=any 51
     fi
   fi
