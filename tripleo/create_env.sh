@@ -158,8 +158,8 @@ function define_overcloud_vms() {
 }
 
 # just define overcloud machines
-define_overcloud_vms 'cont' 8192 $CONTROLLER_COUNT
-define_overcloud_vms $compute_machine_name 8192 $COMPUTE_COUNT 'true'
+define_overcloud_vms 'cont' $CONTROLLER_COUNT 8192
+define_overcloud_vms $compute_machine_name $COMPUTE_COUNT 8192 'true'
 define_overcloud_vms 'stor' $STORAGE_COUNT 4096 'true'
 # TODO: change memory constraints to 8192 if all containers on one node
 define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT 3072
