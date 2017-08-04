@@ -77,7 +77,7 @@ else
   # install pip for future run of OS checks
   curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
   python get-pip.py
-  pip install -y virtualenv
+  pip install -q virtualenv
 fi
 
 # install tripleo clients
