@@ -461,7 +461,7 @@ parameter_defaults:
   RabbitUserName: contrail
   RabbitPassword: contrail
   ContrailInsecure: true
-  AAAMode: no-auth
+  AAAMode: rbac
   ContrailWebuiHttp: 8180
 EOF
 # IMPORTANT: The DNS domain used for the hosts should match the dhcp_domain configured in the Undercloud neutron.
