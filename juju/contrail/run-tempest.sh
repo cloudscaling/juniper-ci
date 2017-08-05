@@ -6,8 +6,30 @@ my_dir="$(dirname $my_file)"
 source $my_dir/../common/functions
 source $my_dir/../common/functions-openstack
 
+USE_VENV='true'
 VERSION=${VERSION:-"XXX-mitaka"}
 VERSION=${VERSION#*-}
+
+# official tempest version for mitaka
+case "$VERSION" in
+  "mitaka")
+    tver="11.0.0"
+    ;;
+  "newton")
+    tver="13.0.0"
+    ;;
+  "ocata")
+    tver="15.0.0"
+    ;;
+  *)
+    tver=""
+    ;;
+esac
+if [[ -n "$tver" ]]; then
+  pushd "$WORKSPACE/tempest"
+  git checkout tags/$tver
+  popd
+fi
 
 auth_ip=`get_machine_ip keystone`
 keystone_machine=`get_machine keystone`
