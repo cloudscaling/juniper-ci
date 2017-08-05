@@ -13,7 +13,7 @@ VERSION=${VERSION#*-}
 # official tempest version for mitaka
 case "$VERSION" in
   "mitaka")
-    tver="11.0.0"
+    tver="13.0.0"
     ;;
   "newton")
     tver="13.0.0"
