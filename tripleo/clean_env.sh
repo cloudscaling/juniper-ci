@@ -22,15 +22,15 @@ delete_domains
 
 vol_path=$(get_pool_path $poolname)
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]]; then
-  rhel_unregister_system $poolname/undercloud-$NUM.qcow2 || true
-  rhel_unregister_system $poolname/undercloud-$NUM-cert-test.qcow2 || true
+  rhel_unregister_system $vol_path/undercloud-$NUM.qcow2 || true
+  rhel_unregister_system $vol_path/undercloud-$NUM-cert-test.qcow2 || true
 fi
 
 delete_volume undercloud-$NUM.qcow2 $poolname
 delete_volume undercloud-$NUM-cert-test.qcow2 $poolname
 for vol in `virsh vol-list $poolname | awk "/overcloud-$NUM-/ {print \$1}"` ; do
   if [[ "$ENVIRONMENT_OS" == 'rhel' ]]; then
-    rhel_unregister_system $poolname/$vol || true
+    rhel_unregister_system $vol_path/$vol || true
   fi
   delete_volume $vol $poolname
 done
