@@ -171,8 +171,9 @@ function rhel_register_system_and_customize() {
     virt-customize -a $image_file \
       --sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
       --run-command "subscription-manager repos ${enable_repos_opts}" \
-      --run-command 'yum remove -y cloud-init' \
-      --run-command 'sed -i "s/SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config'
+      --run-command 'yum remove -y cloud-init'
+      #  \
+      # --run-command 'sed -i "s/SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config'
   fi
   #eval "$old_opt"
   set -x
