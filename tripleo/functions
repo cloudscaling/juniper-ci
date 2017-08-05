@@ -154,6 +154,7 @@ function rhel_register_system_and_customize() {
   local image_file=$1
   local image_type=$2
   local common_repos=$(rhel_get_repos_for_os)
+  local enable_repos_opts=''
   for i in $common_repos ; do
     enable_repos_opts+=" --enable=${i}"
   done
