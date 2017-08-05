@@ -28,43 +28,6 @@ function save_overcloud_logs() {
   fi
 }
 
-function _unregister_rhel_system() {
-  local addr=$1
-  local unreg_overcloud=${2:-'yes'}
-  cat <<EOF | ssh -T $ssh_opts $addr
-set -x
-subscription-manager unregister || true
-if [[ "$unreg_overcloud" == 'yes' ]] ; then
-  if grep -q stack /etc/passwd ; then
-    su - stack
-    if [[ -f stackrc ]] ; then
-      . stackrc
-      count=0
-      while openstack stack list | grep -q overcloud ; do
-        if ! openstack stack list | grep overcloud | grep -i delete | grep -iq progress ; then
-          openstack stack delete --yes overcloud || true
-          ((count+= 1))
-        fi
-        if (( count > 5 )) ; then
-          break
-        fi
-        sleep 10
-      done
-    fi
-  fi
-fi
-EOF
-}
-
-function unregister_rhel_system() {
-  if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-    _unregister_rhel_system $ssh_addr
-    if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
-      _unregister_rhel_system  192.168.${env_addr}.3 'no'
-    fi
-  fi
-}
-
 function catch_errors() {
   local exit_code=$?
   echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
@@ -74,11 +37,6 @@ function catch_errors() {
   sleep 20
 
   save_overcloud_logs
-
-  if [[ $CLEAN_ENV == 'always' ]] ; then
-    unregister_rhel_system
-  fi
-
   exit $exit_code
 }
 
@@ -115,7 +73,4 @@ fi
 trap - ERR
 
 save_overcloud_logs
-if [[ $CLEAN_ENV != 'never' && $CLEAN_ENV != 'before_only' ]] ; then
-  unregister_rhel_system
-fi
 

@@ -31,6 +31,7 @@ ip_addr="192.168.${env_addr}.2"
 ssh_opts="-i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 ssh_addr="root@${ip_addr}"
 
+source "$my_dir/functions"
 
 # copy images for overcloud to it. (images can be build manually but it's too long - use previously built images)
 if [ -f $IMAGES ] ; then
@@ -44,38 +45,7 @@ if [ -f $IMAGES ] ; then
     fi
     pushd $tmp_dir
     tar -xf $IMAGES
-    common_repos="rhel-7-server-rpms rhel-7-server-extras-rpms rhel-7-server-rh-common-rpms rhel-ha-for-rhel-7-server-rpms"
-    if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
-      common_repos+=" rhel-7-server-cert-rpms"
-    fi
-    enable_repo=''
-    case "$OPENSTACK_VERSION" in
-      newton)
-        enable_repo='10'
-        ;;
-      ocata)
-        enable_repo='11'
-        ;;
-      pike)
-        enable_repo='12'
-        ;;
-      *)
-        echo "ERROR: unsupported OS $OPENSTACK_VERSION"
-        exit 1
-    esac
-    common_repos+=" rhel-7-server-openstack-${enable_repo}-rpms"
-    common_repos+=" rhel-7-server-openstack-${enable_repo}-devtools-rpms"
-    enable_repos_opts=''
-    for i in $common_repos ; do
-      enable_repos_opts+=" --enable=${i}"
-    done
-    set +x
-    . $RHEL_ACCOUNT_FILE
-    # virt-customize doesn support activation keys
-    virt-customize -a images/overcloud-full.qcow2 \
-      --sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
-      --run-command "subscription-manager repos ${enable_repos_opts}"
-    set -x
+    rhel_register_system_and_enable_repos "images/overcloud-full.qcow2"
     chown -R stack:stack images
     tar -cf images.tar images
     chown stack:stack images.tar

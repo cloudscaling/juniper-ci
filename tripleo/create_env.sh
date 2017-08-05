@@ -316,6 +316,13 @@ _patch_image "$pool_path/undercloud-$NUM.qcow2" \
   'ifcfg-ethM' $mgmt_ip $mgmt_mac \
   'ifcfg-ethA' $prov_ip $prov_mac
 
+if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+  rhel_register_system_and_enable_repos \
+    "$pool_path/undercloud-$NUM.qcow2" \
+    'yum remove -y cloud-init' \
+    'sed -i "s/SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config'
+fi
+
 _start_vm "rd-undercloud-$NUM" "$pool_path/undercloud-$NUM.qcow2" $mgmt_mac $prov_mac
 
 if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
@@ -323,6 +330,11 @@ if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
     'ifcfg-ethMC' $mgmt_ip $mgmt_mac_cert \
     'ifcfg-ethAC' $prov_ip $prov_mac_cert \
     'no'
+
+  rhel_register_system_and_enable_repos \
+    "$pool_path/undercloud-$NUM-cert-test.qcow2" \
+    'yum remove -y cloud-init' \
+    'sed -i "s/SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config'
 
   _start_vm "rd-undercloud-$NUM-cert-test" "$pool_path/undercloud-$NUM-cert-test.qcow2" $mgmt_mac_cert $prov_mac_cert 4096
 fi
@@ -360,72 +372,16 @@ hostnamectl set-hostname --transient $my_host
 echo "127.0.0.1   localhost myhost $my_host" > /etc/hosts
 systemctl restart network
 sleep 5
-yum remove -y cloud-init
-if sestatus | grep -q enforcing ; then
-  echo 0 > /sys/fs/selinux/enforce
-fi
-sed -i 's/SELINUX=.*/SELINUX=disabled/g' /etc/selinux/config
-EOF
-}
-
-#TODO: rework to avoid duplication between undercloud and overcloud
-function _rhel_register_system() {
-  local addr=$1
-  local common_repos="rhel-7-server-rpms rhel-7-server-extras-rpms rhel-7-server-rh-common-rpms rhel-ha-for-rhel-7-server-rpms"
-  if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
-    common_repos+=" rhel-7-server-cert-rpms"
-  fi
-  local enable_repo=''
-  case "$OPENSTACK_VERSION" in
-    newton)
-      enable_repo='10'
-      ;;
-    ocata)
-      enable_repo='11'
-      ;;
-    pike)
-      enable_repo='12'
-      ;;
-    *)
-      echo "ERROR: unsupported OS $OPENSTACK_VERSION"
-      exit 1
-  esac
-  common_repos+=" rhel-7-server-openstack-${enable_repo}-rpms"
-  common_repos+=" rhel-7-server-openstack-${enable_repo}-devtools-rpms"
-  local enable_repos_opts=''
-  for i in $common_repos ; do
-    enable_repos_opts+=" --enable=${i}"
-  done
-  cat <<EOF | $ssh_cmd root@${addr}
-set -x
-subscription-manager unregister || true
-release=\$(grep -o '[0-9]\\+\\.[0-9]\\+' /etc/redhat-release)
-set +x
-. $RHEL_ACCOUNT_FILE
-if [[ -n "\$RHEL_ACTIVATION_KEY" ]] ; then
-  echo Use activation key for registration
-  subscription-manager register --release=\$release --activationkey=\$RHEL_ACTIVATION_KEY --org=\$RHEL_ORG
-else
-  echo Use user and password for registration
-  subscription-manager register --auto-attach --release=\$release --username=\$RHEL_USER --password=\$RHEL_PASSWORD
-fi
-set -x
-subscription-manager repos $enable_repos_opts
-yum update -y
 EOF
 }
 
 # wait udnercloud and register it in redhat if rhel env
 _wait_machine "${mgmt_ip}.2"
 _prepare_network "${mgmt_ip}.2"  "myhost.my${NUM}domain"
-if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-  _rhel_register_system "${mgmt_ip}.2"
-fi
 
 if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
   _wait_machine "${mgmt_ip}.3"
   _prepare_network "${mgmt_ip}.3"  "myhost.my${NUM}certdomain"
-  _rhel_register_system "${mgmt_ip}.3"
 
   cat <<EOF | $ssh_cmd ${mgmt_ip}.3
 set -x

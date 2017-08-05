@@ -119,8 +119,64 @@ function delete_domains() {
 }
 
 function delete_volume() {
-  volname=$1
-  poolname=$2
-  pool_path=$(get_pool_path $poolname)
+  local volname=$1
+  local poolname=$2
+  local pool_path=$(get_pool_path $poolname)
   virsh vol-delete $volname --pool $poolname 2>/dev/null || rm -f $pool_path/$volname 2>/dev/null
+}
+
+function rhel_get_repos_for_os() {
+  local common_repos="rhel-7-server-rpms rhel-7-server-extras-rpms rhel-7-server-rh-common-rpms rhel-ha-for-rhel-7-server-rpms"
+  if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+    common_repos+=" rhel-7-server-cert-rpms"
+  fi
+  local enable_repo=''
+  case "$OPENSTACK_VERSION" in
+    newton)
+      enable_repo='10'
+      ;;
+    ocata)
+      enable_repo='11'
+      ;;
+    pike)
+      enable_repo='12'
+      ;;
+    *)
+      echo "ERROR: unsupported OS $OPENSTACK_VERSION"
+      exit 1
+  esac
+  common_repos+=" rhel-7-server-openstack-${enable_repo}-rpms"
+  common_repos+=" rhel-7-server-openstack-${enable_repo}-devtools-rpms"
+  echo $common_repos
+}
+
+function rhel_register_system_and_enable_repos() {
+  local image_file=$1
+  shift
+  local common_repos=$(rhel_get_repos_for_os)
+  for i in $common_repos ; do
+    enable_repos_opts+=" --enable=${i}"
+  done
+  local run_commands="--run-command 'subscription-manager repos ${enable_repos_opts}'"
+  until [ -z "$1" ] ; do
+    run_commands+=" --run-command '$1'"
+    shift
+  done
+  local old_opt=$(shopt -o xtrace)
+  set +x
+  . $RHEL_ACCOUNT_FILE
+  # virt-customize doesn support activation keys
+  virt-customize -a $image_file \
+      --sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
+      $run_commands
+
+  eval "$old_opt"
+}
+
+function rhel_unregister_system() {
+  local image_file=$1
+  if [[ -f $image_file ]] ; then
+    virt-customize -a $image_file \
+      --run-command "subscription-manager unregister"
+  fi
 }
