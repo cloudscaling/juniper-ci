@@ -161,7 +161,7 @@ function rhel_register_system_and_customize() {
   set +x
   . $RHEL_ACCOUNT_FILE
   # virt-customize doesn support activation keys
-  if [[ "$image_type" == 'overcloud' ]]
+  if [[ "$image_type" == 'overcloud' ]] ; then
     virt-customize -a $image_file \
       --sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
       --run-command "subscription-manager repos ${enable_repos_opts}"
