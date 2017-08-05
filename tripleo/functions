@@ -157,7 +157,8 @@ function rhel_register_system_and_customize() {
   for i in $common_repos ; do
     enable_repos_opts+=" --enable=${i}"
   done
-  local old_opt=$(shopt -o xtrace)
+  # todo: fix shopt
+  #local old_opt=$(shopt -o xtrace)
   set +x
   . $RHEL_ACCOUNT_FILE
   # virt-customize doesn support activation keys
@@ -172,7 +173,8 @@ function rhel_register_system_and_customize() {
       --run-command 'yum remove -y cloud-init' \
       --run-command 'sed -i "s/SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config'
   fi
-  eval "$old_opt"
+  #eval "$old_opt"
+  set -x
 }
 
 function rhel_unregister_system() {
