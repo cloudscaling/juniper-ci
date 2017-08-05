@@ -1,0 +1,33 @@
+- username: 'user_1'
+  tenant_name: 'test_tenant_1'
+  password: 'password'
+- username: 'user_2'
+  tenant_name: 'test_tenant_2'
+  password: 'password'
+- username: 'user_3'
+  tenant_name: 'test_tenant_3'
+  password: 'password'
+- username: 'user_4'
+  tenant_name: 'test_tenant_4'
+  password: 'password'
+
+- username: 'user_5'
+  tenant_name: 'test_tenant_5'
+  password: 'password'
+  types:
+     - 'admin'
+- username: 'user_6'
+  tenant_name: 'test_tenant_6'
+  password: 'password'
+  types:
+     - 'admin'
+- username: 'user_7'
+  tenant_name: 'test_tenant_7'
+  password: 'password'
+  types:
+     - 'admin'
+- username: 'user_8'
+  tenant_name: 'test_tenant_8'
+  password: 'password'
+  types:
+     - 'admin'
