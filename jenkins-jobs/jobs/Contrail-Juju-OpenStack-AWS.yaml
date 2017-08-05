@@ -57,6 +57,7 @@
     scm:
       - juniper-contrail-charms-branch
       - juniper-ci
+      - tempest
     builders:
       - shell: |
           #!/bin/bash -e
