@@ -45,7 +45,7 @@ if [ -f $IMAGES ] ; then
     fi
     pushd $tmp_dir
     tar -xf $IMAGES
-    rhel_register_system_and_enable_repos "images/overcloud-full.qcow2"
+    rhel_register_system_and_customize "images/overcloud-full.qcow2" 'overcloud'
     chown -R stack:stack images
     tar -cf images.tar images
     chown stack:stack images.tar

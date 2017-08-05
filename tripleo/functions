@@ -150,26 +150,28 @@ function rhel_get_repos_for_os() {
   echo $common_repos
 }
 
-function rhel_register_system_and_enable_repos() {
+function rhel_register_system_and_customize() {
   local image_file=$1
-  shift
+  local image_type=$2
   local common_repos=$(rhel_get_repos_for_os)
   for i in $common_repos ; do
     enable_repos_opts+=" --enable=${i}"
-  done
-  local run_commands="--run-command 'subscription-manager repos ${enable_repos_opts}'"
-  until [ -z "$1" ] ; do
-    run_commands+=" --run-command '$1'"
-    shift
   done
   local old_opt=$(shopt -o xtrace)
   set +x
   . $RHEL_ACCOUNT_FILE
   # virt-customize doesn support activation keys
-  virt-customize -a $image_file \
+  if [[ "$image_type" == 'overcloud' ]]
+    virt-customize -a $image_file \
       --sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
-      $run_commands
-
+      --run-command "subscription-manager repos ${enable_repos_opts}"
+  else
+    virt-customize -a $image_file \
+      --sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
+      --run-command "subscription-manager repos ${enable_repos_opts}" \
+      --run-command 'yum remove -y cloud-init' \
+      --run-command 'sed -i "s/SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config'
+  fi
   eval "$old_opt"
 }
 

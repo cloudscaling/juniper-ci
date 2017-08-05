@@ -317,10 +317,7 @@ _patch_image "$pool_path/undercloud-$NUM.qcow2" \
   'ifcfg-ethA' $prov_ip $prov_mac
 
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-  rhel_register_system_and_enable_repos \
-    "$pool_path/undercloud-$NUM.qcow2" \
-    'yum remove -y cloud-init' \
-    'sed -i "s/SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config'
+  rhel_register_system_and_customize "$pool_path/undercloud-$NUM.qcow2" 'undercloud'
 fi
 
 _start_vm "rd-undercloud-$NUM" "$pool_path/undercloud-$NUM.qcow2" $mgmt_mac $prov_mac
@@ -331,10 +328,7 @@ if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
     'ifcfg-ethAC' $prov_ip $prov_mac_cert \
     'no'
 
-  rhel_register_system_and_enable_repos \
-    "$pool_path/undercloud-$NUM-cert-test.qcow2" \
-    'yum remove -y cloud-init' \
-    'sed -i "s/SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config'
+  rhel_register_system_and_customize "$pool_path/undercloud-$NUM-cert-test.qcow2" 'undercloud'
 
   _start_vm "rd-undercloud-$NUM-cert-test" "$pool_path/undercloud-$NUM-cert-test.qcow2" $mgmt_mac_cert $prov_mac_cert 4096
 fi
