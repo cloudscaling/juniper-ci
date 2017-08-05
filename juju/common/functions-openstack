@@ -3,22 +3,22 @@
 MAX_FAIL=30
 
 function activate_venv() {
-  if [ -d .venv ]; then
-    source .venv/bin/activate
+  if [ -d "$WORKSPACE/.venv" ]; then
+    source "$WORKSPACE/.venv/bin/activate"
   fi
 }
 
 function deactivate_venv() {
-  if [ -d .venv ]; then
+  if [ -d "$WORKSPACE/.venv" ]; then
     deactivate
   fi
 }
 
 function create_virtualenv() {
-  rm -rf .venv
+  rm -rf "$WORKSPACE/.venv"
   if [[ "$USE_VENV" == 'true' ]] ; then
     echo "INFO: Create venv"
-    virtualenv .venv
+    virtualenv "$WORKSPACE/.venv"
   else
     echo "INFO: Skip venv creation"
   fi

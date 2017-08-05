@@ -65,7 +65,7 @@ sed -i "s/%IMAGE_ID_ALT%/$image_id_alt/g" $CONF
 sed -i "s/%NETWORK_ID%/$network_id/g" $CONF
 #sed -i "s/%SCHEDULER_FILTERS%/$filters/g" $CONF
 
-source $WORKSPACE/.venv/bin/activate
+activate_venv
 pip install -r requirements.txt
 pip install junitxml
 
@@ -83,9 +83,9 @@ set +e
 testr run --subunit --parallel --concurrency=2 --load-list=$tests_filtered | subunit-trace -n -f
 exit_code=$?
 
-testr last --subunit | subunit-1to2 | python $WORKSPACE/jenkins-scripts/tempest/subunit2jenkins.py -o test_result.xml -s scaleio-openstack
+testr last --subunit | subunit-1to2 | python "$my_dir/../../tempest/subunit2jenkins.py" -o test_result.xml -s scaleio-openstack
 
-deactivate
+deactivate_venv
 
 cd $my_dir
 
