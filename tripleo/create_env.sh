@@ -308,8 +308,8 @@ function _start_vm() {
     --boot hd \
     --noautoconsole \
     --network network=$mgmt_net,model=$net_driver,mac=$mgmt_mac \
+    --network network=$prov_net,model=$net_driver,mac=$prov_mac \
     --graphics vnc,listen=0.0.0.0
-
 }
 
 _patch_image "$pool_path/undercloud-$NUM.qcow2" \
