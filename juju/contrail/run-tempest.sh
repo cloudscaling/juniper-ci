@@ -50,6 +50,7 @@ create_flavors
 activate_venv
 network_id=`openstack network list --external -c ID -f value | head -1`
 openstack role create Member || /bin/true
+api_ext=`openstack extension list --network -c Alias -f value | tr '\n' ','`
 deactivate_venv
 
 cd $WORKSPACE/tempest
@@ -63,6 +64,7 @@ sed -i "s|%TEMPEST_DIR%|$(pwd)|g" $CONF
 sed -i "s/%IMAGE_ID%/$image_id/g" $CONF
 sed -i "s/%IMAGE_ID_ALT%/$image_id_alt/g" $CONF
 sed -i "s/%NETWORK_ID%/$network_id/g" $CONF
+sed -i "s/%API_EXT%/$api_ext/g" $CONF
 #sed -i "s/%SCHEDULER_FILTERS%/$filters/g" $CONF
 
 activate_venv
