@@ -94,10 +94,10 @@ create_network management
 mgmt_net=`get_network_name management`
 create_network provisioning
 prov_net=`get_network_name provisioning`
-create_network external
-ext_net=`get_network_name external`
-create_network dpdk
-dpdk_net=`get_network_name dpdk`
+#create_network external
+#ext_net=`get_network_name external`
+#create_network dpdk
+#dpdk_net=`get_network_name dpdk`
 
 # create pool
 virsh pool-info $poolname &> /dev/null || create_pool $poolname
@@ -128,8 +128,6 @@ function define_machine() {
     --noautoconsole \
     --vnc \
     --network network=$prov_net,model=$net_driver \
-    --network network=$dpdk_net,model=$net_driver \
-    --network network=$ext_net,model=$net_driver \
     --cpu SandyBridge,+vmx \
     --dry-run --print-xml > /tmp/oc-$name.xml
   virsh define --file /tmp/oc-$name.xml
@@ -310,8 +308,6 @@ function _start_vm() {
     --boot hd \
     --noautoconsole \
     --network network=$mgmt_net,model=$net_driver,mac=$mgmt_mac \
-    --network network=$prov_net,model=$net_driver,mac=$prov_mac \
-    --network network=$ext_net,model=$net_driver \
     --graphics vnc,listen=0.0.0.0
 
 }
