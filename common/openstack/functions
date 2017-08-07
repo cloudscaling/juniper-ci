@@ -142,6 +142,12 @@ function create_flavors() {
       openstack flavor set --property hw:mem_page_size=any 51
     fi
   fi
+  if ! openstack --insecure flavor show 52 &>/dev/null ; then
+    openstack --insecure flavor create --disk 1 --vcpus 1 --ram 256 --id 52 test_flavor >/dev/null
+    if [[ "$DPDK" == 'yes' ]]; then
+      openstack flavor set --property hw:mem_page_size=any 52
+    fi
+  fi
   deactivate_venv
 }
 

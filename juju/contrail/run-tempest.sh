@@ -32,12 +32,6 @@ if [[ -n "$tver" ]]; then
 fi
 
 auth_ip=`get_machine_ip keystone`
-keystone_machine=`get_machine keystone`
-#juju-scp $my_dir/tempest/__setup_cloud_accounts.sh $keystone_machine: 2>/dev/null
-#juju-ssh $keystone_machine "auth_ip=$auth_ip bash -e __setup_cloud_accounts.sh" 2>/dev/null
-
-#nova_api_machine=`get_machine nova-cloud-controller`
-#filters=`juju-ssh $nova_api_machine "sudo grep scheduler_default_filters /etc/nova/nova.conf | cut -d '=' -f 2" 2>/dev/null`
 
 create_stackrc
 source $WORKSPACE/stackrc
@@ -56,7 +50,6 @@ deactivate_venv
 cd $WORKSPACE/tempest
 rm -f *.xml
 
-#cp $my_dir/tempest/accounts.yaml $(pwd)/etc/
 CONF="$(pwd)/etc/tempest.conf"
 cp $my_dir/tempest/tempest.conf $CONF
 sed -i "s/%AUTH_IP%/$auth_ip/g" $CONF
@@ -65,7 +58,6 @@ sed -i "s/%IMAGE_ID%/$image_id/g" $CONF
 sed -i "s/%IMAGE_ID_ALT%/$image_id_alt/g" $CONF
 sed -i "s/%NETWORK_ID%/$network_id/g" $CONF
 sed -i "s/%API_EXT%/$api_ext/g" $CONF
-#sed -i "s/%SCHEDULER_FILTERS%/$filters/g" $CONF
 
 activate_venv
 pip install -r requirements.txt
