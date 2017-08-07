@@ -417,18 +417,46 @@ resource_registry:
 EOF
   fi
   cat <<EOF >> $misc_opts
-  OS::TripleO::ContrailDBNodeIPsSimulation: simulate_contrail_db_node_ips.yaml
+  OS::TripleO::Services::ContrailControl: simulate_contrail_control.yaml
+  OS::TripleO::Services::ContrailDatabase: simulate_contrail_database.yaml
 EOF
-  cat <<EOF > simulate_contrail_db_node_ips.yaml
+  cat <<EOF > simulate_contrail_database.yaml
 heat_template_version: 2016-10-14
-
+parameters:
+  ServiceNetMap:
+    default: {}
+    type: json
+  DefaultPasswords:
+    default: {}
+    type: json
+  EndpointMap:
+    default: {}
+    type: json
 outputs:
   role_data:
-    description: Simulation for contrail_database_node_ips.
     value:
-      service_name: contrail_container_db_simulation
+      service_name: contrail_database
       config_settings:
-        contrail_database_node_ips: ''
+        contrail_database_sim: 'contrail_database_sim'
+EOF
+  cat <<EOF > simulate_contrail_control.yaml
+heat_template_version: 2016-10-14
+parameters:
+  ServiceNetMap:
+    default: {}
+    type: json
+  DefaultPasswords:
+    default: {}
+    type: json
+  EndpointMap:
+    default: {}
+    type: json
+outputs:
+  role_data:
+    value:
+      service_name: contrail_control
+      config_settings:
+        contrail_control_sim: 'contrail_control_sim'
 EOF
 fi
 
