@@ -262,12 +262,6 @@ sed -i "s/ContrailAnalyticsDatabaseCount:.*/ContrailAnalyticsDatabaseCount: $ANA
 sed -i "s/ComputeCount:.*/ComputeCount: $comp_scale_count/g" $contrail_services_file
 sed -i "s/ContrailDpdkCount:.*/ContrailDpdkCount: $dpdk_scale_count/g" $contrail_services_file
 sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_services_file
-# disable services that are not-exists in R4.0
-# they prevent to install containers on one node because
-# of puppet resource declaraion duplication
-sed -i 's/OS::TripleO::Services::ContrailControl:.*/OS::TripleO::Services::ContrailControl: OS::Heat::None/g' $contrail_services_file
-sed -i 's/OS::TripleO::Services::ContrailDatabase:.*/OS::TripleO::Services::ContrailDatabase: OS::Heat::None/g' $contrail_services_file
-sed -i 's/OS::TripleO::Services::ContrailWebUI:.*/OS::TripleO::Services::ContrailWebUI: OS::Heat::None/g' $contrail_services_file
 
 # set network parameters
 # TODO: temporary use always single nic
@@ -297,6 +291,11 @@ sed -i "s/ControlVirtualInterface:.*/ControlVirtualInterface: ens3/g" $contrail_
 sed -i "s/PublicVirtualInterface:.*/PublicVirtualInterface: ens3/g" $contrail_net_file
 sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_net_file
 sed -i 's/DnsServers:.*/DnsServers: ["8.8.8.8","8.8.4.4"]/g' $contrail_net_file
+
+# file for other options
+misc_opts='misc_opts.yaml'
+rm -f $misc_opts
+touch $misc_opts
 
 # Create ports for Contrail Controller and/or Analytis if any is installed on own node.
 # In that case OS controller will host VIP and haproxy will forward requests.
@@ -393,25 +392,47 @@ EOF
   pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
   sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalytics" $role_file
 fi
-if (( ANALYTICSDB_COUNT > 0 || CONTRAIL_CONTROLLER_COUNT > 0 )) ; then
-  if (( ANALYTICSDB_COUNT > 0 )) ; then
-    echo INFO: contrail analyticsdb is installed on the own node
-  else
+if (( ANALYTICSDB_COUNT > 0 )) ; then
+  echo INFO: contrail analyticsdb is installed on the own node
+else
+  # disable services that are not-exists in R4.0
+  # they prevent to install containers on one node because
+  # of puppet resource declaraion duplication
+  sed -i 's/OS::TripleO::Services::ContrailControl:.*/OS::TripleO::Services::ContrailControl: OS::Heat::None/g' $contrail_services_file
+  sed -i 's/OS::TripleO::Services::ContrailDatabase:.*/OS::TripleO::Services::ContrailDatabase: OS::Heat::None/g' $contrail_services_file
+  sed -i 's/OS::TripleO::Services::ContrailWebUI:.*/OS::TripleO::Services::ContrailWebUI: OS::Heat::None/g' $contrail_services_file
+  if (( CONTRAIL_CONTROLLER_COUNT > 0 )) ; then
     echo INFO: contrail analyticsdb is installed on contrail controller nodes, put analyticsdb service into ContralController role
     pos_to_insert=`sed "=" $role_file | sed -n '/^- name: ContrailController$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
-    sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalyticsDatabase" $role_file
+  else
+    echo INFO: add contrail analyticsdb services to OS Controller role
+    enable_ext_puppet_syntax='true'
+    pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
   fi
-else
-  echo INFO: add contrail analyticsdb services to OS Controller role
-  enable_ext_puppet_syntax='true'
-  pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
   sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalyticsDatabase" $role_file
+  # add simulation contrail_database_node_ips
+  if ! grep -q 'resource_registry:' $misc_opts ;  then
+    cat <<EOF >> $misc_opts
+resource_registry:
+EOF
+  fi
+  cat <<EOF >> $misc_opts
+  OS::TripleO::ContrailDBNodeIPsSimulation: simulate_contrail_db_node_ips.yaml
+EOF
+  cat <<EOF > simulate_contrail_db_node_ips.yaml
+heat_template_version: 2016-10-14
+
+outputs:
+  role_data:
+    description: Simulation for contrail_database_node_ips.
+    value:
+      service_name: contrail_container_db_simulation
+      config_settings:
+        contrail_database_node_ips: ''
+EOF
 fi
 
 # other options
-misc_opts='misc_opts.yaml'
-rm -f $misc_opts
-touch $misc_opts
 if [[ "$enable_ext_puppet_syntax" == 'true' ]] ; then
   cat <<EOF > enable_ext_puppet_syntax.yaml
 heat_template_version: 2014-10-16
@@ -437,8 +458,12 @@ outputs:
     description: Deployment reference, used to trigger post-deploy on changes
     value: {get_attr: [NodeDeployment, deploy_stdout]}
 EOF
-  cat <<EOF >> $misc_opts
+  if ! grep -q 'resource_registry:' $misc_opts ;  then
+    cat <<EOF >> $misc_opts
 resource_registry:
+EOF
+  fi
+  cat <<EOF >> $misc_opts
   OS::TripleO::ControllerExtraConfigPre: enable_ext_puppet_syntax.yaml
 EOF
 fi
