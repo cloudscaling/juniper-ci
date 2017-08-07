@@ -45,6 +45,15 @@ activate_venv
 network_id=`openstack network list --external -c ID -f value | head -1`
 openstack role create Member || /bin/true
 api_ext=`openstack extension list --network -c Alias -f value | tr '\n' ','`
+
+if ! openstack project show demo1 ; then
+  openstack project create demo1
+  openstack user create --project demo1 --password password demo1
+fi
+if ! openstack project show demo2 ; then
+  openstack project create demo2
+  openstack user create --project demo2 --password password demo2
+fi
 deactivate_venv
 
 cd $WORKSPACE/tempest
