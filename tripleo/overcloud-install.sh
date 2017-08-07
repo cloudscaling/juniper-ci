@@ -262,6 +262,12 @@ sed -i "s/ContrailAnalyticsDatabaseCount:.*/ContrailAnalyticsDatabaseCount: $ANA
 sed -i "s/ComputeCount:.*/ComputeCount: $comp_scale_count/g" $contrail_services_file
 sed -i "s/ContrailDpdkCount:.*/ContrailDpdkCount: $dpdk_scale_count/g" $contrail_services_file
 sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_services_file
+# disable services that are not-exists in R4.0
+# they prevent to install containers on one node because
+# of puppet resource declaraion duplication
+sed -i 's/OS::TripleO::Services::ContrailControl:.*/OS::TripleO::Services::ContrailControl: OS::Heat::None/g' $contrail_services_file
+sed -i 's/OS::TripleO::Services::ContrailDatabase:.*/OS::TripleO::Services::ContrailDatabase: OS::Heat::None/g' $contrail_services_file
+sed -i 's/OS::TripleO::Services::ContrailWebUI:.*/OS::TripleO::Services::ContrailWebUI: OS::Heat::None/g' $contrail_services_file
 
 # set network parameters
 # TODO: temporary use always single nic
@@ -277,7 +283,6 @@ sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_services_fi
 use_multi_nic='no'
 vrouter_iface='ens3'
 contrail_net_file='tripleo-heat-templates/environments/contrail/contrail-net-single.yaml'
-
 
 sed -i "s/ControlPlaneDefaultRoute:.*/ControlPlaneDefaultRoute: ${prov_ip}/g" $contrail_net_file
 sed -i "s/EC2MetadataIp:.*/EC2MetadataIp: ${prov_ip}/g" $contrail_net_file
