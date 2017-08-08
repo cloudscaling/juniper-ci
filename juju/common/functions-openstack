@@ -172,6 +172,21 @@ function create_network() {
   deactivate_venv
 }
 
+function remove_network() {
+  local netsfx=$1
+  activate_venv
+
+  local router_id=`openstack --insecure router show p-ext-$netsfx -f value -c id`
+  openstack --insecure router remove subnet $router_id private-$netsfx
+  openstack --insecure router delete $router_id
+
+  local private_net_id=`openstack --insecure network show private-$netsfx -f value -c id`
+  openstack --insecure subnet delete private-$netsfx
+  openstack --insecure network delete private-$netsfx
+
+  deactivate_venv
+}
+
 function run_os_checks() {
   # check installed cloud
   activate_venv
@@ -220,6 +235,10 @@ function run_os_checks() {
 
   openstack --insecure catalog list || keystone catalog || /bin/true
   deactivate_venv
+
+  if [[ $ret == 0 ]]; then
+    delete_network $netsfx
+  fi
 
   return $ret
 }
