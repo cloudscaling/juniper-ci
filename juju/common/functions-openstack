@@ -172,7 +172,7 @@ function create_network() {
   deactivate_venv
 }
 
-function remove_network() {
+function delete_network() {
   local netsfx=$1
   activate_venv
 
