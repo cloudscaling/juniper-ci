@@ -81,7 +81,7 @@ else
 fi
 
 # install tripleo clients
-yum -y install gcc make yum-plugin-priorities python-tripleoclient python-rdomanager-oscplugin sshpass openstack-utils
+yum -y install gcc make python-devel yum-plugin-priorities python-tripleoclient python-rdomanager-oscplugin sshpass openstack-utils
 
 if [[ "$OPENSTACK_VERSION" == 'ocata' && "$ENVIRONMENT_OS" == 'centos' ]] ; then
   yum update -y
