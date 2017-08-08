@@ -137,13 +137,13 @@ function create_image() {
 function create_flavors() {
   activate_venv
   if ! openstack --insecure flavor show 51 &>/dev/null ; then
-    openstack --insecure flavor create --disk 1 --vcpus 1 --ram 128 --id 51 test_flavor >/dev/null
+    openstack --insecure flavor create --disk 1 --vcpus 1 --ram 128 --id 51 test_flavor1 >/dev/null
     if [[ "$DPDK" == 'yes' ]]; then
       openstack flavor set --property hw:mem_page_size=any 51
     fi
   fi
   if ! openstack --insecure flavor show 52 &>/dev/null ; then
-    openstack --insecure flavor create --disk 1 --vcpus 1 --ram 256 --id 52 test_flavor >/dev/null
+    openstack --insecure flavor create --disk 1 --vcpus 1 --ram 256 --id 52 test_flavor2 >/dev/null
     if [[ "$DPDK" == 'yes' ]]; then
       openstack flavor set --property hw:mem_page_size=any 52
     fi
