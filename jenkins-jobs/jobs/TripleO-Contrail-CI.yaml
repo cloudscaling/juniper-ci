@@ -27,6 +27,21 @@
             - 'newton'
             - 'mitaka'
       - choice:
+          name: AAA_MODE
+          description: "aaa_mode parameter for Contrail Controller"
+          choices:
+            - 'rbac'
+            - 'cloud-admin'
+            - 'no-auth'
+      - choice:
+          name: AAA_MODE_ANALYTICS
+          description: "analytics_aaa_mode parameter for Contrail Analytics (auto - equal to aaa_mode)"
+          choices:
+            - 'auto'
+            - 'rbac'
+            - 'cloud-admin'
+            - 'no-auth'
+      - choice:
           name: DPDK
           choices:
             - 'no'
@@ -91,6 +106,10 @@
           if [[ "$DPDK" == 'yes' ]] ; then
             desc+=' dpdk'
           fi
+          desc+=' $AAA_MODE'
+          if [[ "$AAA_MODE_ANALYTICS" != 'auto' ]] ; then
+            desc+="/${AAA_MODE_ANALYTICS}"
+          fi
           if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
             if [[ "$ENVIRONMENT_OS" != 'rhel' ]] ; then
               echo "RedHat Certification is available only for RHEL environment"
@@ -103,7 +122,10 @@
       - description-setter:
           regexp: "DESCRIPTION (.*)"
       - shell: |
-          #!/bin/bash -e
+          #!/bin/bash -ex
+          if [[ "$AAA_MODE_ANALYTICS" == 'auto' ]] ; then
+            export AAA_MODE_ANALYTICS=$AAA_MODE
+          fi
           ./juniper-ci/tripleo/run-contrail.sh
     publishers:
       - archive:

@@ -18,6 +18,16 @@ if [[ -z "$DPDK" ]] ; then
   exit 1
 fi
 
+if [[ -z "$AAA_MODE" ]] ; then
+  echo "AAA_MODE is expected (e.g. export AAA_MODE=rbac/cloud-admin/no-auth)"
+  exit 1
+fi
+
+if [[ -z "$AAA_MODE_ANALYTICS" ]] ; then
+  echo "AAA_MODE_ANALYTICS is expected (e.g. export AAA_MODE_ANALYTICS=rbac/cloud-admin/no-auth)"
+  exit 1
+fi
+
 DEPLOY=${DEPLOY:-0}
 NETWORK_ISOLATION=${NETWORK_ISOLATION:-'single'}
 
@@ -519,8 +529,8 @@ parameter_defaults:
   RabbitUserName: contrail
   RabbitPassword: contrail
   ContrailInsecure: true
-  AAAMode: rbac
-  AAAModeAnalytics: rbac
+  AAAMode: $AAA_MODE
+  AAAModeAnalytics: $AAA_MODE_ANALYTICS
   ContrailWebuiHttp: 8180
 EOF
 # IMPORTANT: The DNS domain used for the hosts should match the dhcp_domain configured in the Undercloud neutron.

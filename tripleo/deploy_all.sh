@@ -42,6 +42,7 @@ function catch_errors() {
 
 ssh_env="NUM=$NUM DEPLOY=1 NETWORK_ISOLATION=$NETWORK_ISOLATION ENVIRONMENT_OS=$ENVIRONMENT_OS"
 ssh_env+=" OPENSTACK_VERSION=$OPENSTACK_VERSION RHEL_CERT_TEST=$RHEL_CERT_TEST DPDK=$DPDK"
+ssh_env+=" AAA_MODE=$AAA_MODE AAA_MODE_ANALYTICS=$AAA_MODE_ANALYTICS"
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
     export RHEL_ACCOUNT_FILE=${RHEL_ACCOUNT_FILE:-'/home/root/rhel/rhel-account-cert'}
