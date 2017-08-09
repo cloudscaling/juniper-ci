@@ -109,6 +109,7 @@ juju-deploy $PLACE/contrail-keystone-auth --to lxd:$cont1
 
 juju-deploy $PLACE/contrail-controller --to $cont1
 juju-expose contrail-controller
+juju-set contrail-controller auth-mode=$AAA_MODE
 juju-deploy $PLACE/contrail-analyticsdb --to $cont1
 juju-deploy $PLACE/contrail-analytics --to $cont1
 juju-expose contrail-analytics

@@ -27,6 +27,13 @@
             - two
             - one
             - ha
+      - choice:
+          name: AAA_MODE
+          description: "aaa-mode for Contrail"
+          choices:
+            - rbac
+            - cloud-admin
+            - no-auth
       - bool:
           name: USE_ADDITIONAL_INTERFACE
           description: "Deploy Contrail with additional interfaces that is used for control-network"
