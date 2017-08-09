@@ -157,12 +157,12 @@ function define_overcloud_vms() {
 
 # just define overcloud machines
 define_overcloud_vms 'cont' $CONTROLLER_COUNT 8192
-define_overcloud_vms $compute_machine_name $COMPUTE_COUNT 8192 'true'
+define_overcloud_vms $compute_machine_name $COMPUTE_COUNT 4096 'true'
 define_overcloud_vms 'stor' $STORAGE_COUNT 4096 'true'
 # TODO: change memory constraints to 8192 if all containers on one node
-define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT 8192
-define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT 8192
-define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT 8192
+define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT 4096
+define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT 4096
+define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT 4096
 
 # copy image for undercloud and resize them
 cp $BASE_IMAGE $pool_path/undercloud-$NUM.qcow2
@@ -320,7 +320,8 @@ if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   rhel_register_system_and_customize "$pool_path/undercloud-$NUM.qcow2" 'undercloud'
 fi
 
-_start_vm "rd-undercloud-$NUM" "$pool_path/undercloud-$NUM.qcow2" $mgmt_mac $prov_mac
+_start_vm "rd-undercloud-$NUM" "$pool_path/undercloud-$NUM.qcow2" \
+  $mgmt_mac $prov_mac
 
 if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
   _patch_image "$pool_path/undercloud-$NUM-cert-test.qcow2" \
@@ -330,7 +331,9 @@ if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
 
   rhel_register_system_and_customize "$pool_path/undercloud-$NUM-cert-test.qcow2" 'undercloud'
 
-  _start_vm "rd-undercloud-$NUM-cert-test" "$pool_path/undercloud-$NUM-cert-test.qcow2" $mgmt_mac_cert $prov_mac_cert 4096
+  _start_vm \
+    "rd-undercloud-$NUM-cert-test" "$pool_path/undercloud-$NUM-cert-test.qcow2" \
+    $mgmt_mac_cert $prov_mac_cert 2048
 fi
 
 
