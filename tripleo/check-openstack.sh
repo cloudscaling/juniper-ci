@@ -12,7 +12,11 @@ if [ -z "$WORKSPACE" ] ; then
 fi
 
 source ${WORKSPACE}/stackrc
-for mid in `nova list | awk '/-novacompute-/{print $12}'` ; do
+node_name_regexp='compute'
+if [[ "$DPDK" == 'yes' ]]; then
+  node_name_regexp='dpdk'
+fi
+for mid in `nova list | grep "$node_name_regexp" |  awk '{print $12}'` ; do
   mip="`echo $mid | cut -d '=' -f 2`"
   ssh heat-admin@$mip sudo yum install -y sshpass
 done
