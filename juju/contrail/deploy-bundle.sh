@@ -61,6 +61,7 @@ if [ "$USE_EXTERNAL_RABBITMQ" == 'true' ]; then
 else
   sed -i -e "s|%USE_EXTERNAL_RABBITMQ%|false|m" $BUNDLE
 fi
+sed -i -e "s|%AUTH_MODE%|$AAA_MODE|m" $BUNDLE
 sed -i "s/\r/\n/g" $BUNDLE
 
 echo "INFO: Deploy bundle $(date)"

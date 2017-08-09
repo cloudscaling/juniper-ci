@@ -36,6 +36,7 @@ export USE_SSL_OS="false"
 export USE_SSL_CONTRAIL="false"
 export USE_ADDITIONAL_INTERFACE="${USE_ADDITIONAL_INTERFACE:-false}"
 export USE_DPDK="${USE_DPDK:-false}"
+export AAA_MODE=${AAA_MODE:-rbac}
 
 export PASSWORD=${PASSWORD:-'password'}
 

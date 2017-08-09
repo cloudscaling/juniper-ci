@@ -121,6 +121,7 @@ juju-deploy $PLACE/contrail-keystone-auth --to $m6
 
 juju-deploy $PLACE/contrail-controller --to $m6
 juju-expose contrail-controller
+juju-set contrail-controller auth-mode=$AAA_MODE
 if [ "$USE_EXTERNAL_RABBITMQ" == 'true' ]; then
   juju-set contrail-controller "use-external-rabbitmq=true"
 fi

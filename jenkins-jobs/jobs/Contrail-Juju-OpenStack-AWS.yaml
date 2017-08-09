@@ -27,6 +27,13 @@
           choices:
             - manual
             - bundle
+      - choice:
+          name: AAA_MODE
+          description: "aaa-mode for Contrail"
+          choices:
+            - rbac
+            - cloud-admin
+            - no-auth
       - bool:
           name: DEPLOY_AS_HA_MODE
           description: "Deploy 3 controllers instead of 1"

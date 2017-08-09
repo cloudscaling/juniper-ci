@@ -99,6 +99,7 @@ services:
     num_units: 1
     options:
       use-external-rabbitmq: "%USE_EXTERNAL_RABBITMQ%"
+      auth-mode: "%AUTH_MODE%"
     expose: true
     to:
       - "5"
