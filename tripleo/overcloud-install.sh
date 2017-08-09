@@ -410,7 +410,7 @@ else
   # of puppet resource declaraion duplication
   sed -i 's/OS::TripleO::Services::ContrailControl:.*/OS::TripleO::Services::ContrailControl: OS::Heat::None/g' $contrail_services_file
   sed -i 's/OS::TripleO::Services::ContrailDatabase:.*/OS::TripleO::Services::ContrailDatabase: OS::Heat::None/g' $contrail_services_file
-  sed -i 's/OS::TripleO::Services::ContrailWebUI:.*/OS::TripleO::Services::ContrailWebUI: OS::Heat::None/g' $contrail_services_file
+  # sed -i 's/OS::TripleO::Services::ContrailWebUI:.*/OS::TripleO::Services::ContrailWebUI: OS::Heat::None/g' $contrail_services_file
   if (( CONTRAIL_CONTROLLER_COUNT > 0 )) ; then
     echo INFO: contrail analyticsdb is installed on contrail controller nodes, put analyticsdb service into ContralController role
     pos_to_insert=`sed "=" $role_file | sed -n '/^- name: ContrailController$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
