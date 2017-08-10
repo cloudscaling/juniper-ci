@@ -309,7 +309,6 @@ touch $misc_opts
 
 # Create ports for Contrail Controller and/or Analytis if any is installed on own node.
 # In that case OS controller will host VIP and haproxy will forward requests.
-enable_ext_puppet_syntax='false'
 contrail_vip_env='contrail_controller_vip_env.yaml'
   cat <<EOF > $contrail_vip_env
 resource_registry:
@@ -352,8 +351,7 @@ else
   OS::TripleO::ContrailControllerVirtualIPs: OS::Heat::None
 EOF
   echo INFO: add contrail controller services to OS Controller role
-  enable_ext_puppet_syntax='true'
-  pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
+  pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
   to_add='    - OS::TripleO::Services::ContrailConfig\n    - OS::TripleO::Services::ContrailControl\n'
   to_add+='    - OS::TripleO::Services::ContrailDatabase\n    - OS::TripleO::Services::ContrailWebUI'
   sed -i "${pos_to_insert} a\\$to_add" $role_file
@@ -363,7 +361,7 @@ if (( ANALYTICS_COUNT > 0 || CONTRAIL_CONTROLLER_COUNT > 0 )) ; then
     echo INFO: contrail analytics is installed on own nodes, prepare VIPs env file
   else
     echo INFO: contrail analytics is installed on contrail controller nodes, prepare VIPs env file and put analytics service into ContralController role
-    pos_to_insert=`sed "=" $role_file | sed -n '/^- name: ContrailController$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
+    pos_to_insert=`sed "=" $role_file | sed -n '/^- name: ContrailController/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
     sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalytics" $role_file
   fi
   contrail_analytics_vip='contrail_analytics_vip.yaml'
@@ -394,12 +392,11 @@ EOF
 EOF
 else
   echo INFO: contrail analytics are installed on OS controller nodes
-  enable_ext_puppet_syntax='true'
   cat <<EOF >> $contrail_vip_env
   OS::TripleO::ContrailAnalyticsVirtualIPs: OS::Heat::None
 EOF
   echo INFO: add contrail analytics services to OS Controller role
-  pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
+  pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
   sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalytics" $role_file
 fi
 if (( ANALYTICSDB_COUNT > 0 )) ; then
@@ -413,11 +410,10 @@ else
   # sed -i 's/OS::TripleO::Services::ContrailWebUI:.*/OS::TripleO::Services::ContrailWebUI: OS::Heat::None/g' $contrail_services_file
   if (( CONTRAIL_CONTROLLER_COUNT > 0 )) ; then
     echo INFO: contrail analyticsdb is installed on contrail controller nodes, put analyticsdb service into ContralController role
-    pos_to_insert=`sed "=" $role_file | sed -n '/^- name: ContrailController$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
+    pos_to_insert=`sed "=" $role_file | sed -n '/^- name: ContrailController/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
   else
     echo INFO: add contrail analyticsdb services to OS Controller role
-    enable_ext_puppet_syntax='true'
-    pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller$/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
+    pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
   fi
   sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalyticsDatabase" $role_file
   # add simulation contrail_database_node_ips
@@ -471,41 +467,6 @@ EOF
 fi
 
 # other options
-if [[ "$enable_ext_puppet_syntax" == 'true' ]] ; then
-  cat <<EOF > enable_ext_puppet_syntax.yaml
-heat_template_version: 2014-10-16
-parameters:
-  server:
-    description: ID of the controller node to apply this config to
-    type: string
-resources:
-  NodeConfig:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: script
-      config: |
-        #!/bin/bash
-        sed -i '/\[main\]/a \ \ \ \ \parser = future' /etc/puppet/puppet.conf
-  NodeDeployment:
-    type: OS::Heat::SoftwareDeployment
-    properties:
-      config: {get_resource: NodeConfig}
-      server: {get_param: server}
-outputs:
-  deploy_stdout:
-    description: Deployment reference, used to trigger post-deploy on changes
-    value: {get_attr: [NodeDeployment, deploy_stdout]}
-EOF
-  if ! grep -q 'resource_registry:' $misc_opts ;  then
-    cat <<EOF >> $misc_opts
-resource_registry:
-EOF
-  fi
-  cat <<EOF >> $misc_opts
-  OS::TripleO::ControllerExtraConfigPre: enable_ext_puppet_syntax.yaml
-EOF
-fi
-
 if [[ "$DPDK" == 'yes' && "$OPENSTACK_VERSION" == 'newton' ]] ; then
   if ! grep -q 'resource_registry:' $misc_opts ;  then
   cat <<EOF >> $misc_opts
