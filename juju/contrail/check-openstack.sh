@@ -22,7 +22,6 @@ fi
 
 # prepare environment for common openstack functions
 OPENSTACK_VERSION="$VERSION"
-USE_VENV=true
 SSH_CMD="juju-ssh"
 
 for mch in `get_machines_index_by_service nova-compute` ; do

@@ -25,21 +25,21 @@ OVERCLOUDRC_FILE=${OVERCLOUDRC_FILE:-"${WORKSPACE}/overcloudrc"}
 UNDERCLOUDRC_FILE=${UNDERCLOUDRC_FILE:-"${WORKSPACE}/stackrc"}
 
 function activate_venv() {
-  if [ -d .venv ]; then
-    source .venv/bin/activate
+  if [ -d "$WORKSPACE/.venv" ]; then
+    source "$WORKSPACE/.venv/bin/activate"
   fi
 }
 
 function deactivate_venv() {
-  if [ -d .venv ]; then
+  if [ -d "$WORKSPACE/.venv" ]; then
     deactivate
   fi
 }
 
 function create_virtualenv() {
-  rm -rf .venv
+  rm -rf "$WORKSPACE/.venv"
   echo "INFO: Create venv"
-  virtualenv .venv
+  virtualenv "$WORKSPACE/.venv"
 
   activate_venv
   pip install -q "python-openstackclient==3.11" 2>/dev/null
@@ -190,9 +190,22 @@ function create_network() {
   deactivate_venv
 }
 
-function run_os_checks() {
-  _access_overcloud
+function delete_network() {
+  local netsfx=$1
+  activate_venv
 
+  local router_id=`openstack --insecure router show p-ext-$netsfx -f value -c id`
+  openstack --insecure router remove subnet $router_id private-$netsfx
+  openstack --insecure router delete $router_id
+
+  local private_net_id=`openstack --insecure network show private-$netsfx -f value -c id`
+  openstack --insecure subnet delete private-$netsfx
+  openstack --insecure network delete private-$netsfx
+
+  deactivate_venv
+}
+
+function run_os_checks() {
   # check installed cloud
   activate_venv
 
@@ -240,6 +253,12 @@ function run_os_checks() {
 
   openstack --insecure catalog list || keystone catalog || /bin/true
   deactivate_venv
+
+  if [[ $ret == 0 ]]; then
+    openstack --insecure floating ip delete 10.5.0.10
+    openstack --insecure floating ip delete 10.5.0.11
+    delete_network $netsfx
+  fi
 
   return $ret
 }
@@ -350,7 +369,6 @@ function _check_instance_ssh_and_metadata() {
   local ip=$2
   local fip=$3
   local ssh_opts='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5'
-
   echo "INFO: Trying to ssh into instance with ip $ip and run ifconfig"
   if ! $SSH_CMD $mch sshpass -p 'cubswin:\)' ssh $ssh_opts cirros@$ip /sbin/ifconfig 2>/dev/null ; then
     echo "ERROR: Can't ssh into instance by ip $ip"
@@ -442,3 +460,4 @@ function check_instance_simple() {
 
   return $ret
 }
+

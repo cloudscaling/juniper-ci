@@ -6,7 +6,6 @@ my_dir="$(dirname $my_file)"
 source $my_dir/../common/functions
 source $my_dir/../common/functions-openstack
 
-USE_VENV='true'
 VERSION=${VERSION:-"XXX-mitaka"}
 VERSION=${VERSION#*-}
 
