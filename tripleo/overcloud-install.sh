@@ -229,11 +229,13 @@ openstack baremetal introspection bulk start
 # prepare Contrail puppet modules via uploading artifacts to swift
 git_branch="stable/${OPENSTACK_VERSION}"
 # TODO: replace personal repo with Juniper
-git_repo="alexey-mr"
+git_repo_ctp="cloudscaling"
+git_repo_pc="alexey-mr"
+git_repo_ctht="juniper"
 rm -rf usr/share/openstack-puppet/modules
 mkdir -p usr/share/openstack-puppet/modules
-git clone https://github.com/${git_repo}/contrail-tripleo-puppet -b $git_branch usr/share/openstack-puppet/modules/tripleo
-git clone https://github.com/${git_repo}/puppet-contrail -b R4.0 usr/share/openstack-puppet/modules/contrail
+git clone https://github.com/${git_repo_ctp}/contrail-tripleo-puppet -b $git_branch usr/share/openstack-puppet/modules/tripleo
+git clone https://github.com/${git_repo_pc}/puppet-contrail -b R4.0 usr/share/openstack-puppet/modules/contrail
 tar czvf puppet-modules.tgz usr/
 upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
 
@@ -242,7 +244,7 @@ upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
 rm -rf ~/tripleo-heat-templates
 cp -r /usr/share/openstack-tripleo-heat-templates/ ~/tripleo-heat-templates
 rm -rf ~/contrail-tripleo-heat-templates
-git clone https://github.com/${git_repo}/contrail-tripleo-heat-templates -b $git_branch
+git clone https://github.com/${git_repo_ctht}/contrail-tripleo-heat-templates -b $git_branch
 if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
   cp -r ~/contrail-tripleo-heat-templates/environments/contrail ~/tripleo-heat-templates/environments
   cp -r ~/contrail-tripleo-heat-templates/puppet/services/network/* ~/tripleo-heat-templates/puppet/services/network
