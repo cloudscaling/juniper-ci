@@ -31,8 +31,8 @@
           name: AAA_MODE
           description: "aaa-mode for Contrail"
           choices:
-            - rbac
             - cloud-admin
+            - rbac
             - no-auth
       - bool:
           name: USE_ADDITIONAL_INTERFACE
@@ -48,7 +48,7 @@
     builders:
       - shell: |
           #!/bin/bash -e
-          desc="$VERSION $DEPLOY_TYPE mode=$DEPLOY_MODE"
+          desc="$VERSION $DEPLOY_TYPE mode=$DEPLOY_MODE $AAA_MODE"
           if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
           if [[ "$USE_DPDK" == "true" ]] ; then desc="$desc +DPDK" ; fi
           echo "DESCRIPTION $desc"

@@ -31,8 +31,8 @@
           name: AAA_MODE
           description: "aaa-mode for Contrail"
           choices:
-            - rbac
             - cloud-admin
+            - rbac
             - no-auth
       - bool:
           name: DEPLOY_AS_HA_MODE
@@ -75,7 +75,7 @@
           fi
       - shell: |
           #!/bin/bash -e
-          desc="$VERSION $DEPLOY_TYPE"
+          desc="$VERSION $DEPLOY_TYPE $AAA_MODE"
           if [[ "$DEPLOY_AS_HA_MODE" == "true" ]] ; then desc="$desc +HA" ; fi
           if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
           if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
