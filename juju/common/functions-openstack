@@ -365,7 +365,7 @@ function check_instance_simple() {
     fi
 
     # TODO: for now skip VGW cases with DPDK
-    if [[ "$USE_DPDK" == "true" ]]; then
+    if [[ "$USE_DPDK" != "true" ]]; then
       # add VGW to second compute host and check ping/ssh from there
       local another_compute_host=`get_machines_index_by_service nova-compute | grep -v $mch`
       echo "INFO: Adding vgw to another compute: $another_compute_host"
