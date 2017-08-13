@@ -92,9 +92,9 @@
           fi
           ./juniper-ci/juju/run-contrail-openstack.sh deploy-$DEPLOY_TYPE.sh $DEPLOY_FROM
     publishers:
-      - junit:
-          results: tempest/test_result.xml
-          allow-empty-results: true
       - archive:
           artifacts: 'logs/**'
           allow-empty: true
+      - junit:
+          results: tempest/test_result.xml
+          allow-empty-results: true

@@ -83,14 +83,10 @@ export OS_TEST_TIMEOUT=700
 set +e
 #python -m subunit.run discover -t ./ ./tempest/test_discover --load-list=$tests_filtered | subunit-trace -n -f
 testr run --subunit --parallel --concurrency=2 --load-list=$tests_filtered | subunit-trace -n -f
-exit_code=$?
+set +e
 
 testr last --subunit | subunit-1to2 | python "$my_dir/../../tempest/subunit2jenkins.py" -o test_result.xml -s scaleio-openstack
-
+rm -f $tests $tests_filtered
 deactivate_venv
 
 cd $my_dir
-
-rm -f $tests $tests_filtered
-
-exit $exit_code
