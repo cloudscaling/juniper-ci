@@ -131,17 +131,19 @@ function create_flavors() {
 
 function create_network() {
   local netsfx=$1
+  local max_attempt=24
   activate_venv
 
   echo "INFO: Create public network and subnet"
   openstack --insecure network create --external --share public-$netsfx
   local public_net_id=`openstack --insecure network show public-$netsfx -f value -c id`
-  if ! openstack --insecure subnet create --no-dhcp --network $public_net_id --subnet-range 10.5.0.0/24 --gateway 0.0.0.0 public-$netsfx ; then
-    echo "WARNING: Subnet creation is too long. Waiting..."
-    for i in {1..24} ; do
+  local cidr="10.5.0.0/24"
+  if ! openstack --insecure subnet create --no-dhcp --network $public_net_id --subnet-range $cidr --gateway 0.0.0.0 public-$netsfx ; then
+    echo "WARNING: Public subnet creation is too long. Waiting..."
+    for i in {1..$max_attempt} ; do
       sleep 10
-      echo "INFO: subnet poll #$i from 24"
-      if openstack --insecure subnet list --network $public_net_id ; then
+      echo "INFO: subnet poll #$i from $max_attempt"
+      if openstack --insecure subnet list --network $public_net_id | grep -q "$cidr" ; then
         break
       fi
     done
@@ -150,7 +152,17 @@ function create_network() {
   echo "INFO: Create private network and subnet"
   openstack --insecure network create --internal private-$netsfx
   local private_net_id=`openstack --insecure network show private-$netsfx -f value -c id`
-  openstack --insecure subnet create --network $private_net_id --subnet-range 10.10.0.0/24 private-$netsfx
+  local cidr="10.10.0.0/24"
+  if ! openstack --insecure subnet create --network $private_net_id --subnet-range $cidr private-$netsfx ; then
+    echo "WARNING: Private subnet creation is too long. Waiting..."
+    for i in {1..$max_attempt} ; do
+      sleep 10
+      echo "INFO: subnet poll #$i from $max_attempt"
+      if openstack --insecure subnet list --network $private_net_id | grep -q "$cidr" ; then
+        break
+      fi
+    done
+  fi
   local private_subnet_id=`openstack --insecure subnet list --network $private_net_id -f value -c ID`
 
   echo "INFO: Create router"
