@@ -17,8 +17,8 @@
           name: ENVIRONMENT_OS
           description: "CentOS or RHEL based installation"
           choices:
-            - 'centos'
             - 'rhel'
+            - 'centos'
       - choice:
           name: OPENSTACK_VERSION
           description: "Version of the OpenStack"
@@ -30,22 +30,21 @@
           name: AAA_MODE
           description: "aaa_mode parameter for Contrail Controller"
           choices:
-            - 'rbac'
             - 'cloud-admin'
+            - 'rbac'
             - 'no-auth'
       - choice:
           name: AAA_MODE_ANALYTICS
           description: "analytics_aaa_mode parameter for Contrail Analytics (auto - equal to aaa_mode)"
           choices:
             - 'auto'
-            - 'rbac'
             - 'cloud-admin'
+            - 'rbac'
             - 'no-auth'
-      - choice:
+      - bool:
           name: DPDK
-          choices:
-            - 'no'
-            - 'yes'
+          description: Deploy vRouter in DPDK mode or not.
+          default: false
       - choice:
           name: CONTROLLER_COUNT
           description: "Count of OS controllers to deploy"
@@ -91,11 +90,14 @@
             - 'before_only'
             - 'always'
             - 'never'
-      - choice:
+      - bool:
           name: RHEL_CERT_TEST
-          choices:
-            - 'no'
-            - 'yes'
+          description: Prepare one more VM with RH certification server or not.
+          default: false
+      - bool:
+          name: USE_DEVELOPMENT_PUPPETS
+          description: Clone puppets from internal repositories or use build's version
+          default: true
 
     scm:
       - juniper-ci
@@ -103,14 +105,14 @@
       - shell: |
           #!/bin/bash -e
           desc="$ENVIRONMENT_OS $OPENSTACK_VERSION"
-          if [[ "$DPDK" == 'yes' ]] ; then
+          if [[ "$DPDK" == 'true' ]] ; then
             desc+=' dpdk'
           fi
           desc+=' $AAA_MODE'
           if [[ "$AAA_MODE_ANALYTICS" != 'auto' ]] ; then
             desc+="/${AAA_MODE_ANALYTICS}"
           fi
-          if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+          if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
             if [[ "$ENVIRONMENT_OS" != 'rhel' ]] ; then
               echo "RedHat Certification is available only for RHEL environment"
               exit -1

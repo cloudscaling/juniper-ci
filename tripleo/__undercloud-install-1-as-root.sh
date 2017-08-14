@@ -155,7 +155,7 @@ fi
 #       temprorary add this package into contrail repo.
 #       It should be fixed by addind the package either into contrail distribution
 #       or into RedHat repo or by enabling additional repo.
-if [[ "$DPDK" == 'yes' ]] ; then
+if [[ "$DPDK" == 'true' ]] ; then
   curl -o /var/www/html/contrail/liburcu2-0.8.6-21.1.x86_64.rpm  ftp://ftp.icm.edu.pl/vol/rzm6/linux-opensuse/repositories/devel:/tools:/lttng/RedHat_RHEL-5/x86_64/liburcu2-0.8.6-21.1.x86_64.rpm
   update_contrail_repo='yes'
 fi

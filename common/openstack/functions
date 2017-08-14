@@ -138,13 +138,13 @@ function create_flavors() {
   activate_venv
   if ! openstack --insecure flavor show 51 &>/dev/null ; then
     openstack --insecure flavor create --disk 1 --vcpus 1 --ram 128 --id 51 test_flavor1 >/dev/null
-    if [[ "$DPDK" == 'yes' ]]; then
+    if [[ "$DPDK" == 'true' ]]; then
       openstack flavor set --property hw:mem_page_size=any 51
     fi
   fi
   if ! openstack --insecure flavor show 52 &>/dev/null ; then
     openstack --insecure flavor create --disk 1 --vcpus 1 --ram 256 --id 52 test_flavor2 >/dev/null
-    if [[ "$DPDK" == 'yes' ]]; then
+    if [[ "$DPDK" == 'true' ]]; then
       openstack flavor set --property hw:mem_page_size=any 52
     fi
   fi
@@ -308,7 +308,7 @@ function _get_machines_by_service() {
     _access_undercloud
     if [[ "$srv" == 'nova-compute' ]] ; then
       local node_name_regexp='compute'
-      if [[ "$DPDK" == 'yes' ]]; then
+      if [[ "$DPDK" == 'true' ]]; then
         node_name_regexp='dpdk'
       fi
       for ip in `openstack --insecure server list | grep $node_name_regexp | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+'` ; do
@@ -437,7 +437,7 @@ function check_instance_simple() {
     fi
 
     # TODO: for now skip VGW cases with DPDK
-    if [[ "$DPDK" != 'yes' ]]; then
+    if [[ "$DPDK" != 'true' ]]; then
       # add VGW to second compute host and check ping/ssh from there
       local another_compute_host=`_get_machines_by_service nova-compute | grep -v $mch`
       echo "INFO: Adding vgw to another compute: $another_compute_host"

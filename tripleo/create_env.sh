@@ -17,7 +17,7 @@ if [[ -z "$ENVIRONMENT_OS" ]] ; then
 fi
 
 if [[ -z "$DPDK" ]] ; then
-  echo "DPDK is expected (e.g. export DPDK=yes/no)"
+  echo "DPDK is expected (e.g. export DPDK=true/false)"
   exit 1
 fi
 
@@ -27,19 +27,19 @@ if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
     exit 1
   fi
 else
-  if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+  if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
     echo "ERROR: RHEL_CERT_TEST is supported only for RHEL environment"
     exit 1
   fi
 fi
 
-if [[ "$DPDK" != 'yes' ]] ; then
+if [[ "$DPDK" != 'true' ]] ; then
 compute_machine_name='comp'
 else
 compute_machine_name='compdpdk'
 fi
 
-RHEL_CERT_TEST=${RHEL_CERT_TEST:-'no'}
+RHEL_CERT_TEST=${RHEL_CERT_TEST:-'false'}
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -169,7 +169,7 @@ cp $BASE_IMAGE $pool_path/undercloud-$NUM.qcow2
 
 # for RHEL make a copy of disk to run one more VM for test server
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-  if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+  if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
     cp $pool_path/undercloud-$NUM.qcow2 $pool_path/undercloud-$NUM-cert-test.qcow2
   fi
 fi
@@ -323,7 +323,7 @@ fi
 _start_vm "rd-undercloud-$NUM" "$pool_path/undercloud-$NUM.qcow2" \
   $mgmt_mac $prov_mac
 
-if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
   _patch_image "$pool_path/undercloud-$NUM-cert-test.qcow2" \
     'ifcfg-ethMC' $mgmt_ip $mgmt_mac_cert \
     'ifcfg-ethAC' $prov_ip $prov_mac_cert \
@@ -376,7 +376,7 @@ EOF
 _wait_machine "${mgmt_ip}.2"
 _prepare_network "${mgmt_ip}.2"  "myhost.my${NUM}domain"
 
-if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
   _wait_machine "${mgmt_ip}.3"
   _prepare_network "${mgmt_ip}.3"  "myhost.my${NUM}certdomain"
 

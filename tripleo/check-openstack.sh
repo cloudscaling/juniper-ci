@@ -13,7 +13,7 @@ fi
 
 source ${WORKSPACE}/stackrc
 node_name_regexp='compute'
-if [[ "$DPDK" == 'yes' ]]; then
+if [[ "$DPDK" == 'true' ]]; then
   node_name_regexp='dpdk'
 fi
 for mid in `nova list | grep "$node_name_regexp" |  awk '{print $12}'` ; do

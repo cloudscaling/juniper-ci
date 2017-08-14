@@ -14,7 +14,7 @@ if [[ -z "$OPENSTACK_VERSION" ]] ; then
 fi
 
 if [[ -z "$DPDK" ]] ; then
-  echo "DPDK is expected (e.g. export DPDK=yes/no)"
+  echo "DPDK is expected (e.g. export DPDK=true/false)"
   exit 1
 fi
 
@@ -46,7 +46,7 @@ SSH_USER=${SSH_USER:-'stack'}
 CPU_COUNT=${CPU_COUNT:-2}
 DISK_SIZE=${DISK_SIZE:-29}
 
-if [[ "$DPDK" != 'yes' ]] ; then
+if [[ "$DPDK" != 'true' ]] ; then
   compute_machine_name='comp'
   compute_flavor_name='compute'
 else
@@ -83,7 +83,7 @@ ANALYTICS_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-ctrlanalytics- | wc -l)
 ANALYTICSDB_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-ctrlanalyticsdb- | wc -l)
 ((OCM_COUNT=CONT_COUNT+COMP_COUNT+CONTRAIL_CONTROLLER_COUNT+ANALYTICS_COUNT+ANALYTICSDB_COUNT))
 
-if [[ "$DPDK" != 'yes' ]] ; then
+if [[ "$DPDK" != 'true' ]] ; then
   comp_scale_count=$COMP_COUNT
   dpdk_scale_count=0
 else
@@ -225,20 +225,20 @@ openstack baremetal introspection bulk start
 # this is a recommended command to check and wait end of introspection. but previous command can wait itself.
 #sudo journalctl -l -u openstack-ironic-discoverd -u openstack-ironic-discoverd-dnsmasq -u openstack-ironic-conductor -f
 
-
-# prepare Contrail puppet modules via uploading artifacts to swift
-git_branch="stable/${OPENSTACK_VERSION}"
-# TODO: replace personal repo with Juniper
-git_repo_ctp="cloudscaling"
-git_repo_pc="alexey-mr"
-git_repo_ctht="juniper"
-rm -rf usr/share/openstack-puppet/modules
-mkdir -p usr/share/openstack-puppet/modules
-git clone https://github.com/${git_repo_ctp}/contrail-tripleo-puppet -b $git_branch usr/share/openstack-puppet/modules/tripleo
-git clone https://github.com/${git_repo_pc}/puppet-contrail -b R4.0 usr/share/openstack-puppet/modules/contrail
-tar czvf puppet-modules.tgz usr/
-upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
-
+if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
+  # prepare Contrail puppet modules via uploading artifacts to swift
+  git_branch="stable/${OPENSTACK_VERSION}"
+  # TODO: replace personal repo with Juniper
+  git_repo_ctp="juniper"
+  git_repo_pc="alexey-mr"
+  git_repo_ctht="juniper"
+  rm -rf usr/share/openstack-puppet/modules
+  mkdir -p usr/share/openstack-puppet/modules
+  git clone https://github.com/${git_repo_ctp}/contrail-tripleo-puppet -b $git_branch usr/share/openstack-puppet/modules/tripleo
+  git clone https://github.com/${git_repo_pc}/puppet-contrail -b R4.0 usr/share/openstack-puppet/modules/contrail
+  tar czvf puppet-modules.tgz usr/
+  upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
+fi
 
 # prepare tripleo heat templates
 rm -rf ~/tripleo-heat-templates
@@ -277,7 +277,7 @@ sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_services_fi
 
 # set network parameters
 # TODO: temporary use always single nic
-# if [[ "$NETWORK_ISOLATION" != 'single' || "$DPDK" == 'yes' ]] ; then
+# if [[ "$NETWORK_ISOLATION" != 'single' || "$DPDK" == 'true' ]] ; then
 #   use_multi_nic='yes'
 #   contrail_net_file='tripleo-heat-templates/environments/contrail/contrail-net.yaml'
 #   vrouter_iface='ens4'
@@ -469,7 +469,7 @@ EOF
 fi
 
 # other options
-if [[ "$DPDK" == 'yes' && "$OPENSTACK_VERSION" == 'newton' ]] ; then
+if [[ "$DPDK" == 'true' && "$OPENSTACK_VERSION" == 'newton' ]] ; then
   if ! grep -q 'resource_registry:' $misc_opts ;  then
   cat <<EOF >> $misc_opts
 resource_registry:
@@ -507,7 +507,7 @@ if [[ "$OPENSTACK_VERSION" != 'newton' ]] ; then
 EOF
 fi
 
-if [[ "$DPDK" == 'yes' ]] ; then
+if [[ "$DPDK" == 'true' ]] ; then
   cat <<EOF >> $misc_opts
   ContrailDpdkCoremask: '1'
 EOF
@@ -584,7 +584,7 @@ if (( errors > 0 )) ; then
   exit 1
 fi
 
-if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
   if  ! openstack role list | grep -q Member ; then
     openstack role create Member
   fi

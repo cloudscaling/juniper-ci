@@ -127,7 +127,7 @@ function delete_volume() {
 
 function rhel_get_repos_for_os() {
   local common_repos="rhel-7-server-rpms rhel-7-server-extras-rpms rhel-7-server-rh-common-rpms rhel-ha-for-rhel-7-server-rpms"
-  if [[ "$RHEL_CERT_TEST" == 'yes' ]] ; then
+  if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
     common_repos+=" rhel-7-server-cert-rpms"
   fi
   local enable_repo=''
