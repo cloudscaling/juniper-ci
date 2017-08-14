@@ -230,6 +230,7 @@ git_branch="stable/${OPENSTACK_VERSION}"
 # TODO: replace personal repo with Juniper
 git_repo_ctp="juniper"
 git_repo_pc="alexey-mr"
+artifact_opts=""
 if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
   rm -rf usr/share/openstack-puppet/modules
   mkdir -p usr/share/openstack-puppet/modules
@@ -237,6 +238,7 @@ if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
   git clone https://github.com/${git_repo_pc}/puppet-contrail -b R4.0 usr/share/openstack-puppet/modules/contrail
   tar czvf puppet-modules.tgz usr/
   upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
+  artifact_opts="-e .tripleo/environments/deployment-artifacts.yaml"
 fi
 
 # TODO: replace personal repo with Juniper
@@ -531,7 +533,7 @@ if [[ "$DEPLOY" != '1' ]] ; then
   # deploy overcloud. if you do it manually then I recommend to do it in screen.
   echo "openstack overcloud deploy --templates tripleo-heat-templates/ \
       --roles-file $role_file \
-      -e .tripleo/environments/deployment-artifacts.yaml \
+      $artifact_opts \
       -e $contrail_services_file \
       -e $contrail_net_file \
       -e $contrail_vip_env \
@@ -546,7 +548,7 @@ set +e
 
 openstack overcloud deploy --templates tripleo-heat-templates/ \
   --roles-file $role_file \
-  -e .tripleo/environments/deployment-artifacts.yaml \
+  $artifact_opts \
   -e $contrail_services_file \
   -e $contrail_net_file \
   -e $contrail_vip_env \
