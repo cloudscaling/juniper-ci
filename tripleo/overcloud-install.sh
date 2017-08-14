@@ -229,7 +229,9 @@ openstack baremetal introspection bulk start
 git_branch="stable/${OPENSTACK_VERSION}"
 # TODO: replace personal repo with Juniper
 git_repo_ctp="juniper"
-git_repo_pc="alexey-mr"
+git_repo_pc="juniper"
+# patch for nova with DPDK is still in private repo
+#git_repo_pc="alexey-mr"
 artifact_opts=""
 if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
   rm -rf usr/share/openstack-puppet/modules
