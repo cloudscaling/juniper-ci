@@ -19,6 +19,11 @@ ip_addr="192.168.${env_addr}.2"
 ssh_opts="-i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 ssh_addr="root@${ip_addr}"
 
+# TODO: place all definitions here
+
+# Dir with contrail packages
+CONTRAIL_PACKAGES_DIR=${CONTRAIL_PACKAGES_DIR:-'/home/root/contrail/latest'}
+
 trap 'catch_errors $LINENO' ERR
 
 oc=0
@@ -40,9 +45,11 @@ function catch_errors() {
   exit $exit_code
 }
 
+build_tag=`cat $CONTRAIL_PACKAGES_DIR/tag`
 ssh_env="NUM=$NUM DEPLOY=1 NETWORK_ISOLATION=$NETWORK_ISOLATION ENVIRONMENT_OS=$ENVIRONMENT_OS"
 ssh_env+=" OPENSTACK_VERSION=$OPENSTACK_VERSION RHEL_CERT_TEST=$RHEL_CERT_TEST DPDK=$DPDK"
-ssh_env+=" AAA_MODE=$AAA_MODE AAA_MODE_ANALYTICS=$AAA_MODE_ANALYTICS USE_DEVELOPMENT_PUPPETS=$USE_DEVELOPMENT_PUPPETS"
+ssh_env+=" AAA_MODE=$AAA_MODE AAA_MODE_ANALYTICS=$AAA_MODE_ANALYTICS"
+ssh_env+=" USE_DEVELOPMENT_PUPPETS=$USE_DEVELOPMENT_PUPPETS BUILD_TAG=$build_tag"
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
     export RHEL_ACCOUNT_FILE=${RHEL_ACCOUNT_FILE:-'/home/root/rhel/rhel-account-cert'}

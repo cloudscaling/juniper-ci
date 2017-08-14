@@ -500,6 +500,7 @@ parameter_defaults:
   AAAMode: $AAA_MODE
   AAAModeAnalytics: $AAA_MODE_ANALYTICS
   ContrailWebuiHttp: 8180
+  ContrailContainerTag: $BUILD_TAG
 EOF
 # IMPORTANT: The DNS domain used for the hosts should match the dhcp_domain configured in the Undercloud neutron.
 if (( CONT_COUNT < 2 )) ; then
