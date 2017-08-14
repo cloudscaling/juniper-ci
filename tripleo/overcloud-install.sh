@@ -225,13 +225,12 @@ openstack baremetal introspection bulk start
 # this is a recommended command to check and wait end of introspection. but previous command can wait itself.
 #sudo journalctl -l -u openstack-ironic-discoverd -u openstack-ironic-discoverd-dnsmasq -u openstack-ironic-conductor -f
 
+# prepare Contrail puppet modules via uploading artifacts to swift
+git_branch="stable/${OPENSTACK_VERSION}"
+# TODO: replace personal repo with Juniper
+git_repo_ctp="juniper"
+git_repo_pc="alexey-mr"
 if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
-  # prepare Contrail puppet modules via uploading artifacts to swift
-  git_branch="stable/${OPENSTACK_VERSION}"
-  # TODO: replace personal repo with Juniper
-  git_repo_ctp="juniper"
-  git_repo_pc="alexey-mr"
-  git_repo_ctht="juniper"
   rm -rf usr/share/openstack-puppet/modules
   mkdir -p usr/share/openstack-puppet/modules
   git clone https://github.com/${git_repo_ctp}/contrail-tripleo-puppet -b $git_branch usr/share/openstack-puppet/modules/tripleo
@@ -240,17 +239,21 @@ if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
   upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
 fi
 
+# TODO: replace personal repo with Juniper
+git_repo_ctht="juniper"
 # prepare tripleo heat templates
-rm -rf ~/tripleo-heat-templates
-cp -r /usr/share/openstack-tripleo-heat-templates/ ~/tripleo-heat-templates
-rm -rf ~/contrail-tripleo-heat-templates
-git clone https://github.com/${git_repo_ctht}/contrail-tripleo-heat-templates -b $git_branch
-if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
-  cp -r ~/contrail-tripleo-heat-templates/environments/contrail ~/tripleo-heat-templates/environments
-  cp -r ~/contrail-tripleo-heat-templates/puppet/services/network/* ~/tripleo-heat-templates/puppet/services/network
-else
-  cp -r ~/contrail-tripleo-heat-templates/* ~/tripleo-heat-templates
-fi
+#if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
+  rm -rf ~/tripleo-heat-templates
+  cp -r /usr/share/openstack-tripleo-heat-templates/ ~/tripleo-heat-templates
+  rm -rf ~/contrail-tripleo-heat-templates
+  git clone https://github.com/${git_repo_ctht}/contrail-tripleo-heat-templates -b $git_branch
+  if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
+    cp -r ~/contrail-tripleo-heat-templates/environments/contrail ~/tripleo-heat-templates/environments
+    cp -r ~/contrail-tripleo-heat-templates/puppet/services/network/* ~/tripleo-heat-templates/puppet/services/network
+  else
+    cp -r ~/contrail-tripleo-heat-templates/* ~/tripleo-heat-templates
+  fi
+#fi
 
 if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
   role_file='tripleo-heat-templates/environments/contrail/roles_data.yaml'
