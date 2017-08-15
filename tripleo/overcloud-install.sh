@@ -229,7 +229,7 @@ openstack baremetal introspection bulk start
 git_branch="stable/${OPENSTACK_VERSION}"
 # TODO: replace personal repo with Juniper. or make switch with available repos.
 git_repo_ctp="juniper"
-git_repo_pc="contrail"
+git_repo_pc="cloudscaling"
 # patch for nova with DPDK is still in private repo
 #git_repo_pc="alexey-mr"
 artifact_opts=""
