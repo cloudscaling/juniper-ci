@@ -22,7 +22,7 @@ ssh_addr="root@${ip_addr}"
 # TODO: place all definitions here
 
 # Dir with contrail packages
-CONTRAIL_PACKAGES_DIR=${CONTRAIL_PACKAGES_DIR:-'/home/root/contrail/latest'}
+export CONTRAIL_PACKAGES_DIR=${CONTRAIL_PACKAGES_DIR:-'/home/root/contrail/latest'}
 
 trap 'catch_errors $LINENO' ERR
 
