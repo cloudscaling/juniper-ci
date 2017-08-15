@@ -22,6 +22,7 @@ for mid in `nova list | grep "$node_name_regexp" |  awk '{print $12}'` ; do
 done
 
 cd $WORKSPACE
+source ${WORKSPACE}/overcloudrc
 source "$my_dir/../common/openstack/functions"
 create_virtualenv
 run_os_checks
