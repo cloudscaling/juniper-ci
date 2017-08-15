@@ -227,9 +227,9 @@ openstack baremetal introspection bulk start
 
 # prepare Contrail puppet modules via uploading artifacts to swift
 git_branch="stable/${OPENSTACK_VERSION}"
-# TODO: replace personal repo with Juniper
+# TODO: replace personal repo with Juniper. or make switch with available repos.
 git_repo_ctp="juniper"
-git_repo_pc="juniper"
+git_repo_pc="contrail"
 # patch for nova with DPDK is still in private repo
 #git_repo_pc="alexey-mr"
 artifact_opts=""
