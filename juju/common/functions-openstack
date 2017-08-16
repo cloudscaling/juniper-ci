@@ -140,6 +140,7 @@ function create_network() {
   local cidr="10.5.0.0/24"
   if ! openstack --insecure subnet create --no-dhcp --network $public_net_id --subnet-range $cidr --gateway 0.0.0.0 public-$netsfx ; then
     echo "WARNING: Public subnet creation is too long. Waiting..."
+    return 1
     for i in {1..$max_attempt} ; do
       sleep 10
       echo "INFO: subnet poll #$i from $max_attempt"
@@ -155,6 +156,7 @@ function create_network() {
   local cidr="10.10.0.0/24"
   if ! openstack --insecure subnet create --network $private_net_id --subnet-range $cidr private-$netsfx ; then
     echo "WARNING: Private subnet creation is too long. Waiting..."
+    return 1
     for i in {1..$max_attempt} ; do
       sleep 10
       echo "INFO: subnet poll #$i from $max_attempt"
