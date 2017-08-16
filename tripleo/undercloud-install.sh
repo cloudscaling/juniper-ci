@@ -22,7 +22,7 @@ if [[ -z "$ENVIRONMENT_OS" ]] ; then
 fi
 
 BASE_ADDR=${BASE_ADDR:-172}
-IMAGES=${IMAGES:-"/home/stack/images-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}.tar"}
+IMAGES=${IMAGES:-"/home/stack/images-${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION}-${OPENSTACK_VERSION}.tar"}
 NETDEV=${NETDEV:-'eth1'}
 
 # on kvm host do once: create stack user, create home directory, add him to libvirtd group
