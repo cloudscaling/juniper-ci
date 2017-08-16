@@ -20,6 +20,12 @@
             - 'rhel'
             - 'centos'
       - choice:
+          name: ENVIRONMENT_OS_VERSION
+          description: "RHEL release version"
+          choices:
+            - '7_3'
+            - '7_4'
+      - choice:
           name: OPENSTACK_VERSION
           description: "Version of the OpenStack"
           choices:
@@ -104,7 +110,7 @@
     builders:
       - shell: |
           #!/bin/bash -e
-          desc="$ENVIRONMENT_OS $OPENSTACK_VERSION"
+          desc="${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION} $OPENSTACK_VERSION"
           if [[ "$DPDK" == 'true' ]] ; then
             desc+=' dpdk'
           fi

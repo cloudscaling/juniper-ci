@@ -108,7 +108,9 @@ sed -i -e 's/Defaults[ \t]*requiretty.*/#Defaults    requiretty/g' /etc/sudoers
 
 cp "$my_dir/__undercloud-install-2-as-stack-user.sh" /home/stack/
 chown stack:stack /home/stack/__undercloud-install-2-as-stack-user.sh
-env_opts="NUM=$NUM NETDEV=$NETDEV OPENSTACK_VERSION=$OPENSTACK_VERSION ENVIRONMENT_OS=$ENVIRONMENT_OS DPDK=$DPDK RHEL_CERT_TEST=$RHEL_CERT_TEST RHEL_ACCOUNT_FILE=$RHEL_ACCOUNT_FILE"
+env_opts="NUM=$NUM NETDEV=$NETDEV OPENSTACK_VERSION=$OPENSTACK_VERSION"
+env_opts+=" ENVIRONMENT_OS=$ENVIRONMENT_OS ENVIRONMENT_OS_VERSION=$ENVIRONMENT_OS_VERSION"
+env_opts+=" DPDK=$DPDK RHEL_CERT_TEST=$RHEL_CERT_TEST RHEL_ACCOUNT_FILE=$RHEL_ACCOUNT_FILE"
 sudo -u stack $env_opts /home/stack/__undercloud-install-2-as-stack-user.sh
 
 # increase timeouts due to virtual installation

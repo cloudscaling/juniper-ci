@@ -47,7 +47,11 @@ my_dir="$(dirname $my_file)"
 ssh_key_dir="/home/jenkins"
 
 # base image for VMs
-DEFAULT_BASE_IMAGE_NAME="undercloud-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}.qcow2"
+if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+  DEFAULT_BASE_IMAGE_NAME="undercloud-${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION}-${OPENSTACK_VERSION}.qcow2"
+else
+  DEFAULT_BASE_IMAGE_NAME="undercloud-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}.qcow2"
+fi
 BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-"$DEFAULT_BASE_IMAGE_NAME"}
 BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
 mkdir -p ${BASE_IMAGE_DIR}
