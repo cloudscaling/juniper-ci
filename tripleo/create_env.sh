@@ -162,7 +162,7 @@ define_overcloud_vms 'cont' $CONTROLLER_COUNT 8192
 define_overcloud_vms $compute_machine_name $COMPUTE_COUNT 4096 'true'
 define_overcloud_vms 'stor' $STORAGE_COUNT 4096 'true'
 # TODO: change memory constraints to 8192 if all containers on one node
-define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT 8192
+define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT 16384
 define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT 8192
 define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT 8192
 
