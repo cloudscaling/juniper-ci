@@ -39,10 +39,6 @@
           description: "Deploy OpenStack with certificates"
           default: false
       - bool:
-          name: USE_ADDITIONAL_INTERFACE
-          description: "Deploy Contrail with additional interfaces that is used for control-network"
-          default: false
-      - bool:
           name: USE_DPDK
           description: "Deploy Contrail's vrouter in DPDK mode"
           default: false
