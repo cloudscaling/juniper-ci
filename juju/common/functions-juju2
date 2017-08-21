@@ -60,13 +60,25 @@ function juju-get-machines() {
 }
 
 function get-machine-ip-by-number() {
-  if output=`juju machines --format json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines'].get('$1', {}).get('dns-name'))" 2>&1` ; then
+  local path=""
+  if echo "$1" | grep -q '/lxd/' ; then
+    # lxd container case
+    local mch=`echo "$1" | cut -d '/' -f 1`
+    local path=".get('$mch', {}).get('containers', {})"
+  fi
+  if output=`juju machines --format json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']${path}.get('$1', {}).get('dns-name'))" 2>&1` ; then
     echo $output
   fi
 }
 
 function get-machine-id-by-number() {
-  if output=`juju machines --format json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines'].get('$1', {}).get('instance-id'))" 2>&1` ; then
+  local path=""
+  if echo "$1" | grep -q '/lxd/' ; then
+    # lxd container case
+    local mch=`echo "$1" | cut -d '/' -f 1`
+    local path=".get('$mch', {}).get('containers', {})"
+  fi
+  if output=`juju machines --format json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']${path}.get('$1', {}).get('instance-id'))" 2>&1` ; then
     echo $output
   fi
 }

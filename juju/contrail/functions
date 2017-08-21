@@ -236,15 +236,16 @@ function apply_ssl_config_by_addr() {
   local srv=$2
   local addr=$3
 
+  local mch_id=`echo "$mch" | tr '\' '-'`
   echo "INFO: creating certificate for address: $addr (machine $mch / service $srv)"
-  local cfname="cert_m${mch}_${addr}"
+  local cfname="cert_m${mch_id}_${addr}"
   openssl genrsa -out "$ssl_dir/$cfname.key" 2048
   openssl req -new -key "$ssl_dir/$cfname.key" -out "$ssl_dir/$cfname.csr" -subj "/C=US/ST=CA/L=Sunnyvale/O=Juniper/CN=$addr"
   openssl x509 -req -in "$ssl_dir/$cfname.csr" -extfile "$ssl_dir/v3.ext" -CA "$ssl_dir/rootCA.crt" -CAkey "$ssl_dir/rootCA.key" -CAcreateserial -out "$ssl_dir/$cfname.crt" -days 365
   cat "$ssl_dir/$cfname.crt" | base64 > "$ssl_dir/$cfname.crt.b64"
   cat "$ssl_dir/$cfname.key" | base64 > "$ssl_dir/$cfname.key.b64"
 
-  local ssl_config="$ssl_dir/ssl_config_m$mch.yaml"
+  local ssl_config="$ssl_dir/ssl_config_m$mch_id.yaml"
   echo "$srv:" > "$ssl_config"
   echo "  ssl_ca: |" >> "$ssl_config"
   cat "$ssl_dir/rootCA.crt.b64" | awk '{printf("    %s\n", $0)}' >> "$ssl_config"
