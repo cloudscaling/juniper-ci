@@ -15,6 +15,8 @@ juju remove-machine 4 --force || /bin/true
 juju remove-machine 5 --force || /bin/true
 juju destroy-controller -y --destroy-all-models test-cloud || /bin/true
 
+rm -rf $HOME/.local/share/juju
+
 delete_network $nname
 delete_network $nname_vm
 
