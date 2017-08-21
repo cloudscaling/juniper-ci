@@ -7,7 +7,7 @@
     parameters:
       - choice:
           name: NUM
-          description: "Enironment Nubmer"
+          description: "Enironment Number"
           choices:
             - '3'
             - '4'
@@ -139,3 +139,25 @@
       - archive:
           artifacts: 'logs/**'
           allow-empty: 'true'
+
+- job:
+    name: TripleO-Destroy-Environment
+    description: 'Destroyes TripleO environment by NUM on baremetal slave'
+    defaults: global
+    node: slave1
+    concurrent: true
+    parameters:
+      - choice:
+          name: NUM
+          description: "Enironment Number"
+          choices:
+            - '3'
+            - '4'
+            - '5'
+            - '6'
+    scm:
+      - juniper-ci
+    builders:
+      - shell: |
+          #!/bin/bash -ex
+          ./juniper-ci/tripleo/clean_env.sh

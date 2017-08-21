@@ -24,7 +24,7 @@ if [[ "$jver" == 1 ]] ; then
 fi
 
 declare -A BUILDS
-BUILDS=([mitaka]=22 [newton]=22)
+BUILDS=([mitaka]=40 [newton]=22)
 # for builds of R4.0 from 1 to 20 version is 4.0.0.0
 export CONTRAIL_VERSION="${CONTRAIL_VERSION:-4.0.1.0}"
 export SERIES="${SERIES:-xenial}"

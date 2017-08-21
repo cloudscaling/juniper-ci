@@ -6,4 +6,4 @@
     block-upstream: false
     properties:
       - build-discarder:
-          num-to-keep: 20
+          num-to-keep: 30
