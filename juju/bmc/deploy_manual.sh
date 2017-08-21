@@ -161,6 +161,10 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   juju-set contrail-controller vip=$ip
 fi
 
+detect_machines
+echo "INFO: Apply SSL flag if set $(date)"
+apply_ssl
+
 echo "INFO: Attach contrail-controller container $(date)"
 juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
 echo "INFO: Attach contrail-analyticsdb container $(date)"
