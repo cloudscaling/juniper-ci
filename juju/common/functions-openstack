@@ -27,11 +27,11 @@ function create_virtualenv() {
 }
 
 function instance_status() {
-  openstack --insecure server show $1 | awk '/ status / {print $4}'
+  openstack server show $1 | awk '/ status / {print $4}'
 }
 
 function image_status() {
-  openstack --insecure image show $1 | awk '/ status / {print $4}'
+  openstack image show $1 | awk '/ status / {print $4}'
 }
 
 function wait_instance() {
@@ -45,7 +45,7 @@ function wait_instance() {
     if ((fail >= max_fail)); then
       echo '' >> errors
       echo "ERROR: Instance status wait timeout occured" >> errors
-      openstack --insecure server show $instance_id >> errors
+      openstack server show $instance_id >> errors
       return 1
     fi
     echo "attempt $fail of $max_fail"
@@ -56,7 +56,7 @@ function wait_instance() {
     if [[ "$status" == "ERROR" || -z "$status" ]]; then
       echo '' >> errors
       echo 'ERROR: Instance booting error' >> errors
-      openstack --insecure server show $instance_id >> errors
+      openstack server show $instance_id >> errors
       return 1
     fi
     sleep $timeout
@@ -76,7 +76,7 @@ function wait_image() {
     if ((fail >= max_fail)); then
       echo '' >> errors
       echo "ERROR: Image status wait timeout occured" >> errors
-      openstack --insecure image show $image_id >> errors
+      openstack image show $image_id >> errors
       return 1
     fi
     echo "attempt $fail of $max_fail"
@@ -87,7 +87,7 @@ function wait_image() {
     if [[ "$status" == "error" || "$status" == "deleted" || -z "$status" ]]; then
       echo '' >> errors
       echo 'ERROR: Image creation error' >> errors
-      openstack --insecure image show $image_id >> errors
+      openstack image show $image_id >> errors
       return 1
     fi
     sleep $timeout
@@ -100,10 +100,10 @@ function create_image() {
   local image_name=${1:-cirros}
   local output=''
   activate_venv
-  if ! output=`openstack --insecure image show $image_name 2>/dev/null` ; then
+  if ! output=`openstack image show $image_name 2>/dev/null` ; then
     rm -f cirros-0.3.4-x86_64-disk.img
     wget -t 2 -T 60 -q http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
-    if ! output=`openstack --insecure image create --public --file cirros-0.3.4-x86_64-disk.img $image_name` ; then
+    if ! output=`openstack image create --public --file cirros-0.3.4-x86_64-disk.img $image_name` ; then
       return 1
     fi
   fi
@@ -114,16 +114,16 @@ function create_image() {
 
 function create_flavors() {
   activate_venv
-  if ! openstack --insecure flavor show 51 &>/dev/null ; then
-    openstack --insecure flavor create --disk 1 --vcpus 1 --ram 128 --id 51 test_flavor >/dev/null
+  if ! openstack flavor show 51 &>/dev/null ; then
+    openstack flavor create --disk 1 --vcpus 1 --ram 128 --id 51 test_flavor >/dev/null
     if [[ "$USE_DPDK" == "true" ]]; then
-      openstack --insecure flavor set --property hw:mem_page_size=any 51
+      openstack flavor set --property hw:mem_page_size=any 51
     fi
   fi
-  if ! openstack --insecure flavor show 52 &>/dev/null ; then
-    openstack --insecure flavor create --disk 1 --vcpus 1 --ram 256 --id 52 test_flavor_alt >/dev/null
+  if ! openstack flavor show 52 &>/dev/null ; then
+    openstack flavor create --disk 1 --vcpus 1 --ram 256 --id 52 test_flavor_alt >/dev/null
     if [[ "$USE_DPDK" == "true" ]]; then
-      openstack --insecure flavor set --property hw:mem_page_size=any 52
+      openstack flavor set --property hw:mem_page_size=any 52
     fi
   fi
   deactivate_venv
@@ -135,47 +135,47 @@ function create_network() {
   activate_venv
 
   echo "INFO: Create public network and subnet"
-  openstack --insecure network create --external --share public-$netsfx
-  local public_net_id=`openstack --insecure network show public-$netsfx -f value -c id`
+  openstack network create --external --share public-$netsfx
+  local public_net_id=`openstack network show public-$netsfx -f value -c id`
   local cidr="10.5.0.0/24"
-  if ! openstack --insecure subnet create --no-dhcp --network $public_net_id --subnet-range $cidr --gateway 0.0.0.0 public-$netsfx ; then
+  if ! openstack subnet create --no-dhcp --network $public_net_id --subnet-range $cidr --gateway 0.0.0.0 public-$netsfx ; then
     echo "WARNING: Public subnet creation is too long. Waiting..."
     for i in {1..$max_attempt} ; do
       sleep 10
       echo "INFO: subnet poll #$i from $max_attempt"
-      if openstack --insecure subnet list --network $public_net_id | grep "$cidr" ; then
+      if openstack subnet list --network $public_net_id | grep "$cidr" ; then
         break
       fi
     done
   fi
 
   echo "INFO: Create private network and subnet"
-  openstack --insecure network create --internal private-$netsfx
-  local private_net_id=`openstack --insecure network show private-$netsfx -f value -c id`
+  openstack network create --internal private-$netsfx
+  local private_net_id=`openstack network show private-$netsfx -f value -c id`
   local cidr="10.10.0.0/24"
-  if ! openstack --insecure subnet create --network $private_net_id --subnet-range $cidr private-$netsfx ; then
+  if ! openstack subnet create --network $private_net_id --subnet-range $cidr private-$netsfx ; then
     echo "WARNING: Private subnet creation is too long. Waiting..."
     for i in {1..$max_attempt} ; do
       sleep 10
       echo "INFO: subnet poll #$i from $max_attempt"
-      if openstack --insecure subnet list --network $private_net_id | grep "$cidr" ; then
+      if openstack subnet list --network $private_net_id | grep "$cidr" ; then
         break
       fi
     done
   fi
-  local private_subnet_id=`openstack --insecure subnet list --network $private_net_id -f value -c ID`
+  local private_subnet_id=`openstack subnet list --network $private_net_id -f value -c ID`
 
   echo "INFO: Create router"
-  openstack --insecure router create p-ext-$netsfx
-  local router_id=`openstack --insecure router show p-ext-$netsfx -f value -c id`
-  openstack --insecure router set --external-gateway $public_net_id $router_id
-  openstack --insecure router add subnet $router_id $private_subnet_id
+  openstack router create p-ext-$netsfx
+  local router_id=`openstack router show p-ext-$netsfx -f value -c id`
+  openstack router set --external-gateway $public_net_id $router_id
+  openstack router add subnet $router_id $private_subnet_id
 
   echo "INFO: Add rules to default security group"
-  local project_id=`openstack --insecure project list | awk '/ admin /{print $2}'`
-  local group_id=`openstack --insecure security group list -c ID -c Project | grep $project_id | awk '{print $2}'`
-  openstack --insecure security group rule create $group_id --protocol tcp --dst-port 22:22
-  openstack --insecure security group rule create $group_id --protocol icmp
+  local project_id=`openstack project list | awk '/ admin /{print $2}'`
+  local group_id=`openstack security group list -c ID -c Project | grep $project_id | awk '{print $2}'`
+  openstack security group rule create $group_id --protocol tcp --dst-port 22:22
+  openstack security group rule create $group_id --protocol icmp
 
   deactivate_venv
 }
@@ -184,18 +184,22 @@ function delete_network() {
   local netsfx=$1
   activate_venv
 
-  local router_id=`openstack --insecure router show p-ext-$netsfx -f value -c id`
-  openstack --insecure router remove subnet $router_id private-$netsfx
-  openstack --insecure router delete $router_id
+  local router_id=`openstack router show p-ext-$netsfx -f value -c id`
+  openstack router remove subnet $router_id private-$netsfx
+  openstack router delete $router_id
 
-  local private_net_id=`openstack --insecure network show private-$netsfx -f value -c id`
-  openstack --insecure subnet delete private-$netsfx
-  openstack --insecure network delete private-$netsfx
+  local private_net_id=`openstack network show private-$netsfx -f value -c id`
+  openstack subnet delete private-$netsfx
+  openstack network delete private-$netsfx
 
   deactivate_venv
 }
 
 function run_os_checks() {
+  if [[ "$USE_SSL_OS" == "true" ]] ; then
+    export OS_CACERT="$WORKSPACE/ssl/rootCA.crt"
+  fi
+
   # check installed cloud
   activate_venv
 
@@ -205,7 +209,7 @@ function run_os_checks() {
   set +x
 
   echo "INFO: Check OpenStack catalog first"
-  openstack --insecure catalog list || keystone catalog || /bin/true
+  openstack catalog list || keystone catalog || /bin/true
   deactivate_venv
 
   echo "INFO: Check/create image"
@@ -220,10 +224,10 @@ function run_os_checks() {
   create_network $netsfx
 
   activate_venv
-  local public_net_id=`openstack --insecure network show public-$netsfx -f value -c id`
-  local private_net_id=`openstack --insecure network show private-$netsfx -f value -c id`
-  openstack --insecure floating ip create --floating-ip-address 10.5.0.10 $public_net_id
-  openstack --insecure floating ip create --floating-ip-address 10.5.0.11 $public_net_id
+  local public_net_id=`openstack network show public-$netsfx -f value -c id`
+  local private_net_id=`openstack network show private-$netsfx -f value -c id`
+  openstack floating ip create --floating-ip-address 10.5.0.10 $public_net_id
+  openstack floating ip create --floating-ip-address 10.5.0.11 $public_net_id
   deactivate_venv
 
   # next checks will handle return code manually
@@ -231,22 +235,22 @@ function run_os_checks() {
 
   activate_venv
   echo "INFO: Cirros image information"
-  openstack --insecure image show $image_id
+  openstack image show $image_id
   local ret=0
   check_instance_simple $private_net_id 10.5.0.10 || ret=1
   echo ''
 
   sleep 5
   set -x
-  openstack --insecure server list
+  openstack server list
   set +x
 
-  openstack --insecure catalog list || keystone catalog || /bin/true
+  openstack catalog list || keystone catalog || /bin/true
   deactivate_venv
 
   if [[ $ret == 0 ]]; then
-    openstack --insecure floating ip delete 10.5.0.10
-    openstack --insecure floating ip delete 10.5.0.11
+    openstack floating ip delete 10.5.0.10
+    openstack floating ip delete 10.5.0.11
     delete_network $netsfx
   fi
 
@@ -258,21 +262,21 @@ function _check_instance_log() {
   # wait for console-log
   echo "INFO: Check that console log is not empty"
   sleep 10
-  local log_lines=`openstack --insecure console log show $id | wc -l`
+  local log_lines=`openstack console log show $id | wc -l`
   if (( log_lines == 0 )) ; then
     echo "ERROR: console log is empty for instance $instance_id"
     return 1
   fi
   echo '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
-  openstack --insecure console log show $id | tail -50
+  openstack console log show $id | tail -50
   echo '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'
   return 0
 }
 
 function _get_instance_machine() {
   local id=$1
-  local host=`openstack --insecure server list --long -c ID -c Host | grep $id | awk '{print $4}'`
-  local ip=`openstack --insecure hypervisor list | grep $host | awk '{print $8}'`
+  local host=`openstack server list --long -c ID -c Host | grep $id | awk '{print $4}'`
+  local ip=`openstack hypervisor list | grep $host | awk '{print $8}'`
   get_machine_by_ip $ip
 }
 
@@ -343,7 +347,7 @@ function check_instance_simple() {
   done
 
   local iname="instance_$flavor"
-  if ! output=`openstack --insecure server create --flavor $flavor --nic net-id=$net_id --image cirros $iname` ; then
+  if ! output=`openstack server create --flavor $flavor --nic net-id=$net_id --image cirros $iname` ; then
     echo "ERROR: Couldn't boot instance"
     echo "$output"
     return 1
@@ -351,7 +355,7 @@ function check_instance_simple() {
   local instance_id=`echo "$output" | awk '/ id /{print $4}'`
   local ret=0
   wait_instance $instance_id $((3*MAX_FAIL)) || ret=1
-  openstack --insecure server add floating ip $instance_id $fip
+  openstack server add floating ip $instance_id $fip
   if [[ $ret == 0 ]] ; then
     local mch=`_get_instance_machine $instance_id`
     echo "INFO: Instance is on machine $mch"
@@ -393,8 +397,8 @@ function check_instance_simple() {
     fi
   fi
 
-  openstack --insecure server show $instance_id
-  openstack --insecure server delete $instance_id
+  openstack server show $instance_id
+  openstack server delete $instance_id
   return $ret
 }
 

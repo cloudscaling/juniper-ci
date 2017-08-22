@@ -30,6 +30,10 @@ if [[ -n "$tver" ]]; then
   popd
 fi
 
+if [[ "$USE_SSL_OS" == "true" ]] ; then
+  export OS_CACERT="$WORKSPACE/ssl/rootCA.crt"
+fi
+
 auth_ip=`get_machine_ip keystone`
 
 create_stackrc
@@ -61,6 +65,7 @@ rm -f *.xml
 CONF="$(pwd)/etc/tempest.conf"
 cp $my_dir/tempest/tempest.conf $CONF
 sed -i "s/%AUTH_IP%/$auth_ip/g" $CONF
+sed -i "s/%CAFILE%/$OS_CACERT/g" $CONF
 sed -i "s|%TEMPEST_DIR%|$(pwd)|g" $CONF
 sed -i "s/%IMAGE_ID%/$image_id/g" $CONF
 sed -i "s/%IMAGE_ID_ALT%/$image_id_alt/g" $CONF
