@@ -117,13 +117,13 @@ function create_flavors() {
   if ! openstack --insecure flavor show 51 &>/dev/null ; then
     openstack --insecure flavor create --disk 1 --vcpus 1 --ram 128 --id 51 test_flavor >/dev/null
     if [[ "$USE_DPDK" == "true" ]]; then
-      openstack flavor set --property hw:mem_page_size=any 51
+      openstack --insecure flavor set --property hw:mem_page_size=any 51
     fi
   fi
   if ! openstack --insecure flavor show 52 &>/dev/null ; then
     openstack --insecure flavor create --disk 1 --vcpus 1 --ram 256 --id 52 test_flavor_alt >/dev/null
     if [[ "$USE_DPDK" == "true" ]]; then
-      openstack flavor set --property hw:mem_page_size=any 52
+      openstack --insecure flavor set --property hw:mem_page_size=any 52
     fi
   fi
   deactivate_venv
@@ -272,7 +272,7 @@ function _check_instance_log() {
 function _get_instance_machine() {
   local id=$1
   local host=`openstack --insecure server list --long -c ID -c Host | grep $id | awk '{print $4}'`
-  local ip=`openstack hypervisor list | grep $host | awk '{print $8}'`
+  local ip=`openstack --insecure hypervisor list | grep $host | awk '{print $8}'`
   get_machine_by_ip $ip
 }
 
