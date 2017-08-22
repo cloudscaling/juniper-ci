@@ -6,6 +6,14 @@ my_dir="$(dirname $my_file)"
 source $my_dir/../common/functions
 source $my_dir/../common/functions-openstack
 
+trap 'catch_errors_ce $LINENO' ERR EXIT
+function catch_errors_ce() {
+  local exit_code=$?
+  echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
+  trap - ERR EXIT
+  exit $exit_code
+}
+
 VERSION=${VERSION:-"XXX-mitaka"}
 VERSION=${VERSION#*-}
 
@@ -65,7 +73,7 @@ rm -f *.xml
 CONF="$(pwd)/etc/tempest.conf"
 cp $my_dir/tempest/tempest.conf $CONF
 sed -i "s/%AUTH_IP%/$auth_ip/g" $CONF
-sed -i "s¦%CAFILE%¦$OS_CACERT¦g" $CONF
+sed -i "s|%CAFILE%|$OS_CACERT|g" $CONF
 sed -i "s|%TEMPEST_DIR%|$(pwd)|g" $CONF
 sed -i "s/%IMAGE_ID%/$image_id/g" $CONF
 sed -i "s/%IMAGE_ID_ALT%/$image_id_alt/g" $CONF
@@ -95,3 +103,5 @@ rm -f $tests $tests_filtered
 deactivate_venv
 
 cd $my_dir
+
+trap - ERR EXIT
