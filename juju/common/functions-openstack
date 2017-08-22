@@ -197,7 +197,7 @@ function delete_network() {
 
 function run_os_checks() {
   if [[ "$USE_SSL_OS" == "true" ]] ; then
-    export OS_CACERT="$WORKSPACE/ssl/rootCA.crt"
+    export OS_CACERT="$WORKSPACE/ssl/rootCA.pem"
   fi
 
   # check installed cloud

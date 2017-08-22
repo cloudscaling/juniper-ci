@@ -39,7 +39,7 @@ if [[ -n "$tver" ]]; then
 fi
 
 if [[ "$USE_SSL_OS" == "true" ]] ; then
-  export OS_CACERT="$WORKSPACE/ssl/rootCA.crt"
+  export OS_CACERT="$WORKSPACE/ssl/rootCA.pem"
 fi
 
 auth_ip=`get_machine_ip keystone`
