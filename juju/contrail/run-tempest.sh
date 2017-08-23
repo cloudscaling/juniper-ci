@@ -102,6 +102,8 @@ export OS_TEST_TIMEOUT=700
 [ -d .testrepository ] || testr init
 
 set +e
+trap - ERR EXIT
+
 echo "INFO: Run tempest tests"
 testr run --subunit --parallel --concurrency=2 --load-list=$tests_filtered | subunit-trace -n -f
 echo "INFO: Convert results"
@@ -110,5 +112,3 @@ rm -f $tests $tests_filtered
 deactivate_venv
 
 cd $my_dir
-
-trap - ERR EXIT
