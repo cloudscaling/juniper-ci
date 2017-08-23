@@ -209,7 +209,8 @@ function apply_ssl_os() {
     echo "INFO: adding rootCA to machine $mch"
     juju-scp "$ssl_dir/rootCA.pem" "${mch}:rootCA.pem"
     juju-ssh $mch sudo mkdir -p /usr/local/share/ca-certificates/openstack
-    juju-ssh $mch sudo cp rootCA.pem /usr/local/share/ca-certificates/openstack/
+    # update-ca-certificates works only with .crt files
+    juju-ssh $mch sudo cp rootCA.pem /usr/local/share/ca-certificates/openstack/rootCA.crt
     juju-ssh $mch sudo update-ca-certificates
   done
 
