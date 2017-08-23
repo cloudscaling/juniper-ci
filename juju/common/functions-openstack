@@ -131,7 +131,6 @@ function create_flavors() {
 
 function create_network() {
   local netsfx=$1
-  local max_attempt=24
   activate_venv
 
   echo "INFO: Create public network and subnet"
@@ -140,9 +139,9 @@ function create_network() {
   local cidr="10.5.0.0/24"
   if ! openstack subnet create --no-dhcp --network $public_net_id --subnet-range $cidr --gateway 0.0.0.0 public-$netsfx ; then
     echo "WARNING: Public subnet creation is too long. Waiting..."
-    for i in {1..$max_attempt} ; do
+    for i in {1..$MAX_FAIL} ; do
       sleep 10
-      echo "INFO: subnet poll #$i from $max_attempt"
+      echo "INFO: subnet poll #$i from $MAX_FAIL"
       if openstack subnet list --network $public_net_id | grep "$cidr" ; then
         break
       fi
@@ -155,9 +154,9 @@ function create_network() {
   local cidr="10.10.0.0/24"
   if ! openstack subnet create --network $private_net_id --subnet-range $cidr private-$netsfx ; then
     echo "WARNING: Private subnet creation is too long. Waiting..."
-    for i in {1..$max_attempt} ; do
+    for i in {1..$MAX_FAIL} ; do
       sleep 10
-      echo "INFO: subnet poll #$i from $max_attempt"
+      echo "INFO: subnet poll #$i from $MAX_FAIL"
       if openstack subnet list --network $private_net_id | grep "$cidr" ; then
         break
       fi
@@ -169,11 +168,11 @@ function create_network() {
   openstack router create p-ext-$netsfx
   local router_id=`openstack router show p-ext-$netsfx -f value -c id`
   openstack router set --external-gateway $public_net_id $router_id
-  for i in {1..$max_attempt} ; do
+  for i in {1..$MAX_FAIL} ; do
     if openstack router add subnet $router_id $private_subnet_id ; then
       break
     fi
-    echo "INFO: Adding subnet to router failed #$i from $max_attempt"
+    echo "INFO: Adding subnet to router failed #$i from $MAX_FAIL"
     sleep 10
   done
 
@@ -361,7 +360,14 @@ function check_instance_simple() {
   local instance_id=`echo "$output" | awk '/ id /{print $4}'`
   local ret=0
   wait_instance $instance_id $((3*MAX_FAIL)) || ret=1
-  openstack server add floating ip $instance_id $fip
+  for i in {1..$MAX_FAIL} ; do
+    if openstack server add floating ip $instance_id $fip ; then
+      break
+    fi
+    echo "INFO: Adding floating ip to instance failed #$i from $MAX_FAIL"
+    sleep 10
+  done
+
   if [[ $ret == 0 ]] ; then
     local mch=`_get_instance_machine $instance_id`
     echo "INFO: Instance is on machine $mch"
