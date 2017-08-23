@@ -169,7 +169,13 @@ function create_network() {
   openstack router create p-ext-$netsfx
   local router_id=`openstack router show p-ext-$netsfx -f value -c id`
   openstack router set --external-gateway $public_net_id $router_id
-  openstack router add subnet $router_id $private_subnet_id
+  for i in {1..$max_attempt} ; do
+    if openstack router add subnet $router_id $private_subnet_id ; then
+      break
+    fi
+    echo "INFO: Adding subnet to router failed #$i from $max_attempt"
+    sleep 10
+  done
 
   echo "INFO: Add rules to default security group"
   local project_id=`openstack project list | awk '/ admin /{print $2}'`
