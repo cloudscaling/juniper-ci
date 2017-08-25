@@ -263,6 +263,6 @@ function apply_ssl_contrail() {
     return
   fi
 
-  juju-deploy cs:$SERIES/easyrsa --to $m4
+  juju-deploy cs:~containers/$SERIES/easyrsa --to $m4
   juju-add-relation easyrsa contrail-controller
 }
