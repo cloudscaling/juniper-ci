@@ -265,6 +265,5 @@ function apply_ssl_contrail() {
 
   juju-deploy cs:~containers/$SERIES/easyrsa --to $m4
   juju-add-relation easyrsa contrail-controller
-  juju-add-relation easyrsa contrail-openstack
   juju-add-relation easyrsa contrail-agent
 }
