@@ -111,6 +111,9 @@
       - shell: |
           #!/bin/bash -e
           desc="${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION} $OPENSTACK_VERSION"
+          if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
+            desc+=' devl'
+          fi
           if [[ "$DPDK" == 'true' ]] ; then
             desc+=' dpdk'
           fi
