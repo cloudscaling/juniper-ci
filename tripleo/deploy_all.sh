@@ -45,12 +45,16 @@ function catch_errors() {
   exit $exit_code
 }
 
-build_tag=`cat $CONTRAIL_PACKAGES_DIR/tag`
 ssh_env="NUM=$NUM DEPLOY=1 NETWORK_ISOLATION=$NETWORK_ISOLATION"
 ssh_env+=" ENVIRONMENT_OS=$ENVIRONMENT_OS ENVIRONMENT_OS_VERSION=$ENVIRONMENT_OS_VERSION"
 ssh_env+=" OPENSTACK_VERSION=$OPENSTACK_VERSION RHEL_CERT_TEST=$RHEL_CERT_TEST DPDK=$DPDK"
 ssh_env+=" AAA_MODE=$AAA_MODE AAA_MODE_ANALYTICS=$AAA_MODE_ANALYTICS"
-ssh_env+=" USE_DEVELOPMENT_PUPPETS=$USE_DEVELOPMENT_PUPPETS BUILD_TAG=$build_tag"
+ssh_env+=" USE_DEVELOPMENT_PUPPETS=$USE_DEVELOPMENT_PUPPETS"
+if [[ -f $CONTRAIL_PACKAGES_DIR/tag ]] ; then
+  build_tag=`cat $CONTRAIL_PACKAGES_DIR/tag`
+  ssh_env+=" BUILD_TAG=$build_tag"
+fi
+
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
     export RHEL_ACCOUNT_FILE=${RHEL_ACCOUNT_FILE:-'/home/root/rhel/rhel-account-cert'}
