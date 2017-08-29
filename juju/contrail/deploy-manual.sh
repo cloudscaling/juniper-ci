@@ -104,7 +104,6 @@ juju-expose glance
 
 juju-deploy cs:$SERIES/keystone --to $m3
 juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
-juju-set keystone "preferred-api-version=3"
 juju-expose keystone
 
 juju-deploy cs:$SERIES/nova-compute --to $m2
