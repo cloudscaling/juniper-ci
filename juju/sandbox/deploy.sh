@@ -201,7 +201,7 @@ wait $pid
 openstack image create --public --file cirros-0.3.4-x86_64-disk.img cirros
 
 log_info "create public network"
-openstack network create --external public --share
+openstack network create --external public --no-share
 public_net_id=`openstack network show public -f value -c id`
 
 log_info "create demo tenant"
