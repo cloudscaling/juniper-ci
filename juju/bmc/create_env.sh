@@ -205,13 +205,13 @@ case "$DEPLOY_MODE" in
     ;;
   "two")
     run_controller 0 8192 1
-    run_controller 1 8192 0
+    run_controller 1 16384 0
     ;;
   "ha")
     run_controller 0 8192 1
-    run_controller 1 8192 0
-    run_controller 2 8192 0
-    run_controller 3 8192 0
+    run_controller 1 16384 0
+    run_controller 2 16384 0
+    run_controller 3 16384 0
     ;;
   *)
     echo "ERROR: Invalid mode: $DEPLOY_MODE (must be 'one', 'two' or 'ha')"
