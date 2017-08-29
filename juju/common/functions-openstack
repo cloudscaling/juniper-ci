@@ -134,7 +134,7 @@ function create_network() {
   activate_venv
 
   echo "INFO: Create public network and subnet"
-  openstack network create --external --share public-$netsfx
+  openstack network create --external public-$netsfx
   local public_net_id=`openstack network show public-$netsfx -f value -c id`
   local cidr="10.5.0.0/24"
   if ! openstack subnet create --no-dhcp --network $public_net_id --subnet-range $cidr --gateway 0.0.0.0 public-$netsfx ; then
