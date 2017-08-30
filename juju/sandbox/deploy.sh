@@ -201,8 +201,10 @@ wait $pid
 openstack image create --public --file cirros-0.3.4-x86_64-disk.img cirros
 
 log_info "create public network"
-openstack network create --external public --no-share
+openstack network create --external public
 public_net_id=`openstack network show public -f value -c id`
+# bug https://bugs.launchpad.net/juniperopenstack/+bug/1713810
+sleep 5 ; openstack network set --no-share $public_net_id
 
 log_info "create demo tenant"
 openstack project create demo

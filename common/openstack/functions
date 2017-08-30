@@ -156,7 +156,9 @@ function create_network() {
   activate_venv
 
   echo "INFO: Create public network and subnet"
-  openstack --insecure network create --external --no-share public-$netsfx
+  openstack --insecure network create --external public-$netsfx
+  # bug https://bugs.launchpad.net/juniperopenstack/+bug/1713810
+  sleep 5 ; openstack network set --no-share public-$netsfx
   local public_net_id=`openstack --insecure network show public-$netsfx -f value -c id`
   openstack --insecure subnet create --no-dhcp --network $public_net_id --subnet-range 10.5.0.0/24 --gateway 0.0.0.0 public-$netsfx
 
