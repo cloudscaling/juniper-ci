@@ -183,4 +183,4 @@ machines:
     constraints: mem=8G cores=2 root-disk=40G
   "5":
     series: %SERIES%
-    constraints: mem=15G cores=2 root-disk=40G
+    constraints: mem=15G cores=2 root-disk=300G
