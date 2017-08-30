@@ -11,10 +11,11 @@
             - never
       - choice:
           name: VERSION
-          description: "Version of the OpenStack. mitaka implies trusty and newton implaies xenial."
+          description: "Version of the OpenStack. mitaka implies trusty and newton/ocata implies xenial."
           choices:
             - mitaka
             - newton
+            - ocata
       - choice:
           name: DEPLOY_FROM
           description: "A place where to get charms"
@@ -87,9 +88,9 @@
           regexp: "DESCRIPTION (.*)"
       - shell: |
           #!/bin/bash -e
-          export SERIES='trusty'
-          if [[ "$VERSION" == "newton" ]] ; then
-            export SERIES='xenial'
+          export SERIES='xenial'
+          if [[ "$VERSION" == "mitaka" ]] ; then
+            export SERIES='trusty'
           fi
           ./juniper-ci/juju/run-contrail-openstack.sh deploy-$DEPLOY_TYPE.sh $DEPLOY_FROM
     publishers:

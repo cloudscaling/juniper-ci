@@ -178,7 +178,7 @@ function create_network() {
   echo "INFO: Add rules to default security group"
   local group_id=''
   case $OPENSTACK_VERSION in
-    liberty|mitaka|newton)
+    liberty|mitaka|newton|ocata)
       local project_id=`openstack --insecure project list | awk '/ admin /{print $2}'`
       group_id=`openstack --insecure security group list -c ID -c Project | grep $project_id | awk '{print $2}'`
       ;;

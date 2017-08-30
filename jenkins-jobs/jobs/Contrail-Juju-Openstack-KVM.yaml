@@ -13,10 +13,11 @@
             - never
       - choice:
           name: VERSION
-          description: "Version of the OpenStack. mitaka implies trusty and newton implaies xenial."
+          description: "Version of the OpenStack. mitaka implies trusty and newton/ocata implies xenial."
           choices:
             - newton
             - mitaka
+            - ocata
       - choice:
           name: DEPLOY_MODE
           description: |
@@ -57,9 +58,9 @@
           regexp: "DESCRIPTION (.*)"
       - shell: |
           #!/bin/bash -e
-          export SERIES='trusty'
-          if [[ "$VERSION" == "newton" ]] ; then
-            export SERIES='xenial'
+          export SERIES='xenial'
+          if [[ "$VERSION" == "mitaka" ]] ; then
+            export SERIES='trusty'
           fi
           ./juniper-ci/juju/bmc/deploy_all.sh
     publishers:
