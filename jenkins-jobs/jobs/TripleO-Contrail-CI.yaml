@@ -163,4 +163,5 @@
     builders:
       - shell: |
           #!/bin/bash -ex
+          export LIBVIRT_DEFAULT_URI=qemu:///system
           ./juniper-ci/tripleo/clean_env.sh
