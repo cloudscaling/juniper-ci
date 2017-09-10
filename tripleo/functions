@@ -164,7 +164,9 @@ function rhel_register_system_and_customize() {
   . $RHEL_ACCOUNT_FILE
   # virt-customize doesn support activation keys
   if [[ "$image_type" == 'overcloud' ]] ; then
+    qemu-img resize $image_file +300G
     virt-customize -a $image_file \
+      --run-command 'xfs_growfs /' \
       --sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
       --run-command "subscription-manager repos ${enable_repos_opts}"
   else
