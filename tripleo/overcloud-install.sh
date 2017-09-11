@@ -503,6 +503,8 @@ parameter_defaults:
   AAAMode: $AAA_MODE
   AAAModeAnalytics: $AAA_MODE_ANALYTICS
   ContrailWebuiHttp: 8180
+  ContrailConfigDBMinDiskGB: 4
+  ContrailAnalyticsDBMinDiskGB: 4
 EOF
 if [[ -n "$BUILD_TAG" ]] ; then
 cat <<EOF >> $misc_opts
