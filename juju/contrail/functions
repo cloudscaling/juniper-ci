@@ -61,7 +61,7 @@ function check_containers() {
   echo "INFO: unpacking archive with containers..."
   pushd "$HOME/docker"
   tar -xvf $di_file
-  pop d
+  popd
   rm -f "$HOME/docker/$di_file"
 }
 
