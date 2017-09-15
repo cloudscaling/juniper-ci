@@ -108,14 +108,15 @@ function get_file() {
 
 get_file "contrail-docker-images_${CONTRAIL_VERSION}-${BUILD}-$SERIES.tgz"
 stage=4
+set_status "unpackinging 'contrail-docker-images_${CONTRAIL_VERSION}-${BUILD}-$SERIES.tgz'"
 pushd docker
 tar -xvf "contrail-docker-images_${CONTRAIL_VERSION}-${BUILD}-$SERIES.tgz"
 popd
-rm -f "$HOME/docker/$di_file"
+rm -f "docker/contrail-docker-images_${CONTRAIL_VERSION}-${BUILD}-$SERIES.tgz"
 stage=5
 
 get_file "contrail_debs-${BUILD}-${OPENSTACK_VERSION}.tgz"
-cp "docker/contrail_debs-${BUILD}-${OPENSTACK_VERSION}.tgz" contrail_debs.tgz
+mv "docker/contrail_debs-${BUILD}-${OPENSTACK_VERSION}.tgz" contrail_debs.tgz
 stage=6
 
 set_status "Setting up apt-repo."
