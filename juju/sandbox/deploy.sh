@@ -109,7 +109,7 @@ function get_file() {
 get_file "contrail-docker-images_${CONTRAIL_VERSION}-${BUILD}-$SERIES.tgz"
 stage=4
 pushd docker
-tar -xvf $di_file
+tar -xvf "contrail-docker-images_${CONTRAIL_VERSION}-${BUILD}-$SERIES.tgz"
 popd
 rm -f "$HOME/docker/$di_file"
 stage=5
