@@ -335,7 +335,7 @@ if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
 
   _start_vm \
     "rd-undercloud-$NUM-cert-test" "$pool_path/undercloud-$NUM-cert-test.qcow2" \
-    $mgmt_mac_cert $prov_mac_cert 2048
+    $mgmt_mac_cert $prov_mac_cert 4096
 fi
 
 
