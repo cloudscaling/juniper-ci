@@ -9,8 +9,8 @@ fi
 
 # base constants for SandBox
 
-export VERSION=${VERSION:-'49'}
-export CHARMS_VERSION=${CHARMS_VERSION:-'343c6179433e56309ea99c7b8ef90df9e29a59e6'}
+export BUILD=${BUILD:-'30'}
+export CHARMS_VERSION=${CHARMS_VERSION:-'b2c96902f5f4075bdd70a585530a9f2a7591bcbd'}
 # here must be trusty-mitaka or xenial-newton
 export SERIES=${SERIES:-'trusty'}
 export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'mitaka'}
@@ -18,7 +18,8 @@ export PASSWORD=${PASSWORD:-'password'}
 OPENSTACK_ORIGIN="cloud:${SERIES}-${OPENSTACK_VERSION}"
 addresses_store_file="$HOME/.addresses"
 base_url='https://s3-us-west-2.amazonaws.com/contrailpkgs'
-suffix='ubuntu14.04-4.0.1.0'
+CONTRAIL_VERSION="4.0.1.0"
+suffix="ubuntu14.04-${CONTRAIL_VERSION}"
 export WORKSPACE="$HOME"
 export SANDBOX_MODE='true'
 
@@ -105,15 +106,16 @@ function get_file() {
   fi
 }
 
-get_file "contrail-analytics-${suffix}-${VERSION}.tar.gz"
-stage=3
-get_file "contrail-analyticsdb-${suffix}-${VERSION}.tar.gz"
+get_file "contrail-docker-images_${CONTRAIL_VERSION}-${BUILD}-$SERIES.tgz"
 stage=4
-get_file "contrail-controller-${suffix}-${VERSION}.tar.gz"
+pushd docker
+tar -xvf $di_file
+popd
+rm -f "$HOME/docker/$di_file"
 stage=5
-get_file "contrail_debs-${VERSION}-${OPENSTACK_VERSION}.tgz"
-cp "docker/contrail_debs-${VERSION}-${OPENSTACK_VERSION}.tgz" contrail_debs.tgz
 
+get_file "contrail_debs-${BUILD}-${OPENSTACK_VERSION}.tgz"
+cp "docker/contrail_debs-${BUILD}-${OPENSTACK_VERSION}.tgz" contrail_debs.tgz
 stage=6
 
 set_status "Setting up apt-repo."
@@ -146,13 +148,13 @@ juju deploy $BUNDLE
 
 stage=8
 set_status "Attaching resource for controller"
-juju attach contrail-controller contrail-controller="$cdir/docker/contrail-controller-${suffix}-${VERSION}.tar.gz"
+juju attach contrail-controller contrail-controller="$cdir/docker/contrail-controller-${suffix}-${BUILD}.tar.gz"
 stage=9
 set_status "Attaching resource for analyticsdb"
-juju attach contrail-analyticsdb contrail-analyticsdb="$cdir/docker/contrail-analyticsdb-${suffix}-${VERSION}.tar.gz"
+juju attach contrail-analyticsdb contrail-analyticsdb="$cdir/docker/contrail-analyticsdb-${suffix}-${BUILD}.tar.gz"
 stage=10
 set_status "Attaching resource for analytics"
-juju attach contrail-analytics contrail-analytics="$cdir/docker/contrail-analytics-${suffix}-${VERSION}.tar.gz"
+juju attach contrail-analytics contrail-analytics="$cdir/docker/contrail-analytics-${suffix}-${BUILD}.tar.gz"
 
 stage=11
 
