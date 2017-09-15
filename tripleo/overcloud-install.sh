@@ -526,7 +526,7 @@ fi
 if [[ "$DPDK" == 'true' ]] ; then
   cat <<EOF >> $misc_opts
   ContrailDpdkCoremask: '1'
-  ContrailDpdkHugepages: '1000'
+  ContrailDpdkHugePages: '1000'
 EOF
 fi
 
