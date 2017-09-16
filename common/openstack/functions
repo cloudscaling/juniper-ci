@@ -358,7 +358,7 @@ function _check_instance_ping() {
   local mch=$1
   local ip=$2
   echo "INFO: Trying to ping instance with ip $ip"
-  if ! $SSH_CMD $mch ping -c 2 $ip 2>/dev/null ; then
+  if ! $SSH_CMD $mch sudo ping -c 2 $ip 2>/dev/null ; then
     echo "ERROR: Can't ping instance by ip $ip"
     return 1
   fi
