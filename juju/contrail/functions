@@ -15,6 +15,7 @@ function wget_file() {
     elif [[ "$fltime" != "$frtime" ]] ; then
       echo "INFO: Local file time ($(stat -c%y "$HOME/docker/$ff")) is not equal to remote ($frtime_full). File is to be removed re-download."
     else
+      echo "INFO: Local file $ff is the same as remote. Skipping download."
       return
     fi
   fi

@@ -5,6 +5,9 @@ my_dir="$(dirname $my_file)"
 source "$my_dir/../common/functions"
 source "$my_dir/functions"
 
+# it also sets variables with names
+check_containers
+
 trap 'catch_errors_ce $LINENO' ERR EXIT
 function catch_errors_ce() {
   local exit_code=$?
@@ -12,9 +15,6 @@ function catch_errors_ce() {
   trap - ERR EXIT
   exit $exit_code
 }
-
-# it also sets variables with names
-check_containers
 
 jver="$(juju-version)"
 deploy_from=${1:-github}   # Place where to get charms - github or charmstore
