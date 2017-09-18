@@ -226,9 +226,14 @@ openstack baremetal introspection bulk start
 #sudo journalctl -l -u openstack-ironic-discoverd -u openstack-ironic-discoverd-dnsmasq -u openstack-ironic-conductor -f
 
 # prepare Contrail puppet modules via uploading artifacts to swift
-git_branch="stable/${OPENSTACK_VERSION}"
+#git_branch_ctp="stable/${OPENSTACK_VERSION}"
+#git_branch_pc="R4.0"
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! POC for 4.0.2 with packages instead of containers
+git_branch_ctp="r4.0.2"
+git_branch_pc="r4.0.2"
+
 # TODO: replace personal repo with Juniper. or make switch with available repos.
-git_repo_ctp="juniper"
+git_repo_ctp="cloudscaling"
 git_repo_pc="cloudscaling"
 # patch for nova with DPDK is still in private repo
 #git_repo_pc="alexey-mr"
@@ -236,8 +241,8 @@ artifact_opts=""
 if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
   rm -rf usr/share/openstack-puppet/modules
   mkdir -p usr/share/openstack-puppet/modules
-  git clone https://github.com/${git_repo_ctp}/contrail-tripleo-puppet -b $git_branch usr/share/openstack-puppet/modules/tripleo
-  git clone https://github.com/${git_repo_pc}/puppet-contrail -b R4.0 usr/share/openstack-puppet/modules/contrail
+  git clone https://github.com/${git_repo_ctp}/contrail-tripleo-puppet -b $git_branch_ctp usr/share/openstack-puppet/modules/tripleo
+  git clone https://github.com/${git_repo_pc}/puppet-contrail -b $git_branch_pc usr/share/openstack-puppet/modules/contrail
   tar czvf puppet-modules.tgz usr/
   upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
   artifact_opts="-e .tripleo/environments/deployment-artifacts.yaml"
