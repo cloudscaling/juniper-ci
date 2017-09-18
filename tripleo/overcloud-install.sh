@@ -226,6 +226,9 @@ openstack baremetal introspection bulk start
 #sudo journalctl -l -u openstack-ironic-discoverd -u openstack-ironic-discoverd-dnsmasq -u openstack-ironic-conductor -f
 
 # prepare Contrail puppet modules via uploading artifacts to swift
+git_branch_tht="stable/${OPENSTACK_VERSION}"
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! original version fo r4.0
 #git_branch_ctp="stable/${OPENSTACK_VERSION}"
 #git_branch_pc="R4.0"
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! POC for 4.0.2 with packages instead of containers
@@ -257,7 +260,7 @@ fi
 rm -rf ~/tripleo-heat-templates
 cp -r /usr/share/openstack-tripleo-heat-templates/ ~/tripleo-heat-templates
 rm -rf ~/contrail-tripleo-heat-templates
-git clone https://github.com/${git_repo_ctht}/contrail-tripleo-heat-templates -b $git_branch
+git clone https://github.com/${git_repo_ctht}/contrail-tripleo-heat-templates -b $git_branch_tht
 if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
   cp -r ~/contrail-tripleo-heat-templates/environments/contrail ~/tripleo-heat-templates/environments
   cp -r ~/contrail-tripleo-heat-templates/puppet/services/network/* ~/tripleo-heat-templates/puppet/services/network
