@@ -158,7 +158,6 @@ if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
   juju-set contrail-controller control-network=$subnet_cidr
   juju-set contrail-analyticsdb control-network=$subnet_cidr
   juju-set contrail-analytics control-network=$subnet_cidr
-  juju-set contrail-agent control-network=$subnet_cidr
 fi
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
