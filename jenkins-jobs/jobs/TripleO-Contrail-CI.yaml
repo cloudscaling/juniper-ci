@@ -80,9 +80,9 @@
                         controller - deploy to OS controller node
                         contrail-controller - deploy to Contrail controller node
           choices:
-            - 'contrail-controller'
             - '1'
             - '3'
+            - 'contrail-controller'
             - 'controller'
       - choice:
           name: CONTRAIL_ANALYTICSDB_COUNT
@@ -91,9 +91,9 @@
                         controller - deploy to OS controller node
                         contrail-controller - deploy to dedicated Contrail controller node
           choices:
-            - 'contrail-controller'
             - '1'
             - '3'
+            - 'contrail-controller'
             - 'controller'
       - choice:
           name: CLEAN_ENV
