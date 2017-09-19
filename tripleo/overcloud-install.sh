@@ -514,6 +514,11 @@ parameter_defaults:
   ContrailConfigDBMinDiskGB: 4
   ContrailAnalyticsDBMinDiskGB: 4
 EOF
+if [[ "$CONTRAIL_VERSION" =~ 3.[0-9].[0-9] ]] ; then
+cat <<EOF >> $misc_opts
+  ContrailVersion: 3
+EOF
+fi
 if [[ -n "$BUILD_TAG" ]] ; then
 cat <<EOF >> $misc_opts
   ContrailContainerTag: $BUILD_TAG
