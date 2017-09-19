@@ -116,7 +116,7 @@
     builders:
       - shell: |
           #!/bin/bash -e
-          desc="${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION} $OPENSTACK_VERSION"
+          desc="${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION} $CONTRAIL_VERSION $OPENSTACK_VERSION"
           if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
             desc+=' devl'
           fi
@@ -134,7 +134,7 @@
             fi
             desc+=" rhcert"
           fi
-          desc+=" (num=$NUM $CONTRAIL_VERSION osc=$CONTROLLER_COUNT cc=$CONTRAIL_CONTROLLER_COUNT ca=$CONTRAIL_ANALYTICS_COUNT cadb=$CONTRAIL_ANALYTICSDB_COUNT, $CLEAN_ENV)"
+          desc+=" (num=$NUM osc=$CONTROLLER_COUNT cc=$CONTRAIL_CONTROLLER_COUNT ca=$CONTRAIL_ANALYTICS_COUNT cadb=$CONTRAIL_ANALYTICSDB_COUNT, $CLEAN_ENV)"
           echo "DESCRIPTION $desc"
       - description-setter:
           regexp: "DESCRIPTION (.*)"
