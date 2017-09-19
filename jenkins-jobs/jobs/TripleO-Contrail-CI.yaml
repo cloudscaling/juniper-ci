@@ -27,11 +27,17 @@
             - '7_4'
       - choice:
           name: OPENSTACK_VERSION
-          description: "Version of the OpenStack"
+          description: "Version of OpenStack"
           choices:
             - 'ocata'
             - 'newton'
             - 'mitaka'
+      - choice:
+          name: CONTRAIL_VERSION
+          description: "Version of Contrail"
+          choices:
+            - '4.0.1'
+            - '3.2.6'
       - choice:
           name: AAA_MODE
           description: "aaa_mode parameter for Contrail Controller"
