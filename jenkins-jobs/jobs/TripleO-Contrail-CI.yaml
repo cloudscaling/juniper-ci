@@ -134,7 +134,7 @@
             fi
             desc+=" rhcert"
           fi
-          desc+=" (num=$NUM osc=$CONTROLLER_COUNT cc=$CONTRAIL_CONTROLLER_COUNT ca=$CONTRAIL_ANALYTICS_COUNT cadb=$CONTRAIL_ANALYTICSDB_COUNT, $CLEAN_ENV)"
+          desc+=" (num=$NUM $CONTRAIL_VERSION osc=$CONTROLLER_COUNT cc=$CONTRAIL_CONTROLLER_COUNT ca=$CONTRAIL_ANALYTICS_COUNT cadb=$CONTRAIL_ANALYTICSDB_COUNT, $CLEAN_ENV)"
           echo "DESCRIPTION $desc"
       - description-setter:
           regexp: "DESCRIPTION (.*)"
