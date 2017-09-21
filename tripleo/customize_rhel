@@ -54,16 +54,16 @@ fi
 # done
 
 # virt-customize -a $dst_image \
-# 	--run-command 'xfs_growfs /' \
-# 	--sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
-# 	--run-command "subscription-manager repos ${enable_repos_opts}" \
-# 	--run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
-# 	--run-command 'systemctl enable sshd' \
+#   --run-command 'xfs_growfs /' \
+#   --sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
+#   --run-command "subscription-manager repos ${enable_repos_opts}" \
+#   --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
+#   --run-command 'systemctl enable sshd' \
 #   --root-password password:qwe123QWE \
-# 	--selinux-relabel
-virt-customize -a $dst_image \
-	--run-command 'xfs_growfs /' \
-	--run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
-	--run-command 'systemctl enable sshd' \
-  --root-password password:qwe123QWE \
-	--selinux-relabel
+#   --selinux-relabel
+virt-customize -a $dst_image \    
+    --run-command 'xfs_growfs /' \
+    --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
+    --run-command 'systemctl enable sshd' \
+    --root-password password:qwe123QWE \
+    --selinux-relabel
