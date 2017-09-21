@@ -85,7 +85,7 @@ EOF
 ```
 
 Undercloud images:
-For RHEL undercloud image must be changed before usage, RHEL subscription is requried.
+For RHEL undercloud image must be changed before usage - resize is required.
 ```
       # example
       export RHEL_USER=<redhat_user>
@@ -93,30 +93,38 @@ For RHEL undercloud image must be changed before usage, RHEL subscription is req
       ./customize_rhel  /root/rhel_7_3_images_org/rhel-guest-image-7.3-36.x86_64.qcow2 \
                          /home/root/images/rhel-guest-image-7.3-36.x86_64.qcow2
 
-      ln -s /home/root/images/rhel-guest-image-7.3-36.x86_64.qcow2 /home/root/images/undercloud-rhel.qcow2
-      ln -s /home/root/images/undercloud-centos7.qcow2 /home/root/images/undercloud-centos.qcow2
+      ln -s /home/root/images/rhel-guest-image-7.3-36.x86_64.qcow2 /home/root/images/undercloud-rhel-newton.qcow2
+      ln -s /home/root/images/undercloud-centos7.qcow2 /home/root/images/undercloud-centos-newton.qcow2
 
-      ls -lh /home/root/images/
-      -rw-r--r-- 1 root root 561M Jul 14 21:06 rhel-guest-image-7.3-36.x86_64.qcow2
-      -rw-r--r-- 1 root root 2.8G Mar 11 13:20 undercloud-centos7.qcow2
-      lrwxrwxrwx 1 root root   42 Jul 14 20:56 undercloud-centos.qcow2 -> /home/root/images/undercloud-centos7.qcow2
-      lrwxrwxrwx 1 root root   54 Jul 14 20:56 undercloud-rhel.qcow2 -> /home/root/images/rhel-guest-image-7.3-36.x86_64.qcow2
+      # structure of dir would look like this:
+      ls /home/root/images/ -l
+      -rw-r--r-- 1 root root  911998976 Jul 29  2016 CentOS-7-x86_64-GenericCloud-1607.qcow2
+      -rw-r--r-- 1 root root 2980052992 Jul 24 19:19 undercloud-centos7.qcow2
+      lrwxrwxrwx 1 root root         42 Jul 14 20:56 undercloud-centos-newton.qcow2 -> /home/root/images/undercloud-centos7.qcow2
+      lrwxrwxrwx 1 root root         42 Jul 21 19:00 undercloud-centos-ocata.qcow2 -> /home/root/images/undercloud-centos7.qcow2
+      lrwxrwxrwx 1 root root         46 Aug 16 08:21 undercloud-rhel-7_3-newton.qcow2 -> /home/root/images/undercloud-rhel-newton.qcow2
+      lrwxrwxrwx 1 root root         45 Aug 16 08:22 undercloud-rhel-7_3-ocata.qcow2 -> /home/root/images/undercloud-rhel-ocata.qcow2
+      lrwxrwxrwx 1 root root         43 Aug 16 08:21 undercloud-rhel-7_4-newton.qcow2 -> /home/root/images/undercloud-rhel-7_4.qcow2
+      lrwxrwxrwx 1 root root         43 Aug 16 08:22 undercloud-rhel-7_4-ocata.qcow2 -> /home/root/images/undercloud-rhel-7_4.qcow2
+      -rw-r--r-- 1 root root 1215299584 Aug 16 08:20 undercloud-rhel-7_4.qcow2
+      -rw-r--r-- 1 root root 1323827200 Aug  1 16:03 undercloud-rhel-newton.qcow2
+      -rw-r--r-- 1 root root 1323827200 Aug  1 16:03 undercloud-rhel-ocata.qcow2
+      root@contrail-ci:~#
 ```
-Overcloud image: for debug purposes set root password via
+Overcloud images are customize at runtime
 ```
-      export RHEL_USER=<redhat_user>
-      export RHEL_PASSWORD=<redhat password>
-      customize_rhel overcloud-full.qcow2
+      # structure of dir would look like this:
+      root@contrail-ci:~# ls -l /home/stack/
+      total 8204072
+      -rw-r--r-- 1 stack stack 1398367523 Jun 15 16:47 images-centos7.tar
+      lrwxrwxrwx 1 stack stack         30 Jul 14 21:11 images-centos-newton.tar -> /home/stack/images-centos7.tar
+      lrwxrwxrwx 1 stack stack         30 Jul 20 17:44 images-centos-ocata.tar -> /home/stack/images-centos7.tar
+      -rw-r--r-- 1 stack stack 1741926400 Sep 21 13:45 images-rhel-7_3-newton.tar
+      -rw-r--r-- 1 stack stack 1743411200 Aug  1 16:26 images-rhel-7_3-ocata.tar
+      -rw-r--r-- 1 stack stack 1817180160 Sep 20 16:46 images-rhel-7_4-newton.tar
+      -rw-r--r-- 1 stack stack 1700055040 Aug 16 08:43 images-rhel-7_4-ocata.tar
 ```
-and re-create archive with images.
-Overcloud image archive:
-```
-      root@contrail-ci:~# ls -lh /home/stack/
-      -rw-r--r-- 1 stack stack 1.4G Jun 15 16:47 images-centos7.tar
-      lrwxrwxrwx 1 stack stack   30 Jul 14 21:11 images-centos-newton.tar -> /home/stack/images-centos7.tar
-      -rw-r--r-- 1 stack stack 1.6G Jul 14 15:31 images-rhel73.tar
-      lrwxrwxrwx 1 stack stack   29 Jul 14 21:11 images-rhel-newton.tar -> /home/stack/images-rhel73.tar
-```
+
 
 Files and parameters
 ====================

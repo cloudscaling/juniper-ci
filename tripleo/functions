@@ -166,18 +166,29 @@ function rhel_register_system_and_customize() {
   if [[ "$image_type" == 'overcloud' ]] ; then
     virt-customize -a $image_file \
       --sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
-      --run-command "subscription-manager repos ${enable_repos_opts}"
+      --run-command 'xfs_growfs /' \
+      --run-command 'systemctl enable sshd' \
+      --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
+      --root-password password:qwe123QWE \
+      --run-command "subscription-manager repos ${enable_repos_opts}" \
+      --selinux-relabel
   else
     virt-customize -a $image_file \
       --sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
+      --run-command 'xfs_growfs /' \
+      --run-command 'systemctl enable sshd' \
+      --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
+      --root-password password:qwe123QWE \
       --run-command "subscription-manager repos ${enable_repos_opts}" \
-      --run-command 'yum remove -y cloud-init'
+      --run-command 'yum remove -y cloud-init' \
+      --selinux-relabel
       #  \
       # --run-command 'sed -i "s/SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config'
   fi
   #eval "$old_opt"
   set -x
 }
+
 
 function rhel_unregister_system() {
   local image_file=$1
