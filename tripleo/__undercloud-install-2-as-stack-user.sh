@@ -28,7 +28,9 @@ mgmt_ip="192.168.$addr"
 dns_nameserver="8.8.8.8"
 
 # create undercloud configuration file. all IP addresses are relevant to create_env.sh script
-cp /usr/share/instack-undercloud/undercloud.conf.sample ~/undercloud.conf
+if [[ -f /usr/share/instack-undercloud/undercloud.conf.sample ]] ; then
+  cp /usr/share/instack-undercloud/undercloud.conf.sample ~/undercloud.conf
+fi
 cat << EOF >> undercloud.conf
 [DEFAULT]
 local_ip = $prov_ip.2/24
