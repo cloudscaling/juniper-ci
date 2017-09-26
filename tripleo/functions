@@ -162,31 +162,40 @@ function rhel_register_system_and_customize() {
   #local old_opt=$(shopt -o xtrace)
   set +x
   . $RHEL_ACCOUNT_FILE
-  # virt-customize doesn support activation keys
-  if [[ "$image_type" == 'overcloud' ]] ; then
-    virt-customize -a $image_file \
-      --sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
-      --run-command 'xfs_growfs /' \
-      --run-command 'systemctl enable sshd' \
-      --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
-      --root-password password:qwe123QWE \
-      --run-command "subscription-manager repos ${enable_repos_opts}" \
-      --selinux-relabel
-  else
-    virt-customize -a $image_file \
-      --sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
-      --run-command 'xfs_growfs /' \
-      --run-command 'systemctl enable sshd' \
-      --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
-      --root-password password:qwe123QWE \
-      --run-command "subscription-manager repos ${enable_repos_opts}" \
-      --run-command 'yum remove -y cloud-init' \
-      --selinux-relabel
-      #  \
-      # --run-command 'sed -i "s/SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config'
-  fi
+  local ret=1
+  local i=0
+  while (( i < 4 )) ; then
+    echo "Image customization try=$i"
+    # virt-customize doesn support activation keys
+    if [[ "$image_type" == 'overcloud' ]] ; then
+      virt-customize -a $image_file \
+        --sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
+        --run-command 'xfs_growfs /' \
+        --run-command 'systemctl enable sshd' \
+        --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
+        --root-password password:qwe123QWE \
+        --run-command "subscription-manager repos ${enable_repos_opts}" && ret=0
+        # --selinux-relabel
+    else
+      virt-customize -a $image_file \
+        --sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
+        --run-command 'xfs_growfs /' \
+        --run-command 'systemctl enable sshd' \
+        --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
+        --root-password password:qwe123QWE \
+        --run-command "subscription-manager repos ${enable_repos_opts}" \
+        --run-command 'yum remove -y cloud-init' && ret=0
+        # --selinux-relabel
+        # --run-command 'sed -i "s/SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config'
+    fi
+    if (( ret == 0 )) ; then
+      break
+    fi
+    (( i+=1 ))
+  done
   #eval "$old_opt"
   set -x
+  return $ret
 }
 
 
