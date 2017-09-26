@@ -164,7 +164,7 @@ function rhel_register_system_and_customize() {
   . $RHEL_ACCOUNT_FILE
   local ret=1
   local i=0
-  while (( i < 4 )) ; then
+  while (( i < 4 )) ; do
     echo "Image customization try=$i"
     # virt-customize doesn support activation keys
     if [[ "$image_type" == 'overcloud' ]] ; then
