@@ -150,57 +150,92 @@ function rhel_get_repos_for_os() {
   echo $common_repos
 }
 
-function rhel_register_system_and_customize() {
+function _rhel_register() {
   local image_file=$1
-  local image_type=$2
+  local ret=1
+  local i=0
+  while (( i < 5 )) ; do
+    echo "Image registration try=$i"
+    virt-customize -a $image_file \
+      --sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register && ret=0
+    if (( ret == 0 )) ; then
+      break
+    fi
+    (( i+=1 ))
+  done
+  echo "Image registration result for $i tries: $ret"
+  return $ret
+}
+
+function _rhel_attach() {
+  local image_file=$1
+  local attach_type='auto'
+  if [[ -n "$RHEL_POOL_ID" ]] ; then
+    attach_type="pool:${RHEL_POOL_ID}"
+  fi
+  local ret=1
+  local i=0
+  while (( i < 5 )) ; do
+    echo "Subscription attach try=$i"
+    virt-customize -a $image_file --sm-attach ${attach_type} && ret=0
+    if (( ret == 0 )) ; then
+      break
+    fi
+    (( i+=1 ))
+  done
+  echo "Subscription attach result for $i tries: $ret"
+  return $ret
+}
+
+function _rhel_repos() {
+  local image_file=$1
   local common_repos=$(rhel_get_repos_for_os)
   local enable_repos_opts=''
   for i in $common_repos ; do
     enable_repos_opts+=" --enable=${i}"
   done
-  # todo: fix shopt
-  #local old_opt=$(shopt -o xtrace)
-  set +x
-  . $RHEL_ACCOUNT_FILE
   local ret=1
   local i=0
   while (( i < 5 )) ; do
-    echo "Image registration try=$i"
-    # virt-customize doesn support activation keys
-    if [[ "$image_type" == 'overcloud' ]] ; then
-      virt-customize -a $image_file \
-        --sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
-        --run-command 'xfs_growfs /' \
-        --run-command 'systemctl enable sshd' \
-        --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
-        --root-password password:qwe123QWE \
-        --run-command "subscription-manager repos ${enable_repos_opts}" && ret=0
-
-      # --selinux-relabel
-    else
-      virt-customize -a $image_file \
-        --sm-credentials ${RHEL_USER}:password:${RHEL_PASSWORD} --sm-register --sm-attach auto \
-        --run-command 'xfs_growfs /' \
-        --run-command 'systemctl enable sshd' \
-        --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
-        --root-password password:qwe123QWE \
-        --run-command "subscription-manager repos ${enable_repos_opts}" \
-        --run-command 'yum remove -y cloud-init' && ret=0
-
-      # --selinux-relabel
-        # --run-command 'sed -i "s/SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config'
-    fi
+    echo "Enable yum repos try=$i"
+    virt-customize -a $image_file \
+      --run-command "subscription-manager repos ${enable_repos_opts}" && ret=0
     if (( ret == 0 )) ; then
       break
     fi
     (( i+=1 ))
-    virt-customize -a $image_file --run-command 'subscription-manager unregister' || true
   done
-  #eval "$old_opt"
-  set -x
+  echo "Enable yum repos result for $i tries: $ret"
   return $ret
 }
 
+function rhel_register_system_and_customize() {
+  local image_file=$1
+  local image_type=$2
+  # todo: fix shopt
+  #local old_opt=$(shopt -o xtrace)
+  set +x
+  . $RHEL_ACCOUNT_FILE
+  _rhel_register $image_file
+  _rhel_attach $image_file
+  #eval "$old_opt"
+  set -x
+  _rhel_repos $image_file
+
+  virt-customize -a $image_file \
+    --run-command 'xfs_growfs /' \
+    --run-command 'systemctl enable sshd' \
+    --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
+    --root-password password:qwe123QWE \
+    --selinux-relabel
+      # --run-command 'sed -i "s/SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config'
+
+  if [[ "$image_type" == 'undercloud' ]] ; then
+
+    virt-customize -a $image_file \
+      --run-command 'yum remove -y cloud-init'
+  fi
+}
 
 function rhel_unregister_system() {
   local image_file=$1
