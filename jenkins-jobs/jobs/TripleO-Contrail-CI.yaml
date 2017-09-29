@@ -23,8 +23,14 @@
           name: ENVIRONMENT_OS_VERSION
           description: "RHEL release version"
           choices:
-            - '7_3'
             - '7_4'
+            - '7_3'
+      - choice:
+          name: KEYSTONE_API_VERSION
+          description: "Keystone auth api version"
+          choices:
+            - '3'
+            - '2'
       - choice:
           name: OPENSTACK_VERSION
           description: "Version of OpenStack"
@@ -116,7 +122,7 @@
     builders:
       - shell: |
           #!/bin/bash -e
-          desc="${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION} $CONTRAIL_VERSION $OPENSTACK_VERSION"
+          desc="${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION} $CONTRAIL_VERSION $OPENSTACK_VERSION auth${KEYSTONE_API_VERSION}"
           if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
             desc+=' devl'
           fi

@@ -516,6 +516,7 @@ parameter_defaults:
   ContrailWebuiHttp: 8180
   ContrailConfigDBMinDiskGB: 4
   ContrailAnalyticsDBMinDiskGB: 4
+  ContrailAuthVersion: $KEYSTONE_API_VERSION
 EOF
 if [[ "$CONTRAIL_VERSION" =~ 3.[0-9].[0-9] ]] ; then
 cat <<EOF >> $misc_opts
