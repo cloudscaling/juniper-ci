@@ -17,9 +17,11 @@ function deactivate_venv() {
 function create_virtualenv() {
   rm -rf "$WORKSPACE/.venv"
   echo "INFO: Create venv"
-  virtualenv "$WORKSPACE/.venv"
+  # latest version of software installs incorrect pkg_resources. installing venv without setuptools workarounds this problem.
+  virtualenv --no-setuptools "$WORKSPACE/.venv"
 
   activate_venv
+  pip install -q setuptools
   pip install -q "python-openstackclient==3.11" 2>/dev/null
   # NOTE: version 9.0 always writes debug output if run via openstack
   pip install -q "python-novaclient<9.0" 2>/dev/null
