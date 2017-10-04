@@ -72,6 +72,7 @@ services:
       admin-role: "admin"
       debug: "true"
       openstack-origin: "%OPENSTACK_ORIGIN%"
+      preferred-api-version: 3
     expose: true
     to:
       - "2"
