@@ -42,7 +42,7 @@
           name: CONTRAIL_VERSION
           description: "Version of Contrail"
           choices:
-            - '4.0.1'
+            - '4.0.2'
             - '3.2.6'
       - choice:
           name: AAA_MODE
