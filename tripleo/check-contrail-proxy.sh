@@ -20,4 +20,5 @@ scp $ssh_opts $my_dir/check-openstack.sh $ssh_addr:$cos_dir/tripleo/
 scp $ssh_opts -r $my_dir/../common $ssh_addr:$cos_dir/
 ssh -T $ssh_opts $ssh_addr "chown -R stack:stack $cos_dir"
 run_opts="SSH_CMD=$SSH_CMD MAX_FAIL=$MAX_FAIL DEBUG=$DEBUG OPENSTACK_VERSION=$OPENSTACK_VERSION DPDK=$DPDK"
+run_opts+=" KEYSTONE_API_VERSION=$KEYSTONE_API_VERSION"
 ssh -T $ssh_opts $ssh_addr "sudo -u stack $run_opts $cos_dir/tripleo/check-openstack.sh"

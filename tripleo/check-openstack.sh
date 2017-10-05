@@ -25,4 +25,5 @@ cd $WORKSPACE
 source ${WORKSPACE}/overcloudrc
 source "$my_dir/../common/openstack/functions"
 create_virtualenv
+prep_os_checks
 run_os_checks

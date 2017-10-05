@@ -207,6 +207,18 @@ function delete_network() {
   deactivate_venv
 }
 
+function prep_os_checks() {
+  local ksver=${KEYSTONE_API_VERSION:-'2'}
+  if [[ "" != "2" ]] ; then
+    echo "INFO: For keystone V3 add for user admin the role for domain"
+    activate_venv
+    if openstack role assignment list --domain default --user ${OS_USERNAME} | grep -qi default
+      openstack role add --domain default --user admin  admin
+    fi
+    deactivate_venv
+  fi
+}
+
 function run_os_checks() {
   # check installed cloud
   activate_venv
