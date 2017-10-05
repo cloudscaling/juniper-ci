@@ -212,7 +212,7 @@ function prep_os_checks() {
   if [[ "" != "2" ]] ; then
     echo "INFO: For keystone V3 add for user admin the role for domain"
     activate_venv
-    if openstack role assignment list --domain default --user ${OS_USERNAME} | grep -qi default
+    if openstack role assignment list --domain default --user ${OS_USERNAME} | grep -qi default ; then
       openstack role add --domain default --user admin  admin
     fi
     deactivate_venv
