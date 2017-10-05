@@ -21,8 +21,13 @@ function set_x() {
 MAX_FAIL=${MAX_FAIL:-30}
 SSH_CMD=${SSH_CMD:-'ssh'}
 
-OVERCLOUDRC_FILE=${OVERCLOUDRC_FILE:-"${WORKSPACE}/overcloudrc"}
 UNDERCLOUDRC_FILE=${UNDERCLOUDRC_FILE:-"${WORKSPACE}/stackrc"}
+KEYSTONE_API_VERSION=${KEYSTONE_API_VERSION:-'2'}
+if [[ "${KEYSTONE_API_VERSION}" == '2' ]] ; then
+  OVERCLOUDRC_FILE=${OVERCLOUDRC_FILE:-"${WORKSPACE}/overcloudrc"}
+else
+  OVERCLOUDRC_FILE=${OVERCLOUDRC_FILE:-"${WORKSPACE}/overcloudrc.v${KEYSTONE_API_VERSION}"}
+fi
 
 function activate_venv() {
   if [ -d "$WORKSPACE/.venv" ]; then
@@ -208,11 +213,10 @@ function delete_network() {
 }
 
 function prep_os_checks() {
-  local ksver=${KEYSTONE_API_VERSION:-'2'}
-  if [[ "" != "2" ]] ; then
+  if [[ "${KEYSTONE_API_VERSION}" != '2' ]] ; then
     echo "INFO: For keystone V3 add for user admin the role for domain"
     activate_venv
-    if openstack role assignment list --domain default --user ${OS_USERNAME} | grep -qi default ; then
+    if ! openstack role assignment list --domain default --user ${OS_USERNAME} | grep -qi default ; then
       openstack role add --domain default --user admin  admin
     fi
     deactivate_venv
@@ -287,6 +291,10 @@ function _access_overcloud() {
   if [[ -n "$OVERCLOUDRC_FILE" && -f "$OVERCLOUDRC_FILE"  ]] ; then
     source $OVERCLOUDRC_FILE
   fi
+}
+
+function access_overcloud() {
+  _access_overcloud
 }
 
 function _check_instance_log() {
