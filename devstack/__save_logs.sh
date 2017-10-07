@@ -18,5 +18,5 @@ journalctl \
     -t kernel \
     -t sudo \
     --no-pager \
-    --since="$(cat /opt/stack/log-start-timestamp.txt)" \
+    --since="2017-01-01" \
   | tee /opt/stack/logs/syslog.txt > /dev/null
