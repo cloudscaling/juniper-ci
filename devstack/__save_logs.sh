@@ -20,3 +20,5 @@ journalctl \
     --no-pager \
     --since="2017-01-01" \
   | tee /opt/stack/logs/syslog.txt > /dev/null
+
+ls -lRAh /opt/stack/data > /opt/stack/logs/stack_data.ls
