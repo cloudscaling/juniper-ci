@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 for u in `systemctl list-unit-files | grep devstack | awk '{print $1}'`; do
   name=$(echo $u | sed 's/devstack@/screen-/' | sed 's/\.service//')
