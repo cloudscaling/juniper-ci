@@ -69,7 +69,7 @@ services:
       https-service-endpoints: "false"
       use-https: "false"
       admin-password: "%PASSWORD%"
-#      admin-role: "admin"
+      admin-role: "admin"
       debug: "true"
       openstack-origin: "%OPENSTACK_ORIGIN%"
       preferred-api-version: 3
