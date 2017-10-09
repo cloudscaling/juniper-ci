@@ -24,10 +24,10 @@ if [[ "$jver" == 1 ]] ; then
 fi
 
 declare -A BUILDS
-BUILDS=([mitaka]=33 [newton]=33 [ocata]=33)
+BUILDS=([mitaka]=32 [newton]=32 [ocata]=32)
 # for builds of R4.0 from 1 to 20 version is 4.0.0.0
 # for builds of R4.0 from 21 to 32 version is 4.0.1.0
-export CONTRAIL_VERSION="${CONTRAIL_VERSION:-4.0.2.0}"
+export CONTRAIL_VERSION="${CONTRAIL_VERSION:-4.0.1.0}"
 export SERIES="${SERIES:-xenial}"
 export VERSION="${VERSION:-newton}"
 export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
