@@ -78,6 +78,7 @@ echo "INFO: Prepare tempest.conf"
 CONF="$(pwd)/etc/tempest.conf"
 cp $my_dir/tempest/tempest.conf $CONF
 sed -i "s|%OS_AUTH_URL%|$OS_AUTH_URL|g" $CONF
+sed -i "s|%OS_AUTH_VER%|$OS_IDENTITY_API_VERSION|g" $CONF
 sed -i "s|%CAFILE%|$OS_CACERT|g" $CONF
 sed -i "s|%TEMPEST_DIR%|$(pwd)|g" $CONF
 sed -i "s/%IMAGE_ID%/$image_id/g" $CONF

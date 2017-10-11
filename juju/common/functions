@@ -126,7 +126,16 @@ function create_stackrc() {
   if [[ "$USE_SSL_OS" != "true" ]] ; then
     local proto="http"
   fi
-  echo "export OS_AUTH_URL=$proto://$auth_ip:5000/v2.0" > $WORKSPACE/stackrc
+  local kver=`juju config keystone preferred-api-version`
+  echo "# created by CI" > $WORKSPACE/stackrc
+  if [[ "$kver" == '3' ]] ; then
+    echo "export OS_AUTH_URL=$proto://$auth_ip:5000/v3" >> $WORKSPACE/stackrc
+    echo "export OS_IDENTITY_API_VERSION=3" >> $WORKSPACE/stackrc
+    echo "export OS_PROJECT_DOMAIN_NAME=admin_domain" >> $WORKSPACE/stackrc
+    echo "export OS_USER_DOMAIN_NAME=admin_domain" >> $WORKSPACE/stackrc
+  else
+    echo "export OS_AUTH_URL=$proto://$auth_ip:5000/v2.0" >> $WORKSPACE/stackrc
+  fi
   echo "export OS_USERNAME=admin" >> $WORKSPACE/stackrc
   echo "export OS_TENANT_NAME=admin" >> $WORKSPACE/stackrc
   echo "export OS_PROJECT_NAME=admin" >> $WORKSPACE/stackrc
