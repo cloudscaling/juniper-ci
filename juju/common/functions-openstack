@@ -181,7 +181,10 @@ function create_network() {
   done
 
   echo "INFO: Add rules to default security group"
-  local project_id=`openstack project list | awk '/ admin /{print $2}'`
+  if [[ -n "$OS_USER_DOMAIN_NAME" ]] ; then
+    local domain_param=" --domain $OS_USER_DOMAIN_NAME"
+  fi
+  local project_id=`openstack project list $domain_param | awk '/ admin /{print $2}'`
   local group_id=`openstack security group list -c ID -c Project | grep $project_id | awk '{print $2}'`
   openstack security group rule create $group_id --protocol tcp --dst-port 22:22
   openstack security group rule create $group_id --protocol icmp
