@@ -31,6 +31,12 @@ for mch in $(juju-get-machines) ; do
   cdir=`pwd`
   pushd "$log_dir/$mch"
   tar -xf "$cdir/logs.tar.gz"
+  for drr in upstart keystone ; do
+    for fff in `find ./var/log/$drr -name "*.log"` ; do
+      echo "Gzip $fff"
+      gzip "$fff"
+    done
+  done
   popd
   rm -f logs.tar.gz
 done

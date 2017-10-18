@@ -56,7 +56,7 @@ if which docker ; then
         mv "$ldir/contrail" "$ldir/var-log-contrail"
         docker cp "contrail-$cnt:/etc/contrail" "./$ldir"
         mv "$ldir/contrail" "$ldir/etc-contrail"
-        for srv in rabbitmq cassandra zookeeper ; do
+        for srv in rabbitmq cassandra ; do
           if docker cp "contrail-$cnt:/etc/$srv" "./$ldir" ; then
             mv "$ldir/$srv" "$ldir/etc-$srv"
           fi
