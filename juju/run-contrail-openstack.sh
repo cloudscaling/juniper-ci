@@ -38,9 +38,6 @@ export USE_ADDITIONAL_INTERFACE="${USE_ADDITIONAL_INTERFACE:-false}"
 export USE_EXTERNAL_RABBITMQ="${USE_EXTERNAL_RABBITMQ:-false}"
 export AAA_MODE=${AAA_MODE:-rbac}
 
-export CONTRAIL_VERSION="5.0.0"
-export BUILD="84"
-
 export PASSWORD=${PASSWORD:-'password'}
 
 echo "INFO: Date: $(date)"
