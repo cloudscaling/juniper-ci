@@ -4,6 +4,13 @@
     defaults: global
     properties:
       - build-discarder
+    parameters:
+      - choice:
+          name: CLEAN_ENV
+          choices:
+            - always
+            - on_success
+            - never
     scm:
       - juniper-ci
       - openstack-helm
@@ -11,6 +18,10 @@
       - shell: |
           #!/bin/bash -e
           ./juniper-ci/contrail-helm/run-{project}.sh
+    publishers:
+      - archive:
+          artifacts: 'logs/**'
+          allow-empty: true
 
 - project:
    name: contrail-helm

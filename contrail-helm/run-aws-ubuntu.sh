@@ -13,7 +13,9 @@ function catch_errors() {
   echo "Errors!" $exit_code $@
 
   $my_dir/aws/save-logs.sh
-  $my_dir/aws/cleanup.sh
+  if [[ "$CLEAN_ENV" == 'always' ]] ; then
+    $my_dir/aws/cleanup.sh
+  fi
 
   exit $exit_code
 }
@@ -28,6 +30,6 @@ $SSH "$HOME/run-openstack-helm-gate.sh"
 
 trap - ERR
 $my_dir/aws/save-logs.sh
-$my_dir/aws/cleanup.sh
-
-
+if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
+  $my_dir/aws/cleanup.sh
+fi
