@@ -6,6 +6,7 @@
       - build-discarder
     scm:
       - juniper-ci
+      - openstack-helm
     builders:
       - shell: |
           #!/bin/bash -e
