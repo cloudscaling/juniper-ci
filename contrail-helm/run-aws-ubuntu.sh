@@ -19,7 +19,7 @@ function catch_errors() {
 }
 
 # ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-201710
-$my_dir/aws/create-instance.sh ami-336b4456
+$my_dir/aws/create-instance.sh ami-336b4456 c4.4xlarge
 source "$my_dir/aws/ssh-defs"
 
 $SCP "$my_dir/__run-openstack-helm-gate.sh" $SSH_DEST:run-openstack-helm-gate.sh
