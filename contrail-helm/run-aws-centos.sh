@@ -26,7 +26,7 @@ $my_dir/aws/create-instance.sh ami-02b69a67 c4.4xlarge
 source "$my_dir/aws/ssh-defs"
 
 $SCP "$my_dir/__run-openstack-helm-gate.sh" $SSH_DEST:run-openstack-helm-gate.sh
-$SSH "$HOME/run-openstack-helm-gate.sh"
+$SSH "./run-openstack-helm-gate.sh"
 
 trap - ERR
 $my_dir/aws/save-logs.sh
