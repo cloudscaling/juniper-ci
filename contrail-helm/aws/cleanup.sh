@@ -14,7 +14,7 @@ errors="0"
 aws ec2 terminate-instances --instance-ids $instance_id
 [[ $? == 0 ]] || errors="1"
 if [[ $? == 0 ]]; then
-  time aws ec2 wait instance-terminated --instance-ids $instance_id
+  timeout -s 9 120 aws ec2 wait instance-terminated --instance-ids $instance_id
   echo "INFO: Instance terminated."
 fi
 

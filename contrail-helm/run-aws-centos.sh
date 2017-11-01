@@ -18,8 +18,8 @@ function catch_errors() {
   exit $exit_code
 }
 
-# centos-7.4-plain-x86_64-170922_19-disk1-6f5e98a1-bc66-4b6a-a37d-efb4b2472f8a-ami-d6498cac.4
-$my_dir/aws/create-instance.sh ami-fbe8c49e
+# dcos-centos7-201710*
+$my_dir/aws/create-instance.sh ami-02b69a67
 source "$my_dir/aws/ssh-defs"
 
 $SCP "$my_dir/__run-openstack-helm-gate.sh" $SSH_DEST:run-openstack-helm-gate.sh
