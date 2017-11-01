@@ -1,5 +1,8 @@
 #!/bin/bash -e
 
+my_file="$(readlink -e "$0")"
+my_dir="$(dirname $my_file)"
+
 ENV_FILE="$WORKSPACE/cloudrc"
 VM_CIDR="192.168.130.0/24"
 # ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20150325
