@@ -38,7 +38,7 @@ git clone https://github.com/openstack/openstack-helm
 cd openstack-helm
 
 # fetch latest
-if [[ -n "$CHANGE_REF" ]] ;
+if [[ -n "$CHANGE_REF" ]] ; then
   git fetch https://git.openstack.org/openstack/openstack-helm "$CHANGE_REF" && git checkout FETCH_HEAD
 fi
 
@@ -48,4 +48,3 @@ export SDN_PLUGIN=opencontrail
 #export GLANCE=pvc
 #export PVC_BACKEND=ceph
 ./tools/gate/setup_gate.sh
-
