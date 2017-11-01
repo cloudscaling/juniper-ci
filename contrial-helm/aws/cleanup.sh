@@ -1,9 +1,9 @@
 #!/bin/bash
 
-ENV_FILE="cloudrc"
+ENV_FILE="$WORKSPACE/cloudrc"
 
 if [ ! -f $ENV_FILE ]; then
-  echo "There is no environment file. There is nothing to clean up."
+  echo "ERROR: There is no environment file. There is nothing to clean up."
   exit 1
 fi
 
@@ -15,7 +15,7 @@ aws ec2 terminate-instances --instance-ids $instance_id
 [[ $? == 0 ]] || errors="1"
 if [[ $? == 0 ]]; then
   time aws ec2 wait instance-terminated --instance-ids $instance_id
-  echo "Instance terminated."
+  echo "INFO: Instance terminated."
 fi
 
 rm kp

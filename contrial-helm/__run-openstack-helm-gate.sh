@@ -1,0 +1,32 @@
+#!/bin/bash -ex
+
+if [[ "$USE_SWAP" == "true" ]] ; then
+  sudo mkswap /dev/xvdf
+  sudo swapon /dev/xvdf
+  swapon -s
+fi
+
+sudo apt-get update && sudo apt-get upgrade
+sudo apt-get install -y --no-install-recommends mc git wget ntp docker.io jq
+sudo docker pull docker.io/opencontrail/contrail-controller-ubuntu16.04:4.0.2.0
+sudo docker pull docker.io/opencontrail/contrail-analyticsdb-ubuntu16.04:4.0.2.0
+sudo docker pull docker.io/opencontrail/contrail-analytics-ubuntu16.04:4.0.2.0
+sudo docker pull docker.io/opencontrail/contrail-kube-manager-ubuntu16.04:4.0.2.0
+sudo docker pull docker.io/opencontrail/contrail-agent-ubuntu16.04:4.0.2.0
+sudo docker pull docker.io/opencontrail/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0
+
+git clone https://github.com/openstack/openstack-helm
+cd openstack-helm
+
+# fetch latest
+if [[ -n "$CHANGE_REF" ]] ;
+  git fetch https://git.openstack.org/openstack/openstack-helm "$CHANGE_REF" && git checkout FETCH_HEAD
+fi
+
+export INTEGRATION=aio
+export INTEGRATION_TYPE=basic
+export SDN_PLUGIN=opencontrail
+#export GLANCE=pvc
+#export PVC_BACKEND=ceph
+./tools/gate/setup_gate.sh
+

@@ -1,0 +1,22 @@
+- job-template:
+    name: contrail-helm-{project}
+    description: "Deploys Kubernetes plus Contrail in AIO mode in host {project}"
+    defaults: global
+    properties:
+      - build-discarder
+    scm:
+      - juniper-ci
+    builders:
+      - shell: |
+          #!/bin/bash -e
+          ./juniper-ci/contrail-helm/run-{project}.sh
+
+- project:
+   name: devstack-extended
+   project:
+    - aws-ubuntu
+    - aws-centos
+    - server-ubuntu
+    - server-centos
+   jobs:
+    - 'contrail-helm-{project}'
