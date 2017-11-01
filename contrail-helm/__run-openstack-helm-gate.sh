@@ -13,7 +13,7 @@ if [[ -x $(command -v apt-get 2>/dev/null) ]]; then
   sudo apt-get install -y --no-install-recommends mc git wget ntp docker.io jq
 elif [[ -x $(command -v yum 2>/dev/null) ]]; then
   sudo yum install -y epel-release
-  sudo yum install -y mc git wget ntp
+  sudo yum install -y mc git wget ntp ceph-deploy
 else
   echo "ERROR: Unable to find apt-get or yum"
   exit 1
