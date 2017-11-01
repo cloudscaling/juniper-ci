@@ -18,6 +18,7 @@ function catch_errors() {
   exit $exit_code
 }
 
+export SSH_USER=centos
 # dcos-centos7-201710*
 $my_dir/aws/create-instance.sh ami-02b69a67 c4.4xlarge
 source "$my_dir/aws/ssh-defs"
