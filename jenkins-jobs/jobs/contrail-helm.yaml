@@ -12,7 +12,7 @@
           ./juniper-ci/contrail-helm/run-{project}.sh
 
 - project:
-   name: devstack-extended
+   name: contrail-helm
    project:
     - aws-ubuntu
     - aws-centos
