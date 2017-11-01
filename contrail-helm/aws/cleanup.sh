@@ -16,7 +16,7 @@ if [[ -n "$instance_id" ]] ; then
   [[ $? == 0 ]] || errors="1"
   if [[ $? == 0 ]]; then
     timeout -s 9 120 aws ec2 wait instance-terminated --instance-ids $instance_id
-   ec ho "INFO: Instance terminated."
+   echo "INFO: Instance terminated."
   fi
 fi
 
