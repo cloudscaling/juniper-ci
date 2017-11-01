@@ -10,9 +10,7 @@ echo "INFO: Preparing instances"
 
 if [[ -x $(command -v apt-get 2>/dev/null) ]]; then
   sudo apt-get -y update && sudo apt-get -y upgrade
-  sudo apt-get install -y --no-install-recommends mc git wget ntp docker.io jq libvirt-bin
-  sudo gpasswd -a $USER docker
-  newgrp docker
+  sudo apt-get install -y --no-install-recommends mc git wget ntp docker.io jq
 elif [[ -x $(command -v yum 2>/dev/null) ]]; then
   sudo yum install -y epel-release
   sudo yum install -y mc git wget ntp
