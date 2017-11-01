@@ -31,6 +31,7 @@ cd openstack-helm
 
 # fetch latest
 if [[ -n "$CHANGE_REF" ]] ; then
+  echo "INFO: Checking out change ref $CHANGE_REF"
   git fetch https://git.openstack.org/openstack/openstack-helm "$CHANGE_REF" && git checkout FETCH_HEAD
 fi
 

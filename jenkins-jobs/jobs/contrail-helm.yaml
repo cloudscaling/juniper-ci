@@ -11,6 +11,10 @@
             - always
             - on_success
             - never
+      - string:
+          name: CHANGE_REF
+          default: refs/changes/18/514518/41
+          description: "change set to cherry pick"
     scm:
       - juniper-ci
       - openstack-helm
