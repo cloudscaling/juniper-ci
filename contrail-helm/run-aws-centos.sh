@@ -25,6 +25,7 @@ export SSH_USER=centos
 $my_dir/aws/create-instance.sh ami-02b69a67 c4.4xlarge
 source "$my_dir/aws/ssh-defs"
 
+$SCP "$my_dir/__ceph.repo" $SSH_DEST:ceph.repo
 $SCP "$my_dir/__run-openstack-helm-gate.sh" $SSH_DEST:run-openstack-helm-gate.sh
 $SSH "CHANGE_REF=$CHANGE_REF ./run-openstack-helm-gate.sh"
 
