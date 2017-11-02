@@ -20,9 +20,12 @@ function catch_errors() {
   exit $exit_code
 }
 
+export AWS_FLAGS="--region us-west-2"
 export SSH_USER=ec2-user
 # CentOS 7.4.1708 - HVM
-$my_dir/aws/create-instance.sh ami-a0fddfc5 c4.4xlarge
+# us-east-2 : ami-a0fddfc5
+# us-west-2 : ami-82bd4ffa
+$my_dir/aws/create-instance.sh ami-82bd4ffa c4.4xlarge
 source "$my_dir/aws/ssh-defs"
 
 $SCP "$my_dir/__ceph.repo" $SSH_DEST:ceph.repo
