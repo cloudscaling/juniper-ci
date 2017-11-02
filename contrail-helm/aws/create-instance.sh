@@ -58,7 +58,8 @@ echo $kp | sed 's/\\n/\'$'\n''/g' > "$WORKSPACE/kp"
 chmod 600 kp
 
 
-cmd=$(aws ${AWS_FLAGS} ec2 run-instances --image-id $IMAGE_ID --key-name $key_name --instance-type $VM_TYPE --block-device-mappings '[{"DeviceName":"/dev/sdh","Ebs":{"VolumeSize":20,"DeleteOnTermination":true}}]' --subnet-id $subnet_id --associate-public-ip-address)
+cmd=$(aws ${AWS_FLAGS} ec2 run-instances --image-id $IMAGE_ID --key-name $key_name --instance-type $VM_TYPE --subnet-id $subnet_id --associate-public-ip-address) \
+  --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}}]'
 instance_id=$(get_value_from_json "echo $cmd" ".Instances[0].InstanceId")
 echo "INFO: INSTANCE_ID: $instance_id"
 echo "instance_id=$instance_id" >> $ENV_FILE
@@ -86,5 +87,11 @@ while ! $SSH uname -a 2>/dev/null ; do
   echo "WARNING: Machine $instance_id isn't accessible yet"
   sleep 2
 done
+
+$SSH "(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | sudo fdisk /dev/xvdf"
+$SSH "sudo mkfs.ext4 /dev/xvdf1"
+$SSH "sudo mkdir -p /var/lib/docker"
+$SSH "sudo su -c \"echo '/dev/xvdf1  /var/lib/docker  auto  defaults,auto  0  0' >> /etc/fstab\""
+$SSH "sudo mount /var/lib/docker"
 
 echo "INFO: Environment ready"
