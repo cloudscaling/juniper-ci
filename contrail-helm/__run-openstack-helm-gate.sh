@@ -11,6 +11,13 @@ echo "INFO: Preparing instances"
 if [[ -x $(command -v apt-get 2>/dev/null) ]]; then
   sudo apt-get -y update && sudo apt-get -y upgrade
   sudo apt-get install -y --no-install-recommends mc git wget ntp docker.io jq
+
+  sudo docker pull docker.io/opencontrail/contrail-controller-ubuntu16.04:4.0.2.0
+  sudo docker pull docker.io/opencontrail/contrail-analyticsdb-ubuntu16.04:4.0.2.0
+  sudo docker pull docker.io/opencontrail/contrail-analytics-ubuntu16.04:4.0.2.0
+  sudo docker pull docker.io/opencontrail/contrail-kube-manager-ubuntu16.04:4.0.2.0
+  sudo docker pull docker.io/opencontrail/contrail-agent-ubuntu16.04:4.0.2.0
+  sudo docker pull docker.io/opencontrail/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0
 elif [[ -x $(command -v yum 2>/dev/null) ]]; then
   sudo yum install -y epel-release
   sudo cp ./ceph.repo /etc/yum.repos.d/ceph.repo
@@ -19,13 +26,6 @@ else
   echo "ERROR: Unable to find apt-get or yum"
   exit 1
 fi
-
-sudo docker pull docker.io/opencontrail/contrail-controller-ubuntu16.04:4.0.2.0
-sudo docker pull docker.io/opencontrail/contrail-analyticsdb-ubuntu16.04:4.0.2.0
-sudo docker pull docker.io/opencontrail/contrail-analytics-ubuntu16.04:4.0.2.0
-sudo docker pull docker.io/opencontrail/contrail-kube-manager-ubuntu16.04:4.0.2.0
-sudo docker pull docker.io/opencontrail/contrail-agent-ubuntu16.04:4.0.2.0
-sudo docker pull docker.io/opencontrail/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0
 
 git clone https://github.com/openstack/openstack-helm
 cd openstack-helm

@@ -20,7 +20,7 @@ function catch_errors() {
   exit $exit_code
 }
 
-export SSH_USER=centos
+export SSH_USER=ec2-user
 # CentOS 7.4.1708 - HVM
 $my_dir/aws/create-instance.sh ami-a0fddfc5 c4.4xlarge
 source "$my_dir/aws/ssh-defs"
