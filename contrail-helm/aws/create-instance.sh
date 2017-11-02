@@ -58,8 +58,7 @@ echo $kp | sed 's/\\n/\'$'\n''/g' > "$WORKSPACE/kp"
 chmod 600 kp
 
 
-cmd=$(aws ${AWS_FLAGS} ec2 run-instances --image-id $IMAGE_ID --key-name $key_name --instance-type $VM_TYPE --subnet-id $subnet_id --associate-public-ip-address) \
-  --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}}]'
+cmd=$(aws ${AWS_FLAGS} ec2 run-instances --image-id $IMAGE_ID --key-name $key_name --instance-type $VM_TYPE --subnet-id $subnet_id --associate-public-ip-address --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}}]')
 instance_id=$(get_value_from_json "echo $cmd" ".Instances[0].InstanceId")
 echo "INFO: INSTANCE_ID: $instance_id"
 echo "instance_id=$instance_id" >> $ENV_FILE
