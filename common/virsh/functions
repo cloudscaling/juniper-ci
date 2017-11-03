@@ -1,5 +1,7 @@
 #!/bin/bash -x
 
+export LIBVIRT_DEFAULT_URI=qemu:///system
+
 function get_network_name() {
   local type=$1
   case "$type" in
