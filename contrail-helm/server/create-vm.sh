@@ -65,9 +65,7 @@ create_pool $POOL_NAME
 
 # create hdd
 vol_name=${VM_NAME}.qcow2
-delete_volume $vol_name $POOL_NAME
-pool_path=$(get_pool_path $POOL_NAME)
-vol_path="${pool_path}/${vol_name}"
+vol_path=$(create_volume_from $vol_name 'images' $BASE_IMAGE_NAME)
 
 VCPUS=8
 MEM=38528

@@ -164,6 +164,16 @@ function create_volume() {
   echo $pool_path/$name.qcow2
 }
 
+function create_volume_from() {
+  local name=$1
+  local poolname=$2
+  local src_pool=$3
+  delete_volume $name $poolname
+  local pool_path=$(get_pool_path $poolname)
+  virsh vol-create-from $poolname $name --inputpool $src_pool 1>/dev/null
+  echo $pool_path/$name
+}
+
 function define_machine() {
   local name=$1
   local vcpus=$2
