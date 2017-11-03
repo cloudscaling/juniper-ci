@@ -13,7 +13,7 @@ export POOL_NAME=${POOL_NAME:-'oshelm'}
 export NET_DRIVER=${NET_DRIVER:-'e1000'}
 export VM_NAME=${VM_NAME:-"contrail-helm-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}"}
 
-source "$my_dir/../common/virsh/functions"
+source "$my_dir/../../common/virsh/functions"
 
 delete_domain $VM_NAME
 delete_network $VM_NAME
