@@ -64,7 +64,10 @@ create_network_dhcp $net_name $net_addr $BRIDGE_NAME
 create_pool $POOL_NAME
 
 # create hdd
-vol_path=$(create_volume "$VM_NAME" "$POOL_NAME" $DISK_SIZE)
+vol_name=${VM_NAME}.qcow2
+delete_volume $vol_name $POOL_NAME
+pool_path=$(get_pool_path $POOL_NAME)
+vol_path="${pool_path}/${vol_name}"
 
 VCPUS=8
 MEM=38528
@@ -72,7 +75,7 @@ OS_VARIANT='rhel'
 if [[ "$ENVIRONMENT_OS" == 'ubuntu' ]] ; then
   OS_VARIANT='ubuntu'
 fi
-define_machine $VM_NAME $VCPUS $MEM $OS_VARIANT $net_name $vol_path
+define_machine $VM_NAME $VCPUS $MEM $OS_VARIANT $net_name $vol_path $DISK_SIZE
 
 # start machine
 start_vm $VM_NAME

@@ -160,7 +160,7 @@ function create_volume() {
   local vm_disk_size=$3
   delete_volume $name.qcow2 $poolname
   local pool_path=$(get_pool_path $poolname)
-  qemu-img create -f qcow2 -o preallocation=metadata $pool_path/$name.qcow2 $vm_disk_size
+  qemu-img create -f qcow2 -o preallocation=metadata $pool_path/$name.qcow2 $vm_disk_size 1>/dev/null
   echo $pool_path/$name.qcow2
 }
 
@@ -171,14 +171,18 @@ function define_machine() {
   local os=$4
   local net=$5
   local disk_path=$6
+  local disk_size=${7:-''}
   NET_DRIVER=${NET_DRIVER:-'e1000'}
-
+  local disk_opts="path=${disk_path},device=disk,cache=writeback,bus=virtio,format=qcow2"
+  if [[ -n "$disk_size" ]] ; then
+    disk_opts+=",size=${disk_size}"
+  fi
   virt-install --name $name \
     --ram $mem \
     --vcpus $vcpus \
     --cpu SandyBridge,+vmx \
     --os-variant $os \
-    --disk path=${disk_path},device=disk,cache=writeback,bus=virtio,format=qcow2 \
+    --disk $disk_opts \
     --network network=$net,model=$NET_DRIVER \
     --boot hd \
     --noautoconsole \
