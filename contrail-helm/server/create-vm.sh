@@ -8,7 +8,7 @@ ssh_key_dir="/home/jenkins"
 export ENVIRONMENT_OS=${1:-${ENVIRONMENT_OS:-''}}
 export OPENSTACK_VERSION=${2:-${OPENSTACK_VERSION:-''}}
 
-export DISK_SIZE=${DISK_SIZE:-'128G'}
+export DISK_SIZE=${DISK_SIZE:-'128'}
 export POOL_NAME=${POOL_NAME:-'oshelm'}
 export NET_DRIVER=${NET_DRIVER:-'e1000'}
 export VM_NAME=${VM_NAME:-"contrail-helm-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}"}
