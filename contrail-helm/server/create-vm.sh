@@ -53,9 +53,9 @@ assert_env_exists "$VM_NAME"
 # create network
 net_name="${VM_NAME}"
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]]; then
-  net_addr="192.168.301.0"
+  net_addr="192.168.221.0"
 else
-  net_addr="192.168.302.0"
+  net_addr="192.168.222.0"
 fi
 create_network_dhcp $net_name $net_addr
 
