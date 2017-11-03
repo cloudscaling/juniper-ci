@@ -1,7 +1,8 @@
 #!/bin/bash -ex
 
-sudo yum install -y httpd; sudo chkconfig httpd on; sudo service httpd start
+sudo yum install -y httpd
 sudo sed -i "s/^Listen .*$/Listen 81/g" /etc/httpd/conf/httpd.conf
+sudo chkconfig httpd on
 sudo service httpd restart
 wget -nv https://s3-us-west-2.amazonaws.com/contrailrhel7/contrail-install-packages-4.0.2.0-35~ocata.el7.noarch.rpm
 sudo rpm -ivh contrail-install-packages-4.0.2.0-35~ocata.el7.noarch.rpm
