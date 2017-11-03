@@ -71,7 +71,7 @@ vol_path="${pool_path}/${vol_name}"
 
 VCPUS=8
 MEM=38528
-OS_VARIANT='rhel'
+OS_VARIANT='rhel7'
 if [[ "$ENVIRONMENT_OS" == 'ubuntu' ]] ; then
   OS_VARIANT='ubuntu'
 fi
