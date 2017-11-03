@@ -23,6 +23,7 @@ if [ -f $ENV_FILE ]; then
 fi
 
 touch $ENV_FILE
+echo "AWS_FLAGS='${AWS_FLAGS}'" >> $ENV_FILE
 echo "INFO: -------------------------------------------------------------------------- $(date)"
 
 cmd="aws ${AWS_FLAGS} ec2 create-vpc --cidr-block $VM_CIDR"
