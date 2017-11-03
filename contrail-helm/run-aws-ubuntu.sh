@@ -28,11 +28,17 @@ export SSH_USER=ubuntu
 $my_dir/aws/create-instance.sh ami-0a00ce72 c4.4xlarge
 source "$my_dir/aws/ssh-defs"
 
+error=0
 $SCP "$my_dir/__run-openstack-helm-gate.sh" $SSH_DEST:run-openstack-helm-gate.sh
-timeout -s 9 120m $SSH "CHANGE_REF=$CHANGE_REF ./run-openstack-helm-gate.sh"
+timeout -s 9 120m $SSH "CHANGE_REF=$CHANGE_REF ./run-openstack-helm-gate.sh" || error=1
+
+$SCP "$my_dir/__containers-build-ubuntu.sh" $SSH_DEST:containers-build-ubuntu.sh
+$SSH "./containers-build-ubuntu.sh"
 
 trap - ERR
 $my_dir/aws/save-logs.sh
 if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
   $my_dir/aws/cleanup.sh
 fi
+
+exit $error
