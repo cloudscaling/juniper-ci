@@ -126,7 +126,7 @@ function create_network_dhcp() {
   local network_name=$1
   local addr=$2
   delete_network_dhcp $network_name
-  local fxml=$(build_network_xml $network_name $addr)
+  local fxml=$(build_network_xml_dhcp $network_name $addr)
   virsh net-define $fxml
   rm -f $fxml
   virsh net-autostart $network_name
