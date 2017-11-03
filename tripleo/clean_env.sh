@@ -11,7 +11,7 @@ if [[ -z "$NUM" ]] ; then
 fi
 poolname="rdimages"
 
-source "$my_dir/functions"
+source "$my_dir/../common/virsh/functions"
 
 delete_network management
 delete_network provisioning

@@ -82,14 +82,10 @@ vm_disk_size="30G"
 poolname="rdimages"
 net_driver=${net_driver:-e1000}
 
-source "$my_dir/functions"
+source "$my_dir/../common/virsh/functions"
 
 # check if environment is present
-if virsh list --all | grep -q "rd-undercloud-$NUM" ; then
-  echo 'ERROR: environment present. please clean up first'
-  virsh list --all | grep "cloud-$NUM"
-  exit 1
-fi
+assert_env_exists "rd-undercloud-$NUM"
 
 # create three networks (i don't know why external is needed)
 create_network management
@@ -102,55 +98,29 @@ prov_net=`get_network_name provisioning`
 #dpdk_net=`get_network_name dpdk`
 
 # create pool
-virsh pool-info $poolname &> /dev/null || create_pool $poolname
+create_pool $poolname
 pool_path=$(get_pool_path $poolname)
 
 function create_root_volume() {
   local name=$1
-  delete_volume $name.qcow2 $poolname
-  qemu-img create -f qcow2 -o preallocation=metadata $pool_path/$name.qcow2 $vm_disk_size
+  create_volume $name $poolname $vm_disk_size
 }
 
 function create_store_volume() {
-  local name=$1
-  delete_volume $name-store.qcow2 $poolname
-  qemu-img create -f qcow2 -o preallocation=metadata $pool_path/$name-store.qcow2 100G
-}
-
-function define_machine() {
-  local name="$1"
-  local mem="$2"
-  shift 2
-  local disk_opt="$@"
-  virt-install --name $name \
-    --ram $mem \
-    --vcpus 2 \
-    --os-variant rhel7 \
-    $disk_opt \
-    --noautoconsole \
-    --vnc \
-    --network network=$prov_net,model=$net_driver \
-    --cpu SandyBridge,+vmx \
-    --dry-run --print-xml > /tmp/oc-$name.xml
-  virsh define --file /tmp/oc-$name.xml
+  local name="${1}-store"
+  create_volume $name $poolname 100G
 }
 
 function define_overcloud_vms() {
   local name=$1
   local count=$2
   local mem=$3
-  local do_create_storage=${4:-'false'}
   local number_re='^[0-9]+$'
   if [[ $count =~ $number_re ]] ; then
     for (( i=1 ; i<=count; i++ )) ; do
       local vol_name="overcloud-$NUM-${name}-$i"
       create_root_volume $vol_name
-      local disk_opts="--disk path=${pool_path}/${vol_name}.qcow2,device=disk,bus=virtio,format=qcow2"
-      if [[ "$do_create_storage" == 'true' ]] ; then
-        create_store_volume $vol_name
-        disk_opts+=" --disk path=${pool_path}/${vol_name}-store.qcow2,device=disk,bus=virtio,format=qcow2"
-      fi
-      define_machine "rd-$vol_name" "$mem" "$disk_opts"
+      define_machine "rd-$vol_name" 2 $mem rhel7 $prov_net "${pool_path}/${vol_name}.qcow2"
     done
   else
     echo Skip VM $name creation, count=$count

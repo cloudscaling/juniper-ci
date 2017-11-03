@@ -31,7 +31,7 @@ ip_addr="192.168.${env_addr}.2"
 ssh_opts="-i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 ssh_addr="root@${ip_addr}"
 
-source "$my_dir/functions"
+source "$my_dir/../common/virsh/functions"
 
 # copy images for overcloud to it. (images can be build manually but it's too long - use previously built images)
 if [ -f $IMAGES ] ; then
