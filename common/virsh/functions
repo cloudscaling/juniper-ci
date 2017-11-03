@@ -180,8 +180,9 @@ function define_machine() {
     --os-variant $os \
     --disk path=${disk_path},device=disk,cache=writeback,bus=virtio,format=qcow2 \
     --network network=$net,model=$NET_DRIVER \
+    --boot hd \
     --noautoconsole \
-    --graphics vnc,listen=0.0.0.0
+    --graphics vnc,listen=0.0.0.0 \
     --dry-run --print-xml > /tmp/oc-$name.xml
   virsh define --file /tmp/oc-$name.xml
 }
