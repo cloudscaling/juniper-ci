@@ -68,6 +68,7 @@ function build_network_xml() {
 function build_network_xml_dhcp() {
   local nname=$1
   local network=$2
+  local brname=${3:-${nname}}
   local forward_mode=${3:-'nat'}
   local fname=`mktemp`
   local net_base_ip=$(echo "$network" | cut -d '.' -f 1,2,3)
@@ -77,7 +78,7 @@ function build_network_xml_dhcp() {
   cat <<EOF > $fname
 <network>
   <name>$nname</name>
-  <bridge name="$nname"/>
+  <bridge name="$brname"/>
 EOF
   if  [[ "$forward_mode" == "nat" ]] ; then
   cat <<EOF >> $fname
@@ -125,8 +126,9 @@ function delete_network_dhcp() {
 function create_network_dhcp() {
   local network_name=$1
   local addr=$2
+  local brname=$3
   delete_network_dhcp $network_name
-  local fxml=$(build_network_xml_dhcp $network_name $addr)
+  local fxml=$(build_network_xml_dhcp $network_name $addr $brname)
   virsh net-define $fxml
   rm -f $fxml
   virsh net-autostart $network_name

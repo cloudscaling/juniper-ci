@@ -12,6 +12,7 @@ export DISK_SIZE=${DISK_SIZE:-'100G'}
 export POOL_NAME=${POOL_NAME:-'oshelm'}
 export NET_DRIVER=${NET_DRIVER:-'e1000'}
 export VM_NAME=${VM_NAME:-"contrail-helm-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}"}
+export BRIDGE_NAME=${BRIDGE_NAME:-'cchelm'}
 
 if [[ -z "$ENVIRONMENT_OS" ]] ; then
   echo "ENVIRONMENT_OS is expected (e.g. export ENVIRONMENT_OS=centos)"
@@ -57,7 +58,7 @@ if [[ "$ENVIRONMENT_OS" == 'rhel' ]]; then
 else
   net_addr="192.168.222.0"
 fi
-create_network_dhcp $net_name $net_addr
+create_network_dhcp $net_name $net_addr $BRIDGE_NAME
 
 # create pool
 create_pool $POOL_NAME
