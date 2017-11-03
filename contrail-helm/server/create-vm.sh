@@ -67,7 +67,7 @@ create_pool $POOL_NAME
 vol_path=$(create_volume "$VM_NAME")
 
 VCPUS=8
-MEM='32G'
+MEM=38528
 OS_VARIANT='rhel'
 if [[ "$ENVIRONMENT_OS" == 'ubuntu' ]] ; then
   OS_VARIANT='ubuntu'
