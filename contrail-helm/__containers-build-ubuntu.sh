@@ -4,7 +4,7 @@ sudo apt-get install -y mini-httpd rpm2cpio
 sudo sed -i "s/^host=.*$/host=0.0.0.0/g" /etc/mini-httpd.conf
 sudo sed -i "s/^port=.*$/port=81/g" /etc/mini-httpd.conf
 sudo sed -i "s/^START=.*$/START=1/g" /etc/default/mini-httpd
-sudo killall mini_httpd
+sudo killall mini_httpd || /bin/true
 sudo service mini-httpd restart
 wget -nv https://s3-us-west-2.amazonaws.com/contrailrhel7/contrail-install-packages-4.0.2.0-35~ocata.el7.noarch.rpm
 rpm2cpio contrail-install-packages-4.0.2.0-35~ocata.el7.noarch.rpm | cpio -i --make-directories
