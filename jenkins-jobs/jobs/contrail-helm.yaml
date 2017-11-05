@@ -17,7 +17,6 @@
 #          description: "change set to cherry pick"
     scm:
       - juniper-ci
-      - openstack-helm-fork
     builders:
       - shell: |
           #!/bin/bash -e

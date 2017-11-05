@@ -30,16 +30,11 @@ source "$my_dir/aws/ssh-defs"
 
 $SCP "$my_dir/__ceph.repo" $SSH_DEST:ceph.repo
 $SCP "$my_dir/__run-openstack-helm-gate.sh" $SSH_DEST:run-openstack-helm-gate.sh
-error=0
-timeout -s 9 120m $SSH "CHANGE_REF=$CHANGE_REF ./run-openstack-helm-gate.sh" || error=1
-
 $SCP "$my_dir/__containers-build-centos.sh" $SSH_DEST:containers-build-centos.sh
-$SSH "./containers-build-centos.sh"
+timeout -s 9 120m $SSH "CHANGE_REF=$CHANGE_REF ./run-openstack-helm-gate.sh"
 
 trap - ERR
 $my_dir/aws/save-logs.sh
 if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
   $my_dir/aws/cleanup.sh
 fi
-
-exit $error
