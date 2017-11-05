@@ -8,6 +8,13 @@ fi
 
 echo "INFO: Preparing instances"
 
+iface=`ip -4 route list 0/0 | awk '{ print $5; exit }'`
+local_ip=`ip addr | grep $iface | grep 'inet ' | awk '{print $2}' | cut -d '/' -f 1`
+sudo cp -f /etc/hosts /etc/hosts.bak
+sudo sed -i "/$(hostname)/d" /etc/hosts
+echo "$(local_ip) $(hostname)" | sudo tee -a /etc/hosts
+
+
 if [[ -x $(command -v apt-get 2>/dev/null) ]]; then
   HOST_OS='ubuntu'
 elif [[ -x $(command -v yum 2>/dev/null) ]]; then
