@@ -9,7 +9,7 @@ sudo rpm -ivh contrail-install-packages-4.0.2.0-35~ocata.el7.noarch.rpm
 sudo mkdir -p /var/www/html/contrail
 sudo tar -xvf /opt/contrail/contrail_packages/contrail_rpms.tgz -C /var/www/html/contrail/
 
-git clone https://github.com/cloudscaling/docker-contrail-4
+git clone ${DOCKER_CONTRAIL_URL:-https://github.com/cloudscaling/docker-contrail-4}
 sudo docker run -d -p 5000:5000 --restart=always --name registry registry:2
 pushd docker-contrail-4
 ./change_contrail_version.sh 4.0.1.0-32 4.0.2.0-35

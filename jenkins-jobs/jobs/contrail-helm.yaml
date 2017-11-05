@@ -11,10 +11,18 @@
             - always
             - on_success
             - never
-#      - string:
-#          name: CHANGE_REF
-#          default: refs/changes/18/514518/41
-#          description: "change set to cherry pick"
+      - string:
+          name: DOCKER_CONTRAIL_URL
+          default: https://github/cloudscaling/docker-contrail-4
+          description: "change set to cherry pick"
+      - string:
+          name: OPENSTACK_HELM_URL
+          default: https://github.com/cloudscaling/openstack-helm
+          description: "change set to cherry pick"
+      - string:
+          name: CHANGE_REF
+          #default: refs/changes/18/514518/41
+          description: "change set to cherry pick in case of OpenStack version of openstack-helm. ex: refs/changes/18/514518/41"
     scm:
       - juniper-ci
     builders:

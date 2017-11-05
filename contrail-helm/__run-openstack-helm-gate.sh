@@ -55,7 +55,7 @@ sudo docker pull docker.io/opencontrail/contrail-agent-ubuntu16.04:4.0.2.0
 sudo docker pull docker.io/opencontrail/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0
 
 
-git clone https://github.com/cloudscaling/openstack-helm
+git clone ${OPENSTACK_HELM_URL:-https://github.com/openstack/openstack-helm}
 cd openstack-helm
 
 # fetch latest
