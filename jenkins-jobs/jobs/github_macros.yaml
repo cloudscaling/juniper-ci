@@ -60,6 +60,12 @@
           repo: tempest
 
 - scm:
+    name: openstack-helm-fork
+    scm:
+      - github:
+          organization: cloudscaling
+          repo: openstack-helm
+- scm:
     name: openstack-helm
     scm:
       - github:
