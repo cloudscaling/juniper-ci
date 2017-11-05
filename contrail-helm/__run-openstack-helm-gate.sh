@@ -58,6 +58,10 @@ sudo docker pull docker.io/opencontrail/contrail-kubernetes-agent-ubuntu16.04:4.
 git clone ${OPENSTACK_HELM_URL:-https://github.com/openstack/openstack-helm}
 cd openstack-helm
 
+# TODO: define the IP in chart
+local_ip=`hostname -i`
+for fn in `grep -r -l 10.0.2.15 *`; do sed "s/10.0.2.15/$local_ip/g" < "$fn" > result; rm "$fn"; mv result "$fn"; done
+
 # fetch latest
 if [[ -n "$CHANGE_REF" ]] ; then
   echo "INFO: Checking out change ref $CHANGE_REF"
