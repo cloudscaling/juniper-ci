@@ -98,5 +98,7 @@ wait_ssh $ip_addr
 cat <<EOF >$ENV_FILE
 SSH_USER=stack
 public_ip=$ip_addr
+public_ip_build=$ip_addr
+public_ip_helm=$ip_addr
 ssh_key_file=/home/jenkins/.ssh/id_rsa
 EOF
