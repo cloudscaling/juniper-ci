@@ -22,6 +22,9 @@ if [ "x$HOST_OS" == "xubuntu" ]; then
   sudo apt-get -y update && sudo apt-get -y upgrade
   sudo apt-get install -y --no-install-recommends mc git wget ntp
 elif [ "x$HOST_OS" == "xcentos" ]; then
+  # ip is located in /usr/sbin that is not in path...
+  export PATH=${PATH}:/usr/sbin
+
   sudo yum install -y epel-release
   sudo cp ./ceph.repo /etc/yum.repos.d/ceph.repo
   sudo yum install -y mc git wget ntp

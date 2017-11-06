@@ -1,6 +1,9 @@
 #!/bin/bash -ex
 
-sudo yum install -y epel-release 
+# ip is located in /usr/sbin that is not in path...
+export PATH=${PATH}:/usr/sbin
+
+sudo yum install -y epel-release
 sudo yum install -y mc git wget ntp httpd iptables iproute nmap
 
 iface=`ip -4 route list 0/0 | awk '{ print $5; exit }'`
@@ -8,6 +11,8 @@ local_ip=`ip addr | grep $iface | grep 'inet ' | awk '{print $2}' | cut -d '/' -
 sudo cp -f /etc/hosts /etc/hosts.bak
 sudo sed -i "/$(hostname)/d" /etc/hosts
 echo "$local_ip $(hostname)" | sudo tee -a /etc/hosts
+sudo sed -i "/$(hostname -s)/d" /etc/hosts
+echo "$local_ip $(hostname -s)" | sudo tee -a /etc/hosts
 
 sudo yum install -y httpd
 sudo sed -i "s/^Listen .*$/Listen 81/g" /etc/httpd/conf/httpd.conf
