@@ -313,19 +313,7 @@ ssh_cmd="ssh -T $ssh_opts"
 
 # wait for undercloud machine
 function _wait_machine() {
-  local addr=$1
-  local max_iter=${2:-20}
-  local iter=0
-  truncate -s 0 ./tmp_file
-  while ! scp $ssh_opts -B ./tmp_file root@${addr}:/tmp/tmp_file ; do
-    if (( iter >= max_iter )) ; then
-      echo "Could not connect to undercloud"
-      exit 1
-    fi
-    echo "Waiting for undercloud..."
-    sleep 30
-    ((++iter))
-  done
+  wait_ssh $addr "$ssh_key_dir/kp-$NUM"
 }
 
 function _prepare_network() {

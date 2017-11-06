@@ -3,7 +3,12 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
-ssh_key_dir="/home/jenkins"
+if [[ -z "$WORKSPACE" ]] ; then
+  echo "WORKSPACE variable is expected"
+  exit -1
+fi
+
+export ENV_FILE="$WORKSPACE/cloudrc"
 
 export ENVIRONMENT_OS=${1:-${ENVIRONMENT_OS:-''}}
 export OPENSTACK_VERSION=${2:-${OPENSTACK_VERSION:-''}}
@@ -80,9 +85,18 @@ define_machine $VM_NAME $VCPUS $MEM $OS_VARIANT $net_name $vol_path $DISK_SIZE
 # customize domain to set root password
 # TODO: access denied under non root...
 # customized manually for now
-# domain_customize $VM_NAME
+# domain_customize $VM_NAME oshelm.local
 
 # start machine
 start_vm $VM_NAME
 
-#TODO: wait machine and get IP via virsh net-dhcp-leases $net_name
+#wait machine and get IP via virsh net-dhcp-leases $net_name
+ip_addr=$(wait_dhcp $net_name)
+wait_ssh $ip_addr
+
+# save env file
+cat <<EOF >$ENV_FILE
+SSH_USER=root
+public_ip=$ip_addr
+ssh_key_file=/home/jenkins/.ssh/id_rsa
+EOF
