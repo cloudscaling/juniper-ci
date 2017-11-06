@@ -1,5 +1,8 @@
 #!/bin/bash -ex
 
+sudo yum install -y epel-release 
+sudo yum install -y mc git wget ntp httpd iptables iproute nmap
+
 iface=`ip -4 route list 0/0 | awk '{ print $5; exit }'`
 local_ip=`ip addr | grep $iface | grep 'inet ' | awk '{print $2}' | cut -d '/' -f 1`
 sudo cp -f /etc/hosts /etc/hosts.bak
