@@ -61,8 +61,6 @@ aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cid
 # contrail ports
 aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port 8080
 aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port 8143
-# inner communication...
-aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr $public_ip/32 --protocol tcp --port 0-65535
 # openstack ports
 #for port in 8774 8776 8788 5000 9696 8080 9292 35357 ; do
 #  aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port $port
@@ -92,6 +90,9 @@ function run_instance() {
   local public_ip=$(get_value_from_json "echo $cmd_result" ".Reservations[0].Instances[0].PublicIpAddress")
   echo "INFO: $env_var_suffix public IP: $public_ip"
   echo "public_ip_${env_var_suffix}=$public_ip" >> $ENV_FILE
+
+  # inner communication...
+  aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr $public_ip/32 --protocol tcp --port 0-65535
 
   echo "INFO: waiting for $env_var_suffix instance SSH"
   source "$my_dir/ssh-defs"
