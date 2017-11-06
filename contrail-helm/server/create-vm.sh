@@ -34,9 +34,9 @@ fi
 
 # base image for VMs
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-  DEFAULT_BASE_IMAGE_NAME="undercloud-${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION}-${OPENSTACK_VERSION}.qcow2"
+  DEFAULT_BASE_IMAGE_NAME="oshelm-${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION}-${OPENSTACK_VERSION}.qcow2"
 else
-  DEFAULT_BASE_IMAGE_NAME="undercloud-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}.qcow2"
+  DEFAULT_BASE_IMAGE_NAME="oshelm-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}.qcow2"
 fi
 BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-"$DEFAULT_BASE_IMAGE_NAME"}
 BASE_IMAGE_POOL=${BASE_IMAGE_POOL:-'images'}
@@ -78,7 +78,9 @@ fi
 define_machine $VM_NAME $VCPUS $MEM $OS_VARIANT $net_name $vol_path $DISK_SIZE
 
 # customize domain to set root password
-domain_customize $VM_NAME
+# TODO: access denied under non root...
+# customized manually for now
+# domain_customize $VM_NAME
 
 # start machine
 start_vm $VM_NAME
