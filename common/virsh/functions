@@ -403,10 +403,10 @@ function wait_dhcp() {
       break
     fi
     if (( iter >= max_iter )) ; then
-      echo "Failed to wait ip address allocation via dhcp"
+      echo "Failed to wait ip address allocation via dhcp" >&2
       exit 1
     fi
-    echo "Waiting for dhcp address requested... $iter"
+    echo "Waiting for dhcp address requested... $iter" >&2
     sleep 30
     ((++iter))
   done

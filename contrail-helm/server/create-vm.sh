@@ -91,7 +91,7 @@ define_machine $VM_NAME $VCPUS $MEM $OS_VARIANT $net_name $vol_path $DISK_SIZE
 start_vm $VM_NAME
 
 #wait machine and get IP via virsh net-dhcp-leases $net_name
-ip_addr=$(wait_dhcp $net_name)
+ip_addr=$(wait_dhcp $net_name | tail -n 1)
 wait_ssh $ip_addr
 
 # save env file
