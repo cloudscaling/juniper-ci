@@ -40,7 +40,6 @@ else
 fi
 BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-"$DEFAULT_BASE_IMAGE_NAME"}
 BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
-mkdir -p ${BASE_IMAGE_DIR}
 BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
 
 if [[ ! -f ${BASE_IMAGE} ]] ; then
