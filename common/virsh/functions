@@ -167,8 +167,8 @@ function create_volume() {
 function create_volume_from() {
   local vol=$1
   local pool=$2
-  local src_pool=$3
-  local src_vol=$4
+  local src_vol=$3
+  local src_pool=$4
   delete_volume $vol $pool
   local vol_file=`mktemp`
   cat <<EOF > $vol_file

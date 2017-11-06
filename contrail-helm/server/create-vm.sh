@@ -11,7 +11,7 @@ export OPENSTACK_VERSION=${2:-${OPENSTACK_VERSION:-''}}
 export VM_NAME=${VM_NAME:-"oshelm-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}"}
 export DISK_SIZE=${DISK_SIZE:-'128'}
 export POOL_NAME=${POOL_NAME:-'oshelm'}
-export VOL_NAME=${VOL_NAME:-${VM_NAME}}
+export VOL_NAME=${VOL_NAME:-"${VM_NAME}.qcow2"}
 export NET_DRIVER=${NET_DRIVER:-'e1000'}
 export BRIDGE_NAME=${BRIDGE_NAME:-'oshelm'}
 
@@ -39,6 +39,7 @@ else
   DEFAULT_BASE_IMAGE_NAME="undercloud-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}.qcow2"
 fi
 BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-"$DEFAULT_BASE_IMAGE_NAME"}
+BASE_IMAGE_POOL=${BASE_IMAGE_POOL:-'images'}
 BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
 BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
 
@@ -64,7 +65,7 @@ create_network_dhcp $net_name $net_addr $BRIDGE_NAME
 create_pool $POOL_NAME
 
 # create disk
-vol_path=$(create_volume_from $POOL_NAME $VOL_NAME 'images' $BASE_IMAGE_NAME)
+vol_path=$(create_volume_from $VOL_NAME $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
 
 VCPUS=8
 MEM=38528
