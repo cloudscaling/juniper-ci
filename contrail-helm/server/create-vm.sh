@@ -52,8 +52,9 @@ source "$my_dir/../../common/virsh/functions"
 
 assert_env_exists "$VM_NAME"
 
-# create network
+# re-create network
 net_name="${VM_NAME}"
+delete_network_dhcp $net_name
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]]; then
   net_addr="192.168.221.0"
 else
@@ -64,7 +65,8 @@ create_network_dhcp $net_name $net_addr $BRIDGE_NAME
 # create pool
 create_pool $POOL_NAME
 
-# create disk
+# re-create disk
+delete_volume $VOL_NAME $POOL_NAME
 vol_path=$(create_volume_from $VOL_NAME $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
 
 # customize image to set root password

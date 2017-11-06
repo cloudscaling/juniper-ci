@@ -129,7 +129,6 @@ function create_network_dhcp() {
   local network_name=$1
   local addr=$2
   local brname=$3
-  delete_network_dhcp $network_name
   local fxml=$(build_network_xml_dhcp $network_name $addr $brname)
   virsh net-define $fxml
   rm -f $fxml
@@ -169,7 +168,6 @@ function create_volume_from() {
   local pool=$2
   local src_vol=$3
   local src_pool=$4
-  delete_volume $vol $pool
   local vol_file=`mktemp`
   cat <<EOF > $vol_file
 <volume type='file'>
