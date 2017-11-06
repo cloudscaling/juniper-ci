@@ -6,15 +6,6 @@ if [[ "$USE_SWAP" == "true" ]] ; then
   swapon -s
 fi
 
-echo "INFO: Preparing instances"
-
-iface=`ip -4 route list 0/0 | awk '{ print $5; exit }'`
-local_ip=`ip addr | grep $iface | grep 'inet ' | awk '{print $2}' | cut -d '/' -f 1`
-sudo cp -f /etc/hosts /etc/hosts.bak
-sudo sed -i "/$(hostname)/d" /etc/hosts
-echo "$local_ip $(hostname)" | sudo tee -a /etc/hosts
-
-
 if [[ -x $(command -v apt-get 2>/dev/null) ]]; then
   HOST_OS='ubuntu'
 elif [[ -x $(command -v yum 2>/dev/null) ]]; then
@@ -24,49 +15,32 @@ else
   exit 1
 fi
 
+echo "INFO: Preparing instances"
 if [ "x$HOST_OS" == "xubuntu" ]; then
   sudo apt-get -y update && sudo apt-get -y upgrade
-  sudo apt-get install -y --no-install-recommends mc git wget ntp docker.io jq
+  sudo apt-get install -y --no-install-recommends mc git wget ntp
 elif [ "x$HOST_OS" == "xcentos" ]; then
   sudo yum install -y epel-release
   sudo cp ./ceph.repo /etc/yum.repos.d/ceph.repo
-  sudo yum install -y mc git wget ntp docker-latest jq
-
-  sudo cp -f /usr/lib/systemd/system/docker-latest.service /etc/systemd/system/docker.service
-  sudo sed -i "s|/var/lib/docker-latest|/var/lib/docker|g" /etc/systemd/system/docker.service
-  sudo sed -i 's/^OPTIONS/#OPTIONS/g' /etc/sysconfig/docker-latest
-  sudo sed -i "s|^MountFlags=slave|MountFlags=share|g" /etc/systemd/system/docker.service
-  sudo sed -i "/--seccomp-profile/,+1 d" /etc/systemd/system/docker.service
-  echo "DOCKER_STORAGE_OPTIONS=--storage-driver=overlay" | sudo tee /etc/sysconfig/docker-latest-storage
-  sudo setenforce 0 || true
-  sudo systemctl daemon-reload
-  sudo systemctl restart docker
+  sudo yum install -y mc git wget ntp
 fi
-
-
-./containers-build-${HOST_OS}.sh
-
-
-#sudo docker pull docker.io/opencontrail/contrail-controller-ubuntu16.04:4.0.2.0
-#sudo docker pull docker.io/opencontrail/contrail-analyticsdb-ubuntu16.04:4.0.2.0
-#sudo docker pull docker.io/opencontrail/contrail-analytics-ubuntu16.04:4.0.2.0
-sudo docker pull docker.io/opencontrail/contrail-kube-manager-ubuntu16.04:4.0.2.0
-sudo docker pull docker.io/opencontrail/contrail-agent-ubuntu16.04:4.0.2.0
-sudo docker pull docker.io/opencontrail/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0
-
 
 git clone ${OPENSTACK_HELM_URL:-https://github.com/openstack/openstack-helm}
 cd openstack-helm
-
-# TODO: define the IP in chart
-local_ip=`hostname -i`
-for fn in `grep -r -l 10.0.2.15 *`; do sed "s/10.0.2.15/$local_ip/g" < "$fn" > result; rm "$fn"; mv result "$fn"; done
 
 # fetch latest
 if [[ -n "$CHANGE_REF" ]] ; then
   echo "INFO: Checking out change ref $CHANGE_REF"
   git fetch https://git.openstack.org/openstack/openstack-helm "$CHANGE_REF" && git checkout FETCH_HEAD
 fi
+
+# TODO: define the IP in chart
+iface=`ip -4 route list 0/0 | awk '{ print $5; exit }'`
+local_ip=`ip addr | grep $iface | grep 'inet ' | awk '{print $2}' | cut -d '/' -f 1`
+sudo cp -f /etc/hosts /etc/hosts.bak
+sudo sed -i "/$(hostname)/d" /etc/hosts
+echo "$local_ip $(hostname)" | sudo tee -a /etc/hosts
+for fn in `grep -r -l 10.0.2.15 *`; do sed "s/10.0.2.15/$local_ip/g" < "$fn" > result; rm "$fn"; mv result "$fn"; done
 
 export INTEGRATION=aio
 export INTEGRATION_TYPE=basic
