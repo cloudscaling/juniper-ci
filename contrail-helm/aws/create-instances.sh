@@ -100,7 +100,7 @@ function run_instance() {
     echo "WARNING: Machine $instance_id for $env_var_suffix isn't accessible yet"
     sleep 2
   done
-  $SSH "(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | sudo fdisk /dev/xvdf"
+  $SSH "(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | sudo fdisk /dev/xvdf" || $SSH "sudo partprobe"
   $SSH "sudo mkfs.ext4 /dev/xvdf1"
   $SSH "sudo mkdir -p /var/lib/docker"
   $SSH "sudo su -c \"echo '/dev/xvdf1  /var/lib/docker  auto  defaults,auto  0  0' >> /etc/fstab\""
