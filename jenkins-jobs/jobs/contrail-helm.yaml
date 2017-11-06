@@ -13,7 +13,7 @@
             - never
       - string:
           name: DOCKER_CONTRAIL_URL
-          default: https://github.com/cloudscaling/docker-contrail-4
+          default: https://github.com/ftersin/docker-contrail-4
           description: "change set to cherry pick"
       - string:
           name: OPENSTACK_HELM_URL
