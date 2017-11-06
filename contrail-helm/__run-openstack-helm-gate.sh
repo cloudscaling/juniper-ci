@@ -1,5 +1,7 @@
 #!/bin/bash -ex
 
+registry_ip=${1:-localhost}
+
 if [[ "$USE_SWAP" == "true" ]] ; then
   sudo mkswap /dev/xvdf
   sudo swapon /dev/xvdf
@@ -41,6 +43,7 @@ sudo cp -f /etc/hosts /etc/hosts.bak
 sudo sed -i "/$(hostname)/d" /etc/hosts
 echo "$local_ip $(hostname)" | sudo tee -a /etc/hosts
 for fn in `grep -r -l 10.0.2.15 *`; do sed "s/10.0.2.15/$local_ip/g" < "$fn" > result; rm "$fn"; mv result "$fn"; done
+for fn in `grep -r -l "localhost:5000" *`; do sed "s/localhost:5000/${registry_ip}:5000/g" < "$fn" > result; rm "$fn"; mv result "$fn"; done
 
 export INTEGRATION=aio
 export INTEGRATION_TYPE=basic
