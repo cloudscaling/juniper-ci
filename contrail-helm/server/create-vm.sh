@@ -8,11 +8,12 @@ ssh_key_dir="/home/jenkins"
 export ENVIRONMENT_OS=${1:-${ENVIRONMENT_OS:-''}}
 export OPENSTACK_VERSION=${2:-${OPENSTACK_VERSION:-''}}
 
+export VM_NAME=${VM_NAME:-"oshelm-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}"}
 export DISK_SIZE=${DISK_SIZE:-'128'}
 export POOL_NAME=${POOL_NAME:-'oshelm'}
+export VOL_NAME=${VOL_NAME:-${VM_NAME}}
 export NET_DRIVER=${NET_DRIVER:-'e1000'}
-export VM_NAME=${VM_NAME:-"contrail-helm-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}"}
-export BRIDGE_NAME=${BRIDGE_NAME:-'cchelm'}
+export BRIDGE_NAME=${BRIDGE_NAME:-'oshelm'}
 
 if [[ -z "$ENVIRONMENT_OS" ]] ; then
   echo "ENVIRONMENT_OS is expected (e.g. export ENVIRONMENT_OS=centos)"
@@ -63,9 +64,8 @@ create_network_dhcp $net_name $net_addr $BRIDGE_NAME
 # create pool
 create_pool $POOL_NAME
 
-# create hdd
-vol_name=${VM_NAME}.qcow2
-vol_path=$(create_volume_from $vol_name 'images' $BASE_IMAGE_NAME)
+# create disk
+vol_path=$(create_volume_from $POOL_NAME $VOL_NAME 'images' $BASE_IMAGE_NAME)
 
 VCPUS=8
 MEM=38528

@@ -165,13 +165,23 @@ function create_volume() {
 }
 
 function create_volume_from() {
-  local name=$1
-  local poolname=$2
+  local vol=$1
+  local pool=$2
   local src_pool=$3
-  delete_volume $name $poolname
-  local pool_path=$(get_pool_path $poolname)
-  virsh vol-create-from $poolname $name --inputpool $src_pool 1>/dev/null
-  echo $pool_path/$name
+  local src_vol=$4
+  delete_volume $vol $pool
+  local vol_file=`mktemp`
+  cat <<EOF > $vol_file
+<volume type='file'>
+  <name>$vol</name>
+  <target>
+    <format type='qcow2'/>
+  </target>
+</volume>
+EOF
+  virsh vol-create-from --pool $pool --file $vol_file --vol $src_vol --inputpool $src_pool 1>/dev/null
+  local pool_path=$(get_pool_path $pool)
+  echo $pool_path/$vol
 }
 
 function define_machine() {
