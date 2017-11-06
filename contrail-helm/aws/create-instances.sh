@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -51,6 +51,7 @@ echo "INFO: RTB_ID: $rtb_id"
 aws ${AWS_FLAGS} ec2 create-route --route-table-id $rtb_id --destination-cidr-block "0.0.0.0/0" --gateway-id $igw_id
 
 # here should be only one 'default' group
+aws ec2 describe-security-groups --filters Name=vpc-id,Values=$vpc_id
 group_id=$(aws ec2 describe-security-groups --filters Name=vpc-id,Values=$vpc_id --query 'SecurityGroups[*].GroupId' --output text)
 echo "INFO: Group ID: $group_id"
 # ssh port
