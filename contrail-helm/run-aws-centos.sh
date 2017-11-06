@@ -28,10 +28,10 @@ export SSH_USER=ec2-user
 $my_dir/aws/create-instances.sh ami-82bd4ffa
 source "$my_dir/aws/ssh-defs"
 
-$SCP "$my_dir/__ceph.repo" $SSH_DEST_BUILD:ceph.repo
 $SCP "$my_dir/__containers-build-centos.sh" $SSH_DEST_BUILD:containers-build-centos.sh
 timeout -s 9 120m $SSH_BUILD "DOCKER_CONTRAIL_URL=$DOCKER_CONTRAIL_URL ./containers-build-centos.sh"
 
+$SCP "$my_dir/__ceph.repo" $SSH_DEST:ceph.repo
 $SCP "$my_dir/__run-openstack-helm-gate.sh" $SSH_DEST:run-openstack-helm-gate.sh
 timeout -s 9 120m $SSH "CHANGE_REF=$CHANGE_REF OPENSTACK_HELM_URL=$OPENSTACK_HELM_URL ./run-openstack-helm-gate.sh $public_ip_build"
 
