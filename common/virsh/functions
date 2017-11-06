@@ -370,7 +370,6 @@ function image_customize() {
     --root-password password:qwe123QWE \
     --run-command 'yum remove -y cloud-init' \
     --selinux-relabel
-  fi
 }
 
 function assert_env_exists() {
