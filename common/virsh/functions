@@ -361,6 +361,18 @@ function rhel_unregister_system() {
   fi
 }
 
+function image_customize() {
+  local image_file=$1
+  virt-customize -a $image_file \
+    --run-command 'xfs_growfs /' \
+    --run-command 'systemctl enable sshd' \
+    --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
+    --root-password password:qwe123QWE \
+    --run-command 'yum remove -y cloud-init' \
+    --selinux-relabel
+  fi
+}
+
 function assert_env_exists() {
   local name=$1
   if virsh list --all | grep -q "$name" ; then

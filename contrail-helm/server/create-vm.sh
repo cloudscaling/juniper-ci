@@ -67,6 +67,9 @@ create_pool $POOL_NAME
 # create disk
 vol_path=$(create_volume_from $VOL_NAME $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
 
+# customize image to set root password
+image_customize $vol_path
+
 VCPUS=8
 MEM=38528
 OS_VARIANT='rhel7'
