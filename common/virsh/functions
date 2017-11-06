@@ -363,7 +363,7 @@ function domain_customize() {
   local domain=$1
   local hname=${2:-${domain}}
   local ssh_user=${3:-$(whoami)}
-  # ssu_user could be root:file:/home/jenkins/.ssh/id_rsa.pub
+  # ssu_user could be stack:file:/home/jenkins/.ssh/id_rsa.pub
   virt-customize -d $domain \
     --run-command 'xfs_growfs /' \
     --run-command 'systemctl enable sshd' \

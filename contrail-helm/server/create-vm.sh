@@ -96,7 +96,7 @@ wait_ssh $ip_addr
 
 # save env file
 cat <<EOF >$ENV_FILE
-SSH_USER=root
+SSH_USER=stack
 public_ip=$ip_addr
 ssh_key_file=/home/jenkins/.ssh/id_rsa
 EOF
