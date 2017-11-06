@@ -71,7 +71,7 @@ function build_network_xml_dhcp() {
   local nname=$1
   local network=$2
   local brname=${3:-${nname}}
-  local forward_mode=${3:-'nat'}
+  local forward_mode=${4:-'nat'}
   local fname=`mktemp`
   local net_base_ip=$(echo "$network" | cut -d '.' -f 1,2,3)
   local nic_ip="${net_base_ip}.1"
