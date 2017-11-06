@@ -69,9 +69,6 @@ create_pool $POOL_NAME
 delete_volume $VOL_NAME $POOL_NAME
 vol_path=$(create_volume_from $VOL_NAME $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
 
-# customize image to set root password
-image_customize $vol_path
-
 VCPUS=8
 MEM=38528
 OS_VARIANT='rhel7'
@@ -79,6 +76,9 @@ if [[ "$ENVIRONMENT_OS" == 'ubuntu' ]] ; then
   OS_VARIANT='ubuntu'
 fi
 define_machine $VM_NAME $VCPUS $MEM $OS_VARIANT $net_name $vol_path $DISK_SIZE
+
+# customize domain to set root password
+domain_customize $VM_NAME
 
 # start machine
 start_vm $VM_NAME

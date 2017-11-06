@@ -359,9 +359,9 @@ function rhel_unregister_system() {
   fi
 }
 
-function image_customize() {
-  local image_file=$1
-  virt-customize -a $image_file \
+function domain_customize() {
+  local domain=$1
+  virt-customize -d $domain \
     --run-command 'xfs_growfs /' \
     --run-command 'systemctl enable sshd' \
     --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
