@@ -19,7 +19,7 @@ export CONTRAIL_VERSION=4.0.2.0-35
 git clone ${DOCKER_CONTRAIL_URL:-https://github.com/ftersin/docker-contrail-4}
 cd docker-contrail-4/containers
 ./setup-for-build.sh
-sudo ./build.sh || /bin/true
+./build.sh || /bin/true
 sudo docker images | grep "0-35"
-sudo ./build.sh || /bin/true
+./build.sh || /bin/true
 sudo docker images | grep "0-35"
