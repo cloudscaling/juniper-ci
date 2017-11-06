@@ -30,7 +30,7 @@ cmd="aws ${AWS_FLAGS} ec2 create-vpc --cidr-block $VM_CIDR"
 vpc_id=$(get_value_from_json "$cmd" ".Vpc.VpcId")
 echo "INFO: VPC_ID: $vpc_id"
 echo "vpc_id=$vpc_id" >> $ENV_FILE
-aws ec2 wait vpc-available --vpc-id $vpc_id
+aws ${AWS_FLAGS} ec2 wait vpc-available --vpc-id $vpc_id
 
 cmd="aws ${AWS_FLAGS} ec2 create-subnet --vpc-id $vpc_id --cidr-block $VM_CIDR"
 subnet_id=$(get_value_from_json "$cmd" ".Subnet.SubnetId")
@@ -52,8 +52,7 @@ echo "INFO: RTB_ID: $rtb_id"
 aws ${AWS_FLAGS} ec2 create-route --route-table-id $rtb_id --destination-cidr-block "0.0.0.0/0" --gateway-id $igw_id
 
 # here should be only one 'default' group
-aws ec2 describe-security-groups --filters Name=vpc-id,Values=$vpc_id
-group_id=$(aws ec2 describe-security-groups --filters Name=vpc-id,Values=$vpc_id --query 'SecurityGroups[*].GroupId' --output text)
+group_id=$(aws ${AWS_FLAGS} ec2 describe-security-groups --filters Name=vpc-id,Values=$vpc_id --query 'SecurityGroups[*].GroupId' --output text)
 echo "INFO: Group ID: $group_id"
 # ssh port
 aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port 22
