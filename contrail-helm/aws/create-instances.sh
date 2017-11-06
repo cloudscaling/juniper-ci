@@ -93,24 +93,31 @@ function run_instance() {
 
   # inner communication...
   aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr $public_ip/32 --protocol tcp --port 0-65535
+}
 
-  echo "INFO: waiting for $env_var_suffix instance SSH"
-  source "$my_dir/ssh-defs"
-  while ! $SSH uname -a 2>/dev/null ; do
-    echo "WARNING: Machine $instance_id for $env_var_suffix isn't accessible yet"
+function wait_instance() {
+  local ssh="$@"
+
+  echo "INFO: waiting for instance SSH"
+  while ! $ssh uname -a 2>/dev/null ; do
+    echo "WARNING: Machine isn't accessible yet"
     sleep 2
   done
-  $SSH "(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | sudo fdisk /dev/xvdf" || $SSH "sudo partprobe"
-  $SSH "sudo mkfs.ext4 /dev/xvdf1"
-  $SSH "sudo mkdir -p /var/lib/docker"
-  $SSH "sudo su -c \"echo '/dev/xvdf1  /var/lib/docker  auto  defaults,auto  0  0' >> /etc/fstab\""
-  $SSH "sudo mount /var/lib/docker"
+  $ssh "(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | sudo fdisk /dev/xvdf"
+  $ssh "sudo mkfs.ext4 /dev/xvdf1"
+  $ssh "sudo mkdir -p /var/lib/docker"
+  $ssh "sudo su -c \"echo '/dev/xvdf1  /var/lib/docker  auto  defaults,auto  0  0' >> /etc/fstab\""
+  $ssh "sudo mount /var/lib/docker"
 }
 
 # instance for helm
 run_instance c4.4xlarge helm
+source "$my_dir/ssh-defs"
+wait_instance $SSH
 
 # instance for build
 run_instance m4.large build
+source "$my_dir/ssh-defs"
+wait_instance $SSH_BUILD
 
 echo "INFO: Environment ready"
