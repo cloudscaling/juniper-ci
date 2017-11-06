@@ -30,6 +30,7 @@ cmd="aws ${AWS_FLAGS} ec2 create-vpc --cidr-block $VM_CIDR"
 vpc_id=$(get_value_from_json "$cmd" ".Vpc.VpcId")
 echo "INFO: VPC_ID: $vpc_id"
 echo "vpc_id=$vpc_id" >> $ENV_FILE
+aws ec2 wait vpc-available --vpc-id $vpc_id
 
 cmd="aws ${AWS_FLAGS} ec2 create-subnet --vpc-id $vpc_id --cidr-block $VM_CIDR"
 subnet_id=$(get_value_from_json "$cmd" ".Subnet.SubnetId")
