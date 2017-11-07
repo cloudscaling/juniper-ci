@@ -19,6 +19,17 @@ export CONTRAIL_VERSION=4.0.2.0-35
 git clone ${DOCKER_CONTRAIL_URL:-https://github.com/ftersin/docker-contrail-4}
 cd docker-contrail-4/containers
 ./setup-for-build.sh
+
+i=0
+while ! netstat -ln | grep -q ":5000" ; do
+  sleep 10
+  bash -x ./install-registry.sh
+  ((i++))
+  if (( i > 12 )) ; then
+    exit 1
+  fi
+done
+
 sudo -E ./build.sh || /bin/true
 sudo docker images | grep "0-35"
 sudo -E ./build.sh || /bin/true
