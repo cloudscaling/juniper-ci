@@ -1,11 +1,19 @@
 #!/bin/bash -ex
 
-registry_ip=${1:-localhost}
-
 if [[ "$USE_SWAP" == "true" ]] ; then
   sudo mkswap /dev/xvdf
   sudo swapon /dev/xvdf
   swapon -s
+fi
+
+registry_ip=${1:-localhost}
+if [[ "$registry_ip" != 'localhost' ]] ; then
+  sudo mkdir -p /etc/docker
+  cat | sudo tee /etc/docker/daemon.json << EOF
+{
+    "insecure-registries": ["$registry_ip:5000"]
+}
+EOF
 fi
 
 if [[ -x $(command -v apt-get 2>/dev/null) ]]; then
