@@ -13,12 +13,12 @@
             - never
       - string:
           name: DOCKER_CONTRAIL_URL
-          default: https://github.com/ftersin/docker-contrail-4
-          description: "change set to cherry pick"
+          default: https://github.com/cloudscaling/docker-contrail-4
+          description: "repository with sources for build microservices"
       - string:
           name: OPENSTACK_HELM_URL
           default: https://github.com/cloudscaling/openstack-helm
-          description: "change set to cherry pick"
+          description: "repository with OpenStack Helm project"
       - string:
           name: CHANGE_REF
           #default: refs/changes/18/514518/41
