@@ -23,7 +23,7 @@ cd docker-contrail-4/containers
 i=0
 while ! netstat -ln | grep -q ":5000" ; do
   sleep 10
-  bash -x ./install-registry.sh
+  bash -x ./install-registry.sh || /bin/true
   ((i++))
   if (( i > 12 )) ; then
     exit 1
