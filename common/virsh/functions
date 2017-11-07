@@ -373,6 +373,7 @@ function domain_customize() {
     --run-command 'echo net.ipv6.conf.all.disable_ipv6=1 >> /etc/sysctl.conf' \
     --run-command 'echo net.ipv6.conf.default.disable_ipv6=1 >> /etc/sysctl.conf' \
     --run-command 'cd /etc/sysconfig/network-scripts && sed 's/eth0/ens3/g' ifcfg-eth0 > ifcfg-ens3' \
+    --run-command 'echo 127.0.0.1    localhost.localdomain    localhost > /etc/hosts' \
     --hostname $hname \
     --ssh-inject $ssh_user \
     --selinux-relabel
