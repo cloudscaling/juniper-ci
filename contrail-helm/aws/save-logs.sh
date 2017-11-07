@@ -5,7 +5,7 @@ my_dir="$(dirname $my_file)"
 
 source "$my_dir/ssh-defs"
 
-if $SSH "tar -cvf logs.tar /home/ubuntu/openstack-helm/logs ; gzip logs.tar" ; then
+if $SSH "tar -cvf logs.tar ./openstack-helm/logs ; gzip logs.tar" ; then
   $SCP $SSH_DEST:logs.tar.gz "$WORKSPACE/logs/logs.tar.gz"
   pushd "$WORKSPACE/logs"
   tar -xvf logs.tar.gz
