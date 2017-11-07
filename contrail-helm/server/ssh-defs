@@ -3,7 +3,9 @@ ENV_FILE="$WORKSPACE/cloudrc"
 source $ENV_FILE
 
 SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
+
 SCP="scp -i $ssh_key_file $SSH_OPTS"
+
 SSH_DEST="$SSH_USER@$public_ip_helm"
 SSH="ssh -i $ssh_key_file $SSH_OPTS $SSH_DEST"
 
