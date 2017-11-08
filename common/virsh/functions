@@ -370,13 +370,18 @@ function domain_customize() {
     --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
     --root-password password:qwe123QWE \
     --run-command 'yum remove -y cloud-init' \
-    --run-command 'echo net.ipv6.conf.all.disable_ipv6=1 >> /etc/sysctl.conf' \
-    --run-command 'echo net.ipv6.conf.default.disable_ipv6=1 >> /etc/sysctl.conf' \
+    --run-command 'echo net.ipv6.bindv6only=0 >> /etc/sysctl.conf' \
+    --run-command 'echo net.ipv6.conf.all.forwarding=1 >> /etc/sysctl.conf' \
     --run-command 'cd /etc/sysconfig/network-scripts && sed 's/eth0/ens3/g' ifcfg-eth0 > ifcfg-ens3' \
-    --run-command 'echo 127.0.0.1    localhost.localdomain    localhost > /etc/hosts' \
+    --run-command 'echo ::1  localhost.localdomain localhost  ip6-localhost ip6-loopback > /etc/hosts' \
+    --run-command 'echo ff02::1 ip6-allnodes >> /etc/hosts' \
+    --run-command 'echo ff02::2 ip6-allrouters >> /etc/hosts' \
+    --run-command 'echo 127.0.0.1  localhost.localdomain  localhost >> /etc/hosts' \
+    --run-command 'echo 127.0.0.1  ${hname}.localdomain  $hname >> /etc/hosts' \
     --hostname $hname \
     --ssh-inject $ssh_user \
     --selinux-relabel
+
 }
 
 function assert_env_exists() {
