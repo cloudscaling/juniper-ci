@@ -28,7 +28,7 @@ export SSH_USER=ubuntu
 $my_dir/aws/create-instances.sh ami-0a00ce72
 source "$my_dir/aws/ssh-defs"
 
-$SCP "$my_dir/__containers-build-centos.sh" $SSH_DEST_BUILD:containers-build-ubuntu.sh
+$SCP "$my_dir/__containers-build-centos.sh" $SSH_DEST_BUILD:containers-build-centos.sh
 timeout -s 9 120m $SSH_BUILD "DOCKER_CONTRAIL_URL=$DOCKER_CONTRAIL_URL ./containers-build-centos.sh"
 
 $SCP "$my_dir/__run-openstack-helm-gate.sh" $SSH_DEST:run-openstack-helm-gate.sh
