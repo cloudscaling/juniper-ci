@@ -1,0 +1,93 @@
+#!/bin/bash -ex
+
+export CONTRAIL_VERSION=${CONTRAIL_VERSION:-'4.0.2.0-35'}
+export EXTERNAL_K8S_AGENT=${EXTERNAL_K8S_AGENT:-'docker.io/opencontrail/contrail-kubernetes-agent-ubuntu16.04:4.0.1.0'}
+export DOCKER_REGISTRY_ADDR=${DOCKER_REGISTRY_ADDR:-''}
+
+pushd docker-contrail-4
+kubernetes/setup-k8s.sh
+
+iface=`ip -4 route list 0/0 | awk '{ print $5; exit }'`
+local_ip=`ip addr | grep $iface | grep 'inet ' | awk '{print $2}' | cut -d '/' -f 1`
+
+docker_registry=$DOCKER_REGISTRY_ADDR
+if [[ -z "$docker_registry" ]] ; then
+  docker_registry="${local_ip}:5000"
+fi
+
+if [[ -n "$EXTERNAL_K8S_AGENT" ]] ; then
+  docker pull $EXTERNAL_K8S_AGENT
+  kubernetes_agent_fname=$(echo "$EXTERNAL_K8S_AGENT" | awk -F '/' '{print($NF)}')
+  kubernetes_agent_name=$(echo $kubernetes_agent_fname | cut -d ':' -f 1)
+  docker tag $EXTERNAL_K8S_AGENT ${docker_registry}/${kubernetes_agent_name}:${CONTRAIL_VERSION}
+  docker tag $EXTERNAL_K8S_AGENT ${docker_registry}/${kubernetes_agent_fname}
+fi
+
+sed "s/^#\(.*=\)\(.*\)/\1${local_ip}/g" common.env.sample | sed "s/PHYSICAL_INTERFACE=.*/PHYSICAL_INTERFACE=${iface}/g"  > common.env
+
+pushd kubernetes/manifests/
+./resolve-manifest.sh <contrail-micro.yaml >my-contrail-micro.yaml
+popd
+
+popd
+
+
+function wait_cluster() {
+  local name=$1
+  local pods_rgx=$2
+  echo "Wait $name up.."
+  local total=0
+  local running=0
+  local i=0
+  for (( i=0 ; i << 600 ; ++i )) ; do
+    total=$(kubectl get pods --all-namespaces=true | grep -c "$pods_rgx")
+    running=$(kubectl get pods --all-namespaces=true | grep "$pods_rgx" | grep -ic 'running')
+    echo "  components up: ${running}/${total}"
+    if (( total != 0 && total == running )) ; then
+      echo "$name is running"
+      break
+    fi
+  done
+  if (( total != running )) ; then
+    echo "$name failed to run till timeout"
+    exit -1
+  fi
+}
+
+kubectl create -f docker-contrail-4/kubernetes/manifests/my-contrail-micro.yaml
+wait_cluster "Contrail" "contrail\|zookeeper\|rabbit\|kafka\|redis"
+
+echo "Run test application: nginx"
+cat <<EOF > test_app.yaml
+apiVersion: apps/v1beta1 # for versions before 1.8.0 use apps/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 1 # tells deployment to run 2 pods matching the template
+  template: # create pods using pod definition in this template
+    metadata:
+      # unlike pod-nginx.yaml, the name is not included in the meta data as a unique name is
+      # generated from the deployment name
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
+      tolerations:
+      - operator: "Exists"
+        effect: "NoSchedule"
+EOF
+echo "Test application yaml:"
+cat test_app.yaml
+
+kubectl create -f test_app.yaml
+wait_cluster "nginx" "nginx"
+
+# TODO: test connectivities
