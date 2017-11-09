@@ -41,5 +41,6 @@
     - aws-centos
     - server-ubuntu
     - server-centos
+    - k8s-server-centos
    jobs:
     - 'contrail-helm-{project}'
