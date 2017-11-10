@@ -33,6 +33,11 @@ elif [ "x$HOST_OS" == "xcentos" ]; then
   # ip is located in /usr/sbin that is not in path...
   export PATH=${PATH}:/usr/sbin
 
+  # TODO: remove this hack
+  wget -nv http://$registry_ip/$CONTRAIL_VERSION/vrouter.ko
+  chmod 755 vrouter.ko
+  sudo insmod ./vrouter.ko
+
   sudo yum install -y epel-release
   sudo cp ./ceph.repo /etc/yum.repos.d/ceph.repo
   sudo yum install -y mc git wget ntp
