@@ -65,10 +65,10 @@ function wait_cluster() {
   local running=0
   local i=0
   for (( i=0 ; i < 600 ; ++i )) ; do
-    total=$(kubectl get pods --all-namespaces=true | grep -c "$pods_rgx")
-    running=$(kubectl get pods --all-namespaces=true | grep "$pods_rgx" | grep -ic 'running')
+    (( total=1 + $(kubectl get pods --all-namespaces=true | grep -c "$pods_rgx") ))
+     (( running=1 + $(kubectl get pods --all-namespaces=true | grep "$pods_rgx" | grep -ic 'running') ))
     log_info "  components up: ${running}/${total}"
-    if (( total != 0 && total == running )) ; then
+    if (( total != 1 && total == running )) ; then
       log_info "$name is running"
       break
     fi
