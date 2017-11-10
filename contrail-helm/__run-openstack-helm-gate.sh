@@ -36,6 +36,11 @@ elif [ "x$HOST_OS" == "xcentos" ]; then
   sudo yum install -y epel-release
   sudo cp ./ceph.repo /etc/yum.repos.d/ceph.repo
   sudo yum install -y mc git wget ntp
+
+  # TODO: remove this hack
+  wget -nv http://$registry_ip/$CONTRAIL_VERSION/vrouter.ko
+  chmod 755 vrouter.ko
+  sudo insmod ./vrouter.ko
 fi
 
 git clone ${OPENSTACK_HELM_URL:-https://github.com/openstack/openstack-helm}
