@@ -40,7 +40,12 @@ if [[ -n "$EXTERNAL_K8S_AGENT" ]] ; then
   docker tag $EXTERNAL_K8S_AGENT ${docker_registry}/${kubernetes_agent_fname}
 fi
 
-sed "s/^#\(.*=\)\(.*\)/\1${local_ip}/g" common.env.sample | sed "s/PHYSICAL_INTERFACE=.*/PHYSICAL_INTERFACE=${iface}/g"  > common.env
+cat <<EOF > common.env
+HOST_IP=$local_ip
+PHYSICAL_INTERFACE=$iface
+CONTRAIL_VERSION=$CONTRAIL_VERSION
+EOF
+
 log_info "common.env:"
 cat common.env
 
