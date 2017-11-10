@@ -55,9 +55,6 @@ fi
 # TODO: define the IP in chart
 iface=`ip -4 route list 0/0 | awk '{ print $5; exit }'`
 local_ip=`ip addr | grep $iface | grep 'inet ' | awk '{print $2}' | cut -d '/' -f 1`
-sudo cp -f /etc/hosts /etc/hosts.bak
-sudo sed -i "/$(hostname)/d" /etc/hosts
-echo "$local_ip $(hostname)" | sudo tee -a /etc/hosts
 
 # TODO: change next to nodes definition in helm
 for fn in `grep -r -l 10.0.2.15 *`; do sed "s/10.0.2.15/$local_ip/g" < "$fn" > result; rm "$fn"; mv result "$fn"; done
