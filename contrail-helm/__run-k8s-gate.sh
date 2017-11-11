@@ -50,9 +50,7 @@ log_info "common.env:"
 cat common.env
 
 pushd kubernetes/manifests/
-./resolve-manifest.sh <contrail-micro.yaml >my-contrail-micro.yaml
-log_info "generated k8s contrail manifest my-contrail-micro.yaml:"
-cat my-contrail-micro.yaml
+./resolve-manifest.sh <contrail-micro.yaml >~/my-contrail-micro.yaml
 popd
 
 popd
@@ -80,11 +78,11 @@ function wait_cluster() {
 }
 
 log_info "create Contrail cluster"
-kubectl create -f docker-contrail-4/kubernetes/manifests/my-contrail-micro.yaml
+kubectl create -f ~/my-contrail-micro.yaml
 wait_cluster "Contrail" "contrail\|zookeeper\|rabbit\|kafka\|redis"
 
 log_info "Run test application: nginx"
-cat <<EOF > test_app.yaml
+cat <<EOF > ~/test_app.yaml
 apiVersion: apps/v1beta1 # for versions before 1.8.0 use apps/v1beta1
 kind: Deployment
 metadata:
@@ -110,11 +108,9 @@ spec:
       - operator: "Exists"
         effect: "NoSchedule"
 EOF
-log_info "Test application yaml:"
-cat test_app.yaml
 
 log_info "run test application"
-kubectl create -f test_app.yaml
+kubectl create -f ~/test_app.yaml
 wait_cluster "nginx" "nginx"
 
 # TODO: test connectivities
