@@ -66,22 +66,6 @@ export INTEGRATION_TYPE=basic
 export SDN_PLUGIN=opencontrail
 #export GLANCE=pvc
 #export PVC_BACKEND=ceph
-err=0
-./tools/gate/setup_gate.sh || err=$?
+./tools/gate/setup_gate.sh
 
-set +x
-set +e
-# save contrail files
-mkdir -p logs/contrail
-pushd logs/contrail
-for cnt in `sudo docker ps | grep contrail | grep -v pause | awk '{print $1}'` ; do
-  cnt_name=`sudo docker inspect $cnt | grep '"Name"' | head -1 | cut -d '_' -f 2,3`
-  echo "Collecting files from $cnt_name"
-  mkdir -p "$cnt_name"
-  sudo docker inspect $cnt > "$cnt_name/inspect.log"
-  sudo docker cp $cnt:/var/log/contrail "$cnt_name/"
-  sudo docker cp $cnt:/etc/contrail "$cnt_name/"
-done
-popd
-
-exit $err
+mv logs ../

@@ -37,6 +37,9 @@ $SCP "$my_dir/__ceph.repo" $SSH_DEST:ceph.repo
 $SCP "$my_dir/__run-openstack-helm-gate.sh" $SSH_DEST:run-openstack-helm-gate.sh
 timeout -s 9 120m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION CHANGE_REF=$CHANGE_REF OPENSTACK_HELM_URL=$OPENSTACK_HELM_URL ./run-openstack-helm-gate.sh $public_ip_build"
 
+$SCP "$my_dir/__save-docker-logs.sh" $SSH_DEST:save-docker-logs.sh
+$SSH "./save-docker-logs.sh"
+
 trap - ERR
 $my_dir/aws/save-logs.sh
 if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
