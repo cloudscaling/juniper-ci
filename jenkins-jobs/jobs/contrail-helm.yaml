@@ -13,7 +13,7 @@
             - never
       - string:
           name: DOCKER_CONTRAIL_URL
-          default: https://github.com/cloudscaling/docker-contrail-4
+          default: https://github.com/juniper/contrail-container-builder
           description: "repository with sources for build microservices"
       - string:
           name: OPENSTACK_HELM_URL
