@@ -313,6 +313,7 @@ ssh_cmd="ssh -T $ssh_opts"
 
 # wait for undercloud machine
 function _wait_machine() {
+  local addr=$1
   wait_ssh $addr "$ssh_key_dir/kp-$NUM"
 }
 
