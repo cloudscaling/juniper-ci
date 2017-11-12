@@ -66,6 +66,9 @@ export INTEGRATION_TYPE=basic
 export SDN_PLUGIN=opencontrail
 #export GLANCE=pvc
 #export PVC_BACKEND=ceph
-./tools/gate/setup_gate.sh
+err=0
+./tools/gate/setup_gate.sh || err=$?
 
 mv logs ../
+
+exit $err
