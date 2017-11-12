@@ -28,7 +28,8 @@ fi
 echo "INFO: Preparing instances"
 if [ "x$HOST_OS" == "xubuntu" ]; then
   sudo apt-get -y update && sudo apt-get -y upgrade
-  sudo apt-get install -y --no-install-recommends mc git wget ntp
+  sudo apt-get install -y --no-install-recommends mc git wget ntp ntpdate
+  sudo ntpdate pool.ntp.org
 elif [ "x$HOST_OS" == "xcentos" ]; then
   # ip is located in /usr/sbin that is not in path...
   export PATH=${PATH}:/usr/sbin
@@ -36,6 +37,9 @@ elif [ "x$HOST_OS" == "xcentos" ]; then
   sudo yum install -y epel-release
   sudo cp ./ceph.repo /etc/yum.repos.d/ceph.repo
   sudo yum install -y mc git wget ntp
+
+  sudo yum install ntpdate || /bin/true
+  sudo ntpdate pool.ntp.org
 
   # TODO: remove this hack
   wget -nv http://$registry_ip/$CONTRAIL_VERSION/vrouter.ko
