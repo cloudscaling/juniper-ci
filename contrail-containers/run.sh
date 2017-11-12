@@ -7,6 +7,7 @@ rm -rf "$WORKSPACE/logs"
 mkdir -p "$WORKSPACE/logs"
 
 function save_logs() {
+  source "$my_dir/${HOST}/ssh-defs"
   $SCP "$my_dir/__save-docker-logs.sh" $SSH_DEST:save-docker-logs.sh
   $SSH "./save-docker-logs.sh"
   $my_dir/${HOST}/save-logs.sh
