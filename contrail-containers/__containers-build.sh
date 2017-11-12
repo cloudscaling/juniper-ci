@@ -10,6 +10,8 @@ elif [[ -x $(command -v yum 2>/dev/null) ]]; then
   export PATH=${PATH}:/usr/sbin
   sudo yum install -y epel-release
   sudo yum install -y mc git wget ntp iptables iproute
+  sudo systemctl enable ntpd.service
+  sudo systemctl start ntpd.service
 else
   echo "ERROR: Unable to find apt-get or yum"
   exit 1

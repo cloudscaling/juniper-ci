@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # save contrail files
 mkdir -p logs/contrail
@@ -17,7 +17,6 @@ for cnt in `sudo docker ps | grep contrail | grep -v pause | awk '{print $1}'` ;
   mv $cnt_name/contrail $cnt_name/etc
 done
 popd
-set +x
 
 function save_introspect_info() {
   curl -s http://localhost:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - | grep -P "state|<type|<status" > logs/contrail/$1-introspect.log
