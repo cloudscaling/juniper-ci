@@ -1,0 +1,6 @@
+export AWS_FLAGS="--region us-west-2"
+export SSH_USER=ec2-user
+# CentOS 7.4.1708 - HVM
+# us-east-2 : ami-a0fddfc5
+# us-west-2 : ami-82bd4ffa
+export IMAGE_ID=ami-82bd4ffa

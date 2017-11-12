@@ -1,6 +1,6 @@
 - job-template:
-    name: contrail-helm-{project}
-    description: "Deploys Kubernetes plus Contrail in AIO mode in host {project}"
+    name: contrail-{project}
+    description: "Deploys Kubernetes plus Contrail in AIO mode: {project}"
     defaults: global
     properties:
       - build-discarder
@@ -28,19 +28,24 @@
     builders:
       - shell: |
           #!/bin/bash -e
-          ./juniper-ci/contrail-helm/run-{project}.sh
+          export CONTRAIL_VERSION=4.0.2.0-35
+          export OPENSTACK_VERSION=ocata
+          export WAY=$(echo {project} | tr -d '-' -f 1)
+          export HOST=$(echo {project} | tr -d '-' -f 2)
+          export ENVIRONMENT_OS=$(echo {project} | tr -d '-' -f 3)
+          ./juniper-ci/contrail-containers/run.sh
     publishers:
       - archive:
           artifacts: 'logs/**'
           allow-empty: true
 
 - project:
-   name: contrail-helm
+   name: contrail-containers
    project:
-    - aws-ubuntu
-    - aws-centos
-    - server-ubuntu
-    - server-centos
+    - helm-aws-ubuntu
+    - helm-aws-centos
+    - helm-server-ubuntu
+    - helm-server-centos
     - k8s-server-centos
    jobs:
-    - 'contrail-helm-{project}'
+    - 'contrail-{project}'

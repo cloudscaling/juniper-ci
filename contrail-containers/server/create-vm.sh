@@ -10,9 +10,6 @@ fi
 
 export ENV_FILE="$WORKSPACE/cloudrc"
 
-export ENVIRONMENT_OS=${1:-${ENVIRONMENT_OS:-''}}
-export OPENSTACK_VERSION=${2:-${OPENSTACK_VERSION:-''}}
-
 export VM_NAME=${VM_NAME:-"oshelm-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}"}
 export DISK_SIZE=${DISK_SIZE:-'128'}
 export POOL_NAME=${POOL_NAME:-'oshelm'}
