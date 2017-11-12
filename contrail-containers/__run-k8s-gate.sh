@@ -16,7 +16,7 @@ function log_error() {
 }
 
 log_info "setup k8s ..."
-pushd docker-contrail-4
+pushd contrail-container-builder
 kubernetes/setup-k8s.sh
 
 iface=`ip -4 route list 0/0 | awk '{ print $5; exit }'`

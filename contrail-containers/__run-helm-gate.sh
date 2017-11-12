@@ -69,16 +69,6 @@ export SDN_PLUGIN=opencontrail
 err=0
 ./tools/gate/setup_gate.sh || err=$?
 
-# save contrail files
-mkdir -p logs/contrail
-pushd logs/contrail
-for cnt in `sudo docker ps | grep contrail | grep -v pause | awk '{print $1}'` ; do
-  cnt_name=`sudo docker ps | grep "^$cnt" | awk '{print $11}' | cut -d '_' -f 2,3`
-  mkdir -p "$cnt_name"
-  sudo docker inspect $cnt > "$cnt_name/inspect.log"
-  sudo docker cp $cnt:/var/log/contrail "$cnt_name/"
-  sudo docker cp $cnt:/etc/contrail "$cnt_name/"
-done
-popd
+mv logs ../
 
 exit $err

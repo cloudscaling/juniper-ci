@@ -5,11 +5,10 @@ my_dir="$(dirname $my_file)"
 
 ENV_FILE="$WORKSPACE/cloudrc"
 VM_CIDR="192.168.130.0/24"
-# ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-20150325
-# us-east-1 IMAGE_ID="ami-d05e75b8"
-# ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-201704
-IMAGE_ID="${1:-ami-618fab04}"
-VM_TYPE="${2:-c3.xlarge}"
+
+source "$my_dir/${ENVIRONMENT_OS}"
+
+echo "INFO: Image ID: $IMAGE_ID"
 
 function get_value_from_json() {
   local cmd_out=$($1 | jq $2)
@@ -24,6 +23,7 @@ fi
 
 touch $ENV_FILE
 echo "AWS_FLAGS='${AWS_FLAGS}'" >> $ENV_FILE
+echo "SSH_USER='${SSH_USER}'" >> $ENV_FILE
 echo "INFO: -------------------------------------------------------------------------- $(date)"
 
 cmd="aws ${AWS_FLAGS} ec2 create-vpc --cidr-block $VM_CIDR"
