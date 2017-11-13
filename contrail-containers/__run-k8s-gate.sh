@@ -50,7 +50,7 @@ log_info "common.env:"
 cat common.env
 
 pushd kubernetes/manifests/
-./resolve-manifest.sh <contrail-micro.yaml >~/my-contrail-micro.yaml
+./resolve-manifest.sh <contrail-micro.yaml.template >~/my-contrail-micro.yaml
 popd
 
 popd
