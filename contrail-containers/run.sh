@@ -9,9 +9,22 @@ mkdir -p "$WORKSPACE/logs"
 function save_logs() {
   source "$my_dir/${HOST}/ssh-defs"
   set +e
+  # save common docker logs
   $SCP "$my_dir/__save-docker-logs.sh" $SSH_DEST:save-docker-logs.sh
   $SSH "./save-docker-logs.sh"
+
+  # save env host specific logs
+  # (should save into ~/logs folder on the SSH host)
   $my_dir/${HOST}/save-logs.sh
+
+  # save to workspace
+  if $SSH "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
+    $SCP $SSH_DEST:logs.tar.gz "$WORKSPACE/logs/logs.tar.gz"
+    pushd "$WORKSPACE/logs"
+    tar -xf logs.tar.gz
+    rm logs.tar.gz
+    popd
+  fi
 }
 
 trap catch_errors ERR;
