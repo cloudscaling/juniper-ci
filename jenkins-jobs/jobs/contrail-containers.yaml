@@ -2,7 +2,7 @@
     name: contrail-{project}
     description: "Deploys Kubernetes plus Contrail in AIO mode: {project}"
     defaults: global
-    node: {node}
+    node: {slave_node}
     properties:
       - build-discarder
     parameters:
@@ -45,14 +45,14 @@
    name: contrail-containers
    project:
      - helm-aws-ubuntu:
-         node: '*'
+         slave_node: '*'
      - helm-aws-centos:
-         node: '*'
+         slave_slave: '*'
      - helm-server-ubuntu:
-         node: slave1
+         slave_node: slave1
      - helm-server-centos:
-         node: slave1
+         slave_node: slave1
      - k8s-server-centos:
-         node: slave1
+         slave_node: slave1
    jobs:
     - 'contrail-{project}'
