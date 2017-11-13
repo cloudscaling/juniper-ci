@@ -44,15 +44,15 @@
 - project:
    name: contrail-containers
    project:
-    - helm-aws-ubuntu:
-      node: '*'
-    - helm-aws-centos:
-      node: '*'
-    - helm-server-ubuntu:
-      node: slave1
-    - helm-server-centos:
-      node: slave1
-    - k8s-server-centos:
-      node: slave1
+     - helm-aws-ubuntu:
+         node: '*'
+     - helm-aws-centos:
+         node: '*'
+     - helm-server-ubuntu:
+         node: slave1
+     - helm-server-centos:
+         node: slave1
+     - k8s-server-centos:
+         node: slave1
    jobs:
     - 'contrail-{project}'
