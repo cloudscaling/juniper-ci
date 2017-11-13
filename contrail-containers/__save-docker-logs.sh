@@ -28,7 +28,6 @@ save_introspect_info HttpPortConfigNodemgr 8100
 save_introspect_info HttpPortControlNodemgr 8101
 save_introspect_info HttpPortVRouterNodemgr 8102
 save_introspect_info HttpPortAnalyticsNodemgr 8104
-save_introspect_info HttpPortStorageStatsmgr 8105
 save_introspect_info HttpPortKubeManager 8108
 #save_introspect_info HttpPortMesosManager 8109
 
