@@ -3,6 +3,13 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
+if [[ "$CLEAN_BEFORE" == 'true' || "$CLEAN_BEFORE" == 'clean_and_exit' ]] ; then
+  $my_dir/${HOST}/cleanup.sh || /bin/true
+  if [[ "$CLEAN_BEFORE" == 'clean_and_exit' ]] ; then
+    exit
+  fi
+fi
+
 rm -rf "$WORKSPACE/logs"
 mkdir -p "$WORKSPACE/logs"
 

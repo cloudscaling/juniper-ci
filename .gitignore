@@ -8,3 +8,4 @@ vagrant
 .pydevproject
 .idea
 jenkins-jobs/generated_xml/*
+jenkins-jobs/.venv/*

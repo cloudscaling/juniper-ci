@@ -18,7 +18,7 @@ for cnt in `sudo docker ps | grep contrail | grep -v pause | awk '{print $1}'` ;
 done
 for cnt in `sudo docker ps -a | grep contrail | grep -v pause | awk '{print $1}'` ; do
   cnt_name=`sudo docker inspect $cnt | grep '"Name"' | head -1 | cut -d '_' -f 2,3`
-  sudo docker logs $cnt > $cnt_name/docker.log
+  sudo docker logs $cnt &> $cnt_name/docker.log
 done
 popd
 
