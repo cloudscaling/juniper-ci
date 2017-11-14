@@ -13,7 +13,7 @@ kubectl get pods -o wide --all-namespaces=true > ~/logs/kube-info/pods 2>&1 || t
 kubectl get all -o wide --all-namespaces=true > ~/logs/kube-info/apps 2>&1 || true
 data=\"var/log/contrail\"
 data+=\" /var/log/containers\"
-data+=\" /etc/cni'
+data+=\" /etc/cni\"
 data+=\" ~/my-contrail-micro.yaml\"
 data+=\" ~/test_app.yaml\"
 mkdir -p ~/logs/k8s
