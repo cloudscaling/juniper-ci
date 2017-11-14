@@ -9,10 +9,9 @@
       - choice:
           name: CLEAN_BEFORE
           choices:
-            - no
-            - yes
+            - false
+            - true
             - clean_and_exit
-          default: false
       - choice:
           name: CLEAN_ENV
           choices:
