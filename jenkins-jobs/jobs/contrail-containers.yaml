@@ -9,8 +9,8 @@
       - choice:
           name: CLEAN_BEFORE
           choices:
-            - true
-            - false
+            - no
+            - yes
             - clean_and_exit
           default: false
       - choice:
