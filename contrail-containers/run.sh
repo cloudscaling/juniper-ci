@@ -57,7 +57,7 @@ if [[ "$WAY" == 'helm' ]] ; then
   echo "INFO: ($(date)) run build in background then wait some time and run helm gating"
   $SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION DOCKER_CONTRAIL_URL=$DOCKER_CONTRAIL_URL timeout -s 9 60m ./containers-build.sh" &>$WORKSPACE/logs/build.log &
   # wait some time while it prepares vrouter.ko on www that is needed for gate in the beginning
-  timeout -s 9 300 tail -f $WORKSPACE/logs/build.log || /bin/true
+  timeout -s 9 180 tail -f $WORKSPACE/logs/build.log || /bin/true
   echo "INFO: ($(date)) continuing with helm deployment"
 else
   $SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION DOCKER_CONTRAIL_URL=$DOCKER_CONTRAIL_URL timeout -s 9 60m ./containers-build.sh"
