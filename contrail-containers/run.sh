@@ -52,7 +52,15 @@ $my_dir/${HOST}/create-vm.sh
 source "$my_dir/${HOST}/ssh-defs"
 
 $SCP "$my_dir/__containers-build.sh" $SSH_DEST_BUILD:containers-build.sh
-timeout -s 9 120m $SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION DOCKER_CONTRAIL_URL=$DOCKER_CONTRAIL_URL ./containers-build.sh"
+if [[ "$WAY" == 'helm' ]] ; then
+  # helm's gating is not very fast. it takes more than 25 minutes. we can build containers in background.
+  echo "INFO: ($(date)) run build in background then wait some time and run helm gating"
+  $SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION DOCKER_CONTRAIL_URL=$DOCKER_CONTRAIL_URL timeout -s 9 60 ./containers-build.sh" &>$WORKSPACE/logs/build.log &
+  timeout -s 9 300s tail -f $WORKSPACE/logs/build.log || /bin/true
+  echo "INFO: ($(date)) run helm gating"
+else
+  $SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION DOCKER_CONTRAIL_URL=$DOCKER_CONTRAIL_URL timeout -s 9 60 ./containers-build.sh"
+fi
 
 # ceph.repo file is needed ONLY fow centos on aws.
 $SCP "$my_dir/__ceph.repo" $SSH_DEST:ceph.repo
