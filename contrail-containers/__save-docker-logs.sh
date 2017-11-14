@@ -16,6 +16,10 @@ for cnt in `sudo docker ps | grep contrail | grep -v pause | awk '{print $1}'` ;
   sudo chown -R $USER $cnt_name
   mv $cnt_name/contrail $cnt_name/etc
 done
+for cnt in `sudo docker ps -a | grep contrail | grep -v pause | awk '{print $1}'` ; do
+  cnt_name=`sudo docker inspect $cnt | grep '"Name"' | head -1 | cut -d '_' -f 2,3`
+  sudo docker logs $cnt > $cnt_name/docker.log
+done
 popd
 
 function save_introspect_info() {
