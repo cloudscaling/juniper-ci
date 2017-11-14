@@ -528,7 +528,7 @@ fi
 
 if [[ "$OPENSTACK_VERSION" != 'newton' ]] ; then
   cat <<EOF >> $misc_opts
-  ContrailControlRNDCSecret: rndc_secret
+  ContrailControlRNDCSecret: xvysmOR8lnUQRBcunkC6vg==
 EOF
 fi
 
