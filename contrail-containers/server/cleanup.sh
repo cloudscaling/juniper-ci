@@ -23,7 +23,7 @@ export NET_DRIVER=${NET_DRIVER:-'e1000'}
 source "$my_dir/../../common/virsh/functions"
 
 delete_domain $VM_NAME
-delete_network $VM_NAME
+delete_network_dhcp $VM_NAME
 
 vol_path=$(get_pool_path $POOL_NAME)
 vol_name="$VM_NAME.qcow2"
