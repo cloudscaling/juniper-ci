@@ -48,17 +48,17 @@
           allow-empty: true
 
 - project:
-   name: contrail-containers
-   project:
-    - helm-aws-ubuntu:
-       slavenode: naster
-    - helm-aws-centos:
-       slavenode: master
-    - helm-server-ubuntu:
-       slavenode: slave1
-    - helm-server-centos:
-       slavenode: slave1
-    - k8s-server-centos:
-       slavenode: slave1
-   jobs:
-    - 'contrail-{project}'
+    name: contrail-containers
+    project:
+      - helm-aws-ubuntu:
+          slavenode: master
+      - helm-aws-centos:
+          slavenode: master
+      - helm-server-ubuntu:
+          slavenode: slave1
+      - helm-server-centos:
+         slavenode: slave1
+      - k8s-server-centos:
+         slavenode: slave1
+    jobs:
+      - 'contrail-{project}'
