@@ -7,6 +7,13 @@
       - build-discarder
     parameters:
       - choice:
+          name: CLEAN_BEFORE
+          choices:
+            - true
+            - false
+            - clean_and_exit
+          default: false
+      - choice:
           name: CLEAN_ENV
           choices:
             - always
