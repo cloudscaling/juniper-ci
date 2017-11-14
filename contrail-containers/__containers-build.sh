@@ -1,4 +1,6 @@
-#!/bin/bash -ex
+#!/bin/bash -e
+
+echo "INFO: Build started: $(date)"
 
 if [[ -x $(command -v apt-get 2>/dev/null) ]]; then
   echo "INFO: Preparing Ubuntu host to build containers"
@@ -22,3 +24,6 @@ cd contrail-container-builder/containers
 ./setup-for-build.sh
 sudo -E ./build.sh || /bin/true
 sudo docker images | grep "$CONTRAIL_VERSION"
+
+echo "INFO: Build finished: $(date)"
+
