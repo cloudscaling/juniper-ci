@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -6,6 +6,7 @@ my_dir="$(dirname $my_file)"
 source "$my_dir/ssh-defs"
 
 cat <<EOF | $SSH
+set -x
 mkdir -p ~/logs/kube-info
 kubectl get nodes -o wide > ~/logs/kube-info/nodes 2>&1 || true
 kubectl get pods -o wide --all-namespaces=true > ~/logs/kube-info/pods 2>&1 || true

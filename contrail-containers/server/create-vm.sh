@@ -8,14 +8,19 @@ if [[ -z "$WORKSPACE" ]] ; then
   exit -1
 fi
 
+if [[ -z "$WAY" ]] ; then
+  echo "WAY variable is expected: oshelm/k8s"
+  exit -1
+fi
+
 export ENV_FILE="$WORKSPACE/cloudrc"
 
-export VM_NAME=${VM_NAME:-"oshelm-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}"}
+export VM_NAME=${VM_NAME:-"${WAY}-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}"}
 export DISK_SIZE=${DISK_SIZE:-'128'}
-export POOL_NAME=${POOL_NAME:-'oshelm'}
+export POOL_NAME=${POOL_NAME:-${WAY}}
 export VOL_NAME=${VOL_NAME:-"${VM_NAME}.qcow2"}
 export NET_DRIVER=${NET_DRIVER:-'e1000'}
-export BRIDGE_NAME=${BRIDGE_NAME:-'oshelm'}
+export BRIDGE_NAME=${BRIDGE_NAME:-${WAY}}
 
 if [[ -z "$ENVIRONMENT_OS" ]] ; then
   echo "ENVIRONMENT_OS is expected (e.g. export ENVIRONMENT_OS=centos)"
@@ -36,9 +41,9 @@ fi
 
 # base image for VMs
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-  DEFAULT_BASE_IMAGE_NAME="oshelm-${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION}-${OPENSTACK_VERSION}.qcow2"
+  DEFAULT_BASE_IMAGE_NAME="${WAY}-${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION}-${OPENSTACK_VERSION}.qcow2"
 else
-  DEFAULT_BASE_IMAGE_NAME="oshelm-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}.qcow2"
+  DEFAULT_BASE_IMAGE_NAME="${WAY}-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}.qcow2"
 fi
 BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-"$DEFAULT_BASE_IMAGE_NAME"}
 BASE_IMAGE_POOL=${BASE_IMAGE_POOL:-'images'}
@@ -82,7 +87,7 @@ define_machine $VM_NAME $VCPUS $MEM $OS_VARIANT $net_name $vol_path $DISK_SIZE
 # customize domain to set root password
 # TODO: access denied under non root...
 # customized manually for now
-# domain_customize $VM_NAME oshelm.local
+# domain_customize $VM_NAME ${WAY}.local
 
 # start machine
 start_vm $VM_NAME
