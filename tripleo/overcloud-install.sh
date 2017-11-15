@@ -228,7 +228,11 @@ openstack baremetal introspection bulk start
 # prepare Contrail puppet modules via uploading artifacts to swift
 git_branch_tht="stable/${OPENSTACK_VERSION}"
 git_branch_ctp="stable/${OPENSTACK_VERSION}"
-git_branch_pc="R4.0"
+if [[ "$CONTRAIL_VERSION" =~ 4.1.[0-9] ]] ; then
+  git_branch_pc="R4.1"
+else
+  git_branch_pc="R4.0"
+fi
 
 # TODO: replace personal repo with Juniper. or make switch with available repos.
 git_repo_ctp="cloudscaling"
