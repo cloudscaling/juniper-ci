@@ -27,7 +27,8 @@ fi
 
 echo "INFO: Preparing instances"
 if [ "x$HOST_OS" == "xubuntu" ]; then
-  sudo apt-get -y update && sudo apt-get -y upgrade
+  sudo apt-get -y update
+  sudo DEBIAN_FRONTEND=noninteractive apt-get -fqy -o Dpkg::Options::=\"--force-confold\" upgrade
   sudo apt-get install -y --no-install-recommends mc git wget ntp ntpdate
 elif [ "x$HOST_OS" == "xcentos" ]; then
   # ip is located in /usr/sbin that is not in path...

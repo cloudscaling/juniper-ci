@@ -2,7 +2,8 @@
 
 if [[ -x $(command -v apt-get 2>/dev/null) ]]; then
   echo "INFO: Preparing Ubuntu host to build containers  $(date)"
-  sudo apt-get -y update && sudo apt-get -y upgrade
+  sudo apt-get -y update
+  sudo DEBIAN_FRONTEND=noninteractive apt-get -fqy -o Dpkg::Options::=\"--force-confold\" upgrade
   sudo apt-get install -y --no-install-recommends mc git wget ntp
 elif [[ -x $(command -v yum 2>/dev/null) ]]; then
   echo "INFO: Preparing CentOS host to build containers  $(date)"
