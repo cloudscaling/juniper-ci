@@ -582,6 +582,23 @@ openstack overcloud deploy --templates tripleo-heat-templates/ \
 
 errors=$?
 
+
+echo "INFO: overcloud nodes"
+overcloud_nodes=$(openstack server list)
+echo "$overcloud_nodes"
+
+echo "INFO: collecting Contrail status"
+for i in $(echo "$overcloud_nodes" | awk '/contrail|compute|dpdk|tsn/ {print($8)}' | cut -d '=' -f 2) ; do
+    contrail_status=$(ssh heat-admin@${i} sudo contrail-status)
+    echo ==== $i ====
+    echo "$contrail_status"
+    state=$(echo "$contrail_status" | grep -v '==' | awk '{print($2)}')
+    if  [[ ! "active timeout backup" =~ "$state" ]] ; then
+      echo "ERROR: some of contrail services are not in active state"
+      ((++errors))
+    fi
+done
+
 echo "INFO: collecting HEAT logs"
 
 echo "INFO: Heat logs" > heat.log
