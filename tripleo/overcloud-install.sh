@@ -593,10 +593,12 @@ for i in $(echo "$overcloud_nodes" | awk '/contrail|compute|dpdk|tsn/ {print($8)
     echo ==== $i ====
     echo "$contrail_status"
     state=$(echo "$contrail_status" | grep -v '==' | awk '{print($2)}')
-    if  [[ ! "active timeout backup" =~ "$state" ]] ; then
-      echo "ERROR: some of contrail services are not in active state"
-      ((++errors))
-    fi
+    for st in $state; do
+      if  [[ ! "active timeout backup" =~ "$st" ]] ; then
+        echo "ERROR: some of contrail services are not in active state"
+        ((++errors))
+      fi
+    done
 done
 
 echo "INFO: collecting HEAT logs"
