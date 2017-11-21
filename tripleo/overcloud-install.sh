@@ -592,7 +592,11 @@ for i in $(echo "$overcloud_nodes" | awk '/contrail|compute|dpdk|tsn/ {print($8)
     contrail_status=$(ssh heat-admin@${i} sudo contrail-status)
     echo ==== $i ====
     echo "$contrail_status"
-    state=$(echo "$contrail_status" | grep -v '==' | awk '{print($2)}')
+    if [[ ! `hostname` =~ 'contrailcontroller' ]] ; then
+      state=$(echo "$contrail_status" | grep -v '==' |  awk '{print($2)}')
+    else
+      state=$(echo "$contrail_status" | grep -v '==' |  grep -v 'supervisor-database' | awk '{print($2)}')
+    fi
     for st in $state; do
       if  [[ ! "active timeout backup" =~ "$st" ]] ; then
         echo "ERROR: some of contrail services are not in active state"
