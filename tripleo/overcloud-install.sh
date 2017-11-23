@@ -56,7 +56,7 @@ if [[ "$DPDK" == 'true' ]] ; then
   compute_flavor_name='compute-dpdk'
 elif [[ "$TSN" == 'true' ]] ; then
   compute_machine_name='comptsn'
-  compute_flavor_name='compute-tsn'
+  compute_flavor_name='contrail-tsn'
 else
   compute_machine_name='comp'
   compute_flavor_name='compute'
