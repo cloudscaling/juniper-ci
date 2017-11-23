@@ -332,6 +332,8 @@ function _get_machines_by_service() {
       local node_name_regexp='compute'
       if [[ "$DPDK" == 'true' ]]; then
         node_name_regexp='dpdk'
+      elif [[ "$TSN" == 'true' ]] ; then
+        node_name_regexp='tsn'
       fi
       for ip in `openstack --insecure server list | grep $node_name_regexp | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+'` ; do
         _get_machine_by_ip $ip
@@ -414,6 +416,11 @@ function _check_instance_ssh_and_metadata() {
 }
 
 function check_instance_simple() {
+  if [[ "$TSN" == 'true' ]]; then
+    echo "WARNING: TODO: skip instance check for TSN"
+    return 0
+  fi
+
   echo "INFO: Check instance with simple flavor"
   local flavor=51
   local net_id=$1

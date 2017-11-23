@@ -18,6 +18,11 @@ if [[ -z "$DPDK" ]] ; then
   exit 1
 fi
 
+if [[ -z "$TSN" ]] ; then
+  echo "TSN is expected (e.g. export TSN=true/false)"
+  exit 1
+fi
+
 if [[ -z "$AAA_MODE" ]] ; then
   echo "AAA_MODE is expected (e.g. export AAA_MODE=rbac/cloud-admin/no-auth)"
   exit 1
@@ -46,12 +51,15 @@ SSH_USER=${SSH_USER:-'stack'}
 CPU_COUNT=${CPU_COUNT:-2}
 DISK_SIZE=${DISK_SIZE:-29}
 
-if [[ "$DPDK" != 'true' ]] ; then
-  compute_machine_name='comp'
-  compute_flavor_name='compute'
-else
+if [[ "$DPDK" == 'true' ]] ; then
   compute_machine_name='compdpdk'
   compute_flavor_name='compute-dpdk'
+elif [[ "$TSN" == 'true' ]] ; then
+  compute_machine_name='comptsn'
+  compute_flavor_name='compute-tsn'
+else
+  compute_machine_name='comp'
+  compute_flavor_name='compute'
 fi
 
 # su - stack
@@ -83,12 +91,18 @@ ANALYTICS_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-ctrlanalytics- | wc -l)
 ANALYTICSDB_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-ctrlanalyticsdb- | wc -l)
 ((OCM_COUNT=CONT_COUNT+COMP_COUNT+CONTRAIL_CONTROLLER_COUNT+ANALYTICS_COUNT+ANALYTICSDB_COUNT))
 
-if [[ "$DPDK" != 'true' ]] ; then
-  comp_scale_count=$COMP_COUNT
-  dpdk_scale_count=0
-else
+if [[ "$DPDK" == 'true' ]] ; then
   comp_scale_count=0
   dpdk_scale_count=$COMP_COUNT
+  tsn_scale_count=0
+elif [[ "$TSN" == 'true' ]] ; then
+  comp_scale_count=0
+  dpdk_scale_count=0
+  tsn_scale_count=$COMP_COUNT
+else
+  comp_scale_count=$COMP_COUNT
+  dpdk_scale_count=0
+  tsn_scale_count=0
 fi
 
 # collect MAC addresses of overcloud machines
@@ -288,6 +302,7 @@ sed -i "s/ContrailAnalyticsCount:.*/ContrailAnalyticsCount: $ANALYTICS_COUNT/g" 
 sed -i "s/ContrailAnalyticsDatabaseCount:.*/ContrailAnalyticsDatabaseCount: $ANALYTICSDB_COUNT/g" $contrail_services_file
 sed -i "s/ComputeCount:.*/ComputeCount: $comp_scale_count/g" $contrail_services_file
 sed -i "s/ContrailDpdkCount:.*/ContrailDpdkCount: $dpdk_scale_count/g" $contrail_services_file
+sed -i "s/ContrailTsnCount:.*/ContrailTsnCount: $tsn_scale_count/g" $contrail_services_file
 sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_services_file
 
 # set network parameters

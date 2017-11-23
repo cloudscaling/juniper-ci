@@ -15,6 +15,8 @@ source ${WORKSPACE}/stackrc
 node_name_regexp='compute'
 if [[ "$DPDK" == 'true' ]]; then
   node_name_regexp='dpdk'
+elif [[ "$TSN" == 'true' ]] ; then
+  node_name_regexp='tsn'
 fi
 for mid in `nova list | grep "$node_name_regexp" |  awk '{print $12}'` ; do
   mip="`echo $mid | cut -d '=' -f 2`"

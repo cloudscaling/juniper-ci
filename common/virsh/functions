@@ -14,6 +14,9 @@ function get_network_name() {
     dpdk)
       echo "rd-dpdk-$NUM"
       ;;
+    tsn)
+      echo "rd-tsn-$NUM"
+      ;;
     external)
       echo "rd-ext-$NUM"
       ;;
@@ -33,6 +36,9 @@ function get_network_ip() {
       ;;
     dpdk)
       ((addr=178+NUM*10))
+      ;;
+    tsn)
+      ((addr=179+NUM*10))
       ;;
     external)
       ((addr=175+NUM*10))
@@ -56,6 +62,9 @@ function build_network_xml() {
       echo "<network><name>$nname</name><bridge name=\"$nname\" /><ip address=\"$addr.1\" netmask=\"255.255.255.0\"/></network>" > $fname
       ;;
     dpdk)
+      echo "<network><name>$nname</name><bridge name=\"$nname\" /><ip address=\"$addr.1\" netmask=\"255.255.255.0\"/></network>" > $fname
+      ;;
+    tsn)
       echo "<network><name>$nname</name><bridge name=\"$nname\" /><ip address=\"$addr.1\" netmask=\"255.255.255.0\"/></network>" > $fname
       ;;
     external)

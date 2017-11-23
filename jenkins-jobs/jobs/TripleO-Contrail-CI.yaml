@@ -65,6 +65,10 @@
           name: DPDK
           description: Deploy vRouter in DPDK mode or not.
           default: false
+      - bool:
+          name: TSN
+          description: Deploy vRouter in TSN mode or not.
+          default: false
       - choice:
           name: CONTROLLER_COUNT
           description: "Count of OS controllers to deploy"
@@ -131,6 +135,9 @@
           if [[ "$DPDK" == 'true' ]] ; then
             desc+=' dpdk'
           fi
+          if [[ "$TSN" == 'true' ]] ; then
+            desc+=' tsn'
+          fi
           desc+=' $AAA_MODE'
           if [[ "$AAA_MODE_ANALYTICS" != 'auto' ]] ; then
             desc+="/${AAA_MODE_ANALYTICS}"
@@ -150,6 +157,10 @@
           #!/bin/bash -ex
           if [[ "$AAA_MODE_ANALYTICS" == 'auto' ]] ; then
             export AAA_MODE_ANALYTICS=$AAA_MODE
+          fi
+          if [[ "$DPDK" == 'true' && "$TSN" == 'true' ]] ; then
+            echo "ERROR: DPDK and TSN cannot be enabled together"
+            exit -1
           fi
           ./juniper-ci/tripleo/run-contrail.sh
     publishers:

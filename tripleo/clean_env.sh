@@ -17,6 +17,7 @@ delete_network management
 delete_network provisioning
 delete_network external
 delete_network dpdk
+delete_network tsn
 
 delete_domains
 

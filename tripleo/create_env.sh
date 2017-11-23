@@ -21,6 +21,11 @@ if [[ -z "$DPDK" ]] ; then
   exit 1
 fi
 
+if [[ -z "$TSN" ]] ; then
+  echo "TSN is expected (e.g. export TSN=true/false)"
+  exit 1
+fi
+
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   if [[ -z "$RHEL_ACCOUNT_FILE" ]] ; then
     echo "ERROR: for rhel environemnt the environment variable RHEL_ACCOUNT_FILE is required"
@@ -33,10 +38,12 @@ else
   fi
 fi
 
-if [[ "$DPDK" != 'true' ]] ; then
-compute_machine_name='comp'
+if [[ "$DPDK" == 'true' ]] ; then
+  compute_machine_name='compdpdk'
+elif [[ "$TSN" == 'true' ]] ; then
+  compute_machine_name='comptsn'
 else
-compute_machine_name='compdpdk'
+  compute_machine_name='comp'
 fi
 
 RHEL_CERT_TEST=${RHEL_CERT_TEST:-'false'}
@@ -96,6 +103,8 @@ prov_net=`get_network_name provisioning`
 #ext_net=`get_network_name external`
 #create_network dpdk
 #dpdk_net=`get_network_name dpdk`
+#create_network tsn
+#tsn_net=`get_network_name tsn`
 
 # create pool
 create_pool $poolname
