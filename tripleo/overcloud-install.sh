@@ -558,6 +558,12 @@ if [[ "$DPDK" == 'true' ]] ; then
 EOF
 fi
 
+if [[ "$TSN" == 'true' ]] ; then
+  cat <<EOF >> $misc_opts
+  ContrailVrouterTSNEVPNMode: true
+EOF
+fi
+
 multi_nic_opts=''
 if [[ "$use_multi_nic" == 'yes' ]] ; then
   multi_nic_opts+=' -e tripleo-heat-templates/environments/network-management.yaml'
