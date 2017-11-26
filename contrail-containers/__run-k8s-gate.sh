@@ -44,6 +44,7 @@ cat <<EOF > common.env
 HOST_IP=$local_ip
 PHYSICAL_INTERFACE=$iface
 CONTRAIL_VERSION=$CONTRAIL_VERSION
+LOG_LEVEL=SYS_DEBUG
 EOF
 
 log_info "common.env:"
