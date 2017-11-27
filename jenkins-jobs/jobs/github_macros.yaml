@@ -66,6 +66,19 @@
           organization: Juniper
           repo: contrail-charms
 
+- scm:
+    name: contrail-build-poc
+    scm:
+      - github:
+          organization: cloudscaling
+          repo: contrail-build-poc
+- scm:
+    name: contrail-container-builder
+    scm:
+      - github:
+          organization: juniper
+          repo: contrail-container-builder
+
 
 - scm:
     name: juniper-contrail-charms-branch

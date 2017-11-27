@@ -23,15 +23,13 @@
           description: "Build packages by CI instead of getting from hardcoded S3 URL"
           default: false
       - string:
-          name: DOCKER_CONTRAIL_URL
-          default: https://github.com/juniper/contrail-container-builder
-          description: "repository with sources for build microservices"
-      - string:
           name: OPENSTACK_HELM_URL
           default: https://github.com/cloudscaling/openstack-helm
           description: "repository with OpenStack Helm project"
     scm:
       - juniper-ci
+      - contrail-build-poc
+      - contrail-container-builder
     builders:
       - shell: |
           #!/bin/bash -e

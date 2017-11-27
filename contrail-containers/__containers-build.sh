@@ -20,7 +20,6 @@ fi
 
 echo "INFO: Run setup-for-build  $(date)"
 
-git clone $DOCKER_CONTRAIL_URL
 cd contrail-container-builder/containers
 ./setup-for-build.sh
 
