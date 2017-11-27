@@ -55,9 +55,10 @@ timeout='60m'
 if [[ "$BUILD_PACKAGES" == 'true' ]] ; then
   timeout='300m'
 fi
-$SCP -r "$WORKSPACE/contrail-build-poc" $SSH_DEST:contrail-build-poc
-$SCP -r "$WORKSPACE/contrail-container-builder" $SSH_DEST:contrail-container-builder
-$SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION BUILD_PACKAGES=$BUILD_PACKAGES DOCKER_CONTRAIL_URL=$DOCKER_CONTRAIL_URL timeout -s 9 $timeout ./containers-build.sh" | tee $WORKSPACE/logs/build.log
+$SCP "$my_dir/__containers-build.sh" $SSH_DEST_BUILD:containers-build.sh
+$SCP -r "$WORKSPACE/contrail-build-poc" $SSH_DEST:./
+$SCP -r "$WORKSPACE/contrail-container-builder" $SSH_DEST:./
+$SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION BUILD_PACKAGES=$BUILD_PACKAGES timeout -s 9 $timeout ./containers-build.sh" | tee $WORKSPACE/logs/build.log
 
 # ceph.repo file is needed ONLY fow centos on aws.
 $SCP "$my_dir/__ceph.repo" $SSH_DEST:ceph.repo
