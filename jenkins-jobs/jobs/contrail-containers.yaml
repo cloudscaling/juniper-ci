@@ -18,6 +18,10 @@
             - always
             - on_success
             - never
+      - bool:
+          name: BUILD_PACKAGES
+          description: "Build packages by CI instead of getting from hardcoded S3 URL"
+          default: false
       - string:
           name: DOCKER_CONTRAIL_URL
           default: https://github.com/juniper/contrail-container-builder
@@ -26,10 +30,6 @@
           name: OPENSTACK_HELM_URL
           default: https://github.com/cloudscaling/openstack-helm
           description: "repository with OpenStack Helm project"
-      - string:
-          name: CHANGE_REF
-          #default: refs/changes/18/514518/41
-          description: "change set to cherry pick in case of OpenStack version of openstack-helm. ex: refs/changes/18/514518/41"
     scm:
       - juniper-ci
     builders:

@@ -50,12 +50,6 @@ fi
 git clone ${OPENSTACK_HELM_URL:-https://github.com/openstack/openstack-helm}
 cd openstack-helm
 
-# fetch latest
-if [[ -n "$CHANGE_REF" ]] ; then
-  echo "INFO: Checking out change ref $CHANGE_REF"
-  git fetch https://git.openstack.org/openstack/openstack-helm "$CHANGE_REF" && git checkout FETCH_HEAD
-fi
-
 # TODO: define the IP in chart
 iface=`ip -4 route list 0/0 | awk '{ print $5; exit }'`
 local_ip=`ip addr | grep $iface | grep 'inet ' | awk '{print $2}' | cut -d '/' -f 1`
