@@ -17,18 +17,26 @@ export ENVIRONMENT_OS=${1:-${ENVIRONMENT_OS:-''}}
 export OPENSTACK_VERSION=${2:-${OPENSTACK_VERSION:-''}}
 
 export VM_NAME=${VM_NAME:-"${WAY}-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}"}
+export NET_NAME="${VM_NAME}"
 export POOL_NAME=${POOL_NAME:-${WAY}}
-export NET_DRIVER=${NET_DRIVER:-'e1000'}
 
 source "$my_dir/../../common/virsh/functions"
 
-delete_domain $VM_NAME
+NODES=( "${VM_NAME}_1" "${VM_NAME}_2" "${VM_NAME}_3" "${VM_NAME}_4" )
+
+function delete_node() {
+  local vm_name=$1
+  delete_domain $vm_name
+  local vol_path=$(get_pool_path $POOL_NAME)
+  local vol_name="$vm_name.qcow2"
+  if [[ "$ENVIRONMENT_OS" == 'rhel' ]]; then
+    rhel_unregister_system $vol_path/$vol_name || true
+  fi
+  delete_volume $vol_name $POOL_NAME
+}
+
+for i in ${NODES[@]} ; do
+  delete_node $i
+done
+
 delete_network_dhcp $VM_NAME
-
-vol_path=$(get_pool_path $POOL_NAME)
-vol_name="$VM_NAME.qcow2"
-if [[ "$ENVIRONMENT_OS" == 'rhel' ]]; then
-  rhel_unregister_system $vol_path/$vol_name || true
-fi
-
-delete_volume $vol_name $POOL_NAME
