@@ -32,6 +32,15 @@ function save_logs() {
     rm logs.tar.gz
     popd
   fi
+
+  # save to workspace
+  if $SSH_BUILD "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
+    $SCP $SSH_DEST_BUILD:logs.tar.gz "$WORKSPACE/logs/build_logs.tar.gz"
+    pushd "$WORKSPACE/logs"
+    tar -xf build_logs.tar.gz
+    rm build_logs.tar.gz
+    popd
+  fi
 }
 
 trap catch_errors ERR;
@@ -59,7 +68,10 @@ $my_dir/${HOST}/setup-${WAY}-nodes.sh
 
 $SCP "$my_dir/__containers-build.sh" $SSH_DEST_BUILD:containers-build.sh
 $SCP -r "$WORKSPACE/contrail-build-poc" $SSH_DEST_BUILD:./
+
+set -o pipefail
 $SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION BUILD_PACKAGES=$BUILD_PACKAGES timeout -s 9 $timeout ./containers-build.sh" | tee $WORKSPACE/logs/build.log
+set +o pipefail
 
 # ceph.repo file is needed ONLY fow centos on aws.
 $SCP "$my_dir/__ceph.repo" $SSH_DEST:ceph.repo
