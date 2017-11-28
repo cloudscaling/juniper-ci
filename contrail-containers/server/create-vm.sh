@@ -122,10 +122,10 @@ for ip in ${ips[@]} ; do
   cat <<EOF | ssh $SSH_OPTS root@${ip}
 set -x
 hname=${WAY}_${index}
-echo $hname > /etc/hostname
-hostname $hname
+echo \$hname > /etc/hostname
+hostname \$hname
 domainname localdomain
-echo ${ip}  ${hname}.localdomain  ${hname} >> /etc/hosts
+echo ${ip}  \${hname}.localdomain  \${hname} >> /etc/hosts
 EOF
 done
 
@@ -139,6 +139,6 @@ public_ip=$master_ip
 public_ip_build=$master_ip
 public_ip_helm=$master_ip
 ssh_key_file=/home/jenkins/.ssh/id_rsa
-nodes=${NODES[@]}
-nodes_ips=${ips[@]}
+nodes="${NODES[@]}"
+nodes_ips="${ips[@]}"
 EOF
