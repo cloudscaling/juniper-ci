@@ -1,12 +1,5 @@
 #!/bin/bash -ex
 
-export CONTRAIL_VERSION=${CONTRAIL_VERSION:-'4.0.2.0-35'}
-export EXTERNAL_K8S_AGENT=${EXTERNAL_K8S_AGENT:-'docker.io/opencontrail/contrail-kubernetes-agent-ubuntu16.04:4.0.1.0'}
-export DOCKER_REGISTRY_ADDR=${DOCKER_REGISTRY_ADDR:-''}
-
-# to find ip tool
-export PATH=${PATH}:/usr/sbin
-
 function log_info() {
   echo "INFO: $@"
 }
@@ -15,45 +8,8 @@ function log_error() {
   echo "ERROR: $@"
 }
 
-log_info "setup k8s ..."
-pushd contrail-container-builder
-kubernetes/setup-k8s.sh
-
-iface=`ip -4 route list 0/0 | awk '{ print $5; exit }'`
-local_ip=`ip addr | grep $iface | grep 'inet ' | awk '{print $2}' | cut -d '/' -f 1`
-log_info "iface=$iface local_ip=$local_ip"
-
-docker_registry=$DOCKER_REGISTRY_ADDR
-if [[ -z "$docker_registry" ]] ; then
-  docker_registry="${local_ip}:5000"
-fi
-log_info "docker_registry=$docker_registry"
-
-if [[ -n "$EXTERNAL_K8S_AGENT" ]] ; then
-  log_info "pull external contrail agent: $EXTERNAL_K8S_AGENT"
-  docker pull $EXTERNAL_K8S_AGENT
-  kubernetes_agent_fname=$(echo "$EXTERNAL_K8S_AGENT" | awk -F '/' '{print($NF)}')
-  kubernetes_agent_name=$(echo $kubernetes_agent_fname | cut -d ':' -f 1)
-  log_info "set tag: ${docker_registry}/${kubernetes_agent_name}:${CONTRAIL_VERSION}"
-  docker tag $EXTERNAL_K8S_AGENT ${docker_registry}/${kubernetes_agent_name}:${CONTRAIL_VERSION}
-  log_info "set tag: ${docker_registry}/${kubernetes_agent_fname}"
-  docker tag $EXTERNAL_K8S_AGENT ${docker_registry}/${kubernetes_agent_fname}
-fi
-
-cat <<EOF > common.env
-HOST_IP=$local_ip
-PHYSICAL_INTERFACE=$iface
-CONTRAIL_VERSION=$CONTRAIL_VERSION
-LOG_LEVEL=SYS_DEBUG
-EOF
-
-log_info "common.env:"
-cat common.env
-
-pushd kubernetes/manifests/
-./resolve-manifest.sh <contrail-micro.yaml.template >~/my-contrail-micro.yaml
-popd
-
+pushd contrail-container-builder/kubernetes/manifests/
+./resolve-manifest.sh <contrail-template.yaml > ~/my-contrail.yaml
 popd
 
 function wait_cluster() {
@@ -79,7 +35,7 @@ function wait_cluster() {
 }
 
 log_info "create Contrail cluster"
-kubectl create -f ~/my-contrail-micro.yaml
+kubectl create -f ~/my-contrail.yaml
 wait_cluster "Contrail" "contrail\|zookeeper\|rabbit\|kafka\|redis"
 
 log_info "Run test application: nginx"

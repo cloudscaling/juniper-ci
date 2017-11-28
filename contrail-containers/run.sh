@@ -47,17 +47,18 @@ function catch_errors() {
   exit $exit_code
 }
 
-#TODO: move NUM (option server HOST) to job params
 $my_dir/${HOST}/create-vm.sh
 source "$my_dir/${HOST}/ssh-defs"
 
-timeout='60m'
-if [[ "$BUILD_PACKAGES" == 'true' ]] ; then
-  timeout='300m'
-fi
+for dest in ${SSH_DEST_WORKERS[@]} ; do
+  # TODO: when repo be splitted to containers & build here will be containers repo only,
+  # then build repo should be added to be copied below
+  $SCP -r "$WORKSPACE/contrail-container-builder" ${dest}:./
+done
+$my_dir/${HOST}/setup-${WAY}-nodes.sh
+
 $SCP "$my_dir/__containers-build.sh" $SSH_DEST_BUILD:containers-build.sh
 $SCP -r "$WORKSPACE/contrail-build-poc" $SSH_DEST_BUILD:./
-$SCP -r "$WORKSPACE/contrail-container-builder" $SSH_DEST_BUILD:./
 $SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION BUILD_PACKAGES=$BUILD_PACKAGES timeout -s 9 $timeout ./containers-build.sh" | tee $WORKSPACE/logs/build.log
 
 # ceph.repo file is needed ONLY fow centos on aws.

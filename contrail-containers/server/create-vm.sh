@@ -16,11 +16,16 @@ fi
 export ENV_FILE="$WORKSPACE/cloudrc"
 
 export VM_NAME=${VM_NAME:-"${WAY}-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}"}
+export NET_NAME="${VM_NAME}"
 export DISK_SIZE=${DISK_SIZE:-'128'}
 export POOL_NAME=${POOL_NAME:-${WAY}}
 export VOL_NAME=${VOL_NAME:-"${VM_NAME}.qcow2"}
 export NET_DRIVER=${NET_DRIVER:-'e1000'}
 export BRIDGE_NAME=${BRIDGE_NAME:-${WAY}}
+
+VCPUS=4
+MEM=8192
+OS_VARIANT='rhel7'
 
 if [[ -z "$ENVIRONMENT_OS" ]] ; then
   echo "ENVIRONMENT_OS is expected (e.g. export ENVIRONMENT_OS=centos)"
@@ -57,50 +62,83 @@ fi
 
 source "$my_dir/../../common/virsh/functions"
 
-assert_env_exists "$VM_NAME"
+NODES=( "${VM_NAME}_1" "${VM_NAME}_2" "${VM_NAME}_3" "${VM_NAME}_4" )
+for i in ${NODES[@]} ; do
+  assert_env_exists "$i"
+done
 
 # re-create network
-net_name="${VM_NAME}"
-delete_network_dhcp $net_name
+delete_network_dhcp $NET_NAME
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]]; then
   net_addr="192.168.221.0"
 else
   net_addr="192.168.222.0"
 fi
-create_network_dhcp $net_name $net_addr $BRIDGE_NAME
+create_network_dhcp $NET_NAME $net_addr $BRIDGE_NAME
 
 # create pool
 create_pool $POOL_NAME
 
 # re-create disk
-delete_volume $VOL_NAME $POOL_NAME
-vol_path=$(create_volume_from $VOL_NAME $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
+function define_node() {
+  local vm_name=$1
+  local vol_name=$vm_name
+  delete_volume $vol_name $POOL_NAME
+  local vol_path=$(create_volume_from $vol_name $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
 
-VCPUS=8
-MEM=38528
-OS_VARIANT='rhel7'
-if [[ "$ENVIRONMENT_OS" == 'ubuntu' ]] ; then
-  OS_VARIANT='ubuntu'
-fi
-define_machine $VM_NAME $VCPUS $MEM $OS_VARIANT $net_name $vol_path $DISK_SIZE
+  if [[ "$ENVIRONMENT_OS" == 'ubuntu' ]] ; then
+    OS_VARIANT='ubuntu'
+  fi
+  define_machine $vm_name $VCPUS $MEM $OS_VARIANT $NET_NAME $vol_path $DISK_SIZE
+}
+
+for i in ${NODES[@]} ; do
+  define_node "$i"
+done
 
 # customize domain to set root password
 # TODO: access denied under non root...
 # customized manually for now
-# domain_customize $VM_NAME ${WAY}.local
+#for i in ${NODES[@]} ; do
+#  domain_customize $i ${WAY}.local
+#done
 
-# start machine
-start_vm $VM_NAME
+# start nodes
+for i in ${NODES[@]} ; do
+  start_vm $i
+done
 
-#wait machine and get IP via virsh net-dhcp-leases $net_name
-ip_addr=$(wait_dhcp $net_name | tail -n 1)
-wait_ssh $ip_addr
+#wait machine and get IP via virsh net-dhcp-leases $NET_NAME
+ips=( $(wait_dhcp $NET_NAME ) )
+for ip in ${ips[@]} ; do
+  wait_ssh $ip
+done
+
+# prepare host name
+SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
+index=0
+for ip in ${ips[@]} ; do
+  (( index+=1 ))
+  cat <<EOF | ssh $SSH_OPTS root@${ip}
+set -x
+hname=${WAY}_${index}
+echo $hname > /etc/hostname
+hostname $hname
+domainname localdomain
+echo ${ip}  ${hname}.localdomain  ${hname} >> /etc/hosts
+EOF
+done
+
+# first machine is master
+master_ip=${ips[0]}
 
 # save env file
 cat <<EOF >$ENV_FILE
 SSH_USER=stack
-public_ip=$ip_addr
-public_ip_build=$ip_addr
-public_ip_helm=$ip_addr
+public_ip=$master_ip
+public_ip_build=$master_ip
+public_ip_helm=$master_ip
 ssh_key_file=/home/jenkins/.ssh/id_rsa
+nodes=${NODES[@]}
+nodes_ips=${ips[@]}
 EOF

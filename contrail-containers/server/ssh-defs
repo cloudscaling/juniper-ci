@@ -11,3 +11,9 @@ SSH="ssh -i $ssh_key_file $SSH_OPTS $SSH_DEST"
 
 SSH_DEST_BUILD="$SSH_USER@$public_ip_build"
 SSH_BUILD="ssh -i $ssh_key_file $SSH_OPTS $SSH_DEST_BUILD"
+
+SSH_DEST_WORKERS=()
+for ip in $nodes_ips ; do
+  SSH_DEST_WORKERS+=( "$SSH_USER@${ip}" )
+done
+SSH_WORKER="ssh -i $ssh_key_file $SSH_OPTS"

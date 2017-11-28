@@ -12,7 +12,7 @@ kubectl get nodes -o wide > ~/logs/kube-info/nodes 2>&1 || true
 kubectl get pods -o wide --all-namespaces=true > ~/logs/kube-info/pods 2>&1 || true
 kubectl get all -o wide --all-namespaces=true > ~/logs/kube-info/apps 2>&1 || true
 mkdir -p ~/logs/k8s
-for i in /var/log/contrail /var/log/containers /etc/cni ~/my-contrail-micro.yaml ~/test_app.yaml ; do
+for i in /var/log/contrail /var/log/containers /etc/cni ~/my-contrail.yaml ~/test_app.yaml ; do
   cp -r \$i ~/logs/k8s/ || true
 done
 EOF

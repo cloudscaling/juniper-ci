@@ -390,7 +390,6 @@ function domain_customize() {
     --hostname $hname \
     --ssh-inject $ssh_user \
     --selinux-relabel
-
 }
 
 function assert_env_exists() {
@@ -412,13 +411,13 @@ function wait_dhcp() {
     filter+=".*${host}"
   fi
   while true ; do
-    local ip=$(virsh net-dhcp-leases $net | grep "$filter" | awk '{print($5)}' | cut -d '/' -f 1)
-    if echo $ip | grep -q '[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+' ; then
-      echo $ip
+    local ips=$(virsh net-dhcp-leases $net | grep "$filter" | awk '{print($5)}' | cut -d '/' -f 1)
+    if echo "$ips" | grep -q '[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+' ; then
+      echo "$ips"
       break
     fi
     if (( iter >= max_iter )) ; then
-      echo "Failed to wait ip address allocation via dhcp" >&2
+      echo "Failed to wait ip addresses allocation via dhcp" >&2
       exit 1
     fi
     echo "Waiting for dhcp address requested... $iter" >&2
