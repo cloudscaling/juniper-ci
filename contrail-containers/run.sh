@@ -32,6 +32,15 @@ function save_logs() {
     rm logs.tar.gz
     popd
   fi
+
+  # save to workspace
+  if $SSH_BUILD "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
+    $SCP $SSH_DEST_BUILD:logs.tar.gz "$WORKSPACE/logs/build_logs.tar.gz"
+    pushd "$WORKSPACE/logs"
+    tar -xf build_logs.tar.gz
+    rm build_logs.tar.gz
+    popd
+  fi
 }
 
 trap catch_errors ERR;
