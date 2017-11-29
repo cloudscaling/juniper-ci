@@ -70,7 +70,7 @@ $SCP "$my_dir/__containers-build.sh" $SSH_DEST_BUILD:containers-build.sh
 $SCP -r "$WORKSPACE/contrail-build-poc" $SSH_DEST_BUILD:./
 
 set -o pipefail
-$SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION BUILD_PACKAGES=$BUILD_PACKAGES timeout -s 9 $timeout ./containers-build.sh" | tee $WORKSPACE/logs/build.log
+$SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION BUILD_PACKAGES=$BUILD_PACKAGES timeout -s 9 180m ./containers-build.sh" | tee $WORKSPACE/logs/build.log
 set +o pipefail
 
 # ceph.repo file is needed ONLY fow centos on aws.
