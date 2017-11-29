@@ -50,15 +50,7 @@ fi
 git clone ${OPENSTACK_HELM_URL:-https://github.com/openstack/openstack-helm}
 cd openstack-helm
 
-# TODO: define the IP in chart
-iface=`ip -4 route list 0/0 | awk '{ print $5; exit }'`
-local_ip=`ip addr | grep $iface | grep 'inet ' | awk '{print $2}' | cut -d '/' -f 1`
-
-# TODO: change next to nodes definition in helm
-for fn in `grep -r -l 10.0.2.15 *`; do sed "s/10.0.2.15/$local_ip/g" < "$fn" > result; rm "$fn"; mv result "$fn"; done
-# TODO: change next to images definition in helm
-for fn in `grep -r -l "localhost:5000" *`; do sed "s/localhost:5000/${registry_ip}:5000/g" < "$fn" > result; rm "$fn"; mv result "$fn"; done
-
+export OPENCONTRAIL_REGISTRY_URL="${registry_ip}:5000"
 export INTEGRATION=aio
 export INTEGRATION_TYPE=basic
 export SDN_PLUGIN=opencontrail
