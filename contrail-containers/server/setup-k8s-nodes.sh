@@ -12,8 +12,8 @@ for d in ${dest[@]} ; do
 done
 export DOCKER_REGISTRY_ADDR=${ips[0]}
 export KUBERNETES_API_SERVER=${ips[0]}
-export CONTROLLER_NODES=${ips[@]:0:3}
-export AGENT_NODES==${ips[@]:3}
+export CONTROLLER_NODES=$(echo ${ips[@]:0:3} | sed 's/ /,/g')
+export AGENT_NODES=$(echo ${ips[@]:3} | sed 's/ /,/g')
 
 function assert_empty() {
   if [[ -z "${!1}" ]] ; then
