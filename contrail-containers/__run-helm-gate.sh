@@ -56,10 +56,8 @@ local_ip=`ip addr | grep $iface | grep 'inet ' | awk '{print $2}' | cut -d '/' -
 
 # TODO: change next to nodes definition in helm
 for fn in `grep -r -l 10.0.2.15 *`; do sed "s/10.0.2.15/$local_ip/g" < "$fn" > result; rm "$fn"; mv result "$fn"; done
-# TODO: change next to images definition in helm
-for fn in `grep -r -l "4.0.2.0-35" *`; do sed "s/4.0.2.0-35/${CONTRAIL_VERSION}/g" < "$fn" > result; rm "$fn"; mv result "$fn"; done
-for fn in `grep -r -l "localhost:5000" *`; do sed "s/localhost:5000/${registry_ip}:5000/g" < "$fn" > result; rm "$fn"; mv result "$fn"; done
 
+export OPENCONTRAIL_REGISTRY_URL="${registry_ip}:5000"
 export INTEGRATION=aio
 export INTEGRATION_TYPE=basic
 export SDN_PLUGIN=opencontrail
