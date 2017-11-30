@@ -111,12 +111,12 @@ function wait_instance() {
 }
 
 # instance for helm
-run_instance c5.4xlarge helm
+run_instance c4.4xlarge helm
 source "$my_dir/ssh-defs"
 wait_instance $SSH
 
 # instance for build
-run_instance m5.xlarge build
+run_instance m4.xlarge build
 source "$my_dir/ssh-defs"
 wait_instance $SSH_BUILD
 
