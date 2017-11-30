@@ -31,6 +31,7 @@ function setup_k8s() {
   local token_opts=${2:-''}
   cat <<EOF | $SSH_WORKER $dest
 set -x
+export PATH=\${PATH}:/usr/sbin
 sudo mkdir -p /etc/docker
 cat <<EOM | sudo tee /etc/docker/daemon.json
 {
@@ -60,7 +61,7 @@ for d in ${dest[@]} ; do
   setup_k8s $d "join-token=$token"
   if [[ -z "$token" ]] ; then
     # label nodes
-    $SSH_WORKER $d "cd ~/contrail-container-builder/kubernetes/manifests && ./set-node-labels.sh"
+    $SSH_WORKER $d "export PATH=\${PATH}:/usr/sbin; cd ~/contrail-container-builder/kubernetes/manifests && ./set-node-labels.sh"
     # master so get token
     token=$($SSH_WORKER $d "sudo kubeadm token list | tail -n 1 | awk '{print(\$1)}'")
   fi
