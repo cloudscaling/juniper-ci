@@ -32,16 +32,7 @@ function setup_k8s() {
   cat <<EOF | $SSH_WORKER $dest
 set -x
 export PATH=\${PATH}:/usr/sbin
-sudo mkdir -p /etc/docker
-cat <<EOM | sudo tee /etc/docker/daemon.json
-{
-  \"insecure-registries\": [\"${DOCKER_REGISTRY_ADDR}:5000\"]
-}
-EOM
-if docker version ; then
-  sudo service docker restart
-fi
-cd ~/contrail-container-builder
+d ~/contrail-container-builder
 cat <<EOM > common.env
 LOG_LEVEL=SYS_DEBUG
 CONTRAIL_VERSION=$CONTRAIL_VERSION
