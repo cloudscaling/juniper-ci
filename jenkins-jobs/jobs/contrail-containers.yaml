@@ -56,12 +56,12 @@
           contrail_version: 4.1.0.0-6
       - helm-server-ubuntu:
           slavenode: slave1
-          contrail_version: 4.0.2.0-35
+          contrail_version: 4.1.0.0-6
       - helm-server-centos:
          slavenode: slave1
-          contrail_version: 4.0.2.0-35
+          contrail_version: 4.1.0.0-6
       - k8s-server-centos:
          slavenode: slave1
-          contrail_version: 4.0.2.0-35
+          contrail_version: 4.1.0.0-6
     jobs:
       - 'contrail-{project}'
