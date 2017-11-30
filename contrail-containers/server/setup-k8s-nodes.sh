@@ -32,7 +32,7 @@ function setup_k8s() {
   cat <<EOF | $SSH_WORKER $dest
 set -x
 export PATH=\${PATH}:/usr/sbin
-d ~/contrail-container-builder
+cd ~/contrail-container-builder
 cat <<EOM > common.env
 LOG_LEVEL=SYS_DEBUG
 CONTRAIL_VERSION=$CONTRAIL_VERSION
