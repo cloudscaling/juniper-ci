@@ -48,12 +48,15 @@ EOF
 }
 
 token=''
+master_dest=''
 for d in ${dest[@]} ; do
   setup_k8s $d "join-token=$token"
-  if [[ -z "$token" ]] ; then
-    # label nodes
-    $SSH_WORKER $d "export PATH=\${PATH}:/usr/sbin; cd ~/contrail-container-builder/kubernetes/manifests && ./set-node-labels.sh"
-    # master so get token
-    token=$($SSH_WORKER $d "sudo kubeadm token list | tail -n 1 | awk '{print(\$1)}'")
+  if [[ -z "$master_dest" ]] ; then
+    # first is master, so get token
+    master_dest="$d"
+    token=$($SSH_WORKER $d "set -x; sudo kubeadm token list | tail -n 1 | awk '{print(\$1)}'")
   fi
 done
+
+$SSH_WORKER $master_dest  "set -x; export PATH=\${PATH}:/usr/sbin; cd ~/contrail-container-builder/kubernetes/manifests && ./set-node-labels.sh"
+
