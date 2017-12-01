@@ -43,7 +43,7 @@ function check_ui_ip () {
     echo "INFO: ok"
   fi
   echo "INFO: check controller $ctrl port 8143"
-  local psize=`curl -I -k https://$ip:8143/ 2>/dev/null | grep "Content-Length" | cut -d ' ' -f 2`
+  local psize=`curl -I -k https://$ip:8143/ 2>/dev/null | grep "Content-Length" | cut -d ' ' -f 2 | sed 's/\r$//'`
   if (( psize < 1000 )) ; then
     echo "ERROR: response from port 8143 is smaller than 1000 bytes:"
     curl -I -k https://$ip:8143/

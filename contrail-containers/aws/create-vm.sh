@@ -116,7 +116,7 @@ source "$my_dir/ssh-defs"
 wait_instance $SSH
 
 # instance for build
-run_instance m4.large build
+run_instance m4.xlarge build
 source "$my_dir/ssh-defs"
 wait_instance $SSH_BUILD
 
