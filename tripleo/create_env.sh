@@ -215,7 +215,7 @@ function _change_image() {
   if [["$CONTRAIL_SERIES" == 'release']]; then
     build_series=''
     else
-    build_series='sb-'
+    build_series='cb-'
   fi
 
   if [[ "$prepare_contrail_pkgs" == 'yes' ]] ; then
