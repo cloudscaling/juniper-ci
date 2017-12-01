@@ -42,10 +42,15 @@
           name: CONTRAIL_VERSION
           description: "Version of Contrail"
           choices:
-            - '4.1.0'
-            - '4.0.2'
-            - '3.2.7'
-            - '3.2.6'
+            - '4.1'
+            - '4.0'
+            - '3.2'
+      - choice:
+          name: CONTRAIL_SERIES
+          description: "Series of Contrail builds (cb, release, ...)"
+          choices:
+            - 'release'
+            - 'cb'
       - choice:
           name: AAA_MODE
           description: "aaa_mode parameter for Contrail Controller"
