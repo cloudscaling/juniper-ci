@@ -212,11 +212,19 @@ function _change_image() {
   echo "PermitRootLogin yes" > $tmpdir/etc/ssh/sshd_config
 
   # prepare contrail pkgs
+  if [["$CONTRAIL_SERIES" == 'release']]; then
+    build_series=''
+    else
+    build_series='sb-'
+  fi
+
   if [[ "$prepare_contrail_pkgs" == 'yes' ]] ; then
     rm -rf $tmpdir/root/contrail_packages
     mkdir -p $tmpdir/root/contrail_packages
+    aws s3 sync s3://contrailrhel7 $CONTRAIL_PACKAGES_DIR
+    latest_ver_rpm=`ls "$CONTRAIL_PACKAGES_DIR"/"$CONTRAIL_SERIES"contrail-install* -vr  | grep $CONTRAIL_VERSION | grep $OPENSTACK_VERSION | head -n1`
     cp $CONTRAIL_PACKAGES_DIR/*.tgz $tmpdir/root/contrail_packages/
-    cp $CONTRAIL_PACKAGES_DIR/*${OPENSTACK_VERSION}*.rpm $tmpdir/root/contrail_packages/
+    cp $CONTRAIL_PACKAGES_DIR/$latest_ver_rpm $tmpdir/root/contrail_packages/
   fi
 
   # cp rhel account file
