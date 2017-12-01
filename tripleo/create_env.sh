@@ -212,7 +212,7 @@ function _change_image() {
   echo "PermitRootLogin yes" > $tmpdir/etc/ssh/sshd_config
 
   # prepare contrail pkgs
-  if [["$CONTRAIL_SERIES" == 'release']]; then
+  if [[ "$CONTRAIL_SERIES" == 'release' ]] ; then
     build_series=''
   else
     build_series='cb-'
