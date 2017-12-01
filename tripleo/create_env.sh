@@ -213,9 +213,9 @@ function _change_image() {
 
   # prepare contrail pkgs
   if [["$CONTRAIL_SERIES" == 'release']]; then
-    build_series=''
+      build_series=''
     else
-    build_series='cb-'
+      build_series='cb-'
   fi
 
   if [[ "$prepare_contrail_pkgs" == 'yes' ]] ; then
