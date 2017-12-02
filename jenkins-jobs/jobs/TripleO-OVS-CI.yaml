@@ -17,8 +17,8 @@
           name: ENVIRONMENT_OS
           description: "CentOS or RHEL based installation"
           choices:
-            - 'rhel'
             - 'centos'
+            - 'rhel'
       - choice:
           name: ENVIRONMENT_OS_VERSION
           description: "RHEL release version"
