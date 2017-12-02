@@ -120,7 +120,7 @@ for ip in ${ips[@]} ; do
   (( index+=1 ))
   cat <<EOF | ssh $SSH_OPTS root@${ip}
 set -x
-hname=\"node_\$(echo $ip | tr '.' '_')\"
+hname="node_\$(echo $ip | tr '.' '-')"
 echo \$hname > /etc/hostname
 hostname \$hname
 domainname localdomain
