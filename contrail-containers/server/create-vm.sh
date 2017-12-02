@@ -108,7 +108,7 @@ for i in ${NODES[@]} ; do
 done
 
 #wait machine and get IP via virsh net-dhcp-leases $NET_NAME
-ips=( $(wait_dhcp $NET_NAME ) )
+ips=( $(wait_dhcp $NET_NAME ${#NODES[@]} ) )
 for ip in ${ips[@]} ; do
   wait_ssh $ip
 done
