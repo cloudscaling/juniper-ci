@@ -1,0 +1,10 @@
+DEVICE=eth1
+BOOTPROTO=none
+HWADDR={{mac-address}}
+ONBOOT=yes
+TYPE=Ethernet
+USERCTL=yes
+IPV6INIT=no
+NM_CONTROLLED=no
+NETMASK=255.255.255.0
+IPADDR={{network}}.201

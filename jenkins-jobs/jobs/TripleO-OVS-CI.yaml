@@ -1,0 +1,75 @@
+- job:
+    name: TripleO-OVS-CI
+    description: 'TripleO OVS CI'
+    defaults: global
+    node: slave1
+    concurrent: true
+    parameters:
+      - choice:
+          name: NUM
+          description: "Enironment Number"
+          choices:
+            - '3'
+            - '4'
+            - '5'
+            - '6'
+      - choice:
+          name: ENVIRONMENT_OS
+          description: "CentOS or RHEL based installation"
+          choices:
+            - 'rhel'
+            - 'centos'
+      - choice:
+          name: ENVIRONMENT_OS_VERSION
+          description: "RHEL release version"
+          choices:
+            - '7_4'
+            - '7_3'
+      - choice:
+          name: OPENSTACK_VERSION
+          description: "Version of OpenStack"
+          choices:
+            - 'ocata'
+            - 'newton'
+            - 'mitaka'
+      - choice:
+          name: CONTROLLER_COUNT
+          description: "Count of OS controllers to deploy"
+          choices:
+            - '1'
+            - '3'
+            - '5'
+      - choice:
+          name: CLEAN_ENV
+          choices:
+            - 'auto'
+            - 'before_only'
+            - 'always'
+            - 'never'
+      - bool:
+          name: USE_DEVELOPMENT_PUPPETS
+          description: Clone puppets from internal repositories or use build's version
+          default: true
+
+    scm:
+      - juniper-ci
+    builders:
+      - shell: |
+          #!/bin/bash -e
+          desc="${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION}  $OPENSTACK_VERSION"
+          if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
+            desc+=' devl'
+          fi
+          desc+=" (num=$NUM, osc=$CONTROLLER_COUNT, $CLEAN_ENV)"
+          echo "DESCRIPTION $desc"
+      - description-setter:
+          regexp: "DESCRIPTION (.*)"
+      - shell: |
+          #!/bin/bash -ex
+          export LIBVIRT_DEFAULT_URI=qemu:///system
+          ./juniper-ci/tripleo_ovs/run.sh
+    publishers:
+      - archive:
+          artifacts: 'logs/**'
+          allow-empty: 'true'
+
