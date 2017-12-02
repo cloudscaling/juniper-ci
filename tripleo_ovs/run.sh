@@ -26,10 +26,7 @@ ssh_addr="root@${ip_addr}"
 
 
 function cleanup_environment() {
-# /opt/jenkins/clean_env.sh is available for modifying only for root,
-# this script should point to correct clean_env.sh.
-# It should be set manually once during jenkins slave preparation.
-  sudo -E /opt/jenkins/tripleo_contrail_clean_env.sh
+  ${my_dir}/clean_env.sh
 }
 
 function save_logs() {
@@ -68,10 +65,7 @@ if [[ $CLEAN_ENV != 'never' ]] ; then
   cleanup_environment
 fi
 
-# /opt/jenkins/tripleo_contrail_deploy_all.sh is available for modifying only for root,
-# this script should point to correct deploy_all.sh.
-# It should be set manually once during jenkins slave preparation.
-sudo -E /opt/jenkins/tripleo_contrail_deploy_all.sh "check-contrail-proxy.sh"
+${my_dir}/deploy_all.sh "${my_dir}/check-openstack-proxy.sh"
 
 trap - ERR
 
