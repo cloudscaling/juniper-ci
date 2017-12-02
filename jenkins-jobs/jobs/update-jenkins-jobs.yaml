@@ -25,6 +25,6 @@
           pip install .
           cd ../juniper-ci/jenkins-jobs
           echo "--------------------------------------------------------------------- test"
-          make -v test
+          make test
           echo "--------------------------------------------------------------------- update"
-          make -v update
+          make update
