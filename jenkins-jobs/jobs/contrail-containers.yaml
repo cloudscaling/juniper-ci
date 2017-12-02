@@ -18,10 +18,6 @@
             - always
             - on_success
             - never
-      - bool:
-          name: BUILD_PACKAGES
-          description: "Build packages by CI instead of getting from hardcoded S3 URL"
-          default: false
       - string:
           name: OPENSTACK_HELM_URL
           default: https://github.com/cloudscaling/openstack-helm
