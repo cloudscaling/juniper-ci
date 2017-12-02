@@ -12,9 +12,19 @@ mkdir -p ~/logs/kube-info
 kubectl get nodes -o wide > ~/logs/kube-info/nodes 2>&1 || true
 kubectl get pods -o wide --all-namespaces=true > ~/logs/kube-info/pods 2>&1 || true
 kubectl get all -o wide --all-namespaces=true > ~/logs/kube-info/apps 2>&1 || true
-mkdir -p ~/logs/k8s
-for i in /var/log/contrail /var/log/containers /etc/cni ~/my-contrail.yaml ~/test_app.yaml ; do
-  cp -r \$i ~/logs/k8s/ || true
+for i in ~/my-contrail.yaml ~/test_app.yaml ; do
+  cp \$i ~/logs/ || true
 done
 EOF
 
+# save contrail logs
+for dest in ${SSH_DEST_WORKERS[@]} ; do
+  # TODO: when repo be splitted to containers & build here will be containers repo only,
+  # then build repo should be added to be copied below
+  cat <<EOF | ssh -i $ssh_key_file $SSH_OPTS ${dest}
+mkdir -p ~/logs/k8s
+for i in /var/log/contrail /var/log/containers /etc/cni ; do
+  cp -r \$i ~/logs/k8s/ || true
+done
+EOF
+done
