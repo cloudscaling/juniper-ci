@@ -66,11 +66,11 @@ for dest in ${SSH_DEST_WORKERS[@]} ; do
 done
 $my_dir/${HOST}/setup-${WAY}-nodes.sh
 
-$SCP "$my_dir/__containers-build.sh" $SSH_DEST_BUILD:containers-build.sh
+$SCP "$my_dir/__build-${BUILD_TARGET}.sh" $SSH_DEST_BUILD:build-${BUILD_TARGET}.sh
 $SCP -r "$WORKSPACE/contrail-build-poc" $SSH_DEST_BUILD:./
 
 set -o pipefail
-$SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION timeout -s 9 60m ./containers-build.sh" | tee $WORKSPACE/logs/build.log
+$SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION timeout -s 9 180m ./build-${BUILD_TARGET}.sh" |& tee $WORKSPACE/logs/build.log
 set +o pipefail
 
 # ceph.repo file is needed ONLY fow centos on aws.

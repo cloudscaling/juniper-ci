@@ -34,6 +34,10 @@
           export WAY=$(echo {project} | cut -d '-' -f 1)
           export HOST=$(echo {project} | cut -d '-' -f 2)
           export ENVIRONMENT_OS=$(echo {project} | cut -d '-' -f 3)
+          export BUILD_TARGET=$(echo {project} | cut -d '-' -f 4)
+          if [[ -z "$BUILD_TARGET" ]] ; then
+            export BUILD_TARGET="containers"
+          fi
           env|sort
           ./juniper-ci/contrail-containers/run.sh
     publishers:
@@ -50,12 +54,15 @@
       - helm-aws-centos:
           slavenode: master
           contrail_version: 4.1.0.0-6
-      - helm-server-ubuntu:
-          slavenode: slave1
-          contrail_version: 4.1.0.0-6
-      - helm-server-centos:
-          slavenode: slave1
-          contrail_version: 4.1.0.0-6
+      - helm-aws-centos-all:
+          slavenode: master
+          contrail_version: 4.2.0.0-1
+#      - helm-server-ubuntu:
+#          slavenode: slave1
+#          contrail_version: 4.1.0.0-6
+#      - helm-server-centos:
+#          slavenode: slave1
+#          contrail_version: 4.1.0.0-6
       - k8s-server-centos:
           slavenode: slave1
           contrail_version: 4.1.0.0-6
