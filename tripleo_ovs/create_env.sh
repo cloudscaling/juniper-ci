@@ -31,6 +31,7 @@ BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-"$DEFAULT_BASE_IMAGE_NAME"}
 BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
 mkdir -p ${BASE_IMAGE_DIR}
 BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
+BASE_IMAGE_POOL=${BASE_IMAGE_POOL:-'images'}
 
 # number of machines in overcloud
 # by default scripts will create hyperconverged environment with SDS on compute
@@ -57,28 +58,18 @@ prov_net=`get_network_name provisioning`
 
 # create pool
 create_pool $poolname
-pool_path=$(get_pool_path $poolname)
-
-function create_root_volume() {
-  local name=$1
-  create_volume $name $poolname $vm_disk_size
-}
-
-function create_store_volume() {
-  local name="${1}-store"
-  create_volume $name $poolname 100G
-}
 
 function define_overcloud_vms() {
   local name=$1
   local count=$2
   local mem=$3
+  local disk_size=${4:-40}
   local number_re='^[0-9]+$'
   if [[ $count =~ $number_re ]] ; then
     for (( i=1 ; i<=count; i++ )) ; do
       local vol_name="overcloud-$NUM-${name}-$i"
-      create_root_volume $vol_name
-      define_machine "rd-$vol_name" 2 $mem rhel7 $prov_net "${pool_path}/${vol_name}.qcow2"
+      local vol_path=$(create_new_volume $vol_name $poolname $disk_size)
+      define_machine "rd-$vol_name" 2 $mem rhel7 $prov_net "$vol_path"
     done
   else
     echo Skip VM $name creation, count=$count
@@ -87,11 +78,11 @@ function define_overcloud_vms() {
 
 # just define overcloud machines
 define_overcloud_vms 'cont' $CONTROLLER_COUNT 8192
-define_overcloud_vms 'comp' $COMPUTE_COUNT 4096 'true'
-define_overcloud_vms 'stor' $STORAGE_COUNT 4096 'true'
+define_overcloud_vms 'comp' $COMPUTE_COUNT 4096
+define_overcloud_vms 'stor' $STORAGE_COUNT 4096
 
 # copy image for undercloud and resize them
-cp $BASE_IMAGE $pool_path/undercloud-$NUM.qcow2
+local undercloud_vol_path=$(create_volume_from $undercloud-$NUM.qcow2 $poolname $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
 
 # define MAC's
 mgmt_ip=$(get_network_ip "management")
@@ -211,11 +202,11 @@ function _start_vm() {
     --graphics vnc,listen=0.0.0.0
 }
 
-_patch_image "$pool_path/undercloud-$NUM.qcow2" \
+_patch_image "$undercloud_vol_path" \
   'ifcfg-ethM' $mgmt_ip $mgmt_mac \
   'ifcfg-ethA' $prov_ip $prov_mac
 
-_start_vm "rd-undercloud-$NUM" "$pool_path/undercloud-$NUM.qcow2" \
+_start_vm "rd-undercloud-$NUM" "$undercloud_vol_path" \
   $mgmt_mac $prov_mac
 
 ssh_opts="-i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"

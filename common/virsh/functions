@@ -191,6 +191,28 @@ EOF
   echo $pool_path/$vol
 }
 
+function create_new_volume() {
+  local vol=$1
+  local pool=$2
+  local size_gb=$3
+  local vol_file=`mktemp`
+  cat <<EOF > $vol_file
+<volume type='file'>
+  <name>$vol</name>
+  <capacity unit='gb'>$size_gb</capacity>
+  <target>
+    <format type='qcow2'/>
+    <permissions>
+      <mode>0644</mode>
+    </permissions>
+  </target>
+</volume>
+EOF
+  virsh vol-create --pool $pool --file $vol_file
+  local pool_path=$(get_pool_path $pool)
+  echo $pool_path/$vol
+}
+
 function define_machine() {
   local name=$1
   local vcpus=$2
