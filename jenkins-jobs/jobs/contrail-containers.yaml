@@ -39,7 +39,7 @@
             export BUILD_TARGET="containers"
           fi
           env|sort
-          ./juniper-ci/contrail-containers/${WAY}/run.sh
+          ./juniper-ci/contrail-containers/$WAY/run.sh
     publishers:
       - archive:
           artifacts: 'logs/**'
