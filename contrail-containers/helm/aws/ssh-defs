@@ -3,12 +3,8 @@ SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerA
 SCP="scp -i $WORKSPACE/kp $SSH_OPTS"
 
 source $ENV_FILE
-ssh_key_file="$WORKSPACE/kp"
 SSH_DEST="$SSH_USER@$public_ip_helm"
 SSH="ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_DEST"
 
 SSH_DEST_BUILD="$SSH_USER@$public_ip_build"
 SSH_BUILD="ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_DEST_BUILD"
-
-SSH_DEST_WORKERS=( $SSH_DEST_BUILD )
-SSH_WORKER="ssh -i $ssh_key_file $SSH_OPTS"

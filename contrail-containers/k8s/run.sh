@@ -20,7 +20,7 @@ function save_logs() {
   for dest in ${SSH_DEST_WORKERS[@]} ; do
     # TODO: when repo be splitted to containers & build here will be containers repo only,
     # then build repo should be added to be copied below
-    $SCP "$my_dir/__save-docker-logs.sh" ${dest}:save-docker-logs.sh
+    $SCP "$my_dir/../__save-docker-logs.sh" ${dest}:save-docker-logs.sh
     ssh -i $ssh_key_file $SSH_OPTS ${dest} "./save-docker-logs.sh"
   done
 
@@ -72,7 +72,7 @@ for dest in ${SSH_DEST_WORKERS[@]} ; do
   # then build repo should be added to be copied below
   $SCP -r "$WORKSPACE/contrail-container-builder" ${dest}:./
 done
-$my_dir/${HOST}/setup-${WAY}-nodes.sh
+$my_dir/${HOST}/setup-nodes.sh
 
 $SCP "$my_dir/__build-${BUILD_TARGET}.sh" $SSH_DEST_BUILD:build-${BUILD_TARGET}.sh
 $SCP -r "$WORKSPACE/contrail-build-poc" $SSH_DEST_BUILD:./
@@ -83,8 +83,8 @@ set +o pipefail
 
 # ceph.repo file is needed ONLY fow centos on aws.
 $SCP "$my_dir/__ceph.repo" $SSH_DEST:ceph.repo
-$SCP "$my_dir/__run-${WAY}-gate.sh" $SSH_DEST:run-${WAY}-gate.sh
-timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_HELM_URL=$OPENSTACK_HELM_URL ./run-${WAY}-gate.sh $public_ip_build"
+$SCP "$my_dir/__run-gate.sh" $SSH_DEST:run-gate.sh
+timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_HELM_URL=$OPENSTACK_HELM_URL ./run-gate.sh $public_ip_build"
 
 trap - ERR
 save_logs
