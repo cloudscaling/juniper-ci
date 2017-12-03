@@ -74,7 +74,8 @@ for dest in ${SSH_DEST_WORKERS[@]} ; do
 done
 $my_dir/${HOST}/setup-nodes.sh
 
-$SCP "$my_dir/__build-${BUILD_TARGET}.sh" $SSH_DEST_BUILD:build-${BUILD_TARGET}.sh
+$SCP "$my_dir/../__build-${BUILD_TARGET}.sh" $SSH_DEST_BUILD:build-${BUILD_TARGET}.sh
+$SCP "$my_dir/../__functions" $SSH_DEST_BUILD:functions
 $SCP -r "$WORKSPACE/contrail-build-poc" $SSH_DEST_BUILD:./
 
 set -o pipefail
