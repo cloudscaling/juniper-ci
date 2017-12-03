@@ -82,8 +82,6 @@ set -o pipefail
 $SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION timeout -s 9 180m ./build-${BUILD_TARGET}.sh" |& tee $WORKSPACE/logs/build.log
 set +o pipefail
 
-# ceph.repo file is needed ONLY fow centos on aws.
-$SCP "$my_dir/__ceph.repo" $SSH_DEST:ceph.repo
 $SCP "$my_dir/__run-gate.sh" $SSH_DEST:run-gate.sh
 timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_HELM_URL=$OPENSTACK_HELM_URL ./run-gate.sh $public_ip_build"
 
