@@ -47,11 +47,11 @@ kubernetes/setup-k8s.sh $token_opts
 # wait docker because ot is restarted at the end for setup-k8s.sh
 for (( i=0; i < 10 ; ++i )); do
   echo \"docker wait \${i}/10...\"
-  if docker ps >/dev/null 2>&1 ; then
+  sleep 3
+  if docker ps ; then
     echo \"docker wait done\"
     break
   fi
-  sleep 3
 done
 EOF
 }
@@ -59,7 +59,7 @@ EOF
 token=''
 master_dest=''
 for d in ${dest[@]} ; do
-  setup_k8s $d "join-token=$token"
+  setup_k8s $d "join-token=$token" develop
   if [[ -z "$master_dest" ]] ; then
     # first is master, so get token
     master_dest="$d"
