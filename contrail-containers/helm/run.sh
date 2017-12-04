@@ -60,7 +60,7 @@ $SCP -r "$WORKSPACE/contrail-build-poc" $SSH_DEST_BUILD:./
 if [[ "$BUILD_TARGET" == 'containers' ]] ; then
   # helm's gating is not very fast. it takes more than 25 minutes. we can build containers in background.
   echo "INFO: ($(date)) run build in background then wait some time and run helm gating"
-  $SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION timeout -s 9 60m ./containers-build.sh" &>$WORKSPACE/logs/build.log &
+  $SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION timeout -s 9 60m ./build-${BUILD_TARGET}.sh" &>$WORKSPACE/logs/build.log &
   # wait some time while it prepares vrouter.ko on www that is needed for gate in the beginning
   timeout -s 9 180s tail -f $WORKSPACE/logs/build.log || /bin/true
   echo "INFO: ($(date)) continuing with helm deployment"
