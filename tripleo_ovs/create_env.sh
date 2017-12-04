@@ -67,9 +67,10 @@ function define_overcloud_vms() {
   local number_re='^[0-9]+$'
   if [[ $count =~ $number_re ]] ; then
     for (( i=1 ; i<=count; i++ )) ; do
-      local vol_name="overcloud-${NUM}-${name}-${i}.qcow2"
+      local vm_name="rd-overcloud-${NUM}-${name}-${i}"
+      local vol_name="${vm_name}.qcow2"
       local vol_path=$(create_new_volume $vol_name $poolname $disk_size)
-      define_machine "rd-$vol_name" 2 $mem rhel7 $prov_net "$vol_path"
+      define_machine $vm_name 2 $mem rhel7 $prov_net "$vol_path"
     done
   else
     echo Skip VM $name creation, count=$count
@@ -82,7 +83,7 @@ define_overcloud_vms 'comp' $COMPUTE_COUNT 4096
 define_overcloud_vms 'stor' $STORAGE_COUNT 4096
 
 # copy image for undercloud and resize them
-undercloud_vol_path=$(create_volume_from $undercloud-$NUM.qcow2 $poolname $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
+undercloud_vol_path=$(create_volume_from undercloud-$NUM.qcow2 $poolname $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
 
 # define MAC's
 mgmt_ip=$(get_network_ip "management")
