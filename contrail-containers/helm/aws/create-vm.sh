@@ -3,6 +3,7 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
+SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
 ENV_FILE="$WORKSPACE/cloudrc"
 VM_CIDR="192.168.130.0/24"
 
@@ -77,8 +78,15 @@ chmod 600 kp
 function run_instance() {
   local type=$1
   local env_var_suffix=$2
+  local kube_vm=$3
 
-  local cmd=$(aws ${AWS_FLAGS} ec2 run-instances --image-id $IMAGE_ID --key-name $key_name --instance-type $type --subnet-id $subnet_id --associate-public-ip-address --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}}]')
+  if [[ $kube_vm == "true" ]]; then
+    # it means that additional disks must be created for VM
+    local bdm='{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdg","Ebs":{"VolumeSize":8,"DeleteOnTermination":true,"VolumeType":"gp2"}}'
+  else
+    local bdm='{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}}'
+  fi
+  local cmd=$(aws ${AWS_FLAGS} ec2 run-instances --image-id $IMAGE_ID --key-name $key_name --instance-type $type --subnet-id $subnet_id --associate-public-ip-address --block-device-mappings "[${bdm}]")
   local instance_id=$(get_value_from_json "echo $cmd" ".Instances[0].InstanceId")
   echo "INFO: $env_var_suffix INSTANCE_ID: $instance_id"
   echo "instance_id_${env_var_suffix}=$instance_id" >> $ENV_FILE
@@ -93,31 +101,24 @@ function run_instance() {
 
   # inner communication...
   aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr $public_ip/32 --protocol tcp --port 0-65535
-}
 
-function wait_instance() {
-  local ssh="$@"
-
+  local ssh="ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_USER@$public_ip"
   echo "INFO: waiting for instance SSH"
   while ! $ssh uname -a 2>/dev/null ; do
     echo "WARNING: Machine isn't accessible yet"
     sleep 2
   done
-  $ssh "(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | sudo fdisk /dev/xvdf"
-  $ssh "sudo mkfs.ext4 /dev/xvdf1"
-  $ssh "sudo mkdir -p /var/lib/docker"
-  $ssh "sudo su -c \"echo '/dev/xvdf1  /var/lib/docker  auto  defaults,auto  0  0' >> /etc/fstab\""
-  $ssh "sudo mount /var/lib/docker"
+  if [[ $kube_vm == "true" ]]; then
+    $ssh "(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | sudo fdisk /dev/xvdf"
+    $ssh "sudo mkfs.ext4 /dev/xvdf1 ; sudo mkdir -p /var/lib/docker ; sudo su -c \"echo '/dev/xvdf1  /var/lib/docker  auto  defaults,auto  0  0' >> /etc/fstab\" ; sudo mount /var/lib/docker"
+    $ssh "sudo mkswap /dev/xvdg ; sudo swapon /dev/xvdg ; sudo swapon -s ; free -h"
+  fi
 }
 
 # instance for helm
-run_instance c4.4xlarge helm
-source "$my_dir/ssh-defs"
-wait_instance $SSH
+run_instance c4.4xlarge helm true
 
 # instance for build
-run_instance m4.xlarge build
-source "$my_dir/ssh-defs"
-wait_instance $SSH_BUILD
+run_instance m4.xlarge build false
 
 echo "INFO: Environment ready"
