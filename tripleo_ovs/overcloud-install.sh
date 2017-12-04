@@ -230,6 +230,7 @@ parameter_defaults:
   StorageCount: $STOR_COUNT
 
   OvercloudCephStorageFlavor: storage
+  CephPoolDefaultSize: 1
 EOF
 
 

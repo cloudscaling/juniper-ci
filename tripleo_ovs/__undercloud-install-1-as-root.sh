@@ -68,13 +68,6 @@ chmod 0440 /etc/sudoers.d/stack
 mkdir -p /home/stack/.ssh
 chown stack:stack /home/stack/.ssh
 chmod 700 /home/stack/.ssh
-# key to stack user may access kvm host
-cp /root/stack_id_rsa /home/stack/.ssh/id_rsa
-cp /root/stack_id_rsa.pub /home/stack/.ssh/id_rsa.pub
-chown stack:stack /home/stack/.ssh/id_rsa
-chown stack:stack /home/stack/.ssh/id_rsa.pub
-chmod 600 /home/stack/.ssh/id_rsa
-chmod 644 /home/stack/.ssh/id_rsa.pub
 # ssh config to do not check host keys and avoid garbadge in known hosts files
 cat <<EOF >/home/stack/.ssh/config
 Host *
@@ -122,7 +115,7 @@ cp "$my_dir/__undercloud-install-2-as-stack-user.sh" /home/stack/
 chown stack:stack /home/stack/__undercloud-install-2-as-stack-user.sh
 env_opts="NUM=$NUM OPENSTACK_VERSION=$OPENSTACK_VERSION"
 env_opts+=" ENVIRONMENT_OS=$ENVIRONMENT_OS ENVIRONMENT_OS_VERSION=$ENVIRONMENT_OS_VERSION"
-env_opts+=" NETDEV=$NETDEV MGMT_IP=$MGMT_IP PROV_IP=$PROV_IP SSH_OPTS=$SSH_OPTS"
+env_opts+=" NETDEV=$NETDEV MGMT_IP=$MGMT_IP PROV_IP=$PROV_IP SSH_OPTS='$SSH_OPTS'"
 sudo -u stack $env_opts /home/stack/__undercloud-install-2-as-stack-user.sh
 
 # increase timeouts due to virtual installation
