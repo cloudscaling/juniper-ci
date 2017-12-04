@@ -99,6 +99,14 @@ if [[ "$ENVIRONMENT_OS" == 'centos' ]] ; then
   #    file /usr/lib64/python2.7/site-packages/ujson.so from install of
   #    python2-ujson-1.35-1.el7.x86_64 conflicts with file from package python-ujson-1.35-1.el7.x86_64
   yum remove -y python-ujson || true
+  # workaround for another conflict:
+  #   Package: python-zmq-14.7.0-2.el7.x86_64 (@delorean-ocata-testing)
+  #   Requires: libzmq.so.4()(64bit)
+  #   Removing: zeromq-4.0.5-4.el7.x86_64 (@delorean-ocata-testing)
+  #     INFO:                libzmq.so.4()(64bit)
+  #     INFO:            Updated By: zeromq-4.1.4-5.el7.x86_64 (epel)
+  #     INFO:               ~libzmq.so.5()(64bit)
+  yum remove -y python-zeromq zeromq || true
 fi
 
 # add Ceph repos to workaround bug with redhat-lsb-core package
