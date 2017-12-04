@@ -6,6 +6,9 @@ if [[ "$USE_SWAP" == "true" ]] ; then
   swapon -s
 fi
 
+# tune some host settings
+sudo sysctl -w vm.max_map_count=104857
+
 registry_ip=${1:-localhost}
 if [[ "$registry_ip" != 'localhost' ]] ; then
   sudo mkdir -p /etc/docker
