@@ -117,5 +117,4 @@ done
 
 export MGMT_IP=$mgmt_ip
 export PROV_IP=$prov_ip
-export PROV_NETDEV=eth1
-export SSH_MGMT="ssh $SSH_OPTS stack@${MGMT_IP}"
+export PROV_NETDEV=$(ssh $SSH_OPTS root@${mgmt_ip} ip addr | grep $prov_ip | awk '{print($8)}')
