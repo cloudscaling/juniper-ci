@@ -92,6 +92,15 @@ if [[ "$OPENSTACK_VERSION" == 'ocata' && "$ENVIRONMENT_OS" == 'centos' ]] ; then
   fi
 fi
 
+if [[ "$ENVIRONMENT_OS" == 'centos' ]] ; then
+  # workaround of conflict:
+  # sudo /bin/yum -d 0 -e 0 -y install openstack-zaqar
+  #   Transaction check error:
+  #    file /usr/lib64/python2.7/site-packages/ujson.so from install of
+  #    python2-ujson-1.35-1.el7.x86_64 conflicts with file from package python-ujson-1.35-1.el7.x86_64
+  yum remove -y python-ujson || true
+fi
+
 # add Ceph repos to workaround bug with redhat-lsb-core package
 # todo: there is enabled ceph repo jewel
 #yum -y install --enablerepo=extras centos-release-ceph-hammer
