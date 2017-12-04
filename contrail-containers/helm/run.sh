@@ -16,7 +16,7 @@ mkdir -p "$WORKSPACE/logs"
 function save_logs() {
   source "$my_dir/${HOST}/ssh-defs"
   set +e
-  $SCP "$my_dir/__save-docker-logs.sh" $SSH_DEST:save-docker-logs.sh
+  $SCP "$my_dir/../__save-docker-logs.sh" $SSH_DEST:save-docker-logs.sh
   $SSH "./save-docker-logs.sh"
 
   if $SSH "sudo tar -czf logs.tgz ./logs" ; then
