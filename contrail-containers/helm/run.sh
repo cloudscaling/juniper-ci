@@ -55,6 +55,7 @@ source "$my_dir/${HOST}/ssh-defs"
 
 $SCP "$my_dir/../__build-${BUILD_TARGET}.sh" $SSH_DEST_BUILD:build-${BUILD_TARGET}.sh
 $SCP "$my_dir/../__functions" $SSH_DEST_BUILD:functions
+$SCP -r "$WORKSPACE/contrail-container-builder" $SSH_DEST_BUILD:./
 $SCP -r "$WORKSPACE/contrail-build-poc" $SSH_DEST_BUILD:./
 
 set -o pipefail

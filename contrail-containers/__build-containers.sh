@@ -6,9 +6,14 @@ my_dir="$(dirname $my_file)"
 source $my_dir/functions
 
 prepare_build_machine
+# ip is located in /usr/sbin that is not in path...
+export PATH=${PATH}:/usr/sbin
 
 echo "INFO: Run setup-for-build  $(date)"
 
+pwd
+ls -l
+cd
 cd contrail-container-builder/containers
 ./setup-for-build.sh
 

@@ -59,7 +59,7 @@ if [[ ! -f ${BASE_IMAGE} ]] ; then
   exit 1
 fi
 
-source "$my_dir/../../common/virsh/functions"
+source "$my_dir/../../../common/virsh/functions"
 
 NODES=( "${VM_NAME}_1" "${VM_NAME}_2" "${VM_NAME}_3" "${VM_NAME}_4" )
 for i in ${NODES[@]} ; do
