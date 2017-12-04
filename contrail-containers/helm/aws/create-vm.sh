@@ -111,7 +111,7 @@ function run_instance() {
   if [[ $kube_vm == "true" ]]; then
     $ssh "(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | sudo fdisk /dev/xvdf"
     $ssh "sudo mkfs.ext4 /dev/xvdf1 ; sudo mkdir -p /var/lib/docker ; sudo su -c \"echo '/dev/xvdf1  /var/lib/docker  auto  defaults,auto  0  0' >> /etc/fstab\" ; sudo mount /var/lib/docker"
-    $ssh "sudo mkswap /dev/xvdg ; sudo swapon /dev/xvdg ; swapon -s ; free -h"
+    $ssh "sudo mkswap /dev/xvdg ; sudo swapon /dev/xvdg ; sudo swapon -s ; free -h"
   fi
 }
 
