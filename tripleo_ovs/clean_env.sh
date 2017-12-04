@@ -23,9 +23,8 @@ delete_domains
 
 vol_path=$(get_pool_path $poolname)
 
-delete_volume undercloud-$NUM.qcow2 $poolname
-delete_volume undercloud-$NUM-cert-test.qcow2 $poolname
-for vol in `virsh vol-list $poolname | awk "/overcloud-$NUM-/ {print \$1}"` ; do
+delete_volume rd-undercloud-$NUM.qcow2 $poolname
+for vol in `virsh vol-list $poolname | awk "/rd-overcloud-$NUM-/ {print \$1}"` ; do
   delete_volume $vol $poolname
 done
 
