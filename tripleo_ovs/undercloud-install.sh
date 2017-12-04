@@ -61,7 +61,7 @@ for fff in __undercloud-install-1-as-root.sh __undercloud-install-2-as-stack-use
 done
 env_opts="NUM=$NUM OPENSTACK_VERSION=$OPENSTACK_VERSION"
 env_opts+=" ENVIRONMENT_OS=$ENVIRONMENT_OS ENVIRONMENT_OS_VERSION=$ENVIRONMENT_OS_VERSION"
-env_opts+=" NETDEV=$NETDEV MGMT_IP=$MGMT_IP PROV_IP=$PROV_IP SSH_OPTS=$SSH_OPTS"
+env_opts+=" NETDEV=$NETDEV MGMT_IP=$MGMT_IP PROV_IP=$PROV_IP SSH_OPTS='$SSH_OPTS'"
 ssh -T $SSH_OPTS $ssh_addr_root "$env_opts /root/__undercloud-install-1-as-root.sh"
 
 scp $SSH_OPTS "$my_dir/overcloud-install.sh" ${ssh_addr_stack}:/home/stack/overcloud-install.sh

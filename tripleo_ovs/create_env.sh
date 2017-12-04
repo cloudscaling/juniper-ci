@@ -43,6 +43,7 @@ NET_ADDR_PROV=${NET_ADDR_PROV:-"192.168.160.0"}
 CONTROLLER_COUNT=${CONTROLLER_COUNT:-1}
 COMPUTE_COUNT=${COMPUTE_COUNT:-2}
 STORAGE_COUNT=${STORAGE_COUNT:-2}
+NETNODE_COUNT=${NETNODE_COUNT:-0}
 
 # disk size for overcloud machines
 vm_disk_size="30G"
@@ -83,6 +84,7 @@ function define_overcloud_vms() {
 define_overcloud_vms 'cont' $CONTROLLER_COUNT 8192
 define_overcloud_vms 'comp' $COMPUTE_COUNT 4096
 define_overcloud_vms 'stor' $STORAGE_COUNT 4096
+define_overcloud_vms 'net' $NETNODE_COUNT 1024
 
 # make undercloud image from base image and define undercloud VM
 undercloud_vm_name="rd-undercloud-$NUM"
