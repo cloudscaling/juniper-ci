@@ -11,6 +11,9 @@ export PATH=${PATH}:/usr/sbin
 
 echo "INFO: Run setup-for-build  $(date)"
 
+pwd
+ls -l
+cd
 cd contrail-container-builder/containers
 ./setup-for-build.sh
 
