@@ -23,7 +23,6 @@ export NET_DRIVER=${NET_DRIVER:-'e1000'}
 export BRIDGE_NAME=${BRIDGE_NAME:-${WAY}}
 
 VCPUS=4
-MEM=8192
 OS_VARIANT='rhel7'
 
 if [[ -z "$ENVIRONMENT_OS" ]] ; then
@@ -81,6 +80,7 @@ create_pool $POOL_NAME
 # re-create disk
 function define_node() {
   local vm_name=$1
+  local mem=$2
   local vol_name=$vm_name
   delete_volume $vol_name $POOL_NAME
   local vol_path=$(create_volume_from $vol_name $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
@@ -88,11 +88,15 @@ function define_node() {
   if [[ "$ENVIRONMENT_OS" == 'ubuntu' ]] ; then
     OS_VARIANT='ubuntu'
   fi
-  define_machine $vm_name $VCPUS $MEM $OS_VARIANT $NET_NAME $vol_path $DISK_SIZE
+  define_machine $vm_name $VCPUS $mem $OS_VARIANT $NET_NAME $vol_path $DISK_SIZE
 }
 
-for i in ${NODES[@]} ; do
-  define_node "$i"
+# First 3 are controllers,
+# latest is agent
+MEM_MAP=( 16284 16284 16284 4096 )
+CTRL_MEM_LIMIT=10000
+for (( i=0; i < ${#NODES[@]}; ++i )) ; do
+  define_node "${NODES[$i]}" ${MEM_MAP[$i]}
 done
 
 # customize domain to set root password
@@ -126,6 +130,20 @@ hostname \$hname
 domainname localdomain
 echo ${ip}  \${hname}.localdomain  \${hname} >> /etc/hosts
 EOF
+done
+
+
+# sort IPs according to MEM, agent machine has less RAM than CTRL_MEM_LIMIT
+# put agent machines at the end of list
+_ips=( ${ips[@]} )
+ips=()
+for ip in ${_ips[@]} ; do
+  mem=$(ssh $SSH_OPTS root@${ip} free -m | awk '/Mem/ {print $2}')
+  if (( mem < CTRL_MEM_LIMIT )) ; then
+    ips=( ${ips[@]} $ip )
+  else
+    ips=( $ip ${ips[@]} )
+  fi
 done
 
 # first machine is master
