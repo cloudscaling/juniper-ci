@@ -82,7 +82,7 @@ define_overcloud_vms 'comp' $COMPUTE_COUNT 4096
 define_overcloud_vms 'stor' $STORAGE_COUNT 4096
 
 # copy image for undercloud and resize them
-local undercloud_vol_path=$(create_volume_from $undercloud-$NUM.qcow2 $poolname $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
+undercloud_vol_path=$(create_volume_from $undercloud-$NUM.qcow2 $poolname $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
 
 # define MAC's
 mgmt_ip=$(get_network_ip "management")
