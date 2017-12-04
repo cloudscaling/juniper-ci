@@ -208,7 +208,7 @@ function create_new_volume() {
   </target>
 </volume>
 EOF
-  virsh vol-create --pool $pool --file $vol_file
+  virsh vol-create --pool $pool --file $vol_file 1>/dev/null
   local pool_path=$(get_pool_path $pool)
   echo $pool_path/$vol
 }
