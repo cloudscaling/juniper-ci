@@ -8,7 +8,6 @@ function prepare_build_machine() {
     sudo apt-get install -y --no-install-recommends mc git wget ntp
   elif [[ -x $(command -v yum 2>/dev/null) ]]; then
     echo "INFO: Preparing CentOS host to build containers  $(date)"
-    # ip is located in /usr/sbin that is not in path...
     sudo yum install -y epel-release
     sudo yum install -y mc git wget ntp iptables iproute
     sudo systemctl enable ntpd.service
