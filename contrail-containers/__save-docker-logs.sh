@@ -24,7 +24,7 @@ done
 popd
 
 function save_introspect_info() {
-  echo "INFO: savinf introspect output for $1"
+  echo "INFO: saving introspect output for $1"
   timeout -s 9 30 curl -s http://localhost:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - | grep -P "state|<type|<status" > logs/contrail/$1-introspect.log
   echo '' >> logs/contrail/$1-introspect.log
   timeout -s 9 30 curl -s http://localhost:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - >> logs/contrail/$1-introspect.log

@@ -8,6 +8,3 @@ SSH="ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_DEST"
 
 SSH_DEST_BUILD="$SSH_USER@$public_ip_build"
 SSH_BUILD="ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_DEST_BUILD"
-
-SSH_DEST_WORKERS=( $SSH_DEST_BUILD )
-SSH_WORKER="ssh -i $ssh_key_file $SSH_OPTS"
