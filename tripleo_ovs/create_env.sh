@@ -102,18 +102,16 @@ prov_ip=$(wait_dhcp $NET_NAME_PROV 1 )
 
 # prepare host name
 export SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
+undercloud_hname="undercloud-$(echo $mgmt_ip | tr '.' '-')"
 cat <<EOF | ssh $SSH_OPTS root@${mgmt_ip}
 set -x
-ip=$mgmt_ip
 echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf
 sysctl -p /etc/sysctl.conf
-hname="undercloud-\$(echo $ip | tr '.' '-')"
-echo \$hname > /etc/hostname
-hostname \$hname
+echo $undercloud_hname > /etc/hostname
+hostname $undercloud_hname
 domainname localdomain
-echo $ip  \${hname}.localdomain  \${hname} >> /etc/hosts
+echo $mgmt_ip ${undercloud_hname}.localdomain  ${undercloud_hname} >> /etc/hosts
 EOF
-done
 
 export MGMT_IP=$mgmt_ip
 export PROV_IP=$prov_ip
