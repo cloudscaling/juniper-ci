@@ -1,8 +1,8 @@
 #!/bin/bash -ex
 
 if [[ "$USE_SWAP" == "true" ]] ; then
-  sudo mkswap /dev/xvdf
-  sudo swapon /dev/xvdf
+  sudo mkswap /dev/xvdg
+  sudo swapon /dev/xvdg
   swapon -s
 fi
 
