@@ -42,19 +42,6 @@ fi
 
 CLOUD_DOMAIN_NAME=${CLOUD_DOMAIN_NAME:-'localdomain'}
 
-# update OS
-yum update -y
-
-if [[ "$ENVIRONMENT_OS" == 'centos' ]] ; then
-  yum install -y epel-release
-fi
-
-# install ntpd - it is needed for correct work of OS services
-# (particulary neutron services may not work properly)
-yum install -y ntp wget
-chkconfig ntpd on
-service ntpd start
-
 # create stack user
 if ! grep -q 'stack' /etc/passwd ; then
   useradd -m stack -s /bin/bash
@@ -78,18 +65,25 @@ chown stack:stack /home/stack/.ssh/config
 chmod 644 /home/stack/.ssh/config
 
 # add OpenStack repositories for centos, for rhel it is added in images
-if [[ "$ENVIRONMENT_OS" != 'rhel' ]] ; then
+if [[ "$ENVIRONMENT_OS" == 'centos' ]] ; then
   curl -L -o /etc/yum.repos.d/delorean-$OPENSTACK_VERSION.repo https://trunk.rdoproject.org/centos7-$OPENSTACK_VERSION/current/delorean.repo
   curl -L -o /etc/yum.repos.d/delorean-deps-$OPENSTACK_VERSION.repo http://trunk.rdoproject.org/centos7-$OPENSTACK_VERSION/delorean-deps.repo
+
+  yum install -y epel-release
+  yum update -y
 fi
 
+# install ntpd - it is needed for correct work of OS services
+# (particulary neutron services may not work properly)
 # install tripleo clients
-yum -y install  yum-utils screen mc deltarpm createrepo bind-utils sshpass\
+yum -y install  ntp wget yum-utils screen mc deltarpm createrepo bind-utils sshpass \
                 gcc make python-devel yum-plugin-priorities \
                 python-tripleoclient python-rdomanager-oscplugin sshpass openstack-utils
 
+chkconfig ntpd on
+service ntpd start
+
 if [[ "$OPENSTACK_VERSION" == 'ocata' && "$ENVIRONMENT_OS" == 'centos' ]] ; then
-  yum update -y
   # workaround for https://bugs.launchpad.net/tripleo/+bug/1692899
   # correct fix is in the review
   # (https://review.openstack.org/#/c/467248/1/heat-config-docker-cmd/os-refresh-config/configure.d/50-heat-config-docker-cmd)
