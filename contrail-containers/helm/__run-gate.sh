@@ -1,11 +1,5 @@
 #!/bin/bash -ex
 
-if [[ "$USE_SWAP" == "true" ]] ; then
-  sudo mkswap /dev/xvdg
-  sudo swapon /dev/xvdg
-  swapon -s
-fi
-
 # tune some host settings
 sudo sysctl -w vm.max_map_count=1048575
 
