@@ -100,6 +100,7 @@ prov_ip=$(wait_dhcp $NET_NAME_PROV 1 )
 
 # prepare host name
 undercloud_hname="undercloud-$(echo $mgmt_ip | tr '.' '-')"
+default_route="$(echo $mgmt_ip | cut -d '.' -f 1,2,3).1"
 cat <<EOF | ssh $SSH_OPTS root@${mgmt_ip}
 set -x
 echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf
@@ -108,6 +109,9 @@ echo $undercloud_hname > /etc/hostname
 hostname $undercloud_hname
 domainname localdomain
 echo $mgmt_ip ${undercloud_hname}.localdomain  ${undercloud_hname} >> /etc/hosts
+ip route del default || true
+ip route add default via $default_route
+echo nameserver $default_route >> /etc/resolv.conf
 EOF
 
 export MGMT_IP=$mgmt_ip
