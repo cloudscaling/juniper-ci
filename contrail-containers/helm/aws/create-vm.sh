@@ -79,11 +79,11 @@ function run_instance() {
   local env_var_suffix=$2
 
   if [[ $USE_SWAP == "true" ]]; then
-    local bdm='{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":8,"DeleteOnTermination":true,"VolumeType":"gp2"}}'
+    local bdm='{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdg","Ebs":{"VolumeSize":8,"DeleteOnTermination":true,"VolumeType":"gp2"}}'
   else
     local bdm='{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}}'
   fi
-  local cmd=$(aws ${AWS_FLAGS} ec2 run-instances --image-id $IMAGE_ID --key-name $key_name --instance-type $type --subnet-id $subnet_id --associate-public-ip-address --block-device-mappings '[${bdm}]')
+  local cmd=$(aws ${AWS_FLAGS} ec2 run-instances --image-id $IMAGE_ID --key-name $key_name --instance-type $type --subnet-id $subnet_id --associate-public-ip-address --block-device-mappings "[${bdm}]")
   local instance_id=$(get_value_from_json "echo $cmd" ".Instances[0].InstanceId")
   echo "INFO: $env_var_suffix INSTANCE_ID: $instance_id"
   echo "instance_id_${env_var_suffix}=$instance_id" >> $ENV_FILE

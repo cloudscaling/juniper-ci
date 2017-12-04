@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-USE_SWAP="true"
+export USE_SWAP="true"
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
