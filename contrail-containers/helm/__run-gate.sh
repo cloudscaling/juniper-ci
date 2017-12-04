@@ -7,7 +7,7 @@ if [[ "$USE_SWAP" == "true" ]] ; then
 fi
 
 # tune some host settings
-sudo sysctl -w vm.max_map_count=104857
+sudo sysctl -w vm.max_map_count=1048575
 
 registry_ip=${1:-localhost}
 if [[ "$registry_ip" != 'localhost' ]] ; then
