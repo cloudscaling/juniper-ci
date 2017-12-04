@@ -14,9 +14,9 @@ export CLEAN_ENV=${CLEAN_ENV:-'auto'}
 export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'newton'}
 export CONTROLLER_COUNT=${CONTROLLER_COUNT:-1}
 export NETWORK_ISOLATION=${NETWORK_ISOLATION:-'single'}
-export BASE_ADDR=${BASE_ADDR:-172}
 export USE_DEVELOPMENT_PUPPETS=${USE_DEVELOPMENT_PUPPETS:-true}
 export SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
+export DVR=${DVR:-'true'}
 
 function cleanup_environment() {
   ${my_dir}/clean_env.sh

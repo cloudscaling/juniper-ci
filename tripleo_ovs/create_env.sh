@@ -38,8 +38,8 @@ NET_ADDR_PROV=${NET_ADDR_PROV:-"192.168.160.0"}
 # by default scripts will create hyperconverged environment with SDS on compute
 CONTROLLER_COUNT=${CONTROLLER_COUNT:-1}
 COMPUTE_COUNT=${COMPUTE_COUNT:-2}
-STORAGE_COUNT=${STORAGE_COUNT:-2}
-NETNODE_COUNT=${NETNODE_COUNT:-0}
+STORAGE_COUNT=${STORAGE_COUNT:-1}
+NETNODE_COUNT=${NETNODE_COUNT:-3}
 
 # disk size for overcloud machines
 vm_disk_size="30G"

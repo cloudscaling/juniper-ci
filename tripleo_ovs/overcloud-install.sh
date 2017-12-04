@@ -13,8 +13,18 @@ if [[ -z "$OPENSTACK_VERSION" ]] ; then
   exit 1
 fi
 
-if [[ -z "$BASE_ADDR" ]] ; then
-  echo "BASE_ADDR is expected (e.g. export BASE_ADDR=192.168.xxx)"
+if [[ -z "$MGMT_IP" ]] ; then
+  echo "MGMT_IP is expected"
+  exit 1
+fi
+
+if [[ -z "$PROV_IP" ]] ; then
+  echo "PROV_IP is expected"
+  exit 1
+fi
+
+if [[ -z "$DVR" ]] ; then
+  echo "DVR is expected"
   exit 1
 fi
 
@@ -37,6 +47,8 @@ DISK_SIZE=${DISK_SIZE:-29}
 
 compute_machine_name='comp'
 compute_flavor_name='compute'
+storage_flavor_name='storage'
+network_flavor_name='network'
 
 # su - stack
 cd ~
@@ -46,11 +58,9 @@ if [[ "$(whoami)" != "stack" ]] ; then
   exit 1
 fi
 
-((prov_ip_addr=BASE_ADDR+NUM*10+4))
-prov_ip="192.168.${prov_ip_addr}.2"
+prov_ip="$PROV_IP"
 
-((addr=BASE_ADDR+NUM*10))
-virt_host_ip="192.168.${addr}.1"
+virt_host_ip="$(echo $MGMT_IP | cut -d '.' -f 1,2,3).1"
 if [[ "$SSH_VIRT_TYPE" != 'vbox' ]] ; then
   virsh_opts="-c qemu+ssh://${SSH_USER}@${virt_host_ip}/system"
   list_vm_cmd="virsh $virsh_opts list --all"
@@ -63,7 +73,8 @@ fi
 CONT_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-cont- | wc -l)
 COMP_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-$compute_machine_name- | wc -l)
 STOR_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-stor- | wc -l)
-((OCM_COUNT=CONT_COUNT+COMP_COUNT+STOR_COUNT))
+NET_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-net- | wc -l)
+((OCM_COUNT=CONT_COUNT+COMP_COUNT+STOR_COUNT+NET_COUNT))
 
 comp_scale_count=$COMP_COUNT
 
@@ -134,6 +145,8 @@ cat << EOF > ~/instackenv.json
 EOF
 define_vms 'cont' $CONT_COUNT 'profile:controller,boot_option:local'
 define_vms $compute_machine_name $COMP_COUNT "profile:$compute_flavor_name,boot_option:local"
+define_vms 'stor' $STOR_COUNT "profile:$storage_flavor_name,boot_option:local"
+define_vms 'net' $NET_COUNT "profile:$network_flavor_name,boot_option:local"
 
 # remove last comma
 head -n -1 ~/instackenv.json > ~/instackenv.json.tmp
@@ -181,7 +194,8 @@ function create_flavor() {
 create_flavor 'baremetal' 1
 create_flavor 'control' $CONT_COUNT 'controller'
 create_flavor $compute_flavor_name $COMP_COUNT $compute_flavor_name
-create_flavor 'storage' $STOR_COUNT 'storage'
+create_flavor $storage_flavor_name $STOR_COUNT $storage_flavor_name
+create_flavor $network_flavor_name $NET_COUNT $network_flavor_name
 
 openstack flavor list --long
 
@@ -207,12 +221,14 @@ role_file='tripleo-heat-templates/roles_data.yaml'
 # wich cause the deployement fails
 sed -i  's/\(.*Ceilometer.*\)/#\1/g' $role_file
 
+dvr_opts=''
+if [[ "$DVR" == 'true' ]] ; then
+  dvr_opts='-e tripleo-heat-templates/environments/neutron-ovs-dvr.yaml'
+fi
+
 # file for other options
 misc_opts='misc_opts.yaml'
-rm -f $misc_opts
-touch $misc_opts
-
-cat <<EOF >> $misc_opts
+cat <<EOF > $misc_opts
 parameter_defaults:
   CloudDomain: $CLOUD_DOMAIN_NAME
 
@@ -256,6 +272,7 @@ if [[ "$DEPLOY" != '1' ]] ; then
       --roles-file $role_file \
       -e tripleo-heat-templates/puppet/extraconfig/ceph/puppet-ceph-external.yaml \
       $artifact_opts \
+      $dvr_opts \
       -e $misc_opts \
       $multi_nic_opts \
       $ha_opts"
@@ -270,6 +287,7 @@ openstack overcloud deploy --templates tripleo-heat-templates/ \
   --roles-file $role_file \
   -e tripleo-heat-templates/puppet/extraconfig/ceph/puppet-ceph-external.yaml \
   $artifact_opts \
+  $dvr_opts \
   -e $misc_opts \
   $multi_nic_opts \
   $ha_opts

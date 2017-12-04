@@ -32,11 +32,6 @@ function catch_errors() {
   exit $exit_code
 }
 
-ssh_env="NUM=$NUM DEPLOY=1 NETWORK_ISOLATION=$NETWORK_ISOLATION"
-ssh_env+=" BASE_ADDR=$BASE_ADDR"
-ssh_env+=" ENVIRONMENT_OS=$ENVIRONMENT_OS ENVIRONMENT_OS_VERSION=$ENVIRONMENT_OS_VERSION"
-ssh_env+=" OPENSTACK_VERSION=$OPENSTACK_VERSION"
-
 echo "INFO: creating environment $(date)"
 source "$my_dir"/create_env.sh
 
@@ -45,6 +40,10 @@ echo "INFO: installing undercloud $(date)"
 
 echo "INFO: installing overcloud $(date)"
 oc=1
+ssh_env="NUM=$NUM DEPLOY=1 NETWORK_ISOLATION=$NETWORK_ISOLATION"
+ssh_env+=" ENVIRONMENT_OS=$ENVIRONMENT_OS ENVIRONMENT_OS_VERSION=$ENVIRONMENT_OS_VERSION"
+ssh_env+=" OPENSTACK_VERSION=$OPENSTACK_VERSION"
+ssh_env+=" MGMT_IP=$MGMT_IP PROV_IP=$PROV_IP DVR=$DVR"
 ssh -T $SSH_OPTS stack@$MGMT_IP "$ssh_env ./overcloud-install.sh"
 
 echo "INFO: checking overcloud $(date)"
