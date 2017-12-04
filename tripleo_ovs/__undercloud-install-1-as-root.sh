@@ -20,8 +20,18 @@ if [[ -z "$ENVIRONMENT_OS" ]] ; then
   exit 1
 fi
 
-if [[ -z "$BASE_ADDR" ]] ; then
-  echo "BASE_ADDR is expected (e.g. export BASE_ADDR=192.168.xxx)"
+if [[ -z "$MGMT_IP" ]] ; then
+  echo "MGMT_IP is expected"
+  exit 1
+fi
+
+if [[ -z "$PROV_IP" ]] ; then
+  echo "PROV_IP is expected"
+  exit 1
+fi
+
+if [[ -z "$SSH_OPTS" ]] ; then
+  echo "SSH_OPTS is expected"
   exit 1
 fi
 
@@ -110,9 +120,9 @@ sed -i -e 's/Defaults[ \t]*requiretty.*/#Defaults    requiretty/g' /etc/sudoers
 
 cp "$my_dir/__undercloud-install-2-as-stack-user.sh" /home/stack/
 chown stack:stack /home/stack/__undercloud-install-2-as-stack-user.sh
-env_opts="NUM=$NUM NETDEV=$NETDEV OPENSTACK_VERSION=$OPENSTACK_VERSION"
+env_opts="NUM=$NUM OPENSTACK_VERSION=$OPENSTACK_VERSION"
 env_opts+=" ENVIRONMENT_OS=$ENVIRONMENT_OS ENVIRONMENT_OS_VERSION=$ENVIRONMENT_OS_VERSION"
-env_opts+=" BASE_ADDR=$BASE_ADDR"
+env_opts+=" NETDEV=$NETDEV MGMT_IP=$MGMT_IP PROV_IP=$PROV_IP SSH_OPTS=$SSH_OPTS"
 sudo -u stack $env_opts /home/stack/__undercloud-install-2-as-stack-user.sh
 
 # increase timeouts due to virtual installation

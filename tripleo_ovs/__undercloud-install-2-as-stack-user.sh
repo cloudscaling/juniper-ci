@@ -19,8 +19,18 @@ if [[ -z "$ENVIRONMENT_OS" ]] ; then
   exit 1
 fi
 
-if [[ -z "$BASE_ADDR" ]] ; then
-  echo "BASE_ADDR is expected (e.g. export BASE_ADDR=192.168.xxx)"
+if [[ -z "$MGMT_IP" ]] ; then
+  echo "MGMT_IP is expected"
+  exit 1
+fi
+
+if [[ -z "$PROV_IP" ]] ; then
+  echo "PROV_IP is expected"
+  exit 1
+fi
+
+if [[ -z "$SSH_OPTS" ]] ; then
+  echo "SSH_OPTS is expected"
   exit 1
 fi
 
@@ -29,10 +39,9 @@ if [[ -z "$NETDEV" ]] ; then
   exit 1
 fi
 
-((addr=BASE_ADDR+NUM*10+4))
-prov_ip="192.168.$addr"
-((addr=BASE_ADDR+NUM*10))
-mgmt_ip="192.168.$addr"
+prov_ip=$PROV_IP
+prov_ip_base=$(echo $prov_ip | cut -d '.' -f 1,2,3)
+mgmt_ip=$MGMT_IP
 dns_nameserver="8.8.8.8"
 
 # create undercloud configuration file. all IP addresses are relevant to create_env.sh script
@@ -41,16 +50,16 @@ if [[ -f /usr/share/instack-undercloud/undercloud.conf.sample ]] ; then
 fi
 cat << EOF >> undercloud.conf
 [DEFAULT]
-local_ip = $prov_ip.2/24
-undercloud_public_vip = $prov_ip.10
-undercloud_admin_vip = $prov_ip.11
+local_ip = ${prov_ip}/24
+undercloud_public_vip = $prov_ip_base.10
+undercloud_admin_vip = $prov_ip_base.11
 local_interface = $NETDEV
-masquerade_network = $prov_ip.0/24
-dhcp_start = $prov_ip.100
-dhcp_end = $prov_ip.149
-network_cidr = $prov_ip.0/24
-network_gateway = $prov_ip.2
-discovery_iprange = $prov_ip.150,$prov_ip.170
+masquerade_network = $prov_ip_base.0/24
+dhcp_start = $prov_ip_base.50
+dhcp_end = $prov_ip_base.99
+network_cidr = $prov_ip_base.0/24
+network_gateway = $prov_ip
+discovery_iprange = $prov_ip_base.50,$prov_ip_base.99
 EOF
 
 # install undercloud
@@ -102,5 +111,5 @@ openstack overcloud image upload
 cd ..
 
 # update undercloud's network information
-sid=`neutron subnet-list | grep " $prov_ip.0" | awk '{print $2}'`
+sid=`neutron subnet-list | grep " $prov_ip_base.0" | awk '{print $2}'`
 neutron subnet-update $sid --dns-nameserver $dns_nameserver

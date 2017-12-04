@@ -226,13 +226,18 @@ function define_machine() {
   if [[ -n "$disk_size" ]] ; then
     disk_opts+=",size=${disk_size}"
   fi
+  local net_opts=''
+  local i=''
+  for i in $(echo $net | tr ',' ' ') ; do
+    net_opts+=" --network network=${i},model=$NET_DRIVER"
+  done
   virt-install --name $name \
     --ram $mem \
     --vcpus $vcpus \
     --cpu SandyBridge,+vmx \
     --os-variant $os \
     --disk $disk_opts \
-    --network network=$net,model=$NET_DRIVER \
+    $net_opts \
     --boot hd \
     --noautoconsole \
     --graphics vnc,listen=0.0.0.0 \
@@ -410,6 +415,7 @@ function domain_customize() {
     --run-command 'echo 127.0.0.1  localhost.localdomain  localhost >> /etc/hosts' \
     --run-command 'echo 127.0.0.1  ${hname}.localdomain  $hname >> /etc/hosts' \
     --hostname $hname \
+    --ssh-inject root \
     --ssh-inject $ssh_user \
     --selinux-relabel
 }

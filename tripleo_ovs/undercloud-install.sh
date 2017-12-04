@@ -21,18 +21,32 @@ if [[ -z "$ENVIRONMENT_OS" ]] ; then
   exit 1
 fi
 
-if [[ -z "$BASE_ADDR" ]] ; then
-  echo "BASE_ADDR is expected (e.g. export BASE_ADDR=192.168.xxx)"
+if [[ -z "$MGMT_IP" ]] ; then
+  echo "MGMT_IP is expected"
+  exit 1
+fi
+
+if [[ -z "$PROV_IP" ]] ; then
+  echo "PROV_IP is expected"
+  exit 1
+fi
+
+if [[ -z "$PROV_NETDEV" ]] ; then
+  echo "PROV_NETDEV is expected"
+  exit 1
+fi
+
+if [[ -z "$SSH_OPTS" ]] ; then
+  echo "SSH_OPTS is expected"
   exit 1
 fi
 
 IMAGES=${IMAGES:-"/home/stack/images-${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION}-${OPENSTACK_VERSION}.tar"}
-NETDEV=${NETDEV:-'eth1'}
+NETDEV=${NETDEV:-${PROV_NETDEV}}
 
 # on kvm host do once: create stack user, create home directory, add him to libvirtd group
-((env_addr=BASE_ADDR+NUM*10))
-ip_addr="192.168.${env_addr}.2"
-ssh_opts="-i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+ip_addr=$MGMT_IP
+ssh_opts=$SSH_OPTS
 ssh_addr="root@${ip_addr}"
 
 source "$my_dir/../common/virsh/functions"
@@ -48,9 +62,9 @@ fi
 for fff in __undercloud-install-1-as-root.sh __undercloud-install-2-as-stack-user.sh ; do
   scp $ssh_opts -B "$my_dir/$fff" ${ssh_addr}:/root/$fff
 done
-env_opts="NUM=$NUM NETDEV=$NETDEV OPENSTACK_VERSION=$OPENSTACK_VERSION"
+env_opts="NUM=$NUM OPENSTACK_VERSION=$OPENSTACK_VERSION"
 env_opts+=" ENVIRONMENT_OS=$ENVIRONMENT_OS ENVIRONMENT_OS_VERSION=$ENVIRONMENT_OS_VERSION"
-env_opts+=" BASE_ADDR=$BASE_ADDR"
+env_opts+=" NETDEV=$NETDEV MGMT_IP=$MGMT_IP PROV_IP=$PROV_IP SSH_OPTS=$SSH_OPTS"
 ssh -T $ssh_opts $ssh_addr "$env_opts /root/__undercloud-install-1-as-root.sh"
 
 scp $ssh_opts "$my_dir/overcloud-install.sh" ${ssh_addr}:/home/stack/overcloud-install.sh
