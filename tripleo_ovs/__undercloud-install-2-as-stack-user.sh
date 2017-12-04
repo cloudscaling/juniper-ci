@@ -29,11 +29,6 @@ if [[ -z "$PROV_IP" ]] ; then
   exit 1
 fi
 
-if [[ -z "$SSH_OPTS" ]] ; then
-  echo "SSH_OPTS is expected"
-  exit 1
-fi
-
 if [[ -z "$NETDEV" ]] ; then
   echo "NETDEV is expected (e.g. export NETDEV=eth1)"
   exit 1

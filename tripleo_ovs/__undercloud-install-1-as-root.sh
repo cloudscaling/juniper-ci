@@ -30,11 +30,6 @@ if [[ -z "$PROV_IP" ]] ; then
   exit 1
 fi
 
-if [[ -z "$SSH_OPTS" ]] ; then
-  echo "SSH_OPTS is expected"
-  exit 1
-fi
-
 if [[ -z "$NETDEV" ]] ; then
   echo "NETDEV is expected (e.g. export NETDEV=eth1)"
   exit 1
@@ -109,7 +104,7 @@ cp "$my_dir/__undercloud-install-2-as-stack-user.sh" /home/stack/
 chown stack:stack /home/stack/__undercloud-install-2-as-stack-user.sh
 env_opts="NUM=$NUM OPENSTACK_VERSION=$OPENSTACK_VERSION"
 env_opts+=" ENVIRONMENT_OS=$ENVIRONMENT_OS ENVIRONMENT_OS_VERSION=$ENVIRONMENT_OS_VERSION"
-env_opts+=" NETDEV=$NETDEV MGMT_IP=$MGMT_IP PROV_IP=$PROV_IP SSH_OPTS='$SSH_OPTS'"
+env_opts+=" NETDEV=$NETDEV MGMT_IP=$MGMT_IP PROV_IP=$PROV_IP"
 sudo -u stack $env_opts /home/stack/__undercloud-install-2-as-stack-user.sh
 
 # increase timeouts due to virtual installation
