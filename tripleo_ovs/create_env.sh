@@ -67,7 +67,7 @@ function define_overcloud_vms() {
   local number_re='^[0-9]+$'
   if [[ $count =~ $number_re ]] ; then
     for (( i=1 ; i<=count; i++ )) ; do
-      local vol_name="overcloud-$NUM-${name}-$i"
+      local vol_name="overcloud-${NUM}-${name}-${i}.qcow2"
       local vol_path=$(create_new_volume $vol_name $poolname $disk_size)
       define_machine "rd-$vol_name" 2 $mem rhel7 $prov_net "$vol_path"
     done
