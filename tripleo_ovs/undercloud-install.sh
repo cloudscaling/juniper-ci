@@ -39,7 +39,7 @@ if [[ -z "$SSH_OPTS" ]] ; then
   exit 1
 fi
 
-IMAGES=${IMAGES:-"/home/stack/images-${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION}-${OPENSTACK_VERSION}.tar"}
+IMAGES=${IMAGES:-"/home/jenkins/overcloud-images/images-${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION}-${OPENSTACK_VERSION}.tar"}
 NETDEV=${NETDEV:-${PROV_NETDEV}}
 
 # on kvm host do once: create stack user, create home directory, add him to libvirtd group
@@ -50,7 +50,7 @@ source "$my_dir/../common/virsh/functions"
 
 # copy images for overcloud to it. (images can be build manually but it's too long - use previously built images)
 if [ -f $IMAGES ] ; then
-  scp $SSH_OPTS -B $IMAGES ${ssh_addr_root}:/tmp/images.tar
+  scp $SSH_OPTS -B $IMAGES ${ssh_addr_stack}:/tmp/images.tar
 else
   echo "ERROR: image building is not supported"
   exit 1

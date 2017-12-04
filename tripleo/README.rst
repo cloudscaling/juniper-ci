@@ -114,11 +114,11 @@ For RHEL undercloud image must be changed before usage - resize is required.
 Overcloud images are customize at runtime
 ```
       # structure of dir would look like this:
-      root@contrail-ci:~# ls -l /home/stack/
+      root@contrail-ci:~# ls -l /home/jenkins/overcloud-images
       total 8204072
       -rw-r--r-- 1 stack stack 1398367523 Jun 15 16:47 images-centos7.tar
-      lrwxrwxrwx 1 stack stack         30 Jul 14 21:11 images-centos-newton.tar -> /home/stack/images-centos7.tar
-      lrwxrwxrwx 1 stack stack         30 Jul 20 17:44 images-centos-ocata.tar -> /home/stack/images-centos7.tar
+      lrwxrwxrwx 1 stack stack         30 Jul 14 21:11 images-centos-7_3-newton.tar -> /home/jenkins/overcloud-images/images-centos7.tar
+      lrwxrwxrwx 1 stack stack         30 Jul 20 17:44 images-centos-7_3-ocata.tar -> /home/jenkins/overcloud-images/images-centos7.tar
       -rw-r--r-- 1 stack stack 1741926400 Sep 21 13:45 images-rhel-7_3-newton.tar
       -rw-r--r-- 1 stack stack 1743411200 Aug  1 16:26 images-rhel-7_3-ocata.tar
       -rw-r--r-- 1 stack stack 1817180160 Sep 20 16:46 images-rhel-7_4-newton.tar
