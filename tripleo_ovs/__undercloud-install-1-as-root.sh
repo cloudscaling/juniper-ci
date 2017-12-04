@@ -64,7 +64,6 @@ if [[ "$ENVIRONMENT_OS" == 'centos' ]] ; then
   curl -L -o /etc/yum.repos.d/delorean-$OPENSTACK_VERSION.repo https://trunk.rdoproject.org/centos7-$OPENSTACK_VERSION/current/delorean.repo
   curl -L -o /etc/yum.repos.d/delorean-deps-$OPENSTACK_VERSION.repo http://trunk.rdoproject.org/centos7-$OPENSTACK_VERSION/delorean-deps.repo
 
-  yum install -y epel-release
   yum update -y
 fi
 
@@ -90,23 +89,6 @@ if [[ "$OPENSTACK_VERSION" == 'ocata' && "$ENVIRONMENT_OS" == 'centos' ]] ; then
   if [[ -f /usr/libexec/os-refresh-config/configure.d/50-heat-config-docker-cmd ]] ; then
     sed -i 's/return 1/return 0/' /usr/libexec/os-refresh-config/configure.d/50-heat-config-docker-cmd
   fi
-fi
-
-if [[ "$ENVIRONMENT_OS" == 'centos' ]] ; then
-  # workaround of conflict:
-  # sudo /bin/yum -d 0 -e 0 -y install openstack-zaqar
-  #   Transaction check error:
-  #    file /usr/lib64/python2.7/site-packages/ujson.so from install of
-  #    python2-ujson-1.35-1.el7.x86_64 conflicts with file from package python-ujson-1.35-1.el7.x86_64
-  yum remove -y python-ujson || true
-  # workaround for another conflict:
-  #   Package: python-zmq-14.7.0-2.el7.x86_64 (@delorean-ocata-testing)
-  #   Requires: libzmq.so.4()(64bit)
-  #   Removing: zeromq-4.0.5-4.el7.x86_64 (@delorean-ocata-testing)
-  #     INFO:                libzmq.so.4()(64bit)
-  #     INFO:            Updated By: zeromq-4.1.4-5.el7.x86_64 (epel)
-  #     INFO:               ~libzmq.so.5()(64bit)
-  yum remove -y python-zeromq zeromq || true
 fi
 
 # add Ceph repos to workaround bug with redhat-lsb-core package
