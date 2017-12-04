@@ -101,7 +101,6 @@ wait_ssh $mgmt_ip
 prov_ip=$(wait_dhcp $NET_NAME_PROV 1 )
 
 # prepare host name
-export SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
 undercloud_hname="undercloud-$(echo $mgmt_ip | tr '.' '-')"
 cat <<EOF | ssh $SSH_OPTS root@${mgmt_ip}
 set -x

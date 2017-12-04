@@ -3,8 +3,6 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
-ssh_key_dir="/home/jenkins"
-
 if [[ -z "$WORKSPACE" ]] ; then
   echo "Please set WORKSPACE variable"
   exit 1
@@ -18,24 +16,24 @@ export CONTROLLER_COUNT=${CONTROLLER_COUNT:-1}
 export NETWORK_ISOLATION=${NETWORK_ISOLATION:-'single'}
 export BASE_ADDR=${BASE_ADDR:-172}
 export USE_DEVELOPMENT_PUPPETS=${USE_DEVELOPMENT_PUPPETS:-true}
-
-((env_addr=BASE_ADDR+NUM*10))
-ip_addr="192.168.${env_addr}.2"
-ssh_opts="-i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-ssh_addr="root@${ip_addr}"
-
+export SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
 
 function cleanup_environment() {
   ${my_dir}/clean_env.sh
 }
 
 function save_logs() {
+  if [[ -z "$MGMT_IP" ]] ;then
+    echo "ERROR: no MGMT_IP, it looks create env was not successful"
+    return
+  fi
   rm -rf logs
   mkdir logs
-  scp $ssh_opts $ssh_addr:/home/stack/heat.log logs/heat.log
+  local ssh_addr=root@${MGMT_IP}
+  scp $SSH_OPTS $ssh_addr:/home/stack/heat.log logs/heat.log
   for lf in `ssh $ssh_opts $ssh_addr ls /home/stack/*-logs.tar` ; do
-    nm=`echo $lf | rev | cut -d '/' -f 1 | rev`
-    scp $ssh_opts $ssh_addr:$lf $nm
+    local nm=`echo $lf | rev | cut -d '/' -f 1 | rev`
+    scp $SSH_OPTS $ssh_addr:$lf $nm
     mkdir logs/$nm
     tar xf $nm -C logs/$nm
   done
@@ -65,7 +63,7 @@ if [[ $CLEAN_ENV != 'never' ]] ; then
   cleanup_environment
 fi
 
-${my_dir}/deploy_all.sh "${my_dir}/check-openstack-proxy.sh"
+source ${my_dir}/deploy_all.sh "${my_dir}/check-openstack-proxy.sh"
 
 trap - ERR
 
