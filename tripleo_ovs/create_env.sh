@@ -98,7 +98,7 @@ start_vm $undercloud_vm_name
 mgmt_ip=$(wait_dhcp $NET_NAME_MGMT 1 )
 wait_ssh $mgmt_ip
 
-prov_ip=$(wait_dhcp $NET_NAME_PROV 1 )
+prov_ip="$(echo $NET_ADDR_PROV | cut -d '.' -f 1,2,3).2"
 
 #ssh keys to acces hypervisor under stack user
 scp $SSH_OPTS ~/stack_user_rsa/* stack@${mgmt_ip}:~/.ssh/
