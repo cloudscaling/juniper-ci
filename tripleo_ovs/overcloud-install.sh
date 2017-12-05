@@ -287,7 +287,7 @@ set +e
 
 openstack overcloud deploy --templates tripleo-heat-templates/ \
   --roles-file $role_file \
-  -e tripleo-heat-templates/puppet/extraconfig/ceph/puppet-ceph-external.yaml \
+  -e tripleo-heat-templates/environments/puppet-ceph.yaml \
   $artifact_opts \
   $dvr_opts \
   -e $misc_opts \
