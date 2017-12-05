@@ -82,7 +82,7 @@ function run_instance() {
 
   if [[ $kube_vm == "true" ]]; then
     # it means that additional disks must be created for VM
-    local bdm='{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdg","Ebs":{"VolumeSize":8,"DeleteOnTermination":true,"VolumeType":"gp2"}}'
+    local bdm='{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}}'
   else
     local bdm='{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}}'
   fi
@@ -111,7 +111,6 @@ function run_instance() {
   if [[ $kube_vm == "true" ]]; then
     $ssh "(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | sudo fdisk /dev/xvdf"
     $ssh "sudo mkfs.ext4 /dev/xvdf1 ; sudo mkdir -p /var/lib/docker ; sudo su -c \"echo '/dev/xvdf1  /var/lib/docker  auto  defaults,auto  0  0' >> /etc/fstab\" ; sudo mount /var/lib/docker"
-    $ssh "sudo mkswap /dev/xvdg ; sudo swapon /dev/xvdg ; sudo swapon -s ; free -h"
   fi
 }
 
