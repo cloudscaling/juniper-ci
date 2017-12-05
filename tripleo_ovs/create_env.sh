@@ -31,8 +31,8 @@ BRIDGE_NAME_MGMT=${BRIDGE_NAME_MGMT:-"rd-mgmt-${NUM}"}
 BRIDGE_NAME_PROV=${BRIDGE_NAME_PROV:-"rd-prov-${NUM}"}
 NET_NAME_MGMT=${NET_NAME_MGMT:-${BRIDGE_NAME_MGMT}}
 NET_NAME_PROV=${NET_NAME_PROV:-${BRIDGE_NAME_PROV}}
-NET_ADDR_MGMT=${NET_ADDR_MGMT:-"192.168.150.0"}
-NET_ADDR_PROV=${NET_ADDR_PROV:-"192.168.160.0"}
+NET_ADDR_MGMT=${NET_ADDR_MGMT:-"192.168.1${NUM}0.0"}
+NET_ADDR_PROV=${NET_ADDR_PROV:-"192.168.1${NUM}0.0"}
 PROV_NETDEV=${PROV_NETDEV:-'ens4'}
 
 # number of machines in overcloud
@@ -80,7 +80,8 @@ function define_overcloud_vms() {
 
 function define_and_start_full_vm() {
   local name=$1
-  local mem=$2
+  local count=$2
+  local mem=$3
   local number_re='^[0-9]+$'
   if [[ $count =~ $number_re ]] ; then
     for (( i=1 ; i<=count; i++ )) ; do
