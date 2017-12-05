@@ -81,14 +81,23 @@ function define_overcloud_vms() {
 function define_and_start_full_vm() {
   local name=$1
   local mem=$2
-  local vol_path=$(create_volume_from "${name}.qcow2" $poolname $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
+  local number_re='^[0-9]+$'
+  if [[ $count =~ $number_re ]] ; then
+    for (( i=1 ; i<=count; i++ )) ; do
+      local vm_name="rd-overcloud-${NUM}-${name}-${i}"
+      local vol_name="${vm_name}.qcow2"
+      local vol_path=$(create_volume_from "${vol_name}" $poolname $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
+      define_machine $vm_name 2 $mem rhel7 "$NET_NAME_MGMT,$NET_NAME_PROV" "$vol_path"
 
-  define_machine $name 2 $mem rhel7 "$NET_NAME_MGMT,$NET_NAME_PROV" "$vol_path"
-  # customize domain to set root password
-  # TODO: access denied under non root...
-  # customized manually for now
-  # domain_customize $name $name.local
-  start_vm $name
+      # customize domain to set root password
+      # TODO: access denied under non root...
+      # customized manually for now
+      # domain_customize $name $name.local
+      start_vm $vm_name
+    done
+  else
+    echo Skip VM $name creation, count=$count
+  fi
 }
 
 if [[ "$DEPLOY_STAGES" != 'clean_vms' ]] ; then
