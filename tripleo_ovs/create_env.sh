@@ -154,7 +154,7 @@ EOF
 
   export MGMT_IP=$mgmt_ip
   export PROV_IP=$prov_ip
-  # export PROV_NETDEV=$(ssh $SSH_OPTS root@${mgmt_ip} ip addr | grep $prov_ip | awk '{print($8)}')
+  export PROV_NETDEV=${PROV_NETDEV:-$(ssh $SSH_OPTS root@${mgmt_ip} ip addr | grep $prov_ip | awk '{print($8)}')}
 else
 
 define_and_start_full_vm 'cont' $CONTROLLER_COUNT 4096
