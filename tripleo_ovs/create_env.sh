@@ -31,10 +31,10 @@ BRIDGE_NAME_MGMT=${BRIDGE_NAME_MGMT:-"rd-mgmt-${NUM}"}
 BRIDGE_NAME_PROV=${BRIDGE_NAME_PROV:-"rd-prov-${NUM}"}
 NET_NAME_MGMT=${NET_NAME_MGMT:-${BRIDGE_NAME_MGMT}}
 NET_NAME_PROV=${NET_NAME_PROV:-${BRIDGE_NAME_PROV}}
-netnum=$NUM
-NET_ADDR_MGMT=${NET_ADDR_MGMT:-"192.168.1${netnum}0.0"}
-(( netnum+=10 ))
-NET_ADDR_PROV=${NET_ADDR_PROV:-"192.168.1${netnum}0.0"}
+(( netnum=100+$NUM*10 ))
+NET_ADDR_MGMT=${NET_ADDR_MGMT:-"192.168.${netnum}.0"}
+(( netnum+=30 ))
+NET_ADDR_PROV=${NET_ADDR_PROV:-"192.168.${netnum}.0"}
 PROV_NETDEV=${PROV_NETDEV:-'ens4'}
 
 # number of machines in overcloud
