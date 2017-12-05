@@ -96,6 +96,8 @@ function get_macs() {
 
 get_macs cont $CONT_COUNT
 get_macs $compute_machine_name $COMP_COUNT
+get_macs stor $STOR_COUNT
+get_macs net $NET_COUNT
 
 id_rsa=$(awk 1 ORS='\\n' ~/.ssh/id_rsa)
 

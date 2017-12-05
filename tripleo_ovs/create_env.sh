@@ -33,6 +33,7 @@ NET_NAME_MGMT=${NET_NAME_MGMT:-${BRIDGE_NAME_MGMT}}
 NET_NAME_PROV=${NET_NAME_PROV:-${BRIDGE_NAME_PROV}}
 NET_ADDR_MGMT=${NET_ADDR_MGMT:-"192.168.150.0"}
 NET_ADDR_PROV=${NET_ADDR_PROV:-"192.168.160.0"}
+NETDEV_PROV=${NETDEV_PROV:-'ens4'}
 
 # number of machines in overcloud
 # by default scripts will create hyperconverged environment with SDS on compute
@@ -53,7 +54,8 @@ source "$my_dir/../common/virsh/functions"
 assert_env_exists "rd-undercloud-$NUM"
 
 create_network_dhcp $NET_NAME_MGMT $NET_ADDR_MGMT $BRIDGE_NAME_MGMT
-create_network_dhcp $NET_NAME_PROV $NET_ADDR_PROV $BRIDGE_NAME_PROV
+prov_dhcp='no'
+create_network_dhcp $NET_NAME_PROV $NET_ADDR_PROV $BRIDGE_NAME_PROV $prov_dhcp
 
 # create pool
 create_pool $poolname
@@ -98,7 +100,9 @@ wait_ssh $mgmt_ip
 
 prov_ip=$(wait_dhcp $NET_NAME_PROV 1 )
 
-# prepare host name
+#ssh keys to acces hypervisor under stack user
+scp $SSH_OPTS ~/stack_user_rsa/* stack@${mgmt_ip}:~/.ssh/
+#host name and default ip route
 undercloud_hname="undercloud-$(echo $mgmt_ip | tr '.' '-')"
 default_route="$(echo $mgmt_ip | cut -d '.' -f 1,2,3).1"
 cat <<EOF | ssh $SSH_OPTS root@${mgmt_ip}
@@ -109,6 +113,16 @@ echo $undercloud_hname > /etc/hostname
 hostname $undercloud_hname
 domainname localdomain
 echo $mgmt_ip ${undercloud_hname}.localdomain  ${undercloud_hname} >> /etc/hosts
+ifdown $NETDEV_PROV || true
+cat <<EOM > /etc/sysconfig/network-scripts/ifcfg-ens4
+DEVICE=$NETDEV_PROV
+BOOTPROTO=none
+ONBOOT=yes
+HOTPLUG=no
+NM_CONTROLLED=no
+DEVICETYPE=ovs
+EOM
+ifup $NETDEV_PROV || true
 ip route del default || true
 ip route add default via $default_route
 echo nameserver $default_route >> /etc/resolv.conf
