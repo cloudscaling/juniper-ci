@@ -35,8 +35,18 @@ function catch_errors() {
 echo "INFO: creating environment $(date)"
 source "$my_dir"/create_env.sh
 
+if [[ "$DEPLOY_STAGES" == 'clean_vms' ]] ; then
+  echo "INFO: DEPLOY_STAGES=$DEPLOY_STAGES"
+  exit 0
+fi
+
 echo "INFO: installing undercloud $(date)"
 "$my_dir"/undercloud-install.sh
+
+if [[ "$DEPLOY_STAGES" == 'undercloud' ]] ; then
+  echo "INFO: DEPLOY_STAGES=$DEPLOY_STAGES"
+  exit 0
+fi
 
 echo "INFO: installing overcloud $(date)"
 oc=1
@@ -45,6 +55,11 @@ ssh_env+=" ENVIRONMENT_OS=$ENVIRONMENT_OS ENVIRONMENT_OS_VERSION=$ENVIRONMENT_OS
 ssh_env+=" OPENSTACK_VERSION=$OPENSTACK_VERSION"
 ssh_env+=" MGMT_IP=$MGMT_IP PROV_IP=$PROV_IP DVR=$DVR"
 ssh -T $SSH_OPTS stack@$MGMT_IP "$ssh_env ./overcloud-install.sh"
+
+if [[ "$DEPLOY_STAGES" == 'overcloud' ]] ; then
+  echo "INFO: DEPLOY_STAGES=$DEPLOY_STAGES"
+  exit 0
+fi
 
 echo "INFO: checking overcloud $(date)"
 if [[ -n "$check_script" ]] ; then

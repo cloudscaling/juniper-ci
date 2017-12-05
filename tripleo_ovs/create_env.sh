@@ -78,34 +78,49 @@ function define_overcloud_vms() {
   fi
 }
 
-# just define overcloud machines
-define_overcloud_vms 'cont' $CONTROLLER_COUNT 8192
-define_overcloud_vms 'comp' $COMPUTE_COUNT 4096
-define_overcloud_vms 'stor' $STORAGE_COUNT 4096
-define_overcloud_vms 'net' $NETNODE_COUNT 1024
+function define_and_start_full_vm() {
+  local name=$1
+  local mem=$2
+  local vol_path=$(create_volume_from "${name}.qcow2" $poolname $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
 
-# make undercloud image from base image and define undercloud VM
-undercloud_vm_name="rd-undercloud-$NUM"
-undercloud_vol_path=$(create_volume_from "${undercloud_vm_name}.qcow2" $poolname $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
+  define_machine $name 2 $mem rhel7 "$NET_NAME_MGMT,$NET_NAME_PROV" "$vol_path"
+  # customize domain to set root password
+  # TODO: access denied under non root...
+  # customized manually for now
+  # domain_customize $name $name.local
+  start_vm $name
+}
 
-define_machine $undercloud_vm_name 2 8192 rhel7 "$NET_NAME_MGMT,$NET_NAME_PROV" "$undercloud_vol_path" $mgmt_net
-# customize domain to set root password
-# TODO: access denied under non root...
-# customized manually for now
-# domain_customize undercloud_vm_name undercloud.local
-start_vm $undercloud_vm_name
+if [[ "$DEPLOY_STAGES" != 'clean_vms' ]] ; then
 
-mgmt_ip=$(wait_dhcp $NET_NAME_MGMT 1 )
-wait_ssh $mgmt_ip
+  # just define overcloud machines
+  define_overcloud_vms 'cont' $CONTROLLER_COUNT 8192
+  define_overcloud_vms 'comp' $COMPUTE_COUNT 4096
+  define_overcloud_vms 'stor' $STORAGE_COUNT 2048
+  define_overcloud_vms 'net' $NETNODE_COUNT 2024
 
-prov_ip="$(echo $NET_ADDR_PROV | cut -d '.' -f 1,2,3).2"
+  # make undercloud image from base image and define undercloud VM
+  undercloud_vm_name="rd-undercloud-$NUM"
+  undercloud_vol_path=$(create_volume_from "${undercloud_vm_name}.qcow2" $poolname $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
 
-#ssh keys to acces hypervisor under stack user
-scp $SSH_OPTS ~/stack_user_rsa/* stack@${mgmt_ip}:~/.ssh/
-#host name and default ip route
-undercloud_hname="undercloud-$(echo $mgmt_ip | tr '.' '-')"
-default_route="$(echo $mgmt_ip | cut -d '.' -f 1,2,3).1"
-cat <<EOF | ssh $SSH_OPTS root@${mgmt_ip}
+  define_machine $undercloud_vm_name 2 8192 rhel7 "$NET_NAME_MGMT,$NET_NAME_PROV" "$undercloud_vol_path"
+  # customize domain to set root password
+  # TODO: access denied under non root...
+  # customized manually for now
+  # domain_customize undercloud_vm_name undercloud.local
+  start_vm $undercloud_vm_name
+
+  mgmt_ip=$(wait_dhcp $NET_NAME_MGMT 1 )
+  wait_ssh $mgmt_ip
+
+  prov_ip="$(echo $NET_ADDR_PROV | cut -d '.' -f 1,2,3).2"
+
+  #ssh keys to acces hypervisor under stack user
+  scp $SSH_OPTS ~/stack_user_rsa/* stack@${mgmt_ip}:~/.ssh/
+  #host name and default ip route
+  undercloud_hname="undercloud-$(echo $mgmt_ip | tr '.' '-')"
+  default_route="$(echo $mgmt_ip | cut -d '.' -f 1,2,3).1"
+  cat <<EOF | ssh $SSH_OPTS root@${mgmt_ip}
 set -x
 echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf
 sysctl -p /etc/sysctl.conf
@@ -128,6 +143,15 @@ ip route add default via $default_route
 echo nameserver $default_route >> /etc/resolv.conf
 EOF
 
-export MGMT_IP=$mgmt_ip
-export PROV_IP=$prov_ip
-# export PROV_NETDEV=$(ssh $SSH_OPTS root@${mgmt_ip} ip addr | grep $prov_ip | awk '{print($8)}')
+  export MGMT_IP=$mgmt_ip
+  export PROV_IP=$prov_ip
+  # export PROV_NETDEV=$(ssh $SSH_OPTS root@${mgmt_ip} ip addr | grep $prov_ip | awk '{print($8)}')
+else
+
+define_and_start_full_vm 'cont' $CONTROLLER_COUNT 4096
+define_and_start_full_vm 'comp' $COMPUTE_COUNT 4096
+#define_full_vm 'stor' $STORAGE_COUNT 2048
+define_and_start_full_vm 'net' $NETNODE_COUNT 4096
+
+fi
+

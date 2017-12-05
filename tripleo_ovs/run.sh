@@ -17,6 +17,7 @@ export NETWORK_ISOLATION=${NETWORK_ISOLATION:-'single'}
 export USE_DEVELOPMENT_PUPPETS=${USE_DEVELOPMENT_PUPPETS:-true}
 export SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
 export DVR=${DVR:-'true'}
+export DEPLOY_STAGES=${DEPLOY_STAGES:-'full'}
 
 function cleanup_environment() {
   ${my_dir}/clean_env.sh
