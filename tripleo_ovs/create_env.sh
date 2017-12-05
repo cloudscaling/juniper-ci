@@ -33,7 +33,7 @@ NET_NAME_MGMT=${NET_NAME_MGMT:-${BRIDGE_NAME_MGMT}}
 NET_NAME_PROV=${NET_NAME_PROV:-${BRIDGE_NAME_PROV}}
 NET_ADDR_MGMT=${NET_ADDR_MGMT:-"192.168.150.0"}
 NET_ADDR_PROV=${NET_ADDR_PROV:-"192.168.160.0"}
-NETDEV_PROV=${NETDEV_PROV:-'ens4'}
+PROV_NETDEV=${PROV_NETDEV:-'ens4'}
 
 # number of machines in overcloud
 # by default scripts will create hyperconverged environment with SDS on compute
@@ -130,4 +130,4 @@ EOF
 
 export MGMT_IP=$mgmt_ip
 export PROV_IP=$prov_ip
-export PROV_NETDEV=$(ssh $SSH_OPTS root@${mgmt_ip} ip addr | grep $prov_ip | awk '{print($8)}')
+# export PROV_NETDEV=$(ssh $SSH_OPTS root@${mgmt_ip} ip addr | grep $prov_ip | awk '{print($8)}')
