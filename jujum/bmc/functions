@@ -14,16 +14,16 @@ addr="10.0.0"
 
 mac_base='52:54:00:10:00'
 # juju controller
-jovs_cont_idx='99'
+cont_idx='99'
 # openstack components (controllers + rabbit + db)
-jovs_os_cont_0_idx='10'
+os_cont_0_idx='10'
 # network nodes
-jovs_os_net_1_idx='20'
-jovs_os_net_2_idx='21'
-jovs_os_net_3_idx='22'
+os_net_1_idx='20'
+os_net_2_idx='21'
+os_net_3_idx='22'
 # openstack compute
-jovs_os_comp_1_idx='30'
-jovs_os_comp_2_idx='31'
+os_comp_1_idx='30'
+os_comp_2_idx='31'
 
 function delete_network() {
   local network_name="$1"

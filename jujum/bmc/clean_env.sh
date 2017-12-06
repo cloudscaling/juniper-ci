@@ -22,7 +22,7 @@ delete_network $nname
 delete_domains
 
 delete_volume ${job_prefix}-cont.qcow2 $poolname
-for vol in `$virsh_cmd vol-list $poolname | awk '/${job_prefix}-/{print $1}'` ; do
+for vol in `$virsh_cmd vol-list $poolname | grep "${job_prefix}" | awk '{print $1}'` ; do
   echo "INFO: removing volume $vol $(date)"
   delete_volume $vol $poolname
 done

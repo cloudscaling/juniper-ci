@@ -95,8 +95,7 @@ function wait_kvm_machine() {
   done
 }
 
-mac_var_name=${job_prefix}_cont_idx
-cont_ip="$addr.${!mac_var_name}"
+cont_ip="$addr.$cont_idx"
 run_machine ${job_prefix}-cont 1 2048 ${!mac_var_name} $cont_ip
 
 # wait for controller machine
@@ -131,7 +130,7 @@ function run_cloud_machine() {
 
 function run_compute() {
   local index=$1
-  local mac_var_name="${job_prefix}_os_comp_${index}_idx"
+  local mac_var_name="os_comp_${index}_idx"
   local mac_suffix=${!mac_var_name}
   echo "INFO: creating compute $index (mac suffix $mac_suffix) $(date)"
   run_cloud_machine comp-$index $mac_suffix 4096
@@ -150,7 +149,7 @@ function run_compute() {
 
 function run_network() {
   local index=$1
-  local mac_var_name="${job_prefix}_os_net_${index}_idx"
+  local mac_var_name="os_net_${index}_idx"
   local mac_suffix=${!mac_var_name}
   echo "INFO: creating network $index (mac suffix $mac_suffix) $(date)"
   run_cloud_machine net-$index $mac_suffix 2048
@@ -171,7 +170,7 @@ function run_controller() {
   local index=$1
   local mem=$2
   local prepare_for_openstack=$3
-  local mac_var_name="${job_prefix}_os_cont_${index}_idx"
+  local mac_var_name="os_cont_${index}_idx"
   local mac_suffix=${!mac_var_name}
   echo "INFO: creating controller $index (mac suffix $mac_suffix) $(date)"
   run_cloud_machine cont-$index $mac_suffix $mem
