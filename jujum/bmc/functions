@@ -1,0 +1,153 @@
+#!/bin/bash
+
+export LIBVIRT_DEFAULT_URI=qemu:///system
+virsh_cmd="virsh"
+
+poolname="jujumimages"
+net_driver=${net_driver:-e1000}
+nname="jujum"
+addr="10.0.0"
+nname_vm="jujum-vm"
+addr_vm="10.0.1"
+
+mac_base='52:54:00:10:00'
+# juju controller
+juju_cont_mac='01'
+# openstack compute
+juju_os_comp_1_mac='02'
+juju_os_comp_2_mac='03'
+# openstack components (controllers + rabbit + db)
+juju_os_cont_0_mac='04'
+# network nodes
+juju_os_net_1_mac='05'
+juju_os_net_2_mac='06'
+juju_os_net_3_mac='07'
+
+function get_kvm_machine_ip() {
+  local mac_suffix="$1"
+  for i in {1..10} ; do
+    if python -c "import libvirt; conn = libvirt.open('$LIBVIRT_DEFAULT_URI'); ip = [lease['ipaddr'] for lease in conn.networkLookupByName('$nname').DHCPLeases() if lease['mac'] == '$mac_base:$mac_suffix'][0]; print ip" 2>/dev/null ; then
+      break
+    fi
+    sleep 10
+  done
+}
+
+function delete_network() {
+  local network_name="$1"
+  $virsh_cmd net-destroy $network_name 2> /dev/null || true
+  $virsh_cmd net-undefine $network_name 2> /dev/null || true
+}
+
+function create_network() {
+  local network_name="$1"
+  local addr="$2"
+
+  delete_network $network_name
+
+  echo "<network><name>$network_name</name><forward mode=\"nat\"><nat><port start=\"1024\" end=\"65535\"/></nat></forward><ip address=\"$addr.1\" netmask=\"255.255.255.0\"><dhcp><range start=\"$addr.10\" end=\"$addr.254\"/></dhcp></ip></network>" > /tmp/juju-net.xml
+  $virsh_cmd net-define /tmp/juju-net.xml
+  rm /tmp/juju-net.xml
+  $virsh_cmd net-autostart $network_name
+  $virsh_cmd -c qemu:///system net-start $network_name
+}
+
+function create_pool() {
+  local poolname="$1"
+  local path="$HOME/libvirt/$poolname"
+  $virsh_cmd pool-define-as $poolname dir - - - - "$path"
+  $virsh_cmd pool-build $poolname
+  $virsh_cmd pool-start $poolname
+  $virsh_cmd pool-autostart $poolname
+}
+
+function delete_pool() {
+  local poolname="$1"
+  local path=`get_pool_path $poolname`
+  $virsh_cmd pool-destroy $poolname
+  $virsh_cmd pool-undefine $poolname
+  rm -rf "$poolpath" || /bin/true
+}
+
+function get_pool_path() {
+  local poolname=$1
+  $virsh_cmd pool-info $poolname &>/dev/null || return
+  $virsh_cmd pool-dumpxml $poolname | sed -n '/path/{s/.*<path>\(.*\)<\/path>.*/\1/;p}'
+}
+
+function delete_domains() {
+  for name in `$virsh_cmd list --all | grep "juju-" | awk '{print $2}'` ; do
+    $virsh_cmd destroy $name || /bin/true
+    sleep 2
+    $virsh_cmd undefine $name || /bin/true
+  done
+}
+
+function delete_volume() {
+  volname=$1
+  poolname=$2
+  pool_path=$(get_pool_path $poolname)
+  $virsh_cmd vol-delete $volname --pool $poolname 2>/dev/null || rm -f $pool_path/$volname 2>/dev/null
+}
+
+function detect_machines() {
+  m1=`get_machines_index_by_service openstack-dashboard`
+  m2=`get_machines_index_by_service glance`
+  m3=`get_machines_index_by_service keystone`
+  m4=`get_machines_index_by_service nova-cloud-controller`
+  m5=`get_machines_index_by_service neutron-api`
+}
+
+function hack_openstack() {
+  if [[ "$jver" == 2 ]] ; then
+    # Juju 2.0 registers services with private ips (using new modern tool 'network-get public')
+    echo "INFO: HACK: Reconfigure public endpoints for OpenStack $(date)"
+
+    local mchs=("$m2" "$m3" "$m4" "$m5")
+    local mch_srvs=('glance' 'keystone' 'nova-cloud-controller' 'neutron-api')
+    local mch_sets=('0' '0' '0' '0')
+    for j in {1..30} ; do
+      echo "INFO: attempt $j"
+      for i in {0..3} ; do
+        if [[ ${mch_sets[$i]} != '0' ]] ; then
+          continue;
+        fi
+        local addr_count=`juju machines --format json | python -c "import sys; import json; sys.stdout.write(str(len(json.load(sys.stdin)['machines'].get('${mchs[$i]}', {}).get('ip-addresses', []))))"`
+        if [[ $addr_count != '0' ]] ; then
+          local ip=`get-machine-ip-by-number ${mchs[$i]}`
+          echo "INFO: Update hostnames of ${mch_srvs[$i]} with IP=$ip"
+          juju-set ${mch_srvs[$i]} os-public-hostname=$ip os-admin-hostname=$ip os-internal-hostname=$ip
+          mch_sets[$i]='1'
+        fi
+      done
+      if ! echo ${mch_sets[@]} | grep -q '0' ; then
+        break
+      fi
+      sleep 2
+    done
+  fi
+
+  # open admin port of keystone - to be able to create projects
+  open_port $m3 35357
+  # open port for vnc console
+  open_port $m4 6080
+}
+
+function post_deploy() {
+  echo "INFO: Waiting for services start: $(date)"
+
+  if ! wait_absence_status_for_services "executing|blocked|waiting" 45 ; then
+    echo "ERROR: Waiting for services end: $(date)"
+    return 1
+  fi
+  echo "INFO: Waiting for services end: $(date)"
+
+  # check for errors
+  if juju-status | grep "current" | grep error ; then
+    echo "ERROR: Some services went to error state"
+    juju-ssh 0 sudo grep Error /var/log/juju/all-machines.log 2>/dev/null
+    return 1
+  fi
+
+  juju-status-tabular
+}

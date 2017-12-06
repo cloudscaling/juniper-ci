@@ -1,0 +1,88 @@
+#!/bin/bash
+
+fjmy_file="${BASH_SOURCE[0]}"
+fjmy_dir="$(dirname $fjmy_file)"
+source $fjmy_dir/functions-juju
+
+function juju-version() {
+  echo '2'
+}
+
+function juju-bootstrap() {
+  if ! juju bootstrap --bootstrap-series=$SERIES aws amazon ; then
+    return 1
+  fi
+  juju-status
+}
+
+function juju-destroy-environment() {
+  juju destroy-controller -y --destroy-all-models amazon
+}
+
+function juju-deploy-bundle() {
+  juju-deploy "$@"
+}
+
+function juju-set() {
+  juju config "$@"
+}
+
+function juju-remove-service() {
+  juju remove-application "$@"
+}
+
+function juju-get() {
+  local value=`juju config $1 | grep -v "^      " | grep -A 4 " $2:"`
+  if echo "$value" | grep -q "value:" ; then
+    echo "$value" | grep "value:" | awk '{print $2}'
+  else
+    echo "$value" | grep "default:" | awk '{print $2}'
+  fi
+}
+
+function get_machine() {
+  local service=$1
+  juju status $service --format tabular | grep "$service/" | head -1 | awk '{print $4}'
+}
+
+function get_machine_ip() {
+  local service=$1
+  juju status $service --format tabular | grep "$service/" | head -1 | awk '{print $5}'
+}
+
+function get_machine_by_ip() {
+  local ip=$1
+  juju status $ip --format tabular | grep -A 1 "^Machine" | tail -1 | awk '{print $1}'
+}
+
+function juju-get-machines() {
+  juju machines | awk '/started/{print $1}'
+}
+
+function get-machine-ip-by-number() {
+  local path=""
+  if echo "$1" | grep -q '/lxd/' ; then
+    # lxd container case
+    local mch=`echo "$1" | cut -d '/' -f 1`
+    local path=".get('$mch', {}).get('containers', {})"
+  fi
+  if output=`juju machines --format json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']${path}.get('$1', {}).get('dns-name'))" 2>&1` ; then
+    echo $output
+  fi
+}
+
+function get-machine-id-by-number() {
+  local path=""
+  if echo "$1" | grep -q '/lxd/' ; then
+    # lxd container case
+    local mch=`echo "$1" | cut -d '/' -f 1`
+    local path=".get('$mch', {}).get('containers', {})"
+  fi
+  if output=`juju machines --format json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']${path}.get('$1', {}).get('instance-id'))" 2>&1` ; then
+    echo $output
+  fi
+}
+
+function juju-attach() {
+  juju attach "$@"
+}
