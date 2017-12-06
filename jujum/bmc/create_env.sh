@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -135,7 +135,7 @@ function run_compute() {
   local mac_suffix=${!mac_var_name}
   echo "INFO: creating compute $index (mac suffix $mac_suffix) $(date)"
   run_cloud_machine comp-$index $mac_suffix 4096
-  local ip=`$addr.$mac_suffix`
+  local ip="$addr.$mac_suffix"
   juju add-machine ssh:ubuntu@$ip
 
   echo "INFO: preparing compute $index $(date)"
@@ -154,7 +154,7 @@ function run_network() {
   local mac_suffix=${!mac_var_name}
   echo "INFO: creating network $index (mac suffix $mac_suffix) $(date)"
   run_cloud_machine net-$index $mac_suffix 2048
-  local ip=`$addr.$mac_suffix`
+  local ip="$addr.$mac_suffix"
   juju add-machine ssh:ubuntu@$ip
 
   echo "INFO: preparing network $index $(date)"
@@ -175,7 +175,7 @@ function run_controller() {
   local mac_suffix=${!mac_var_name}
   echo "INFO: creating controller $index (mac suffix $mac_suffix) $(date)"
   run_cloud_machine cont-$index $mac_suffix $mem
-  local ip=`$addr.$mac_suffix`
+  local ip="$addr.$mac_suffix"
   local output=`juju add-machine ssh:ubuntu@$ip 2>&1`
   echo "$output"
   mch=`echo "$output" | tail -1 | awk '{print $3}'`
