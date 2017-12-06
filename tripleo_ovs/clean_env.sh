@@ -13,11 +13,8 @@ poolname="rdimages"
 
 source "$my_dir/../common/virsh/functions"
 
-delete_network management
-delete_network provisioning
-delete_network external
-delete_network dpdk
-delete_network tsn
+delete_network_dhcp e${NUM}-prov
+delete_network_dhcp e${NUM}-mgmt
 
 delete_domains
 
