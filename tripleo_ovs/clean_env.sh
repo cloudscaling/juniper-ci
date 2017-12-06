@@ -16,7 +16,7 @@ source "$my_dir/../common/virsh/functions"
 delete_network_dhcp e${NUM}-prov
 delete_network_dhcp e${NUM}-mgmt
 
-delete_domains
+delete_domains "e${NUM}-"
 
 vol_path=$(get_pool_path $poolname)
 
