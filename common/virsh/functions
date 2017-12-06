@@ -152,6 +152,14 @@ function create_network_dhcp() {
   virsh net-start $network_name
 }
 
+function update_network_dhcp() {
+  local net_name=$1
+  local host=$2
+  local mac=$3
+  local ip=$4
+  virsh net-update $net_name add ip-dhcp-host "<host mac='$mac' name='$host' ip='$ip' />"
+}
+
 function create_pool() {
   local poolname="$1"
   local path="/var/lib/libvirt/$poolname"
@@ -221,6 +229,8 @@ EOF
 }
 
 function define_machine() {
+  # parameter net could be: netname1,netname2
+  # or netname1/mac1,netname2/mac
   local name=$1
   local vcpus=$2
   local mem=$3
@@ -236,7 +246,12 @@ function define_machine() {
   local net_opts=''
   local i=''
   for i in $(echo $net | tr ',' ' ') ; do
-    net_opts+=" --network network=${i},model=$NET_DRIVER"
+    local nname=$(echo $i | cut -d '/' -f 1)
+    local mac=$(echo $i | cut -d '/' -f 2)
+    net_opts+=" --network network=${nname},model=$NET_DRIVER"
+    if [[ -n "$mac" ]] ; then
+      net_opts+=",mac=${mac}"
+    fi
   done
   virt-install --name $name \
     --ram $mem \

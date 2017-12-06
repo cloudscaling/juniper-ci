@@ -84,14 +84,35 @@ function define_and_start_full_vm() {
   local name=$1
   local count=$2
   local mem=$3
+  local mac_mgmt_base=${4:-''}
+  local ip_mgmt_base=${5:-''}
+  local mac_prov=${6:-''}
   local number_re='^[0-9]+$'
   if [[ $count =~ $number_re ]] ; then
     for (( i=1 ; i<=count; i++ )) ; do
       local vm_name="rd-overcloud-${NUM}-${name}-${i}"
       local vol_name="${vm_name}.qcow2"
       local vol_path=$(create_volume_from "${vol_name}" $poolname $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
-      define_machine $vm_name 2 $mem rhel7 "$NET_NAME_MGMT,$NET_NAME_PROV" "$vol_path"
-
+      local net_opts=$NET_NAME_MGMT
+      local mac_mgmt=''
+      if [[ -n "$mac_mgmt_base" ]] ; then
+       mac_mgmt="${mac_mgmt_base}:0${i}"
+      fi
+      if [[ -n "$mac_mgmt" ]] ; then
+        net_opts+="/${mac_mgmt}"
+      fi
+      net_opts+=",$NET_NAME_PROV"
+      if [[ -n "$mac_prov" ]] ; then
+        net_opts+="/${mac_prov}"
+      fi
+      define_machine $vm_name 2 $mem rhel7 "$net_opts" "$vol_path"
+      if [[ -n "$mac_mgmt" && -n "$ip_mgmt_base" ]] ; then
+        local _base="$(echo $ip_mgmt_base | cut -d '.' -f 1,2,3)"
+        local _sfx="$(echo $ip_mgmt_base | cut -d '.' -f 4)"
+        (( _sfx+=i ))
+        local ip_mgmt="${_base}.${_sfx}"
+        update_network_dhcp $NET_NAME_MGMT $vm_name $mac_mgmt $ip_mgmt
+      fi
       # customize domain to set root password
       # TODO: access denied under non root...
       # customized manually for now
@@ -160,10 +181,12 @@ EOF
   export PROV_NETDEV=${PROV_NETDEV:-$(ssh $SSH_OPTS root@${mgmt_ip} ip addr | grep $prov_ip | awk '{print($8)}')}
 else
 
-define_and_start_full_vm 'cont' $CONTROLLER_COUNT 4096
-define_and_start_full_vm 'comp' $COMPUTE_COUNT 4096
-#define_full_vm 'stor' $STORAGE_COUNT 2048
-define_and_start_full_vm 'net' $NETNODE_COUNT 4096
+
+net_mgmt_base_ip=$(echo "$NET_ADDR_MGMT" | cut -d '.' -f 1,2,3)
+define_and_start_full_vm 'cont' $CONTROLLER_COUNT 4096 "00:16:00:0$NUM:01" "${net_mgmt_base_ip}.100"
+define_and_start_full_vm 'comp' $COMPUTE_COUNT 4096 "00:16:00:0$NUM:02" "${net_mgmt_base_ip}.110"
+define_and_start_full_vm 'net' $NETNODE_COUNT 4096 "00:16:00:0$NUM:03" "${net_mgmt_base_ip}.120"
+#define_full_vm 'stor' $STORAGE_COUNT 2048 "00:16:00:0$NUM:04"
 
 fi
 
