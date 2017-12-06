@@ -123,7 +123,7 @@ function run_cloud_machine() {
   local ip=`get_kvm_machine_ip $mac`
   machines["$name"]=$ip
   wait_kvm_machine $ip
-  virsh net-update juju add ip-dhcp-host "<host mac='$mac_base:$mac' name='$name' ip='$ip' />"
+  virsh net-update $nname add ip-dhcp-host "<host mac='$mac_base:$mac' name='$name' ip='$ip' />"
 }
 
 function run_compute() {
