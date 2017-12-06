@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -31,7 +31,6 @@ if $virsh_cmd list --all | grep -q "${job_prefix}-cont" ; then
 fi
 
 create_network $nname $addr
-create_network $nname_vm $addr_vm
 
 # create pool
 $virsh_cmd pool-info $poolname &> /dev/null || create_pool $poolname
@@ -48,6 +47,7 @@ function run_machine() {
   local cpu="$2"
   local ram="$3"
   local mac_suffix="$4"
+  local ip=$5
 
   local params=""
   if echo "$name" | grep -q comp ; then
@@ -72,10 +72,13 @@ function run_machine() {
     --noautoconsole \
     --graphics vnc,listen=0.0.0.0 \
     --network network=$nname,model=$net_driver,mac=$mac_base:$mac_suffix \
-    --network network=$nname_vm,model=$net_driver,mac=52:54:00:11:00:$mac_suffix \
     --cpu SandyBridge,+vmx,+ssse3 \
     --boot hd \
-    $params
+    $params \
+    --dry-run --print-xml > /tmp/oc-$name.xml
+  virsh define --file /tmp/oc-$name.xml
+  virsh net-update $nname add ip-dhcp-host "<host mac='$mac_base:$mac_suffix' name='$name' ip='$ip' />"
+  virsh start $name --force-boot
 }
 
 wait_cmd="ssh"
@@ -92,10 +95,9 @@ function wait_kvm_machine() {
   done
 }
 
-mac_var_name=${job_prefix}_cont_mac
-run_machine ${job_prefix}-cont 1 2048 ${!mac_var_name}
-cont_ip=`get_kvm_machine_ip ${job_prefix}_cont_mac`
-wait_kvm_machine $cont_ip
+mac_var_name=${job_prefix}_cont_idx
+cont_ip="$addr.${!mac_var_name}"
+run_machine ${job_prefix}-cont 1 2048 ${!mac_var_name} $cont_ip
 
 # wait for controller machine
 iter=0
@@ -118,22 +120,22 @@ declare -A machines
 
 function run_cloud_machine() {
   local name=$1
-  local mac=$2
+  local mac_suffix=$2
   local mem=$3
-  run_machine ${job_prefix}-os-$name 4 $mem $mac
-  local ip=`get_kvm_machine_ip $mac`
+
+  local ip="$addr.$mac_suffix"
+  run_machine ${job_prefix}-os-$name 4 $mem $mac_suffix $ip
   machines["$name"]=$ip
   wait_kvm_machine $ip
-  virsh net-update $nname add ip-dhcp-host "<host mac='$mac_base:$mac' name='$name' ip='$ip' />"
 }
 
 function run_compute() {
   local index=$1
-  local mac_var_name="${job_prefix}_os_comp_${index}_mac"
-  local mac=${!mac_var_name}
-  echo "INFO: creating compute $index (mac $mac) $(date)"
-  run_cloud_machine comp-$index $mac 4096
-  local ip=`get_kvm_machine_ip $mac`
+  local mac_var_name="${job_prefix}_os_comp_${index}_idx"
+  local mac_suffix=${!mac_var_name}
+  echo "INFO: creating compute $index (mac suffix $mac_suffix) $(date)"
+  run_cloud_machine comp-$index $mac_suffix 4096
+  local ip=`$addr.$mac_suffix`
   juju add-machine ssh:ubuntu@$ip
 
   echo "INFO: preparing compute $index $(date)"
@@ -148,11 +150,11 @@ function run_compute() {
 
 function run_network() {
   local index=$1
-  local mac_var_name="${job_prefix}_os_net_${index}_mac"
-  local mac=${!mac_var_name}
-  echo "INFO: creating network $index (mac $mac) $(date)"
-  run_cloud_machine net-$index $mac 2048
-  local ip=`get_kvm_machine_ip $mac`
+  local mac_var_name="${job_prefix}_os_net_${index}_idx"
+  local mac_suffix=${!mac_var_name}
+  echo "INFO: creating network $index (mac suffix $mac_suffix) $(date)"
+  run_cloud_machine net-$index $mac_suffix 2048
+  local ip=`$addr.$mac_suffix`
   juju add-machine ssh:ubuntu@$ip
 
   echo "INFO: preparing network $index $(date)"
@@ -169,11 +171,11 @@ function run_controller() {
   local index=$1
   local mem=$2
   local prepare_for_openstack=$3
-  local mac_var_name="${job_prefix}_os_cont_${index}_mac"
-  local mac=${!mac_var_name}
-  echo "INFO: creating controller $index (mac $mac) $(date)"
-  run_cloud_machine cont-$index $mac $mem
-  local ip=`get_kvm_machine_ip $mac`
+  local mac_var_name="${job_prefix}_os_cont_${index}_idx"
+  local mac_suffix=${!mac_var_name}
+  echo "INFO: creating controller $index (mac suffix $mac_suffix) $(date)"
+  run_cloud_machine cont-$index $mac_suffix $mem
+  local ip=`$addr.$mac_suffix`
   local output=`juju add-machine ssh:ubuntu@$ip 2>&1`
   echo "$output"
   mch=`echo "$output" | tail -1 | awk '{print $3}'`
