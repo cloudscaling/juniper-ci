@@ -14,7 +14,7 @@ addr="10.0.0"
 
 mac_base='52:54:00:10:00'
 # juju controller
-jovs_cont_idx='01'
+jovs_cont_idx='99'
 # openstack components (controllers + rabbit + db)
 jovs_os_cont_0_idx='10'
 # network nodes
