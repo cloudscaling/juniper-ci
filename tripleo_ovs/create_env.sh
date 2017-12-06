@@ -198,8 +198,8 @@ else
   net_mgmt_base_ip=$(echo "$NET_ADDR_MGMT" | cut -d '.' -f 1,2,3)
   net_prov_base_ip=$(echo "$NET_ADDR_PROV" | cut -d '.' -f 1,2,3)
   define_and_start_full_vm 'controller' $CONTROLLER_COUNT 4096 "52:54:00:0$NUM:01" "${net_mgmt_base_ip}.100" "52:54:01:0$NUM:01" "${net_prov_base_ip}.100"
-  define_and_start_full_vm 'compute' $COMPUTE_COUNT 4096 "52:54:00:0$NUM:02" "${net_mgmt_base_ip}.110" "52:54:01:0$NUM:02" "${net_prov_base_ip}.100"
-  define_and_start_full_vm 'network' $NETNODE_COUNT 4096 "52:54:00:0$NUM:03" "${net_mgmt_base_ip}.120" "52:54:01:0$NUM:03" "${net_prov_base_ip}.100"
+  define_and_start_full_vm 'compute' $COMPUTE_COUNT 4096 "52:54:00:0$NUM:02" "${net_mgmt_base_ip}.110" "52:54:01:0$NUM:02" "${net_prov_base_ip}.110"
+  define_and_start_full_vm 'network' $NETNODE_COUNT 4096 "52:54:00:0$NUM:03" "${net_mgmt_base_ip}.120" "52:54:01:0$NUM:03" "${net_prov_base_ip}.120"
   #define_full_vm 'stor' $STORAGE_COUNT 2048 "00:16:00:0$NUM:04"
 
 fi
