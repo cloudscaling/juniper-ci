@@ -193,10 +193,10 @@ function run_controller() {
   wait_kvm_machine $ip
 }
 
+run_controller 0 8192 1
+
 run_compute 1
 run_compute 2
-
-run_controller 0 8192 1
 
 run_network 1
 run_network 2
@@ -211,9 +211,10 @@ cat $WORKSPACE/hosts
 echo "INFO: Applying hosts file and hostnames $(date)"
 for m in ${!machines[@]} ; do
   ip=${machines[$m]}
+  echo "INFO: Apply $m for $ip"
   juju scp $WORKSPACE/hosts ubuntu@$ip:hosts
-  juju ssh ubuntu@$ip 'sudo bash -c "cat ./hosts >> /etc/hosts"' 2>/dev/null
   juju ssh ubuntu@$ip "sudo bash -c 'echo $m > /etc/hostname'" 2>/dev/null
+  juju ssh ubuntu@$ip 'sudo bash -c "cat ./hosts >> /etc/hosts"' 2>/dev/null
   juju ssh ubuntu@$ip "sudo hostname $m" 2>/dev/null
 done
 rm $WORKSPACE/hosts
