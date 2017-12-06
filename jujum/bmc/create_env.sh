@@ -92,7 +92,8 @@ function wait_kvm_machine() {
   done
 }
 
-run_machine ${job_prefix}-cont 1 2048 ${job_prefix}_cont_mac
+mac_var_name=${job_prefix}_cont_mac
+run_machine ${job_prefix}-cont 1 2048 ${!mac_var_name}
 cont_ip=`get_kvm_machine_ip ${job_prefix}_cont_mac`
 wait_kvm_machine $cont_ip
 
