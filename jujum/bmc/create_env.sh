@@ -212,9 +212,8 @@ for m in ${!machines[@]} ; do
   ip=${machines[$m]}
   echo "INFO: Apply $m for $ip"
   juju scp $WORKSPACE/hosts ubuntu@$ip:hosts
-  juju ssh ubuntu@$ip "sudo bash -c 'echo $m > /etc/hostname'" 2>/dev/null
+  juju ssh ubuntu@$ip "sudo bash -c 'echo $m > /etc/hostname ; hostname $m'" 2>/dev/null
   juju ssh ubuntu@$ip 'sudo bash -c "cat ./hosts >> /etc/hosts"' 2>/dev/null
-  juju ssh ubuntu@$ip "sudo hostname $m" 2>/dev/null
 done
 rm $WORKSPACE/hosts
 

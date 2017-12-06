@@ -36,6 +36,8 @@ echo "INFO: network 1: $net1 / $net1_ip"
 
 # OpenStack base
 
+wait_for_machines $cont0 $comp1 $comp2 $net1
+
 echo "INFO: Deploy all $(date)"
 juju-deploy cs:$SERIES/ntp
 
@@ -74,10 +76,6 @@ juju-deploy neutron-gateway --to $net1
 #juju-add-unit neutron-gateway --to $net2
 #juju-add-unit neutron-gateway --to $net3
 
-detect_machines
-wait_for_machines $m1 $m2 $m3 $m4 $m5 $net1
-#wait_for_machines $m1 $m2 $m3 $m4 $m5 $net1 $net2 $net3
-
 echo "INFO: Add relations $(date)"
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
 juju-add-relation "keystone:shared-db" "mysql:shared-db"
@@ -100,14 +98,13 @@ juju-add-relation "neutron-api:amqp" "rabbitmq-server:amqp"
 juju-add-relation "neutron-api" "ntp"
 juju-add-relation "nova-compute:juju-info" "ntp:juju-info"
 juju-add-relation "neutron-gateway" "ntp"
-juju-add-relation "neutron-gateway" "mysql:shared-db"
-juju-add-relation "neutron-gateway" "rabbitmq-server:amqp"
+juju-add-relation "neutron-gateway:amqp" "rabbitmq-server:amqp"
 juju-add-relation "neutron-gateway" "nova-cloud-controller"
 juju-add-relation "neutron-gateway" "neutron-api"
 
-juju add-relation "neutron-openvswitch" "nova-compute"
-juju add-relation "neutron-openvswitch" "neutron-api"
-juju add-relation "neutron-openvswitch" "rabbitmq-server"
+juju-add-relation "neutron-openvswitch" "nova-compute"
+juju-add-relation "neutron-openvswitch" "neutron-api"
+juju-add-relation "neutron-openvswitch" "rabbitmq-server"
 
 post_deploy
 
