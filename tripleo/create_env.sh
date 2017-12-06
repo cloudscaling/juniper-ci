@@ -224,7 +224,7 @@ function _change_image() {
     aws s3 sync s3://contrailrhel7 $CONTRAIL_PACKAGES_DIR
     latest_ver_rpm=`ls ${CONTRAIL_PACKAGES_DIR}/${build_series}contrail-install* -vr  | grep $CONTRAIL_VERSION | grep $OPENSTACK_VERSION | head -n1`
     cp $CONTRAIL_PACKAGES_DIR/*.tgz $tmpdir/root/contrail_packages/
-    cp $CONTRAIL_PACKAGES_DIR/$latest_ver_rpm $tmpdir/root/contrail_packages/
+    cp $latest_ver_rpm $tmpdir/root/contrail_packages/
   fi
 
   # cp rhel account file
