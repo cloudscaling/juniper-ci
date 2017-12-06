@@ -57,7 +57,10 @@ undercloud_vm_name="e${NUM}-undercloud"
 assert_env_exists "$undercloud_vm_name"
 
 create_network_dhcp $NET_NAME_MGMT $NET_ADDR_MGMT $BRIDGE_NAME_MGMT
-prov_dhcp='yes'
+prov_dhcp='no'
+if [[ "$DEPLOY_STAGES" == 'clean_vms' ]] ; then
+  prov_dhcp='yes'
+fi
 create_network_dhcp $NET_NAME_PROV $NET_ADDR_PROV $BRIDGE_NAME_PROV $prov_dhcp
 
 # create pool
