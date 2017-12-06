@@ -27,8 +27,8 @@ mkdir -p ${BASE_IMAGE_DIR}
 BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
 BASE_IMAGE_POOL=${BASE_IMAGE_POOL:-'images'}
 
-BRIDGE_NAME_MGMT=${BRIDGE_NAME_MGMT:-"rd-mgmt-${NUM}"}
-BRIDGE_NAME_PROV=${BRIDGE_NAME_PROV:-"rd-prov-${NUM}"}
+BRIDGE_NAME_MGMT=${BRIDGE_NAME_MGMT:-"e-mgmt-${NUM}"}
+BRIDGE_NAME_PROV=${BRIDGE_NAME_PROV:-"e-prov-${NUM}"}
 NET_NAME_MGMT=${NET_NAME_MGMT:-${BRIDGE_NAME_MGMT}}
 NET_NAME_PROV=${NET_NAME_PROV:-${BRIDGE_NAME_PROV}}
 (( netnum=100+$NUM*10 ))
@@ -91,7 +91,7 @@ function define_and_start_full_vm() {
   local number_re='^[0-9]+$'
   if [[ $count =~ $number_re ]] ; then
     for (( i=1 ; i<=count; i++ )) ; do
-      local vm_name="${name}${i}"
+      local vm_name="e${NUM}-${name}${i}"
       local vol_name="${vm_name}.qcow2"
       local vol_path=$(create_volume_from "${vol_name}" $poolname $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
       local net_opts=$NET_NAME_MGMT
