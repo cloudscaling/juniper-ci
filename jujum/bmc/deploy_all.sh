@@ -11,6 +11,13 @@ my_dir="$(dirname $my_file)"
 
 source "$my_dir/functions"
 
+if [[ "$CLEAN_BEFORE" == 'true' || "$CLEAN_BEFORE" == 'clean_and_exit' ]] ; then
+  "$my_dir"/clean_env.sh || /bin/true
+  if [[ "$CLEAN_BEFORE" == 'clean_and_exit' ]] ; then
+    exit
+  fi
+fi
+
 export log_dir="$WORKSPACE/logs"
 if [ -d $log_dir ] ; then
   chmod -R u+w "$log_dir"

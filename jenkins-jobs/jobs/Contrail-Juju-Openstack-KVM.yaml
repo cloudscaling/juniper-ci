@@ -6,6 +6,12 @@
     concurrent: true
     parameters:
       - choice:
+          name: CLEAN_BEFORE
+          choices:
+            - 'false'
+            - 'true'
+            - clean_and_exit
+      - choice:
           name: CLEAN_ENV
           choices:
             - always
@@ -75,6 +81,12 @@
     node: slave1
     concurrent: true
     parameters:
+      - choice:
+          name: CLEAN_BEFORE
+          choices:
+            - 'false'
+            - 'true'
+            - clean_and_exit
       - choice:
           name: CLEAN_ENV
           choices:

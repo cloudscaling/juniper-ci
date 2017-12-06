@@ -10,6 +10,13 @@ my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 source "$my_dir/common/functions"
 
+if [[ "$CLEAN_BEFORE" == 'true' || "$CLEAN_BEFORE" == 'clean_and_exit' ]] ; then
+  cleanup_environment
+  if [[ "$CLEAN_BEFORE" == 'clean_and_exit' ]] ; then
+    exit
+  fi
+fi
+
 log_dir="$WORKSPACE/logs"
 if [ -d $log_dir ] ; then
   chmod -R u+w "$log_dir"

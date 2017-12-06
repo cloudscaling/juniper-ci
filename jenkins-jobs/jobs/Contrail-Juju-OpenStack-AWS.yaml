@@ -4,6 +4,12 @@
     defaults: global
     parameters:
       - choice:
+          name: CLEAN_BEFORE
+          choices:
+            - 'false'
+            - 'true'
+            - clean_and_exit
+      - choice:
           name: CLEAN_ENV
           choices:
             - always
