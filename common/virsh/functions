@@ -247,7 +247,7 @@ function define_machine() {
   local i=''
   for i in $(echo $net | tr ',' ' ') ; do
     local nname=$(echo $i | cut -d '/' -f 1)
-    local mac=$(echo $i | cut -d '/' -f 2)
+    local mac=$(echo $i | cut -s -d '/' -f 2)
     net_opts+=" --network network=${nname},model=$NET_DRIVER"
     if [[ -n "$mac" ]] ; then
       net_opts+=",mac=${mac}"
