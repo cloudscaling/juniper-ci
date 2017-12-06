@@ -3,7 +3,9 @@
 export LIBVIRT_DEFAULT_URI=qemu:///system
 virsh_cmd="virsh"
 
+# set this name manually to mac's definition below
 job_prefix="jovs"
+
 juju_controller_name="${job_prefix}-cloud"
 poolname="${job_prefix}images"
 net_driver=${net_driver:-e1000}
@@ -14,16 +16,16 @@ addr_vm="10.0.1"
 
 mac_base='52:54:00:10:00'
 # juju controller
-juju_cont_mac='01'
+jovs_cont_mac='01'
 # openstack compute
-juju_os_comp_1_mac='02'
-juju_os_comp_2_mac='03'
+jovs_os_comp_1_mac='02'
+jovs_os_comp_2_mac='03'
 # openstack components (controllers + rabbit + db)
-juju_os_cont_0_mac='04'
+jovs_os_cont_0_mac='04'
 # network nodes
-juju_os_net_1_mac='05'
-juju_os_net_2_mac='06'
-juju_os_net_3_mac='07'
+jovs_os_net_1_mac='05'
+jovs_os_net_2_mac='06'
+jovs_os_net_3_mac='07'
 
 function get_kvm_machine_ip() {
   local mac_suffix="$1"

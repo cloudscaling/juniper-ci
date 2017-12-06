@@ -92,8 +92,8 @@ function wait_kvm_machine() {
   done
 }
 
-run_machine ${job_prefix}-cont 1 2048 $juju_cont_mac
-cont_ip=`get_kvm_machine_ip $juju_cont_mac`
+run_machine ${job_prefix}-cont 1 2048 ${job_prefix}_cont_mac
+cont_ip=`get_kvm_machine_ip ${job_prefix}_cont_mac`
 wait_kvm_machine $cont_ip
 
 # wait for controller machine
