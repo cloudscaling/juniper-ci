@@ -86,7 +86,7 @@ function define_and_start_full_vm() {
   local mem=$3
   local mac_mgmt_base=${4:-''}
   local ip_mgmt_base=${5:-''}
-  local mac_prov=${6:-''}
+  local mac_prov_base=${6:-''}
   local ip_prov_base=${7:-''}
   local number_re='^[0-9]+$'
   if [[ $count =~ $number_re ]] ; then
