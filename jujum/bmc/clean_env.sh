@@ -5,13 +5,15 @@ my_dir="$(dirname $my_file)"
 
 source "$my_dir/functions"
 
-juju remove-machine 0 --force || /bin/true
-juju remove-machine 1 --force || /bin/true
-juju remove-machine 2 --force || /bin/true
-juju remove-machine 3 --force || /bin/true
-juju remove-machine 4 --force || /bin/true
-juju remove-machine 5 --force || /bin/true
-juju destroy-controller -y --destroy-all-models $juju_controller_name || /bin/true
+if juju show-controller $juju_controller_name ; then
+  juju remove-machine 0 --force || /bin/true
+  juju remove-machine 1 --force || /bin/true
+  juju remove-machine 2 --force || /bin/true
+  juju remove-machine 3 --force || /bin/true
+  juju remove-machine 4 --force || /bin/true
+  juju remove-machine 5 --force || /bin/true
+  juju destroy-controller -y --destroy-all-models $juju_controller_name || /bin/true
+fi
 
 rm -rf $HOME/.local/share/juju
 

@@ -4,7 +4,7 @@ export LIBVIRT_DEFAULT_URI=qemu:///system
 virsh_cmd="virsh"
 
 job_prefix="jovs"
-juju_controller_name="test-ovs-cloud"
+juju_controller_name="${job_prefix}-cloud"
 poolname="${job_prefix}images"
 net_driver=${net_driver:-e1000}
 nname="$job_prefix"
