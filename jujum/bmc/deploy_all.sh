@@ -38,9 +38,9 @@ export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
 export PASSWORD=${PASSWORD:-'password'}
 
 # check if environment is present
-if $virsh_cmd list --all | grep -q "juju-cont" ; then
+if $virsh_cmd list --all | grep -q "${job_prefix}-cont" ; then
   echo 'ERROR: environment present. please clean up first'
-  $virsh_cmd list --all | grep "juju-"
+  $virsh_cmd list --all | grep "${job_prefix}-"
   exit 1
 fi
 

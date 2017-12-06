@@ -24,9 +24,9 @@ function catch_errors_ce() {
 }
 
 # check if environment is present
-if $virsh_cmd list --all | grep -q "juju-cont" ; then
+if $virsh_cmd list --all | grep -q "${job_prefix}-cont" ; then
   echo 'ERROR: environment present. please clean up first'
-  $virsh_cmd list --all | grep "juju-"
+  $virsh_cmd list --all | grep "${job_prefix}-"
   exit 1
 fi
 
@@ -92,7 +92,7 @@ function wait_kvm_machine() {
   done
 }
 
-run_machine juju-cont 1 2048 $juju_cont_mac
+run_machine ${job_prefix}-cont 1 2048 $juju_cont_mac
 cont_ip=`get_kvm_machine_ip $juju_cont_mac`
 wait_kvm_machine $cont_ip
 
@@ -110,7 +110,7 @@ while ! scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -B ./tmp
 done
 
 echo "INFO: bootstraping juju controller $(date)"
-juju bootstrap manual/$cont_ip test-cloud
+juju bootstrap manual/$cont_ip $juju_controller_name
 wait_cmd="juju ssh"
 
 declare -A machines
@@ -119,7 +119,7 @@ function run_cloud_machine() {
   local name=$1
   local mac=$2
   local mem=$3
-  run_machine juju-os-$name 4 $mem $mac
+  run_machine ${job_prefix}-os-$name 4 $mem $mac
   local ip=`get_kvm_machine_ip $mac`
   machines["$name"]=$ip
   wait_kvm_machine $ip
@@ -128,7 +128,7 @@ function run_cloud_machine() {
 
 function run_compute() {
   local index=$1
-  local mac_var_name="juju_os_comp_${index}_mac"
+  local mac_var_name="${job_prefix}_os_comp_${index}_mac"
   local mac=${!mac_var_name}
   echo "INFO: creating compute $index (mac $mac) $(date)"
   run_cloud_machine comp-$index $mac 4096
@@ -147,7 +147,7 @@ function run_compute() {
 
 function run_network() {
   local index=$1
-  local mac_var_name="juju_os_net_${index}_mac"
+  local mac_var_name="${job_prefix}_os_net_${index}_mac"
   local mac=${!mac_var_name}
   echo "INFO: creating network $index (mac $mac) $(date)"
   run_cloud_machine net-$index $mac 2048
@@ -168,7 +168,7 @@ function run_controller() {
   local index=$1
   local mem=$2
   local prepare_for_openstack=$3
-  local mac_var_name="juju_os_cont_${index}_mac"
+  local mac_var_name="${job_prefix}_os_cont_${index}_mac"
   local mac=${!mac_var_name}
   echo "INFO: creating controller $index (mac $mac) $(date)"
   run_cloud_machine cont-$index $mac $mem

@@ -11,7 +11,7 @@ juju remove-machine 2 --force || /bin/true
 juju remove-machine 3 --force || /bin/true
 juju remove-machine 4 --force || /bin/true
 juju remove-machine 5 --force || /bin/true
-juju destroy-controller -y --destroy-all-models test-cloud || /bin/true
+juju destroy-controller -y --destroy-all-models $juju_controller_name || /bin/true
 
 rm -rf $HOME/.local/share/juju
 
@@ -20,8 +20,8 @@ delete_network $nname_vm
 
 delete_domains
 
-delete_volume juju-cont.qcow2 $poolname
-for vol in `$virsh_cmd vol-list $poolname | awk '/juju-/{print $1}'` ; do
+delete_volume ${job_prefix}-cont.qcow2 $poolname
+for vol in `$virsh_cmd vol-list $poolname | awk '/${job_prefix}-/{print $1}'` ; do
   echo "INFO: removing volume $vol $(date)"
   delete_volume $vol $poolname
 done

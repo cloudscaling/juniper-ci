@@ -3,11 +3,13 @@
 export LIBVIRT_DEFAULT_URI=qemu:///system
 virsh_cmd="virsh"
 
-poolname="jujumimages"
+job_prefix="jujum"
+juju_controller_name="test-ovs-cloud"
+poolname="${job_prefix}images"
 net_driver=${net_driver:-e1000}
-nname="jujum"
+nname="$job_prefix"
 addr="10.0.0"
-nname_vm="jujum-vm"
+nname_vm="${job_prefix}-vm"
 addr_vm="10.0.1"
 
 mac_base='52:54:00:10:00'
@@ -76,7 +78,7 @@ function get_pool_path() {
 }
 
 function delete_domains() {
-  for name in `$virsh_cmd list --all | grep "juju-" | awk '{print $2}'` ; do
+  for name in `$virsh_cmd list --all | grep "${job_prefix}-" | awk '{print $2}'` ; do
     $virsh_cmd destroy $name || /bin/true
     sleep 2
     $virsh_cmd undefine $name || /bin/true
