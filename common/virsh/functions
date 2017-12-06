@@ -282,8 +282,8 @@ function delete_domain() {
 }
 
 function delete_domains() {
-  domname=${1:-rd-overcloud-${NUM}-}
-  for name in `virsh list --all | grep "rd-overcloud-$NUM-" | awk '{print $2}'` ; do
+  local domname=${1:-rd-overcloud-${NUM}-}
+  for name in `virsh list --all | grep "$domname" | awk '{print $2}'` ; do
     delete_domain $name
   done
 
