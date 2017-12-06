@@ -96,7 +96,7 @@ function wait_kvm_machine() {
 }
 
 cont_ip="$addr.$cont_idx"
-run_machine ${job_prefix}-cont 1 2048 ${!mac_var_name} $cont_ip
+run_machine ${job_prefix}-cont 1 2048 $cont_idx $cont_ip
 
 # wait for controller machine
 iter=0
@@ -198,8 +198,8 @@ run_compute 1
 run_compute 2
 
 run_network 1
-run_network 2
-run_network 3
+#run_network 2
+#run_network 3
 
 echo "INFO: creating hosts file $(date)"
 truncate -s 0 $WORKSPACE/hosts
