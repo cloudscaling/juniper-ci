@@ -53,7 +53,8 @@ net_driver=${net_driver:-e1000}
 source "$my_dir/../common/virsh/functions"
 
 # check if environment is present
-assert_env_exists "rd-undercloud-$NUM"
+undercloud_vm_name="e${NUM}-undercloud"
+assert_env_exists "$undercloud_vm_name"
 
 create_network_dhcp $NET_NAME_MGMT $NET_ADDR_MGMT $BRIDGE_NAME_MGMT
 prov_dhcp='yes'
@@ -70,7 +71,7 @@ function define_overcloud_vms() {
   local number_re='^[0-9]+$'
   if [[ $count =~ $number_re ]] ; then
     for (( i=1 ; i<=count; i++ )) ; do
-      local vm_name="rd-overcloud-${NUM}-${name}-${i}"
+      local vm_name="e${NUM}-overcloud-${name}-${i}"
       local vol_name="${vm_name}.qcow2"
       local vol_path=$(create_new_volume $vol_name $poolname $disk_size)
       define_machine $vm_name 2 $mem rhel7 $NET_NAME_PROV "$vol_path"
@@ -146,7 +147,6 @@ if [[ "$DEPLOY_STAGES" != 'clean_vms' ]] ; then
   define_overcloud_vms 'net' $NETNODE_COUNT 2024
 
   # make undercloud image from base image and define undercloud VM
-  undercloud_vm_name="rd-undercloud-$NUM"
   undercloud_vol_path=$(create_volume_from "${undercloud_vm_name}.qcow2" $poolname $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
 
   define_machine $undercloud_vm_name 2 8192 rhel7 "$NET_NAME_MGMT,$NET_NAME_PROV" "$undercloud_vol_path"

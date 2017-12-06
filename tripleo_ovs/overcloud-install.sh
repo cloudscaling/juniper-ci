@@ -70,10 +70,10 @@ else
   list_vm_cmd="ssh $ssh_opts $ssh_addr /usr/bin/VBoxManage list vms"
 fi
 
-CONT_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-cont- | wc -l)
-COMP_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-$compute_machine_name- | wc -l)
-STOR_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-stor- | wc -l)
-NET_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-net- | wc -l)
+CONT_COUNT=$($list_vm_cmd | grep e$NUM-overcloud-cont- | wc -l)
+COMP_COUNT=$($list_vm_cmd | grep e$NUM-overcloud-$compute_machine_name- | wc -l)
+STOR_COUNT=$($list_vm_cmd | grep e$NUM-overcloud-stor- | wc -l)
+NET_COUNT=$($list_vm_cmd | grep e$NUM-overcloud-net- | wc -l)
 ((OCM_COUNT=CONT_COUNT+COMP_COUNT+STOR_COUNT+NET_COUNT))
 
 comp_scale_count=$COMP_COUNT
@@ -85,9 +85,9 @@ function get_macs() {
   truncate -s 0 /tmp/nodes-$type.txt
   for (( i=1; i<=count; i++ )) ; do
     if [[ "$SSH_VIRT_TYPE" != 'vbox' ]] ; then
-      virsh $virsh_opts domiflist rd-overcloud-$NUM-$type-$i | awk '$3 ~ "prov" {print $5};'
+      virsh $virsh_opts domiflist e$NUM-overcloud-$type-$i | awk '$3 ~ "prov" {print $5};'
     else
-      ssh $ssh_opts $ssh_addr /usr/bin/VBoxManage showvminfo rd-overcloud-$NUM-$type-$i | awk '/NIC 1/ {print $4}' | cut -d ',' -f 1 | sed 's/\(..\)/\1:/g' | sed 's/:$//'
+      ssh $ssh_opts $ssh_addr /usr/bin/VBoxManage showvminfo e$NUM-overcloud-$type-$i | awk '/NIC 1/ {print $4}' | cut -d ',' -f 1 | sed 's/\(..\)/\1:/g' | sed 's/:$//'
     fi
   done > /tmp/nodes-$type.txt
   echo "macs for '$type':"
