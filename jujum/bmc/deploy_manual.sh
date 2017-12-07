@@ -27,12 +27,12 @@ echo "INFO: controller 0 (OpenStack): $cont0 / $cont0_ip"
 net1_ip="$addr.$os_net_1_idx"
 net1=`juju status | grep $net1_ip | awk '{print $1}'`
 echo "INFO: network 1: $net1 / $net1_ip"
-#net2_ip="$addr.$os_net_2_idx"
-#net2=`juju status | grep $net2_ip | awk '{print $1}'`
-#echo "INFO: network 1: $net2 / $net2_ip"
-#net3_ip="$addr.$os_net_3_idx"
-#net3=`juju status | grep $net3_ip | awk '{print $1}'`
-#echo "INFO: network 1: $net3 / $net3_ip"
+net2_ip="$addr.$os_net_2_idx"
+net2=`juju status | grep $net2_ip | awk '{print $1}'`
+echo "INFO: network 1: $net2 / $net2_ip"
+net3_ip="$addr.$os_net_3_idx"
+net3=`juju status | grep $net3_ip | awk '{print $1}'`
+echo "INFO: network 1: $net3 / $net3_ip"
 
 # OpenStack base
 
@@ -73,8 +73,9 @@ juju-expose neutron-api
 juju-deploy neutron-openvswitch
 
 juju-deploy neutron-gateway --to $net1
-#juju-add-unit neutron-gateway --to $net2
-#juju-add-unit neutron-gateway --to $net3
+juju-set keystone "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "ha-bindiface=ens3"
+juju-add-unit neutron-gateway --to $net2
+juju-add-unit neutron-gateway --to $net3
 
 echo "INFO: Add relations $(date)"
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"

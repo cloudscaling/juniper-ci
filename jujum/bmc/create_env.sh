@@ -198,8 +198,8 @@ run_compute 1
 run_compute 2
 
 run_network 1
-#run_network 2
-#run_network 3
+run_network 2
+run_network 3
 
 echo "INFO: creating hosts file $(date)"
 truncate -s 0 $WORKSPACE/hosts
