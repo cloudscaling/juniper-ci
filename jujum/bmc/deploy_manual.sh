@@ -67,13 +67,13 @@ juju-set nova-compute "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "virt-ty
 
 # Neutron
 juju-deploy cs:$SERIES/neutron-api --to lxd:$cont0
-juju-set neutron-api "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "enable-dvr=true"
+juju-set neutron-api "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "enable-dvr=true" "overlay-network-type=vxlan" "enable-l3ha=True"
 juju-set nova-cloud-controller "network-manager=Neutron"
 juju-expose neutron-api
 juju-deploy neutron-openvswitch
 
 juju-deploy neutron-gateway --to $net1
-juju-set keystone "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "ha-bindiface=ens3"
+juju-set neutron-gateway "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "ha-bindiface=ens3" "bridge-mappings=external:br-ex"
 juju-add-unit neutron-gateway --to $net2
 juju-add-unit neutron-gateway --to $net3
 
