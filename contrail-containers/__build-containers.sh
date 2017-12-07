@@ -15,6 +15,7 @@ pwd
 ls -l
 cd
 cd contrail-container-builder/containers
+export TEST_MODE=true
 ./setup-for-build.sh
 
 echo "INFO: Run build  $(date)"
