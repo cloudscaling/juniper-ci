@@ -1,9 +1,9 @@
-- job:
-    name: TripleO-Contrail-CI
+- job-template:
+    name: TripleO-Contrail-{slavenode}
     description: 'TripleO Contrail CI'
     defaults: global
-    node: slave1
-    concurrent: true
+    node: '{slavenode}'
+    concurrent: {execconcurrent}
     parameters:
       - choice:
           name: NUM
@@ -195,3 +195,18 @@
           #!/bin/bash -ex
           export LIBVIRT_DEFAULT_URI=qemu:///system
           ./juniper-ci/tripleo/clean_env.sh
+
+- project:
+    name: tripleo-contrail
+    project:
+      - slave01:
+          slavenode: slave01
+          execconcurrent: true
+      - slave02:
+          slavenode: slave02
+          execconcurrent: false
+      - slave03:
+          slavenode: slave03
+          execconcurrent: false
+    jobs:
+      - 'TripleO-Contrail-{project}'
