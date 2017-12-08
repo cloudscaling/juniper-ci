@@ -49,6 +49,8 @@ function run_machine() {
   local ram="$3"
   local mac_suffix="$4"
   local ip=$5
+  # optional params
+  local ip_ext=$6
 
   local params=""
   if echo "$name" | grep -q comp ; then
@@ -59,6 +61,10 @@ function run_machine() {
     local osv='ubuntu16.04'
   else
     local osv='ubuntu14.04'
+  fi
+
+  if [[ -n "$ip_ext" ]] ; then
+    params="$params --network network=$nname_ext,model=$net_driver,mac=$mac_base_ext:$mac_suffix"
   fi
 
   echo "INFO: running  machine $name $(date)"
@@ -73,13 +79,15 @@ function run_machine() {
     --noautoconsole \
     --graphics vnc,listen=0.0.0.0 \
     --network network=$nname,model=$net_driver,mac=$mac_base:$mac_suffix \
-    --network network=$nname_ext,model=$net_driver,mac=$mac_base_ext:$mac_suffix \
     --cpu SandyBridge,+vmx,+ssse3 \
     --boot hd \
     $params \
     --dry-run --print-xml > /tmp/oc-$name.xml
   virsh define --file /tmp/oc-$name.xml
   virsh net-update $nname add ip-dhcp-host "<host mac='$mac_base:$mac_suffix' name='$name' ip='$ip' />"
+  if [[ -n "$ip_ext" ]] ; then
+    virsh net-update $nname_ext add ip-dhcp-host "<host mac='$mac_base_ext:$mac_suffix' name='$name' ip='$ip_ext' />"
+  fi
   virsh start $name --force-boot
 }
 
@@ -125,7 +133,7 @@ function run_cloud_machine() {
   local mem=$3
 
   local ip="$addr.$mac_suffix"
-  run_machine ${job_prefix}-os-$name 4 $mem $mac_suffix $ip
+  run_machine ${job_prefix}-os-$name 4 $mem $mac_suffix $ip "$addr_ext.$mac_suffix"
   machines["$name"]=$ip
   wait_kvm_machine $ip
 }
