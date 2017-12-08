@@ -23,7 +23,6 @@
           choices:
             - ocata
     scm:
-      - juniper-contrail-charms
       - juniper-ci
     builders:
       - shell: |
