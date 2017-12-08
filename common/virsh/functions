@@ -256,7 +256,7 @@ function define_machine() {
   virt-install --name $name \
     --ram $mem \
     --vcpus $vcpus \
-    --cpu SandyBridge,+vmx \
+    --cpu host \
     --os-variant $os \
     --disk $disk_opts \
     $net_opts \

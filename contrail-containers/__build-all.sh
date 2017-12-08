@@ -9,4 +9,5 @@ prepare_build_machine
 # ip is located in /usr/sbin that is not in path...
 export PATH=${PATH}:/usr/sbin
 
+export TEST_MODE=true
 ./contrail-build-poc/build.sh

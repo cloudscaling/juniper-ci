@@ -30,36 +30,17 @@ if [[ "$jver" == 1 ]] ; then
   exit 1
 fi
 
-declare -A BUILDS
-BUILDS=([mitaka]=34 [newton]=34 [ocata]=34)
-# for builds of R4.0 from 1 to 20 version is 4.0.0.0
-# for builds of R4.0 from 21 to 32 version is 4.0.1.0
-export CONTRAIL_VERSION="${CONTRAIL_VERSION:-4.0.2.0}"
-export SERIES="${SERIES:-xenial}"
-export VERSION="${VERSION:-newton}"
+# next step tested only with xenial
+export SERIES="xenial"
+export VERSION="${VERSION:-ocata}"
 export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
-export BUILD="${BUILD:-${BUILDS[$VERSION]}}"
-export DEPLOY_MODE="${DEPLOY_MODE:-two}"
-export USE_SSL_OS="${USE_SSL_OS:-false}"
-export USE_SSL_CONTRAIL="false"
-export USE_ADDITIONAL_INTERFACE="${USE_ADDITIONAL_INTERFACE:-false}"
-export USE_DPDK="${USE_DPDK:-false}"
-export AAA_MODE=${AAA_MODE:-rbac}
 
 export PASSWORD=${PASSWORD:-'password'}
 
-if [[ "$SERIES" == 'xenial' ]]; then
-  export IF1='ens3'
-  export IF2='ens4'
-else
-  export IF1='eth0'
-  export IF2='eth1'
-fi
-
 # check if environment is present
-if $virsh_cmd list --all | grep -q "juju-cont" ; then
+if $virsh_cmd list --all | grep -q "${job_prefix}-cont" ; then
   echo 'ERROR: environment present. please clean up first'
-  $virsh_cmd list --all | grep "juju-"
+  $virsh_cmd list --all | grep "${job_prefix}-"
   exit 1
 fi
 
@@ -90,9 +71,6 @@ echo "INFO: creating environment $(date)"
 juju status
 
 "$my_dir"/deploy_manual.sh
-
-#check it
-$my_dir/../contrail/check-openstack.sh
 
 $my_dir/../save-logs.sh
 

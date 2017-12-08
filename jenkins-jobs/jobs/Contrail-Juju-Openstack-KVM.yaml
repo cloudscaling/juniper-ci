@@ -6,6 +6,12 @@
     concurrent: true
     parameters:
       - choice:
+          name: CLEAN_BEFORE
+          choices:
+            - 'false'
+            - 'true'
+            - clean_and_exit
+      - choice:
           name: CLEAN_ENV
           choices:
             - always
@@ -63,6 +69,49 @@
             export SERIES='trusty'
           fi
           ./juniper-ci/juju/bmc/deploy_all.sh
+    publishers:
+      - archive:
+          artifacts: 'logs/**'
+          allow-empty: 'true'
+
+- job:
+    name: OVS-Juju-OpenStack-KVM
+    description: 'OVS+OpenStack on KVM by Juju'
+    defaults: global
+    node: slave1
+    concurrent: true
+    parameters:
+      - choice:
+          name: CLEAN_BEFORE
+          choices:
+            - 'false'
+            - 'true'
+            - clean_and_exit
+      - choice:
+          name: CLEAN_ENV
+          choices:
+            - always
+            - on_success
+            - never
+      - choice:
+          name: VERSION
+          description: "Version of the OpenStack. mitaka implies trusty and newton/ocata implies xenial."
+          choices:
+            - ocata
+    scm:
+      - juniper-contrail-charms
+      - juniper-ci
+    builders:
+      - shell: |
+          #!/bin/bash -e
+          desc="$VERSION $DEPLOY_TYPE"
+          echo "DESCRIPTION $desc"
+      - description-setter:
+          regexp: "DESCRIPTION (.*)"
+      - shell: |
+          #!/bin/bash -e
+          export SERIES='xenial'
+          ./juniper-ci/jujum/bmc/deploy_all.sh
     publishers:
       - archive:
           artifacts: 'logs/**'

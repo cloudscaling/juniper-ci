@@ -1,0 +1,164 @@
+#!/bin/bash
+
+fmy_file="${BASH_SOURCE[0]}"
+fmy_dir="$(dirname $fmy_file)"
+jver="$(juju --version | cut -d . -f 1)"
+source $fmy_dir/functions-juju$jver
+
+function wait_absence_status_for_services() {
+  sleep 10
+  check_str=$1
+  local max_iter=${2:-30}
+  # waiting for services
+  local iter=0
+  while juju-status | grep -P $check_str &>/dev/null
+  do
+    echo "Waiting for all service to be active - $iter/$max_iter"
+    if ((iter >= max_iter)); then
+      echo "ERROR: Services didn't up."
+      juju-status-tabular
+      return 1
+    fi
+    if juju-status | grep "current" | grep error ; then
+      echo "ERROR: Some services went to error state"
+      juju-status-tabular
+      return 1
+    fi
+    local merr=`juju-status-json | python -c "import sys; import json; ms = json.load(sys.stdin)['machines']; [sys.stdout.write(str(m) + '\n') for m in ms if (ms[m]['juju-status']['current'] == 'down' and ms[m]['instance-id'] == 'pending')]"`
+    if [ -n "$merr" ] ; then
+      echo "ERROR: Machines went to down state: "$merr
+      juju-status
+      return 1
+    fi
+    sleep 30
+    ((++iter))
+  done
+}
+
+function wait_for_removed() {
+  sleep 10
+  check_str=$1
+  local max_iter=${2:-5}
+  # waiting for services
+  local iter=0
+  while juju-status | grep "$check_str/" &>/dev/null
+  do
+    echo "Waiting for all units to be removed - $iter/$max_iter"
+    if ((iter >= max_iter)); then
+      echo "ERROR: Units didn't removed."
+      juju-status-tabular
+      return 1
+    fi
+    if juju-status | grep "current" | grep error ; then
+      echo "ERROR: Some services went to error state"
+      juju-status-tabular
+      return 1
+    fi
+    sleep 30
+    ((++iter))
+  done
+}
+
+function wait_for_machines() {
+  # wait for machines
+  sleep 30
+  for machine in $@ ; do
+    echo "Waiting for machine: $machine"
+    local fail=0
+    while ! output=`juju-ssh $machine "sudo apt-get install -fy joe mc" 2>/dev/null` ; do
+      if ((fail >= 60)); then
+        echo "ERROR: Machine $machine did not up."
+        echo $output
+        return 1
+      fi
+      sleep 10
+      ((++fail))
+      if echo "$machine" | grep -q '/lxd/' ; then
+        # lxd container case
+        local mch=`echo "$machine" | cut -d '/' -f 1`
+        local status=`juju-status-json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']['$mch']['containers']['$machine']['juju-status']['current'])"`
+        local iid=`juju-status-json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']['$mch']['containers']['$machine']['instance-id'])"`
+      else
+        local status=`juju-status-json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']['$machine']['juju-status']['current'])"`
+        local iid=`juju-status-json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']['$machine']['instance-id'])"`
+      fi
+      if [[ "$status" == "down" && "$iid" == "pending" ]] ; then
+        echo "ERROR: Machine $machine went to 'down' state."
+        juju-status
+        return 1
+      fi
+    done
+    while ! juju-ssh $machine uname -a 2>/dev/null ; do
+      echo "WARNING: Machine $machine isn't accessible"
+      sleep 2
+    done
+  done
+}
+
+function create_machine() {
+  local constraints="$@"
+
+  local az_opts=""
+  if [ -n "$AZ" ] ; then
+    az_opts="zone=$AZ"
+  fi
+
+  juju-add-machine $az_opts --series=$SERIES --constraints "$constraints" 2>&1 | tail -1 | awk '{print $3}'
+  # NOTE: 'tail -1' is needed here for enabled debug mode. in this mode there are several lines in output but we need only last.
+}
+
+function cleanup_environment() {
+  if juju-destroy-environment ; then
+    return 0
+  fi
+
+  # sometime Juju couldn't delete amazon environment and volumes - try to do it manually
+  juju-destroy-environment || /bin/true
+  for volid in `aws ec2 describe-volumes --filters Name=tag-value,Values="juju-*-machine-*" Name=status,Values=available --query 'Volumes[*].{ID:VolumeId}' --output text` ; do
+    aws ec2 delete-volume --volume-id "$volid"
+    sleep 3
+  done
+}
+
+function create_stackrc() {
+  local auth_ip=`get_machine_ip keystone`
+  local proto="https"
+  if [[ "$USE_SSL_OS" != "true" ]] ; then
+    local proto="http"
+  fi
+  local kver=`juju config keystone preferred-api-version`
+  echo "# created by CI" > $WORKSPACE/stackrc
+  if [[ "$kver" == '3' ]] ; then
+    echo "export OS_AUTH_URL=$proto://$auth_ip:5000/v3" >> $WORKSPACE/stackrc
+    echo "export OS_IDENTITY_API_VERSION=3" >> $WORKSPACE/stackrc
+    echo "export OS_PROJECT_DOMAIN_NAME=admin_domain" >> $WORKSPACE/stackrc
+    echo "export OS_USER_DOMAIN_NAME=admin_domain" >> $WORKSPACE/stackrc
+  else
+    echo "export OS_AUTH_URL=$proto://$auth_ip:5000/v2.0" >> $WORKSPACE/stackrc
+  fi
+  echo "export OS_USERNAME=admin" >> $WORKSPACE/stackrc
+  echo "export OS_TENANT_NAME=admin" >> $WORKSPACE/stackrc
+  echo "export OS_PROJECT_NAME=admin" >> $WORKSPACE/stackrc
+  echo "export OS_PASSWORD=$PASSWORD" >> $WORKSPACE/stackrc
+}
+
+function open_port() {
+  local mch=$1
+  local port=$2
+  local protocol=${3:-tcp}
+
+  for i in {0..30} ; do
+    local iid=`get-machine-id-by-number $mch`
+    if [[ "$iid" == i-* ]] ; then
+      break
+    fi
+    sleep 5
+  done
+
+  local sg_id=`aws ec2 describe-instances --instance-id "$iid" --query 'Reservations[*].Instances[*].SecurityGroups' | grep -C 2 "\-$mch\"" | awk '/GroupId/{print $2}' | head -1 | xargs`
+  if echo $sg_id | grep ',' ; then
+    sg_id=`echo $sg_id | sed 's/\,//g'`
+  fi
+  aws ec2 authorize-security-group-ingress --group-id $sg_id --protocol $protocol --port $port --cidr 0.0.0.0/0
+  aws ec2 describe-security-groups --group-id $sg_id
+}
