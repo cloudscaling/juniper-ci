@@ -242,7 +242,7 @@ openstack baremetal introspection bulk start
 # prepare Contrail puppet modules via uploading artifacts to swift
 git_branch_tht="stable/${OPENSTACK_VERSION}"
 git_branch_ctp="stable/${OPENSTACK_VERSION}"
-if [[ "$CONTRAIL_VERSION" =~ 4.1.[0-9] ]] ; then
+if [[ "$CONTRAIL_VERSION" =~ 4.1 ]] ; then
   git_branch_pc="R4.1"
 else
   git_branch_pc="R4.0"
@@ -529,7 +529,7 @@ parameter_defaults:
   ContrailAnalyticsDBMinDiskGB: 4
   ContrailAuthVersion: $KEYSTONE_API_VERSION
 EOF
-if [[ "$CONTRAIL_VERSION" =~ 3.[0-9].[0-9] ]] ; then
+if [[ "$CONTRAIL_VERSION" =~ '3.2' ]] ; then
 cat <<EOF >> $misc_opts
   ContrailVersion: 3
 EOF
