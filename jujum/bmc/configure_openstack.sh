@@ -25,7 +25,7 @@ openstack project create demo
 openstack role add --project demo --user admin Member
 
 openstack network create --share --external --provider-network-type flat --provider-physical-network external public
-openstack subnet create --network public --subnet-range 10.10.0.0/24 --no-dhcp --gateway 10.10.0.1 public
+openstack subnet create --network public --subnet-range 10.20.0.0/24 --no-dhcp --gateway 10.20.0.1 public
 
 openstack flavor create --ram 256 --vcpus 1 --public small
 
