@@ -72,6 +72,8 @@ juju status
 
 "$my_dir"/deploy_manual.sh
 
+"$my_dir"/configure_openstack.sh
+
 $my_dir/../save-logs.sh
 
 trap - ERR EXIT
