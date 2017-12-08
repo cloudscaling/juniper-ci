@@ -66,14 +66,19 @@ juju-add-unit nova-compute --to $comp2
 juju-set nova-compute "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "virt-type=kvm" "enable-resize=True" "enable-live-migration=True" "migration-auth-type=ssh"
 
 # Neutron
+brex_port='ens4'
+brex_port='eth1'
+
 juju-deploy cs:$SERIES/neutron-api --to lxd:$cont0
 juju-set neutron-api "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "enable-dvr=true" "overlay-network-type=vxlan" "enable-l3ha=True" "neutron-security-groups=True" "flat-network-providers=external"
 juju-set nova-cloud-controller "network-manager=Neutron"
 juju-expose neutron-api
+
 juju-deploy neutron-openvswitch
+juju-set neutron-openvswitch "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "bridge-mappings=external:br-ex" "data-port=br-ex:$brex_port"
 
 juju-deploy neutron-gateway --to $net1
-juju-set neutron-gateway "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "ha-bindiface=ens3" "bridge-mappings=external:br-ex" "data-port=br-ex:ens4"
+juju-set neutron-gateway "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "ha-bindiface=ens3" "bridge-mappings=external:br-ex" "data-port=br-ex:$brex_port"
 juju-add-unit neutron-gateway --to $net2
 juju-add-unit neutron-gateway --to $net3
 
