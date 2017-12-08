@@ -75,7 +75,7 @@ juju-set nova-cloud-controller "network-manager=Neutron"
 juju-expose neutron-api
 
 juju-deploy neutron-openvswitch
-juju-set neutron-openvswitch "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "bridge-mappings=external:br-ex" "data-port=br-ex:$brex_port"
+juju-set neutron-openvswitch "debug=true" "openstack-origin-git=$VERSION" "bridge-mappings=external:br-ex" "data-port=br-ex:$brex_port"
 
 juju-deploy neutron-gateway --to $net1
 juju-set neutron-gateway "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "ha-bindiface=ens3" "bridge-mappings=external:br-ex" "data-port=br-ex:$brex_port"
