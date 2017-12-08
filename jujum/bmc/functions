@@ -11,8 +11,11 @@ poolname="${job_prefix}images"
 net_driver=${net_driver:-e1000}
 nname="$job_prefix"
 addr="10.0.0"
+nname_ext="${job_prefix}_ext"
+addr_ext="10.20.0"
 
 mac_base='52:54:00:10:00'
+mac_base_ext='52:54:00:11:00'
 # juju controller
 cont_idx='99'
 # openstack components (controllers + rabbit + db)

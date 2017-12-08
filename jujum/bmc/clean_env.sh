@@ -18,6 +18,7 @@ fi
 rm -rf $HOME/.local/share/juju
 
 delete_network $nname
+delete_network $nname_ext
 
 delete_domains
 

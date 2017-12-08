@@ -31,6 +31,7 @@ if $virsh_cmd list --all | grep -q "${job_prefix}-cont" ; then
 fi
 
 create_network $nname $addr
+create_network $nname_ext $addr_ext
 
 # create pool
 $virsh_cmd pool-info $poolname &> /dev/null || create_pool $poolname
@@ -72,6 +73,7 @@ function run_machine() {
     --noautoconsole \
     --graphics vnc,listen=0.0.0.0 \
     --network network=$nname,model=$net_driver,mac=$mac_base:$mac_suffix \
+    --network network=$nname_ext,model=$net_driver,mac=$mac_base_ext:$mac_suffix \
     --cpu SandyBridge,+vmx,+ssse3 \
     --boot hd \
     $params \
