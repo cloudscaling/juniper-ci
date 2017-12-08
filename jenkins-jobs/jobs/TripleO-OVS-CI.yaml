@@ -51,6 +51,7 @@
           choices:
             - 'full'
             - 'clean_vms'
+            - 'cleanup_env_and_exit'
       - bool:
           name: USE_DEVELOPMENT_PUPPETS
           description: Clone puppets from internal repositories or use build's version

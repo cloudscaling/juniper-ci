@@ -64,6 +64,11 @@ if [[ $CLEAN_ENV != 'never' ]] ; then
   cleanup_environment
 fi
 
+if [[ "$DEPLOY_STAGES" == 'cleanup_env_and_exit' ]] ; then
+  trap - ERR
+  exit 0
+fi
+
 source ${my_dir}/deploy_all.sh "${my_dir}/check-openstack-proxy.sh"
 
 trap - ERR
