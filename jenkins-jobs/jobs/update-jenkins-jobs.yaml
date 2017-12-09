@@ -5,7 +5,6 @@
     parameters:
       - string:
           name: USER
-          default: jbuilder
           description: "name of the user to access jenkins for update jobs"
       - password:
           name: PASSWORD
