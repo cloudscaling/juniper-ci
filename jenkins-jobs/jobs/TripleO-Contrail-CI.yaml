@@ -6,7 +6,7 @@
     parameters:
       - node:
           name: SLAVE_NAME
-          description: "Select slave: slave_kvm is any of KVM machines and slave0X is a specific machine."
+          description: "Select slave: one for specific node or multiple for any node."
           default-slaves:
             - slave01
             - slave02
@@ -145,7 +145,7 @@
     builders:
       - shell: |
           #!/bin/bash -e
-          desc="${SLAVE_NODE}-${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION} $CONTRAIL_VERSION $OPENSTACK_VERSION auth${KEYSTONE_API_VERSION}"
+          desc="${SLAVE_NAME}-${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION} $CONTRAIL_VERSION $OPENSTACK_VERSION auth${KEYSTONE_API_VERSION}"
           if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
             desc+=' devl'
           fi

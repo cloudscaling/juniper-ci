@@ -117,7 +117,7 @@
     parameters:
       - node:
           name: SLAVE_NAME
-          description: "Select slave: slave_kvm is any of KVM machines and slave0X is a specific machine."
+          description: "Select slave: one for specific node or multiple for any node."
           default-slaves:
             - slave01
             - slave02
@@ -178,7 +178,7 @@
     builders:
       - shell: |
           #!/bin/bash -e
-          desc="$SLAVE_NODE $VERSION $DEPLOY_TYPE mode=$DEPLOY_MODE $AAA_MODE"
+          desc="$SLAVE_NAME $VERSION $DEPLOY_TYPE mode=$DEPLOY_MODE $AAA_MODE"
           if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
           if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
           if [[ "$USE_DPDK" == "true" ]] ; then desc="$desc +DPDK" ; fi
