@@ -1,4 +1,4 @@
-- job-template:
+- job:
     name: TripleO-Contrail-CI
     description: 'TripleO Contrail CI'
     defaults: global
@@ -11,9 +11,9 @@
             - slave_kvm
           allowed-slaves:
             - slave_kvm
-            - slave01
-            - slave02
-            - slave03
+            - slave1
+            - slave2
+            - slave3
           ignore-offline-nodes: true
           allowed-multiselect: false
       - choice:
@@ -194,9 +194,9 @@
           name: SLAVE_NAME
           description: "Select slave: slave0X is a specific machine."
           allowed-slaves:
-            - slave01
-            - slave02
-            - slave03
+            - slave1
+            - slave2
+            - slave3
           ignore-offline-nodes: true
           allowed-multiselect: false
       - choice:

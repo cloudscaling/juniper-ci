@@ -2,7 +2,7 @@
     name: TripleO-OVS-CI
     description: 'TripleO OVS CI'
     defaults: global
-    node: slave01
+    node: slave1
     concurrent: true
     parameters:
       - choice:

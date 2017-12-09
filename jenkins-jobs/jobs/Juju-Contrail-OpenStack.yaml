@@ -121,9 +121,9 @@
             - slave_kvm
           allowed-slaves:
             - slave_kvm
-            - slave01
-            - slave02
-            - slave03
+            - slave1
+            - slave2
+            - slave3
           ignore-offline-nodes: true
           allowed-multiselect: false
       - choice:

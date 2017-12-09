@@ -2,7 +2,7 @@
     name: Juju-OVS-OpenStack-KVM
     description: 'OVS+OpenStack on KVM by Juju'
     defaults: global
-    node: slave01
+    node: slave1
     concurrent: true
     parameters:
       - choice:
