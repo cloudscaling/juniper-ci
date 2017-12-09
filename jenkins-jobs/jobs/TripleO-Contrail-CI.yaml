@@ -1,5 +1,5 @@
 - job-template:
-    name: TripleO-Contrail-{slavenode}
+    name: TripleO-Contrail-{project}
     description: 'TripleO Contrail CI'
     defaults: global
     node: '{slavenode}'
