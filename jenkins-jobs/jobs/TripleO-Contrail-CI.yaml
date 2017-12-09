@@ -193,7 +193,10 @@
       - node:
           name: SLAVE_NAME
           description: "Select slave: slave0X is a specific machine."
+          default-slaves:
+            - slave_kvm
           allowed-slaves:
+            - slave_kvm
             - slave01
             - slave02
             - slave03
