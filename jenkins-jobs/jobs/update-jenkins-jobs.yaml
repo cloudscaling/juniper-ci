@@ -2,6 +2,7 @@
     name: update-jenkins-jobs
     description: "Updates jenkins jobs"
     defaults: global
+    node: master
     parameters:
       - string:
           name: USER

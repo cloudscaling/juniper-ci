@@ -2,6 +2,7 @@
     name: devstack-{project}
     description: "Deploys devstack with {project} and run projects' tests"
     defaults: global
+    node: master
     properties:
       - build-discarder
     scm:

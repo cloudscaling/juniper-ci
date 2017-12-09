@@ -2,6 +2,7 @@
     name: Juju-Contrail-OpenStack-AWS
     description: "Deploys cluster(manual) with OpenStack/Contrail and checks it. Can be used for debug purposes."
     defaults: global
+    node: master
     parameters:
       - choice:
           name: CLEAN_BEFORE
@@ -117,10 +118,7 @@
       - node:
           name: SLAVE_NAME
           description: "Select slave: slave_kvm is any of KVM machines and slave0X is a specific machine."
-          default-slaves:
-            - slave_kvm
           allowed-slaves:
-            - slave_kvm
             - slave01
             - slave02
             - slave03
