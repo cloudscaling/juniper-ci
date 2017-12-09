@@ -8,14 +8,15 @@
           name: SLAVE_NAME
           description: "Select slave: slave_kvm is any of KVM machines and slave0X is a specific machine."
           default-slaves:
-            - slave_kvm
-          allowed-slaves:
-            - slave_kvm
             - slave01
             - slave02
             - slave03
-          ignore-offline-nodes: true
-          allowed-multiselect: false
+          allowed-slaves:
+            - slave01
+            - slave02
+            - slave03
+          ignore-offline-nodes: false
+          allowed-multiselect: true
       - choice:
           name: NUM
           description: "Enironment Number"

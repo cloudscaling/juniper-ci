@@ -118,12 +118,16 @@
       - node:
           name: SLAVE_NAME
           description: "Select slave: slave_kvm is any of KVM machines and slave0X is a specific machine."
+          default-slaves:
+            - slave01
+            - slave02
+            - slave03
           allowed-slaves:
             - slave01
             - slave02
             - slave03
-          ignore-offline-nodes: true
-          allowed-multiselect: false
+          ignore-offline-nodes: false
+          allowed-multiselect: true
       - choice:
           name: CLEAN_BEFORE
           choices:
