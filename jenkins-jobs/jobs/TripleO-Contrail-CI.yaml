@@ -1,10 +1,19 @@
 - job-template:
-    name: TripleO-Contrail-{project}
+    name: TripleO-Contrail-CI
     description: 'TripleO Contrail CI'
     defaults: global
-    node: '{slavenode}'
-    concurrent: {execconcurrent}
+    concurrent: true
     parameters:
+      - node:
+          name: SLAVE_NAME
+          description: "Select slave: slave_kvm is any of KVM machines and slave0X is a specific machine."
+          allowed-slaves:
+            - slave_kvm
+            - slave01
+            - slave02
+            - slave03
+          ignore-offline-nodes: true
+          allowed-multiselect: false
       - choice:
           name: NUM
           description: "Enironment Number"
@@ -172,18 +181,3 @@
       - archive:
           artifacts: 'logs/**'
           allow-empty: 'true'
-
-- project:
-    name: tripleo-contrail
-    project:
-      - slave01:
-          slavenode: slave01
-          execconcurrent: true
-      - slave02:
-          slavenode: slave02
-          execconcurrent: false
-      - slave03:
-          slavenode: slave03
-          execconcurrent: false
-    jobs:
-      - 'TripleO-Contrail-{project}'
