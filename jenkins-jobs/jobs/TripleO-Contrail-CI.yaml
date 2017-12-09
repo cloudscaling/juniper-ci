@@ -142,7 +142,7 @@
     builders:
       - shell: |
           #!/bin/bash -e
-          desc="${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION} $CONTRAIL_VERSION $OPENSTACK_VERSION auth${KEYSTONE_API_VERSION}"
+          desc="${SLAVE_NODE}-${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION} $CONTRAIL_VERSION $OPENSTACK_VERSION auth${KEYSTONE_API_VERSION}"
           if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
             desc+=' devl'
           fi
