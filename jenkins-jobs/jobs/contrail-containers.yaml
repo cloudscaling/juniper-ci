@@ -45,7 +45,7 @@
           artifacts: 'logs/**'
           allow-empty: true
 
-# TODO: set slave_kvm instead of slave1 when cleaning up technology will be clear for us
+# TODO: set slave_kvm instead of slave01 when cleaning up technology will be clear for us
 - project:
     name: contrail-containers
     project:
@@ -59,7 +59,7 @@
           slavenode: master
           contrail_version: 4.2.0.0-1
       - k8s-server-centos:
-          slavenode: slave1
+          slavenode: slave01
           contrail_version: 4.1.0.0-6
     jobs:
       - 'contrail-{project}'

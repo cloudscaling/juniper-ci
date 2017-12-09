@@ -11,9 +11,9 @@
             - slave_kvm
           allowed-slaves:
             - slave_kvm
-            - slave1
-            - slave2
-            - slave3
+            - slave01
+            - slave02
+            - slave03
           ignore-offline-nodes: true
           allowed-multiselect: false
       - choice:
@@ -193,7 +193,10 @@
       - node:
           name: SLAVE_NAME
           description: "Select slave: slave0X is a specific machine."
+          default-slaves:
+            - slave_kvm
           allowed-slaves:
+            - slave_kvm
             - slave1
             - slave2
             - slave3
