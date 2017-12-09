@@ -112,9 +112,18 @@
     name: Juju-Contrail-OpenStack-KVM
     description: 'Contrail+OpenStack on KVM by Juju'
     defaults: global
-    node: slave1
     concurrent: true
     parameters:
+      - node:
+          name: SLAVE_NAME
+          description: "Select slave: slave_kvm is any of KVM machines and slave0X is a specific machine."
+          allowed-slaves:
+            - slave_kvm
+            - slave01
+            - slave02
+            - slave03
+          ignore-offline-nodes: true
+          allowed-multiselect: false
       - choice:
           name: CLEAN_BEFORE
           choices:
