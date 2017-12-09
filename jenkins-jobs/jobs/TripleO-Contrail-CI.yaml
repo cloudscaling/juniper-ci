@@ -7,6 +7,8 @@
       - node:
           name: SLAVE_NAME
           description: "Select slave: slave_kvm is any of KVM machines and slave0X is a specific machine."
+          default-slaves:
+            - slave_kvm
           allowed-slaves:
             - slave_kvm
             - slave01
@@ -181,3 +183,34 @@
       - archive:
           artifacts: 'logs/**'
           allow-empty: 'true'
+
+- job:
+    name: TripleO-Destroy-Environment
+    description: 'Destroyes TripleO environment by NUM on baremetal slave'
+    defaults: global
+    concurrent: true
+    parameters:
+      - node:
+          name: SLAVE_NAME
+          description: "Select slave: slave0X is a specific machine."
+          allowed-slaves:
+            - slave01
+            - slave02
+            - slave03
+          ignore-offline-nodes: true
+          allowed-multiselect: false
+      - choice:
+          name: NUM
+          description: "Enironment Number"
+          choices:
+            - '3'
+            - '4'
+            - '5'
+            - '6'
+    scm:
+      - juniper-ci
+    builders:
+      - shell: |
+          #!/bin/bash -ex
+          export LIBVIRT_DEFAULT_URI=qemu:///system
+          ./juniper-ci/tripleo/clean_env.sh

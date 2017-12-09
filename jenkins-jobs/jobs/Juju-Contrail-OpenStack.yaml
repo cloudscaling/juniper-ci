@@ -117,6 +117,8 @@
       - node:
           name: SLAVE_NAME
           description: "Select slave: slave_kvm is any of KVM machines and slave0X is a specific machine."
+          default-slaves:
+            - slave_kvm
           allowed-slaves:
             - slave_kvm
             - slave01
