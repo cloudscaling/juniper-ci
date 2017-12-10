@@ -149,7 +149,7 @@ function run_compute() {
 
   echo "INFO: preparing compute $index $(date)"
   kernel_version=`juju ssh ubuntu@$ip uname -r 2>/dev/null | tr -d '\r'`
-  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget apparmor-profiles" &>>$log_dir/apt.log
+  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget apparmor-profiles openvswitch-switch" &>>$log_dir/apt.log
   juju scp "$my_dir/50-cloud-init-compute-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
   juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
   juju ssh ubuntu@$ip "echo 'supersede routers 10.0.0.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
@@ -168,7 +168,7 @@ function run_network() {
 
   echo "INFO: preparing network $index $(date)"
   kernel_version=`juju ssh ubuntu@$ip uname -r 2>/dev/null | tr -d '\r'`
-  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget apparmor-profiles" &>>$log_dir/apt.log
+  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget apparmor-profiles openvswitch-switch" &>>$log_dir/apt.log
   juju scp "$my_dir/50-cloud-init-compute-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
   juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
   juju ssh ubuntu@$ip "echo 'supersede routers 10.0.0.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
