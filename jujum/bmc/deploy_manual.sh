@@ -67,7 +67,7 @@ juju-set nova-compute "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "virt-ty
 
 # Neutron
 brex_iface='br-ex'
-brex_port='dummy0'
+brex_port='ens4'
 
 juju-deploy cs:$SERIES/neutron-api --to lxd:$cont0
 juju-set neutron-api "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "enable-dvr=true" "overlay-network-type=vxlan" "enable-l3ha=True" "neutron-security-groups=True" "flat-network-providers=*"
