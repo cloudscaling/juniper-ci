@@ -217,19 +217,47 @@ cp -r /usr/share/openstack-tripleo-heat-templates/ ~/tripleo-heat-templates
 
 role_file='tripleo-heat-templates/roles_data.yaml'
 
+# add Network role
+    cat <<EOF >> $role_file
+- name: Network
+  CountDefault: 0
+  HostnameFormatDefault: '%stackname%-network-%index%'
+  disable_upgrade_deployment: True
+  ServicesDefault:
+    - OS::TripleO::Services::CACerts
+    - OS::TripleO::Services::Timezone
+    - OS::TripleO::Services::Ntp
+    - OS::TripleO::Services::Snmp
+    - OS::TripleO::Services::Sshd
+    - OS::TripleO::Services::Kernel
+    - OS::TripleO::Services::TripleoPackages
+    - OS::TripleO::Services::NeutronDhcpAgent
+    - OS::TripleO::Services::NeutronL3Agent
+    - OS::TripleO::Services::NeutronMetadataAgent
+    - OS::TripleO::Services::NeutronOvsAgent
+    # - OS::TripleO::Services::ComputeNeutronCorePlugin
+    # - OS::TripleO::Services::ComputeNeutronOvsAgent
+    # - OS::TripleO::Services::ComputeNeutronL3Agent
+    # - OS::TripleO::Services::ComputeNeutronMetadataAgent
+    - OS::TripleO::Services::Keepalived
+    - OS::TripleO::Services::SensuClient
+    - OS::TripleO::Services::FluentdClient
+    - OS::TripleO::Services::AuditD
+    - OS::TripleO::Services::Collectd
+EOF
+fi
+
 # disable ceilometer
 # there is the bug with 'ceilometer-upgrade --skipt-metering-database'
 # https://bugs.launchpad.net/tripleo/+bug/1693339
 # wich cause the deployement fails
 sed -i  's/\(.*Ceilometer.*\)/#\1/g' $role_file
 
-dvr_opts=''
-if [[ "$DVR" == 'true' ]] ; then
-  dvr_opts='-e tripleo-heat-templates/environments/neutron-ovs-dvr.yaml'
-fi
-
 # file for other options
 misc_opts='misc_opts.yaml'
+
+OS::TripleO::Compute::Net::SoftwareConfig: ../net-config-bridge.yaml
+
 cat <<EOF > $misc_opts
 parameter_defaults:
   CloudDomain: $CLOUD_DOMAIN_NAME
@@ -246,11 +274,42 @@ parameter_defaults:
   ControllerCount: $CONT_COUNT
   ComputeCount: $COMP_COUNT
   StorageCount: $STOR_COUNT
+  NetworkCount: $NET_COUNT
 
   OvercloudCephStorageFlavor: storage
   CephPoolDefaultSize: 1
 EOF
 
+
+if  (( STOR_COUNT == 0 )) ; then
+  GlanceBackend: file
+  GnocchiBackend: file
+else
+  ceph_opts="-e tripleo-heat-templates/environments/storage-environment.yaml"
+cat <<EOF > $misc_opts
+  CephStorageCount: $STOR_COUNT
+  CephClusterFSID: '4b5c8c0a-ff60-454b-a1b4-9747aa737d19'
+  CephMonKey: 'AQC+Ox1VmEr3BxAALZejqeHj50Nj6wJDvs96OQ=='
+  CephAdminKey: 'AQDLOh1VgEp6FRAAFzT7Zw+Y9V6JJExQAsRnRQ=='
+  CephClientKey: 'AQC+vYNXgDAgAhAAc8UoYt+OTz5uhV7ItLdwUw=='
+EOF
+fi
+
+dvr_opts=''
+if [[ "$DVR" == 'true' ]] ; then
+  cat <<EOF > dvr_types.yaml
+resource_registry:
+  OS::TripleO::Controller::Net::SoftwareConfig: tripleo-heat-templates/net-config-bridge.yaml
+  OS::TripleO::Compute::Ports::ExternalPort: tripleo-heat-templates/network/ports/external.yaml
+
+parameter_defaults:
+  NovaReservedHostMemory: 500
+EOF
+
+  # With DVR enabled, the Compute nodes also need the br-ex bridge to be
+  # connected to a physical network.
+  dvr_opts='-e dvr_types.yaml -e tripleo-heat-templates/environments/neutron-ovs-dvr.yaml'
+fi
 
 # IMPORTANT: The DNS domain used for the hosts should match the dhcp_domain configured in the Undercloud neutron.
 if (( CONT_COUNT < 2 )) ; then
@@ -272,7 +331,7 @@ if [[ "$DEPLOY" != '1' ]] ; then
   # deploy overcloud. if you do it manually then I recommend to do it in screen.
   echo "openstack overcloud deploy --templates tripleo-heat-templates/ \
       --roles-file $role_file \
-      -e tripleo-heat-templates/puppet/extraconfig/ceph/puppet-ceph-external.yaml \
+      $ceph_opts \
       $artifact_opts \
       $dvr_opts \
       -e $misc_opts \
