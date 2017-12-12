@@ -279,8 +279,10 @@ EOF
 
 
 if  (( STOR_COUNT == 0 )) ; then
+cat <<EOF > $misc_opts
   GlanceBackend: file
   GnocchiBackend: file
+EOF
 else
   ceph_opts="-e tripleo-heat-templates/environments/storage-environment.yaml"
 cat <<EOF > $misc_opts
