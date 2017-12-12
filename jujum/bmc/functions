@@ -128,4 +128,9 @@ function configure_vm() {
   juju ssh $mch "sudo ip route add $public_network_addr.0/24 dev $brex_iface"
   # add route for all traffic from virtual zone to host's default gateway
   juju ssh $mch "sudo ip rule add from all iif $brex_iface pref 10 table 120 ; sudo ip route add 0.0.0.0/0 table 120 via $addr.1 dev $IF1"
+
+  # copy & install neutron_router_helper
+  juju scp $HOME/neutron-router-helper.tgz $mch:
+  juju ssh $mch "tar -xf neutron-router-helper.tgz ; cd neutron-router-helper-master ; sudo PBR_VERSION='0.1.0' python setup.py install --install-scripts=/usr/local/bin"
+  juju ssh $mch "sudo systemctl daemon-reload ; sudo systemct start neutron-router-helper.timer ; sudo systemctl restart rsyslog"
 }
