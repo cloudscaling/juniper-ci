@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# definitions for KVM/virsh:
+
 export LIBVIRT_DEFAULT_URI=qemu:///system
 virsh_cmd="virsh"
 
@@ -27,6 +29,14 @@ os_net_3_idx='22'
 # openstack compute
 os_comp_1_idx='30'
 os_comp_2_idx='31'
+
+# openstack definitions
+public_network_addr="10.10.0"
+# Neutron
+brex_iface='br-ex'
+brex_port='dummy0'
+
+# KVM helpers
 
 function delete_network() {
   local network_name="$1"
@@ -85,6 +95,8 @@ function delete_volume() {
   $virsh_cmd vol-delete $volname --pool $poolname 2>/dev/null || rm -f $pool_path/$volname 2>/dev/null
 }
 
+# juju helpers
+
 function post_deploy() {
   echo "INFO: Waiting for services start: $(date)"
 
@@ -102,4 +114,18 @@ function post_deploy() {
   fi
 
   juju-status-tabular
+}
+
+function configure_vm() {
+  # configures compute/network node for 'disconnected' DVR/HA scheme
+  local mch=$1
+
+  # enable forwarding
+  juju ssh $mch "sudo sysctl -w net.ipv4.ip_forward=1"
+  # assign gateway of public network to br-ex (OVSBridge)
+  juju ssh $mch "sudo ip link set up dev $brex_iface ; sudo ip addr add $public_network_addr.1/32 broadcast $public_network_addr.1 dev $brex_iface"
+  # add route for public CIDR to virtual zone
+  juju ssh $mch "sudo ip route add $public_network_addr.0/24 dev $brex_iface"
+  # add route for all traffic from virtual zone to host's default gateway
+  juju ssh $mch "sudo ip rule add from all iif $brex_iface pref 10 table 120 ; sudo ip route add 0.0.0.0/0 table 120 via $addr.1 dev $IF1"
 }

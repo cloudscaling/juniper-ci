@@ -36,6 +36,8 @@ export VERSION="${VERSION:-ocata}"
 export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
 
 export PASSWORD=${PASSWORD:-'password'}
+export IF1='ens3'
+export IF2='ens4'
 
 # check if environment is present
 if $virsh_cmd list --all | grep -q "${job_prefix}-cont" ; then

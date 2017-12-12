@@ -5,8 +5,6 @@ my_dir="$(dirname $my_file)"
 source "$my_dir/functions"
 source "$my_dir/../common/functions"
 
-PUBLIC_CIDR_PREFIX="10.10.0"
-
 export WORKSPACE="${WORKSPACE:-$HOME}"
 # prepare environment for common openstack functions
 OPENSTACK_VERSION="$VERSION"
@@ -27,7 +25,7 @@ openstack project create demo
 openstack role add --project demo --user admin Member
 
 openstack network create --share --external --provider-network-type flat --provider-physical-network external public
-openstack subnet create --network public --subnet-range $PUBLIC_CIDR_PREFIX.0/24 --no-dhcp --gateway $PUBLIC_CIDR_PREFIX.1 public
+openstack subnet create --network public --subnet-range $public_network_addr.0/24 --no-dhcp --gateway $public_network_addr.1 public
 
 openstack flavor create --ram 256 --vcpus 1 --public small
 
@@ -37,11 +35,19 @@ openstack image create --public --file cirros-0.3.5-x86_64-disk.img cirros
 
 export OS_PROJECT_NAME=demo
 
-openstack network create private
-openstack subnet create --network private --subnet-range 192.168.1.0/24 --gateway 192.168.1.1 private
+openstack network create private1
+openstack subnet create --network private1 --subnet-range 192.168.1.0/24 --gateway 192.168.1.1 private1
+
+openstack network create private2
+openstack subnet create --network private2 --subnet-range 192.168.2.0/24 --gateway 192.168.2.1 private2
 
 openstack router create rt
 openstack router set --external-gateway public rt
-openstack router add subnet rt private
+openstack router add subnet rt private1
+openstack router add subnet rt private2
 
-openstack server create --image cirros --flavor small --network private --min 2 --max 2 ttt
+openstack server create --image cirros --flavor small --network private1 --min 2 --max 2 ttt
+sleep 10
+openstack server create --image cirros --flavor small --network private2 --min 2 --max 2 rrr
+sleep 10
+openstack server list

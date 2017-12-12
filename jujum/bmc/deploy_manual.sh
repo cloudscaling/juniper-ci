@@ -65,10 +65,6 @@ juju-deploy cs:$SERIES/nova-compute --to $comp1
 juju-add-unit nova-compute --to $comp2
 juju-set nova-compute "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "virt-type=kvm" "enable-resize=True" "enable-live-migration=True" "migration-auth-type=ssh"
 
-# Neutron
-brex_iface='br-ex'
-brex_port='dummy0'
-
 juju-deploy cs:$SERIES/neutron-api --to lxd:$cont0
 juju-set neutron-api "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "enable-dvr=true" "overlay-network-type=vxlan" "enable-l3ha=True" "neutron-security-groups=True" "flat-network-providers=*"
 juju-set nova-cloud-controller "network-manager=Neutron"
@@ -78,7 +74,7 @@ juju-deploy neutron-openvswitch
 juju-set neutron-openvswitch "debug=true" "bridge-mappings=external:$brex_iface" "data-port=$brex_iface:$brex_port"
 
 juju-deploy neutron-gateway --to $net1
-juju-set neutron-gateway "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "ha-bindiface=ens3" "bridge-mappings=external:$brex_iface" "data-port=$brex_iface:$brex_port"
+juju-set neutron-gateway "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "ha-bindiface=$IF1" "bridge-mappings=external:$brex_iface" "data-port=$brex_iface:$brex_port"
 juju-add-unit neutron-gateway --to $net2
 juju-add-unit neutron-gateway --to $net3
 
@@ -113,5 +109,12 @@ juju-add-relation "neutron-openvswitch" "neutron-api"
 juju-add-relation "neutron-openvswitch" "rabbitmq-server"
 
 post_deploy
+
+# TODO: these settings are not permanent. it must be applied after reboot.
+configure_vm $comp1
+configure_vm $comp2
+configure_vm $net1
+configure_vm $net2
+configure_vm $net3
 
 trap - ERR EXIT
