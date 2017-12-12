@@ -255,8 +255,6 @@ sed -i  's/\(.*Ceilometer.*\)/#\1/g' $role_file
 # file for other options
 misc_opts='misc_opts.yaml'
 
-OS::TripleO::Compute::Net::SoftwareConfig: ../net-config-bridge.yaml
-
 cat <<EOF > $misc_opts
 parameter_defaults:
   CloudDomain: $CLOUD_DOMAIN_NAME
