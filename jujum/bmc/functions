@@ -116,7 +116,7 @@ function post_deploy() {
   juju-status-tabular
 }
 
-function configure_vm() {
+function configure_l3_routing() {
   # configures compute/network node for 'disconnected' DVR/HA scheme
   local mch=$1
 
@@ -133,4 +133,29 @@ function configure_vm() {
   juju scp $HOME/neutron-router-helper.tgz $mch:
   juju ssh $mch "tar -xf neutron-router-helper.tgz ; cd neutron-router-helper-master ; sudo PBR_VERSION='0.1.0' python setup.py install --install-scripts=/usr/local/bin"
   juju ssh $mch "sudo systemctl daemon-reload ; sudo systemct start neutron-router-helper.timer ; sudo systemctl restart rsyslog"
+}
+
+function configure_bgp_neutron_api() {
+  local mch="neutron-api/0"
+  juju scp $HOME/neutron-dynamic-routing-mailru-ocata.tgz $mch:
+  juju ssh $mch "tar -xf neutron-dynamic-routing-mailru-ocata.tgz ; cd neutron-dynamic-routing-mailru-ocata ; sudo PBR_VERSION='0.1.0' python setup.py install --install-scripts=/usr/local/bin"
+  juju config neutron-api "manage-neutron-plugin-legacy-mode=False"
+}
+
+function configure_bgp_agent() {
+  local mch=$1
+  juju scp $HOME/neutron-dynamic-routing-mailru-ocata.tgz $mch:
+  juju ssh $mch "tar -xf neutron-dynamic-routing-mailru-ocata.tgz ; cd neutron-dynamic-routing-mailru-ocata ; sudo PBR_VERSION='0.1.0' python setup.py install --install-scripts=/usr/local/bin"
+
+  local ftmp=$(mktemp)
+  cat <<EOS >$ftmp
+[DEFAULT]
+verbose=True
+debug=True
+[BGP]
+bgp_speaker_driver = neutron_dynamic_routing.services.bgp.agent.driver.ryu.driver.RyuBgpDriver
+bgp_router_id = $mch
+EOS
+  juju scp $ftmp $mch:bgp_dragent.ini
+  juju ssh $mch "sudo cp ./bgp_dragent.ini /etc/neutron/bgp_dragent.ini ; sudo systemctl start neutron-bgp-dragent.service"
 }

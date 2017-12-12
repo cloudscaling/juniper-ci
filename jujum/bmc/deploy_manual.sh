@@ -114,10 +114,15 @@ juju-add-relation "neutron-openvswitch" "rabbitmq-server"
 post_deploy
 
 # TODO: these settings are not permanent. it must be applied after reboot.
-configure_vm $comp1
-configure_vm $comp2
-configure_vm $net1
-configure_vm $net2
-configure_vm $net3
+configure_l3_routing $comp1
+configure_l3_routing $comp2
+configure_l3_routing $net1
+configure_l3_routing $net2
+configure_l3_routing $net3
+
+configure_bgp_neutron_api
+configure_bgp_agent $net1
+configure_bgp_agent $net2
+configure_bgp_agent $net3
 
 trap - ERR EXIT
