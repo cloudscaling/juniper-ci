@@ -78,6 +78,8 @@ juju-set neutron-gateway "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "ha-b
 juju-add-unit neutron-gateway --to $net2
 juju-add-unit neutron-gateway --to $net3
 
+juju-deploy --series=$SERIES $my_dir/../neutron-bgp
+
 echo "INFO: Add relations $(date)"
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
 juju-add-relation "keystone:shared-db" "mysql:shared-db"
@@ -103,6 +105,7 @@ juju-add-relation "neutron-gateway" "ntp"
 juju-add-relation "neutron-gateway:amqp" "rabbitmq-server:amqp"
 juju-add-relation "neutron-gateway" "nova-cloud-controller"
 juju-add-relation "neutron-gateway" "neutron-api"
+juju-add-relation "neutron-api" "neutron-bgp"
 
 juju-add-relation "neutron-openvswitch" "nova-compute"
 juju-add-relation "neutron-openvswitch" "neutron-api"
