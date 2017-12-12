@@ -218,7 +218,7 @@ cp -r /usr/share/openstack-tripleo-heat-templates/ ~/tripleo-heat-templates
 role_file='tripleo-heat-templates/roles_data.yaml'
 
 # add Network role
-    cat <<EOF >> $role_file
+cat <<EOF >> $role_file
 - name: Network
   CountDefault: 0
   HostnameFormatDefault: '%stackname%-network-%index%'
@@ -245,7 +245,6 @@ role_file='tripleo-heat-templates/roles_data.yaml'
     - OS::TripleO::Services::AuditD
     - OS::TripleO::Services::Collectd
 EOF
-fi
 
 # disable ceilometer
 # there is the bug with 'ceilometer-upgrade --skipt-metering-database'
