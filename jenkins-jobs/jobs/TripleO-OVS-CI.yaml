@@ -2,9 +2,21 @@
     name: TripleO-OVS-CI
     description: 'TripleO OVS CI'
     defaults: global
-    node: slave01
     concurrent: true
     parameters:
+      - node:
+          name: SLAVE_NAME
+          description: "Select slave: one for specific node or multiple for any node."
+          default-slaves:
+            - slave01
+            - slave02
+            - slave03
+          allowed-slaves:
+            - slave01
+            - slave02
+            - slave03
+          ignore-offline-nodes: false
+          allowed-multiselect: true
       - choice:
           name: NUM
           description: "Enironment Number"
