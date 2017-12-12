@@ -138,7 +138,7 @@ function define_overcloud_vms() {
 
 # just define overcloud machines
 define_overcloud_vms 'cont' $CONTROLLER_COUNT 8192
-define_overcloud_vms $compute_machine_name $COMPUTE_COUNT 4096 'true'
+define_overcloud_vms $compute_machine_name $COMPUTE_COUNT 2048 'true'
 define_overcloud_vms 'stor' $STORAGE_COUNT 4096 'true'
 define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT 8192
 define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT 4096
@@ -288,7 +288,7 @@ function _start_vm() {
   # define and start machine
   virt-install --name=$name \
     --ram=$ram \
-    --vcpus=1,cores=1 \
+    --vcpus=2,cores=2 \
     --os-type=linux \
     --os-variant=rhel7 \
     --virt-type=kvm \
