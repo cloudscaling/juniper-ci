@@ -1,4 +1,5 @@
 name: neutron-bgp
+summary: Provides default service plugin list plus bgp plugin
 maintainer: Andrey Pavlov <andrey.mp@gmail.com>
 description: |
   Charm enables dynamic routing plugin in neutron

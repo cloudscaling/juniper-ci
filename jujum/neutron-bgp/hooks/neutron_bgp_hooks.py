@@ -26,14 +26,15 @@ def _notify_neutron():
 @hooks.hook('upgrade-charm')
 @hooks.hook('config-changed')
 def config_changed():
-    if config.changed('service-plugins')
-        _notify_neutron():
+    if config.changed('service-plugins'):
+        _notify_neutron()
 
 
 @hooks.hook("neutron-api-relation-joined")
 def neutron_api_joined(rel_id=None):
     settings = {
-        "service-plugins": config.get('service_plugins'),
+        "neutron-plugin": "ovs",
+        "service-plugins": config.get('service-plugins'),
     }
     relation_set(relation_id=rel_id, relation_settings=settings)
 
