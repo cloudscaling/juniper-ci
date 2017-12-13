@@ -143,12 +143,15 @@ function _install_dr() {
 function configure_bgp_neutron_api() {
   local mch="neutron-api/0"
   _install_dr $mch
+  local path='/usr/local/lib/python2.7/dist-packages/neutron_dynamic_routing/db/migration/alembic_migrations/versions/'
+  juju ssh $mch "sudo mv $path/pike/expand/* $path/newton/expand/"
   juju ssh $mch "sudo neutron-db-manage upgrade heads"
   juju config neutron-api "manage-neutron-plugin-legacy-mode=False"
 }
 
 function configure_bgp_agent() {
   local mch=$1
+  local ip=$2
   _install_dr $mch
 
   local ftmp=$(mktemp)
@@ -158,7 +161,7 @@ verbose=True
 debug=True
 [BGP]
 bgp_speaker_driver = neutron_dynamic_routing.services.bgp.agent.driver.ryu.driver.RyuBgpDriver
-bgp_router_id = mch-$mch
+bgp_router_id = $ip
 EOS
   juju scp $ftmp $mch:bgp_dragent.ini
   juju scp $my_dir/files/neutron-bgp-dragent.service $mch:neutron-bgp-dragent.service

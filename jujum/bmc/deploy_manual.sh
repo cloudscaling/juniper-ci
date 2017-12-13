@@ -121,8 +121,8 @@ configure_l3_routing $net2
 configure_l3_routing $net3
 
 configure_bgp_neutron_api
-configure_bgp_agent $net1
-configure_bgp_agent $net2
-configure_bgp_agent $net3
+configure_bgp_agent $net1 $net1_ip
+configure_bgp_agent $net2 $net2_ip
+configure_bgp_agent $net3 $net3_ip
 
 trap - ERR EXIT
