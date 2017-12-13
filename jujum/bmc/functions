@@ -137,13 +137,13 @@ function configure_l3_routing() {
 
 function _install_dr() {
   juju scp $HOME/neutron-dynamic-routing.tgz $mch:
-  juju ssh $mch "tar -xf neutron-dynamic-routing.tgz ; cd neutron-dynamic-routing ; git checkout -b 30a9f0b ; sudo python setup.py install --install-scripts=/usr/bin --install-data=/"
+  juju ssh $mch "tar -xf neutron-dynamic-routing.tgz ; cd neutron-dynamic-routing ; git checkout 30a9f0b ; sudo python setup.py install --install-scripts=/usr/bin --install-data=/"
 }
 
 function configure_bgp_neutron_api() {
   local mch="neutron-api/0"
   _install_dr $mch
-  # sync db somehow
+  juju ssh $mch "sudo neutron-db-manage upgrade heads"
   juju config neutron-api "manage-neutron-plugin-legacy-mode=False"
 }
 
