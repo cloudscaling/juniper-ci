@@ -158,7 +158,7 @@ function configure_bgp_agent() {
   cat <<EOS >$ftmp
 [DEFAULT]
 verbose=True
-debug=True
+debug=False
 [BGP]
 bgp_speaker_driver = neutron_dynamic_routing.services.bgp.agent.driver.ryu.driver.RyuBgpDriver
 bgp_router_id = $ip
