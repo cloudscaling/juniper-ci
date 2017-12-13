@@ -135,17 +135,21 @@ function configure_l3_routing() {
   juju ssh $mch "sudo systemctl daemon-reload ; sudo systemct start neutron-router-helper.timer ; sudo systemctl restart rsyslog"
 }
 
+function _install_dr() {
+  juju scp $HOME/neutron-dynamic-routing.tgz $mch:
+  juju ssh $mch "tar -xf neutron-dynamic-routing.tgz ; cd neutron-dynamic-routing ; git checkout -b 30a9f0b ; sudo python setup.py install --install-scripts=/usr/bin --install-data=/"
+}
+
 function configure_bgp_neutron_api() {
   local mch="neutron-api/0"
-  juju scp $HOME/neutron-dynamic-routing-mailru-ocata.tgz $mch:
-  juju ssh $mch "tar -xf neutron-dynamic-routing-mailru-ocata.tgz ; cd neutron-dynamic-routing-mailru-ocata ; sudo PBR_VERSION='0.1.0' python setup.py install --install-scripts=/usr/local/bin"
+  _install_dr $mch
+  # sync db somehow
   juju config neutron-api "manage-neutron-plugin-legacy-mode=False"
 }
 
 function configure_bgp_agent() {
   local mch=$1
-  juju scp $HOME/neutron-dynamic-routing-mailru-ocata.tgz $mch:
-  juju ssh $mch "tar -xf neutron-dynamic-routing-mailru-ocata.tgz ; cd neutron-dynamic-routing-mailru-ocata ; sudo PBR_VERSION='0.1.0' python setup.py install --install-scripts=/usr/bin --install-data=/"
+  _install_dr $mch
 
   local ftmp=$(mktemp)
   cat <<EOS >$ftmp
@@ -160,11 +164,4 @@ EOS
   juju scp $my_dir/files/neutron-bgp-dragent.service $mch:neutron-bgp-dragent.service
   juju ssh $mch "sudo cp ./neutron-bgp-dragent.service /usr/lib/systemd/system/neutron-bgp-dragent.service"
   juju ssh $mch "sudo cp ./bgp_dragent.ini /etc/neutron/bgp_dragent.ini ; sudo chmod 644 /etc/neutron/bgp_dragent.ini ; sudo systemctl start neutron-bgp-dragent.service"
-}
-
-function patch_db_neutron_api() {
-  local mch="mysql/0"
-  juju ssh $mch "mysql -u root -ppassword neutron -e 'alter table `bgp_speakers` change column `tenant_id` `project_id` varchar(255); alter table `bgp_peers` change column `tenant_id` `project_id` varchar(255);'"
-  juju ssh $mch "mysql -u root -ppassword neutron -e 'drop index ix_bgp_speakers_tenant_id on bgp_speakers; drop index ix_bgp_peers_tenant_id on bgp_peers;'"
-  juju ssh neutron-api/0 "sudo systemctl restart neutron-server"
 }
