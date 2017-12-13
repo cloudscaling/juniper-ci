@@ -159,7 +159,7 @@ EOS
   juju scp $ftmp $mch:bgp_dragent.ini
   juju scp $my_dir/files/neutron-bgp-dragent.service $mch:neutron-bgp-dragent.service
   juju ssh $mch "sudo cp ./neutron-bgp-dragent.service /usr/lib/systemd/system/neutron-bgp-dragent.service"
-  juju ssh $mch "sudo cp ./bgp_dragent.ini /etc/neutron/bgp_dragent.ini ; sudo systemctl start neutron-bgp-dragent.service"
+  juju ssh $mch "sudo cp ./bgp_dragent.ini /etc/neutron/bgp_dragent.ini ; sudo chmod 644 /etc/neutron/bgp_dragent.ini ; sudo systemctl start neutron-bgp-dragent.service"
 }
 
 function patch_db_neutron_api() {
