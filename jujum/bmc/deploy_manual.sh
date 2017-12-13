@@ -125,6 +125,4 @@ configure_bgp_agent $net1
 configure_bgp_agent $net2
 configure_bgp_agent $net3
 
-patch_db_neutron_api
-
 trap - ERR EXIT
