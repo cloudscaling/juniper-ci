@@ -132,7 +132,7 @@ function configure_l3_routing() {
   # copy & install neutron_router_helper
   juju scp $HOME/neutron-router-helper.tgz $mch:
   juju ssh $mch "tar -xf neutron-router-helper.tgz ; cd neutron-router-helper-master ; sudo PBR_VERSION='0.1.0' python setup.py install --install-scripts=/usr/local/bin &>/dev/null"
-  juju ssh $mch "sudo systemctl daemon-reload ; sudo systemct start neutron-router-helper.timer ; sudo systemctl restart rsyslog"
+  juju ssh $mch "sudo systemctl daemon-reload ; sudo systemctl start neutron-router-helper.timer ; sudo systemctl restart rsyslog"
 }
 
 function _install_dr() {
@@ -155,7 +155,7 @@ bgp_router_id = $ip
 EOS
   juju scp $ftmp $mch:bgp_dragent.ini
   juju scp $my_dir/files/neutron-bgp-dragent.service $mch:neutron-bgp-dragent.service
-  juju ssh $mch "sudo cp ./neutron-bgp-dragent.service /usr/lib/systemd/system/neutron-bgp-dragent.service"
+  juju ssh $mch "sudo mkdir -p /usr/lib/systemd/system ; sudo cp ./neutron-bgp-dragent.service /usr/lib/systemd/system/neutron-bgp-dragent.service"
   juju ssh $mch "sudo cp ./bgp_dragent.ini /etc/neutron/bgp_dragent.ini ; sudo chmod 644 /etc/neutron/bgp_dragent.ini ; sudo systemctl start neutron-bgp-dragent.service"
 }
 
