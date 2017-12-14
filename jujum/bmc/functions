@@ -131,28 +131,18 @@ function configure_l3_routing() {
 
   # copy & install neutron_router_helper
   juju scp $HOME/neutron-router-helper.tgz $mch:
-  juju ssh $mch "tar -xf neutron-router-helper.tgz ; cd neutron-router-helper-master ; sudo PBR_VERSION='0.1.0' python setup.py install --install-scripts=/usr/local/bin"
+  juju ssh $mch "tar -xf neutron-router-helper.tgz ; cd neutron-router-helper-master ; sudo PBR_VERSION='0.1.0' python setup.py install --install-scripts=/usr/local/bin &>/dev/null"
   juju ssh $mch "sudo systemctl daemon-reload ; sudo systemct start neutron-router-helper.timer ; sudo systemctl restart rsyslog"
 }
 
 function _install_dr() {
   juju scp $HOME/neutron-dynamic-routing.tgz $mch:
-  juju ssh $mch "tar -xf neutron-dynamic-routing.tgz ; cd neutron-dynamic-routing ; git checkout 30a9f0b ; sudo python setup.py install --install-scripts=/usr/bin --install-data=/"
+  juju ssh $mch "tar -xf neutron-dynamic-routing.tgz ; cd neutron-dynamic-routing ; git checkout 30a9f0b ; sudo python setup.py install --install-scripts=/usr/bin --install-data=/ &>/dev/null"
 }
 
-function configure_bgp_neutron_api() {
-  local mch="neutron-api/0"
-  _install_dr $mch
-  local path='/usr/local/lib/python2.7/dist-packages/neutron_dynamic_routing/db/migration/alembic_migrations/versions/'
-  juju ssh $mch "sudo mv $path/pike/expand/* $path/newton/expand/"
-  juju ssh $mch "sudo neutron-db-manage upgrade heads"
-  juju config neutron-api "manage-neutron-plugin-legacy-mode=False"
-}
-
-function configure_bgp_agent() {
+function _run_dr_agent() {
   local mch=$1
   local ip=$2
-  _install_dr $mch
 
   local ftmp=$(mktemp)
   cat <<EOS >$ftmp
@@ -167,4 +157,26 @@ EOS
   juju scp $my_dir/files/neutron-bgp-dragent.service $mch:neutron-bgp-dragent.service
   juju ssh $mch "sudo cp ./neutron-bgp-dragent.service /usr/lib/systemd/system/neutron-bgp-dragent.service"
   juju ssh $mch "sudo cp ./bgp_dragent.ini /etc/neutron/bgp_dragent.ini ; sudo chmod 644 /etc/neutron/bgp_dragent.ini ; sudo systemctl start neutron-bgp-dragent.service"
+}
+
+function configure_bgp_neutron_api() {
+  local mch="neutron-api/0"
+  _install_dr $mch
+
+  # run dr agent
+  local ip=`juju ssh $mch "hostname -i" 2>/dev/null`
+  _run_dr_agent $mch $ip
+
+  # configure dr plugin
+  local path='/usr/local/lib/python2.7/dist-packages/neutron_dynamic_routing/db/migration/alembic_migrations/versions/'
+  juju ssh $mch "sudo mv $path/pike/expand/* $path/newton/expand/"
+  juju ssh $mch "sudo neutron-db-manage upgrade heads"
+  juju config neutron-api "manage-neutron-plugin-legacy-mode=False"
+}
+
+function configure_bgp_agent() {
+  local mch=$1
+  local ip=$2
+  _install_dr $mch
+  _run_dr_agent $mch $ip
 }

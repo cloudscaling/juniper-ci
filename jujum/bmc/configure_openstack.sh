@@ -65,3 +65,7 @@ sleep 10
 openstack server create --image cirros --flavor small --network private2 --min 2 --max 2 rrr
 sleep 10
 openstack server list
+
+export OS_PROJECT_NAME=admin
+
+for iii in `openstack network agent list | grep BGP | awk '{print $2}'` ; do openstack network agent show $iii ; done
