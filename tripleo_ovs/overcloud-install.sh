@@ -279,13 +279,13 @@ EOF
 
 
 if  (( STOR_COUNT == 0 )) ; then
-cat <<EOF > $misc_opts
+cat <<EOF >> $misc_opts
   GlanceBackend: file
   GnocchiBackend: file
 EOF
 else
   ceph_opts="-e tripleo-heat-templates/environments/storage-environment.yaml"
-cat <<EOF > $misc_opts
+cat <<EOF >> $misc_opts
   CephStorageCount: $STOR_COUNT
   CephClusterFSID: '4b5c8c0a-ff60-454b-a1b4-9747aa737d19'
   CephMonKey: 'AQC+Ox1VmEr3BxAALZejqeHj50Nj6wJDvs96OQ=='
