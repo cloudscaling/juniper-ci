@@ -168,7 +168,7 @@ function run_network() {
   local mac_suffix=${!mac_var_name}
   echo "INFO: creating network $index (mac suffix $mac_suffix) $(date)"
   local ip="$addr.$mac_suffix"
-  run_cloud_machine net-$index $mac_suffix 2048 $ip
+  run_cloud_machine net-$index $mac_suffix 4096 $ip
 
   echo "INFO: preparing network $index $(date)"
   kernel_version=`juju ssh ubuntu@$ip uname -r 2>/dev/null | tr -d '\r'`
