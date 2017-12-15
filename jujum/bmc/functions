@@ -177,6 +177,14 @@ function configure_bgp_neutron_api() {
 function configure_bgp_agent() {
   local mch=$1
   local ip=$2
+
   _install_dr $mch
   _run_dr_agent $mch $ip
+}
+
+function create_adv_ip() {
+  local host=$1
+  local ip=$2
+
+  juju ssh neutron-api/0 "neutron-bgp-manage-adv-ip create --ip $ip --adv-host $host"
 }
