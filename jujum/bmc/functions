@@ -50,7 +50,7 @@ function create_network() {
 
   delete_network $network_name
 
-  echo "<network><name>$network_name</name><forward mode=\"nat\"><nat><port start=\"1024\" end=\"65535\"/></nat></forward><ip address=\"$addr.1\" netmask=\"255.255.255.0\"><dhcp><range start=\"$addr.100\" end=\"$addr.109\"/></dhcp></ip></network>" > /tmp/juju-net.xml
+  echo "<network><name>$network_name</name><forward mode=\"nat\"><nat><port start=\"1024\" end=\"65535\"/></nat></forward><ip address=\"$addr.1\" netmask=\"255.255.255.0\"><dhcp><range start=\"$addr.100\" end=\"$addr.129\"/></dhcp></ip></network>" > /tmp/juju-net.xml
   $virsh_cmd net-define /tmp/juju-net.xml
   rm /tmp/juju-net.xml
   $virsh_cmd net-autostart $network_name
