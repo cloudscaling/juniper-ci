@@ -27,9 +27,9 @@ openstack role add --project demo --user admin Member
 
 sleep 30
 
-#openstack address scope create --share --ip-version 4 bgp
-#openstack subnet pool create --pool-prefix 10.10.0.0/24 --address-scope bgp public
-#openstack subnet pool create --pool-prefix 192.168.1.0/24 --pool-prefix 192.168.2.0/24 --address-scope bgp --share private
+openstack address scope create --share --ip-version 4 bgp
+openstack subnet pool create --pool-prefix 10.10.0.0/24 --address-scope bgp public
+openstack subnet pool create --pool-prefix 192.168.1.0/24 --pool-prefix 192.168.2.0/24 --address-scope bgp --share private
 
 openstack network create --share --external --provider-network-type flat --provider-physical-network external public
 openstack subnet create --network public --subnet-range $public_network_addr.0/24 --no-dhcp --gateway $public_network_addr.1 public
