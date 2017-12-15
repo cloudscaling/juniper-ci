@@ -1,5 +1,8 @@
 #!/bin/bash -ex
 
+# TODO: redefine default param in outer script/job
+export OPENSTACK_VERSION='newton'
+
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
@@ -60,21 +63,21 @@ $SCP -r "$WORKSPACE/contrail-build-poc" $SSH_DEST_BUILD:./
 if [[ "$BUILD_TARGET" == 'containers' ]] ; then
   # helm's gating is not very fast. it takes more than 25 minutes. we can build containers in background.
   echo "INFO: ($(date)) run build in background then wait some time and run helm gating"
-  $SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION timeout -s 9 60m ./build-${BUILD_TARGET}.sh" &>$WORKSPACE/logs/build.log &
+  $SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION timeout -s 9 60m ./build-${BUILD_TARGET}.sh" &>$WORKSPACE/logs/build.log &
   # wait some time while it prepares vrouter.ko on www that is needed for gate in the beginning
   timeout -s 9 300s tail -f $WORKSPACE/logs/build.log || /bin/true
   echo "INFO: ($(date)) continuing with helm deployment"
 else
   # but in case full build time is not so critical...
   set -o pipefail
-  $SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION timeout -s 9 180m ./build-${BUILD_TARGET}.sh" |& tee $WORKSPACE/logs/build.log
+  $SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION timeout -s 9 180m ./build-${BUILD_TARGET}.sh" |& tee $WORKSPACE/logs/build.log
   set +o pipefail
 fi
 
 # ceph.repo file is needed ONLY fow centos on aws.
 $SCP "$my_dir/__ceph.repo" $SSH_DEST:ceph.repo
 $SCP "$my_dir/__run-gate.sh" $SSH_DEST:run-gate.sh
-timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_HELM_URL=$OPENSTACK_HELM_URL ./run-gate.sh $public_ip_build"
+timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION OPENSTACK_HELM_URL=$OPENSTACK_HELM_URL ./run-gate.sh $public_ip_build"
 
 trap - ERR
 save_logs
