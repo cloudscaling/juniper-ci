@@ -39,7 +39,7 @@ elif [ "x$HOST_OS" == "xcentos" ]; then
   sudo systemctl start ntpd.service
 
   # TODO: remove this hack
-  wget -nv http://$registry_ip/$CONTRAIL_VERSION/vrouter.ko
+  wget -nv http://$registry_ip/$CONTRAIL_VERSION-$OPENSTACK_VERSION/vrouter.ko
   chmod 755 vrouter.ko
   sudo insmod ./vrouter.ko
 fi
