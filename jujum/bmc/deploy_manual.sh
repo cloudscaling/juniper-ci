@@ -128,10 +128,10 @@ configure_bgp_neutron_api
 #configure_bgp_agent $net3 $net3_ip
 
 # add advertisiment ip for nodes
-create_adv_ip comp1 $comp1_ip
-create_adv_ip comp2 $comp2_ip
-create_adv_ip net1 $net1_ip
-create_adv_ip net2 $net2_ip
-create_adv_ip net3 $net3_ip
+create_adv_ip comp-1 $comp1_ip
+create_adv_ip comp-2 $comp2_ip
+create_adv_ip net-1 $net1_ip
+create_adv_ip net-2 $net2_ip
+create_adv_ip net-3 $net3_ip
 
 trap - ERR EXIT
