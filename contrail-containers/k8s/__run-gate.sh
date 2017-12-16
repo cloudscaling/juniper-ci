@@ -8,6 +8,9 @@ function log_error() {
   echo "ERROR: $@"
 }
 
+# ip is located in /usr/sbin that is not in path...
+export PATH=${PATH}:/usr/sbin
+
 pushd contrail-container-builder/kubernetes/manifests/
 ./resolve-manifest.sh <contrail-template.yaml > ~/my-contrail.yaml
 popd
