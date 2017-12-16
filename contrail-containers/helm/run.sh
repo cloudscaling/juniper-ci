@@ -1,8 +1,5 @@
 #!/bin/bash -ex
 
-# TODO: redefine default param in outer script/job
-export OPENSTACK_VERSION='newton'
-
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
