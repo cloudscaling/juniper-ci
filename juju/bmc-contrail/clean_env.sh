@@ -15,10 +15,8 @@ if juju show-controller $juju_controller_name ; then
   juju destroy-controller -y --destroy-all-models $juju_controller_name || /bin/true
 fi
 
-rm -rf $HOME/.local/share/juju
-
 delete_network $nname
-delete_network $nname_ext
+delete_network $nname_vm
 
 delete_domains
 

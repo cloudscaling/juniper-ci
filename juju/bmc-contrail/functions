@@ -1,0 +1,10 @@
+#!/bin/bash
+
+fomy_file="${BASH_SOURCE[0]}"
+fomy_dir="$(dirname $fomy_file)"
+source $fomy_dir/definitions
+source $fomy_dir/../common/functions
+source $fomy_dir/../common/functions-bmc
+source $fomy_dir/../common/functions-contrail-R4
+source $fomy_dir/../common/functions-contrail
+source $fomy_dir/../common/functions-aws

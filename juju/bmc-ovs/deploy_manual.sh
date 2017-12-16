@@ -3,7 +3,6 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 source "$my_dir/functions"
-source "$my_dir/../common/functions"
 
 trap 'catch_errors_ce $LINENO' ERR EXIT
 function catch_errors_ce() {
@@ -78,7 +77,7 @@ juju-set neutron-gateway "openstack-origin=$OPENSTACK_ORIGIN" "ha-bindiface=$IF1
 juju-add-unit neutron-gateway --to $net2
 juju-add-unit neutron-gateway --to $net3
 
-juju-deploy --series=$SERIES $my_dir/../neutron-bgp
+juju-deploy --series=$SERIES $my_dir/neutron-bgp
 
 echo "INFO: Add relations $(date)"
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"

@@ -99,7 +99,7 @@
           if [[ "$VERSION" == "mitaka" ]] ; then
             export SERIES='trusty'
           fi
-          ./juniper-ci/juju/run-contrail-openstack.sh deploy-$DEPLOY_TYPE.sh $DEPLOY_FROM
+          ./juniper-ci/juju/aws-contrail/deploy-all.sh deploy-$DEPLOY_TYPE.sh $DEPLOY_FROM
     publishers:
       - archive:
           artifacts: 'logs/**'
@@ -191,7 +191,7 @@
           if [[ "$VERSION" == "mitaka" ]] ; then
             export SERIES='trusty'
           fi
-          ./juniper-ci/juju/bmc/deploy_all.sh
+          ./juniper-ci/juju/bmc-contrail/deploy_all.sh
     publishers:
       - archive:
           artifacts: 'logs/**'

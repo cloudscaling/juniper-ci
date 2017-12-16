@@ -3,17 +3,7 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
-# base image for VMs is a ubuntu cloud image with:
-# 1) removed cloud-init (echo 'datasource_list: [ None ]' | sudo -s tee /etc/cloud/cloud.cfg.d/90_dpkg.cfg ; sudo apt-get purge cloud-init ; sudo rm -rf /etc/cloud/; sudo rm -rf /var/lib/cloud/ )
-# 2) added jenkins's key to authorized keys for ubuntu user
-# 3) added password '123' for user ubuntu
-# 4) root disk resized to 60G ( truncate -s 60G temp.raw ; virt-resize --expand /dev/vda1 ubuntu-xenial.qcow2 temp.raw ; qemu-img convert -O qcow2 temp.raw ubuntu-xenial-new.qcow2 )
-BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-"ubuntu-$SERIES.qcow2"}
-BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
-BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
-
 source "$my_dir/functions"
-source "$my_dir/../common/functions"
 
 trap 'catch_errors_ce $LINENO' ERR EXIT
 function catch_errors_ce() {
@@ -36,12 +26,6 @@ create_network $nname_ext $addr_ext
 # create pool
 $virsh_cmd pool-info $poolname &> /dev/null || create_pool $poolname
 pool_path=$(get_pool_path $poolname)
-
-function create_root_volume() {
-  local name=$1
-  delete_volume $name.qcow2 $poolname
-  qemu-img create -f qcow2 -o preallocation=metadata $pool_path/$name.qcow2 $vm_disk_size
-}
 
 function run_machine() {
   local name="$1"
@@ -108,6 +92,7 @@ function wait_kvm_machine() {
 
 cont_ip="$addr.$cont_idx"
 run_machine ${job_prefix}-cont 1 2048 $cont_idx $cont_ip
+wait_kvm_machine $cont_ip
 
 # wait for controller machine
 iter=0

@@ -34,7 +34,7 @@
       - shell: |
           #!/bin/bash -e
           export SERIES='xenial'
-          ./juniper-ci/jujum/bmc/deploy_all.sh
+          ./juniper-ci/juju/bmc-ovs/deploy_all.sh
     publishers:
       - archive:
           artifacts: 'logs/**'

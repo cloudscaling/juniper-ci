@@ -42,7 +42,6 @@ export BUILD="${BUILD:-${BUILDS[$VERSION]}}"
 export DEPLOY_MODE="${DEPLOY_MODE:-two}"
 export USE_SSL_OS="${USE_SSL_OS:-false}"
 export USE_SSL_CONTRAIL="false"
-export USE_ADDITIONAL_INTERFACE="${USE_ADDITIONAL_INTERFACE:-false}"
 export USE_DPDK="${USE_DPDK:-false}"
 export AAA_MODE=${AAA_MODE:-rbac}
 
@@ -57,9 +56,9 @@ else
 fi
 
 # check if environment is present
-if $virsh_cmd list --all | grep -q "juju-cont" ; then
+if $virsh_cmd list --all | grep -q "${job_prefix}-cont" ; then
   echo 'ERROR: environment present. please clean up first'
-  $virsh_cmd list --all | grep "juju-"
+  $virsh_cmd list --all | grep "${job_prefix}-"
   exit 1
 fi
 
@@ -92,7 +91,7 @@ juju status
 "$my_dir"/deploy_manual.sh
 
 #check it
-$my_dir/../contrail/check-openstack.sh
+$my_dir/../common/check-openstack.sh
 
 $my_dir/../save-logs.sh
 

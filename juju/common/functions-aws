@@ -1,0 +1,66 @@
+#!/bin/bash -e
+
+function detect_machines() {
+  m1=`get_machines_index_by_service openstack-dashboard`
+  m2=`get_machines_index_by_service glance`
+  m3=`get_machines_index_by_service keystone`
+  m4=`get_machines_index_by_service nova-cloud-controller`
+  m5=`get_machines_index_by_service neutron-api`
+  m6=`get_machines_index_by_service contrail-controller`
+}
+
+function open_port() {
+  local mch=$1
+  local port=$2
+  local protocol=${3:-tcp}
+
+  for i in {0..30} ; do
+    local iid=`get-machine-id-by-number $mch`
+    if [[ "$iid" == i-* ]] ; then
+      break
+    fi
+    sleep 5
+  done
+
+  local sg_id=`aws ec2 describe-instances --instance-id "$iid" --query 'Reservations[*].Instances[*].SecurityGroups' | grep -C 2 "\-$mch\"" | awk '/GroupId/{print $2}' | head -1 | xargs`
+  if echo $sg_id | grep ',' ; then
+    sg_id=`echo $sg_id | sed 's/\,//g'`
+  fi
+  aws ec2 authorize-security-group-ingress --group-id $sg_id --protocol $protocol --port $port --cidr 0.0.0.0/0
+  aws ec2 describe-security-groups --group-id $sg_id
+}
+
+function hack_openstack() {
+  if [[ "$jver" == 2 ]] ; then
+    # Juju 2.0 registers services with private ips (using new modern tool 'network-get public')
+    echo "INFO: HACK: Reconfigure public endpoints for OpenStack $(date)"
+
+    local mchs=("$m2" "$m3" "$m4" "$m5")
+    local mch_srvs=('glance' 'keystone' 'nova-cloud-controller' 'neutron-api')
+    local mch_sets=('0' '0' '0' '0')
+    for j in {1..30} ; do
+      echo "INFO: attempt $j"
+      for i in {0..3} ; do
+        if [[ ${mch_sets[$i]} != '0' ]] ; then
+          continue;
+        fi
+        local addr_count=`juju machines --format json | python -c "import sys; import json; sys.stdout.write(str(len(json.load(sys.stdin)['machines'].get('${mchs[$i]}', {}).get('ip-addresses', []))))"`
+        if [[ $addr_count != '0' ]] ; then
+          local ip=`get-machine-ip-by-number ${mchs[$i]}`
+          echo "INFO: Update hostnames of ${mch_srvs[$i]} with IP=$ip"
+          juju-set ${mch_srvs[$i]} os-public-hostname=$ip os-admin-hostname=$ip os-internal-hostname=$ip
+          mch_sets[$i]='1'
+        fi
+      done
+      if ! echo ${mch_sets[@]} | grep -q '0' ; then
+        break
+      fi
+      sleep 2
+    done
+  fi
+
+  # open admin port of keystone - to be able to create projects
+  open_port $m3 35357
+  # open port for vnc console
+  open_port $m4 6080
+}

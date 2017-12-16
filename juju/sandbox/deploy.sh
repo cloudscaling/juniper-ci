@@ -121,7 +121,7 @@ stage=6
 
 set_status "Setting up apt-repo."
 # only this file is allowed to be run with sudo in the sandbox.
-sudo $my_dir/../contrail/create-aptrepo.sh
+sudo $my_dir/../common/create-aptrepo.sh
 set_status "Apt-repo was setup."
 
 stage=7
@@ -161,7 +161,8 @@ stage=11
 
 set_status "Configuring OpenStack services"
 source "$my_dir/../common/functions"
-source "$my_dir/../contrail/functions"
+source "$my_dir/../common/functions-aws"
+source "$my_dir/../common/functions-contrail-R4"
 set_status "Detecting machines for OpenStack"
 detect_machines
 set_status "Re-configuring OpenStack public endpoints"

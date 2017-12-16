@@ -1,37 +1,20 @@
 #!/bin/bash
 
+# definitions for KVM/virsh:
+
 export LIBVIRT_DEFAULT_URI=qemu:///system
 virsh_cmd="virsh"
 
-poolname="jujuimages"
-net_driver=${net_driver:-e1000}
-nname="juju"
-addr="10.0.0"
-nname_vm="juju-vm"
-addr_vm="10.0.1"
+# base image for VMs is a ubuntu cloud image with:
+# 1) removed cloud-init (echo 'datasource_list: [ None ]' | sudo -s tee /etc/cloud/cloud.cfg.d/90_dpkg.cfg ; sudo apt-get purge cloud-init ; sudo rm -rf /etc/cloud/; sudo rm -rf /var/lib/cloud/ )
+# 2) added jenkins's key to authorized keys for ubuntu user
+# 3) added password '123' for user ubuntu
+# 4) root disk resized to 60G ( truncate -s 60G temp.raw ; virt-resize --expand /dev/vda1 ubuntu-xenial.qcow2 temp.raw ; qemu-img convert -O qcow2 temp.raw ubuntu-xenial-new.qcow2 )
+BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-"ubuntu-$SERIES.qcow2"}
+BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
+BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
 
-mac_base='52:54:00:10:00'
-# juju controller
-juju_cont_mac='01'
-# openstack compute
-juju_os_comp_1_mac='02'
-juju_os_comp_2_mac='03'
-# openstack components (controllers + rabbit + db)
-juju_os_cont_0_mac='04'
-# contrail controllers
-juju_os_cont_1_mac='05'
-juju_os_cont_2_mac='06'
-juju_os_cont_3_mac='07'
-
-function get_kvm_machine_ip() {
-  local mac_suffix="$1"
-  for i in {1..10} ; do
-    if python -c "import libvirt; conn = libvirt.open('$LIBVIRT_DEFAULT_URI'); ip = [lease['ipaddr'] for lease in conn.networkLookupByName('$nname').DHCPLeases() if lease['mac'] == '$mac_base:$mac_suffix'][0]; print ip" 2>/dev/null ; then
-      break
-    fi
-    sleep 10
-  done
-}
+# KVM helpers
 
 function delete_network() {
   local network_name="$1"
@@ -45,7 +28,7 @@ function create_network() {
 
   delete_network $network_name
 
-  echo "<network><name>$network_name</name><forward mode=\"nat\"><nat><port start=\"1024\" end=\"65535\"/></nat></forward><ip address=\"$addr.1\" netmask=\"255.255.255.0\"><dhcp><range start=\"$addr.10\" end=\"$addr.254\"/></dhcp></ip></network>" > /tmp/juju-net.xml
+  echo "<network><name>$network_name</name><forward mode=\"nat\"><nat><port start=\"1024\" end=\"65535\"/></nat></forward><ip address=\"$addr.1\" netmask=\"255.255.255.0\"><dhcp><range start=\"$addr.100\" end=\"$addr.129\"/></dhcp></ip></network>" > /tmp/juju-net.xml
   $virsh_cmd net-define /tmp/juju-net.xml
   rm /tmp/juju-net.xml
   $virsh_cmd net-autostart $network_name
@@ -76,7 +59,7 @@ function get_pool_path() {
 }
 
 function delete_domains() {
-  for name in `$virsh_cmd list --all | grep "juju-" | awk '{print $2}'` ; do
+  for name in `$virsh_cmd list --all | grep "${job_prefix}-" | awk '{print $2}'` ; do
     $virsh_cmd destroy $name || /bin/true
     sleep 2
     $virsh_cmd undefine $name || /bin/true

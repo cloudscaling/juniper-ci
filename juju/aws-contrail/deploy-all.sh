@@ -8,7 +8,7 @@ fi
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
-source "$my_dir/common/functions"
+source "$my_dir/../common/functions"
 
 if [[ "$CLEAN_BEFORE" == 'true' || "$CLEAN_BEFORE" == 'clean_and_exit' ]] ; then
   cleanup_environment
@@ -84,9 +84,9 @@ function catch_errors() {
   echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
   trap - ERR EXIT
 
-  $my_dir/save-logs.sh
-  if [ -f $my_dir/contrail/save-logs.sh ] ; then
-    $my_dir/contrail/save-logs.sh
+  $my_dir/../save-logs.sh
+  if [ -f $my_dir/save-logs.sh ] ; then
+    $my_dir/save-logs.sh
   fi
 
   if [[ "$CLEAN_ENV" == 'always' ]] ; then
@@ -97,17 +97,17 @@ function catch_errors() {
 }
 
 echo "--------------------------------------------- Run deploy script: $inner_script"
-$my_dir/contrail/$inner_script $script_params
+$my_dir/$inner_script $script_params
 
-$my_dir/contrail/check-openstack.sh
+$my_dir/../common/check-openstack.sh
 
 if [[ "$RUN_TEMPEST" == 'true' ]] ; then
-  $my_dir/contrail/run-tempest.sh
+  $my_dir/run-tempest.sh
 fi
 
-$my_dir/save-logs.sh
-if [ -f $my_dir/contrail/save-logs.sh ] ; then
-  $my_dir/contrail/save-logs.sh
+$my_dir/../save-logs.sh
+if [ -f $my_dir/save-logs.sh ] ; then
+  $my_dir/save-logs.sh
 fi
 
 if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then

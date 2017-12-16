@@ -2,7 +2,7 @@
 
 my_file="${BASH_SOURCE[0]}"
 my_dir="$(dirname $my_file)"
-source "$my_dir/../common/functions"
+source "$my_dir/functions"
 
 trap 'catch_errors_ce $LINENO' ERR EXIT
 function catch_errors_ce() {
@@ -28,7 +28,7 @@ for mch in `get_machines_index_by_service nova-compute` ; do
   juju-ssh $mch sudo apt-get -y install sshpass &>/dev/null
 done
 
-source "$my_dir/../common/functions-openstack"
+source "$my_dir/functions-openstack"
 
 cd $WORKSPACE
 create_stackrc
