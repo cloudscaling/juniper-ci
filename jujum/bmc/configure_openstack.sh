@@ -60,8 +60,15 @@ openstack router set --external-gateway public rt
 openstack router add subnet rt private1
 openstack router add subnet rt private2
 
+openstack security group rule create default --protocol icmp
+openstack security group rule create default --protocol tcp --dst-port 22:22
+
 openstack server create --image cirros --flavor small --network private1 --min 2 --max 2 ttt
 sleep 10
 openstack server create --image cirros --flavor small --network private2 --min 2 --max 2 rrr
 sleep 10
 openstack server list
+
+export OS_PROJECT_NAME=admin
+
+for iii in `openstack network agent list | grep BGP | awk '{print $2}'` ; do openstack network agent show $iii ; done

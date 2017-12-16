@@ -67,7 +67,7 @@ function run_machine() {
     params="$params --network network=$nname_ext,model=$net_driver,mac=$mac_base_ext:$mac_suffix"
   fi
 
-  echo "INFO: running  machine $name $(date)"
+  echo "INFO: running machine $name $(date)"
   cp $BASE_IMAGE $pool_path/$name.qcow2
   virt-install --name $name \
     --ram $ram \
@@ -89,6 +89,7 @@ function run_machine() {
     virsh net-update $nname_ext add ip-dhcp-host "<host mac='$mac_base_ext:$mac_suffix' name='$name' ip='$ip_ext' />"
   fi
   virsh start $name --force-boot
+  echo "INFO: machine $name run $(date)"
 }
 
 wait_cmd="ssh"
@@ -131,11 +132,16 @@ function run_cloud_machine() {
   local name=$1
   local mac_suffix=$2
   local mem=$3
+  local ip=$4
 
   local ip="$addr.$mac_suffix"
   run_machine ${job_prefix}-os-$name 4 $mem $mac_suffix $ip "$addr_ext.$mac_suffix"
   machines["$name"]=$ip
+  echo "INFO: start machine $name waiting $name $(date)"
   wait_kvm_machine $ip
+  echo "INFO: adding machine $name to juju controller $(date)"
+  juju add-machine ssh:ubuntu@$ip
+  echo "INFO: machine $name is ready $(date)"
 }
 
 function run_compute() {
@@ -143,13 +149,12 @@ function run_compute() {
   local mac_var_name="os_comp_${index}_idx"
   local mac_suffix=${!mac_var_name}
   echo "INFO: creating compute $index (mac suffix $mac_suffix) $(date)"
-  run_cloud_machine comp-$index $mac_suffix 4096
   local ip="$addr.$mac_suffix"
-  juju add-machine ssh:ubuntu@$ip
+  run_cloud_machine comp-$index $mac_suffix 4096 $ip
 
   echo "INFO: preparing compute $index $(date)"
   kernel_version=`juju ssh ubuntu@$ip uname -r 2>/dev/null | tr -d '\r'`
-  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget apparmor-profiles openvswitch-switch" &>>$log_dir/apt.log
+  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget openvswitch-switch" &>>$log_dir/apt.log
   juju scp "$my_dir/files/50-cloud-init-compute-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
   juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
   juju ssh ubuntu@$ip "echo 'supersede routers 10.0.0.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
@@ -162,13 +167,12 @@ function run_network() {
   local mac_var_name="os_net_${index}_idx"
   local mac_suffix=${!mac_var_name}
   echo "INFO: creating network $index (mac suffix $mac_suffix) $(date)"
-  run_cloud_machine net-$index $mac_suffix 2048
   local ip="$addr.$mac_suffix"
-  juju add-machine ssh:ubuntu@$ip
+  run_cloud_machine net-$index $mac_suffix 4096 $ip
 
   echo "INFO: preparing network $index $(date)"
   kernel_version=`juju ssh ubuntu@$ip uname -r 2>/dev/null | tr -d '\r'`
-  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget apparmor-profiles openvswitch-switch" &>>$log_dir/apt.log
+  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget openvswitch-switch" &>>$log_dir/apt.log
   juju scp "$my_dir/files/50-cloud-init-compute-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
   juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
   juju ssh ubuntu@$ip "echo 'supersede routers 10.0.0.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
@@ -183,11 +187,8 @@ function run_controller() {
   local mac_var_name="os_cont_${index}_idx"
   local mac_suffix=${!mac_var_name}
   echo "INFO: creating controller $index (mac suffix $mac_suffix) $(date)"
-  run_cloud_machine cont-$index $mac_suffix $mem
   local ip="$addr.$mac_suffix"
-  local output=`juju add-machine ssh:ubuntu@$ip 2>&1`
-  echo "$output"
-  mch=`echo "$output" | tail -1 | awk '{print $3}'`
+  run_cloud_machine cont-$index $mac_suffix $mem $ip
 
   echo "INFO: preparing controller $index $(date)"
   juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget bridge-utils" &>>$log_dir/apt.log

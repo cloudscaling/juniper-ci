@@ -46,35 +46,35 @@ juju-deploy cs:$SERIES/percona-cluster mysql --to lxd:$cont0
 juju-set mysql "root-password=$PASSWORD" "max-connections=1500"
 
 juju-deploy cs:$SERIES/openstack-dashboard --to lxd:$cont0
-juju-set openstack-dashboard "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+juju-set openstack-dashboard "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose openstack-dashboard
 
 juju-deploy cs:$SERIES/nova-cloud-controller --to lxd:$cont0
-juju-set nova-cloud-controller "console-access-protocol=novnc" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+juju-set nova-cloud-controller "console-access-protocol=novnc" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose nova-cloud-controller
 
 juju-deploy cs:$SERIES/glance --to lxd:$cont0
-juju-set glance "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+juju-set glance "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose glance
 
 juju-deploy cs:$SERIES/keystone --to lxd:$cont0
-juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose keystone
 
 juju-deploy cs:$SERIES/nova-compute --to $comp1
 juju-add-unit nova-compute --to $comp2
-juju-set nova-compute "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "virt-type=kvm" "enable-resize=True" "enable-live-migration=True" "migration-auth-type=ssh"
+juju-set nova-compute "openstack-origin=$OPENSTACK_ORIGIN" "virt-type=kvm" "enable-resize=True" "enable-live-migration=True" "migration-auth-type=ssh"
 
 juju-deploy cs:$SERIES/neutron-api --to lxd:$cont0
-juju-set neutron-api "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "enable-dvr=true" "overlay-network-type=vxlan" "enable-l3ha=True" "neutron-security-groups=True" "flat-network-providers=*"
+juju-set neutron-api "openstack-origin=$OPENSTACK_ORIGIN" "enable-dvr=true" "overlay-network-type=vxlan" "enable-l3ha=True" "neutron-security-groups=True" "flat-network-providers=*" "max-l3-agents-per-router=3"
 juju-set nova-cloud-controller "network-manager=Neutron"
 juju-expose neutron-api
 
 juju-deploy neutron-openvswitch
-juju-set neutron-openvswitch "debug=true" "bridge-mappings=external:$brex_iface" "data-port=$brex_iface:$brex_port"
+juju-set neutron-openvswitch "bridge-mappings=external:$brex_iface" "data-port=$brex_iface:$brex_port"
 
 juju-deploy neutron-gateway --to $net1
-juju-set neutron-gateway "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "ha-bindiface=$IF1" "bridge-mappings=external:$brex_iface" "data-port=$brex_iface:$brex_port"
+juju-set neutron-gateway "openstack-origin=$OPENSTACK_ORIGIN" "ha-bindiface=$IF1" "bridge-mappings=external:$brex_iface" "data-port=$brex_iface:$brex_port"
 juju-add-unit neutron-gateway --to $net2
 juju-add-unit neutron-gateway --to $net3
 
@@ -102,6 +102,7 @@ juju-add-relation "neutron-api:amqp" "rabbitmq-server:amqp"
 juju-add-relation "neutron-api" "ntp"
 juju-add-relation "nova-compute:juju-info" "ntp:juju-info"
 juju-add-relation "neutron-gateway" "ntp"
+
 juju-add-relation "neutron-gateway:amqp" "rabbitmq-server:amqp"
 juju-add-relation "neutron-gateway" "nova-cloud-controller"
 juju-add-relation "neutron-gateway" "neutron-api"
@@ -121,8 +122,16 @@ configure_l3_routing $net2
 configure_l3_routing $net3
 
 configure_bgp_neutron_api
-configure_bgp_agent $net1 $net1_ip
-configure_bgp_agent $net2 $net2_ip
-configure_bgp_agent $net3 $net3_ip
+# it needs connect to mysql that doesn't have now
+#configure_bgp_agent $net1 $net1_ip
+#configure_bgp_agent $net2 $net2_ip
+#configure_bgp_agent $net3 $net3_ip
+
+# add advertisiment ip for nodes
+create_adv_ip comp-1 $comp1_ip
+create_adv_ip comp-2 $comp2_ip
+create_adv_ip net-1 $net1_ip
+create_adv_ip net-2 $net2_ip
+create_adv_ip net-3 $net3_ip
 
 trap - ERR EXIT
