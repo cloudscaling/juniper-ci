@@ -26,6 +26,9 @@ assert_empty KUBERNETES_API_SERVER
 assert_empty CONTROLLER_NODES
 assert_empty AGENT_NODES
 
+# Set both ZOOKEEPER_PORT and ZOOKEEPER_ANALYTICS_PORT to 2181
+# because there is one zookeeper cluster in this test
+
 function setup_k8s() {
   local dest=$1
   local token_opts=${2:-''}
@@ -41,6 +44,8 @@ _CONTRAIL_REGISTRY_IP=$DOCKER_REGISTRY_ADDR
 OPENSTACK_VERSION=$OPENSTACK_VERSION
 CONTROLLER_NODES=$CONTROLLER_NODES
 AGENT_NODES=$AGENT_NODES
+ZOOKEEPER_PORT=2181
+ZOOKEEPER_ANALYTICS_PORT=2181
 EOM
 cat common.env
 kubernetes/setup-k8s.sh $token_opts
