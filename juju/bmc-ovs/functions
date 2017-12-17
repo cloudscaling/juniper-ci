@@ -20,8 +20,15 @@ function configure_l3_routing() {
   juju ssh $mch "sudo ip rule add from all iif $brex_iface pref 10 table 120 ; sudo ip route add 0.0.0.0/0 table 120 via $addr.1 dev $IF1"
 
   # copy & install neutron_router_helper
+  tmpf=$(mktemp)
+  cp $my_dir/files/neutron-router-helper.yaml $tmpf
+  sed -i -e "s/{{public_iface}}/$brex_iface/g" $tmpf
+  sed -i -e "s|{{public_cidr}}|$public_network_addr.0/24|g" $tmpf
+  sed -i -e "s/{{public_gateway}}/$public_network_addr.1/g" $tmpf
   juju scp $HOME/neutron-router-helper.tgz $mch:
+  juju scp $tmpf $mch:neutron-router-helper.yaml
   juju ssh $mch "tar -xf neutron-router-helper.tgz ; cd neutron-router-helper-master ; sudo PBR_VERSION='0.1.0' python setup.py install --install-scripts=/usr/local/bin &>/dev/null"
+  juju ssh $mch "sudo mv neutron-router-helper.yaml /etc/neutrin/neutron-router-helper.yaml"
   juju ssh $mch "sudo systemctl daemon-reload ; sudo systemctl start neutron-router-helper.timer ; sudo systemctl restart rsyslog"
 }
 

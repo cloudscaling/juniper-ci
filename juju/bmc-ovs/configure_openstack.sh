@@ -27,7 +27,7 @@ openstack role add --project demo --user admin Member
 sleep 30
 
 openstack address scope create --share --ip-version 4 bgp
-openstack subnet pool create --pool-prefix 10.10.0.0/24 --address-scope bgp public
+openstack subnet pool create --pool-prefix $public_network_addr.0/24 --address-scope bgp public
 openstack subnet pool create --pool-prefix 192.168.1.0/24 --pool-prefix 192.168.2.0/24 --address-scope bgp --share private
 
 openstack network create --share --external --provider-network-type flat --provider-physical-network external public
@@ -42,7 +42,7 @@ openstack image create --public --file cirros-0.3.5-x86_64-disk.img cirros
 # BGP
 openstack bgp speaker create --local-as 65433 --no-advertise-tenant-networks bgpspeaker
 openstack bgp speaker add network bgpspeaker public
-openstack bgp peer create --remote-as 65432 --peer-ip 10.0.0.1 kvm
+openstack bgp peer create --remote-as 65432 --peer-ip $addr.1 kvm
 openstack bgp speaker add peer bgpspeaker kvm
 for iii in `openstack network agent list | grep BGP | awk '{print $2}'` ; do openstack bgp dragent add speaker $iii bgpspeaker ; done
 

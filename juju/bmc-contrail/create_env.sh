@@ -149,7 +149,7 @@ function run_compute() {
     # '50-cloud-init.cfg' is default name for xenial and it is overwritten
     juju ssh ubuntu@$ip "sudo rm /etc/network/interfaces.d/eth0.cfg" 2>/dev/null
   fi
-  juju ssh ubuntu@$ip "echo 'supersede routers 10.0.0.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
+  juju ssh ubuntu@$ip "echo 'supersede routers $addr.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
   juju ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $ip
 }
@@ -179,7 +179,7 @@ function run_controller() {
     # '50-cloud-init.cfg' is default name for xenial and it is overwritten
     juju ssh ubuntu@$ip "sudo rm /etc/network/interfaces.d/eth0.cfg" 2>/dev/null
   fi
-  juju ssh ubuntu@$ip "echo 'supersede routers 10.0.0.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
+  juju ssh ubuntu@$ip "echo 'supersede routers $addr.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
   juju ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $ip
 

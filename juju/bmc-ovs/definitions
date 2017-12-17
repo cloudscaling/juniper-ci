@@ -6,6 +6,7 @@ juju_controller_name="${job_prefix}-cloud"
 poolname="${job_prefix}images"
 net_driver=${net_driver:-e1000}
 nname="$job_prefix"
+# bird daemon configured to this CIDR on KVM
 addr="10.0.0"
 nname_ext="${job_prefix}_ext"
 addr_ext="10.0.1"
