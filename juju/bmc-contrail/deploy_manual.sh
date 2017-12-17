@@ -18,7 +18,7 @@ check_containers
 # version 2
 PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
 
-repo_ip=`$addr.$cont_idx`
+repo_ip="$addr.$cont_idx"
 mrepo="ubuntu@$repo_ip"
 echo "INFO: Prepare apt-repo on $mrepo"
 scp "$HOME/docker/$packages" "$mrepo:contrail_debs.tgz"
@@ -35,7 +35,7 @@ comp2_ip="$addr.$os_comp_2_idx"
 comp2=`juju status | grep $comp2_ip | awk '{print $1}'`
 echo "INFO: compute 2: $comp2 / $comp2_ip"
 
-cont0_ip=`$addr.$os_cont_0_idx`
+cont0_ip="$addr.$os_cont_0_idx"
 cont0=`juju status | grep $cont0_ip | awk '{print $1}'`
 echo "INFO: controller 0 (OpenStack): $cont0 / $cont0_ip"
 
@@ -43,16 +43,16 @@ if [[ "$DEPLOY_MODE" == "one" ]] ; then
   cont1_ip="$cont0_ip"
   cont1="$cont0"
 else
-  cont1_ip=`$addr.$os_cont_1_idx`
+  cont1_ip="$addr.$os_cont_1_idx"
   cont1=`juju status | grep $cont1_ip | awk '{print $1}'`
 fi
 echo "INFO: controller 1 (Contrail): $cont1 / $cont1_ip"
 
 if [ "$DEPLOY_MODE" == 'ha' ] ; then
-  cont2_ip=`$addr.$os_cont_2_idx`
+  cont2_ip="$addr.$os_cont_2_idx"
   cont2=`juju status | grep $cont2_ip | awk '{print $1}'`
   echo "INFO: controller 2 (Contrail): $cont2 / $cont3_ip"
-  cont3_ip=`$addr.$os_cont_3_idx`
+  cont3_ip="$addr.$os_cont_3_idx"
   cont3=`juju status | grep $cont3_ip | awk '{print $1}'`
   echo "INFO: controller 3 (Contrail): $cont3 / $cont3_ip"
 fi
