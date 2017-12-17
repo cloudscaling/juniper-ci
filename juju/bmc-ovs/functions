@@ -28,7 +28,7 @@ function configure_l3_routing() {
   juju scp $HOME/neutron-router-helper.tgz $mch:
   juju scp $tmpf $mch:neutron-router-helper.yaml
   juju ssh $mch "tar -xf neutron-router-helper.tgz ; cd neutron-router-helper-master ; sudo PBR_VERSION='0.1.0' python setup.py install --install-scripts=/usr/local/bin &>/dev/null"
-  juju ssh $mch "sudo mv neutron-router-helper.yaml /etc/neutrin/neutron-router-helper.yaml"
+  juju ssh $mch "sudo mv neutron-router-helper.yaml /etc/neutron/neutron-router-helper.yaml"
   juju ssh $mch "sudo systemctl daemon-reload ; sudo systemctl start neutron-router-helper.timer ; sudo systemctl restart rsyslog"
 }
 
