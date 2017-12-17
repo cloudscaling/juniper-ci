@@ -2,9 +2,9 @@
 
 fomy_file="${BASH_SOURCE[0]}"
 fomy_dir="$(dirname $fomy_file)"
-source $fjmy_dir/definitions
-source $fjmy_dir/../common/functions
-source $fjmy_dir/../common/functions-bmc
+source $fomy_dir/definitions
+source $fomy_dir/../common/functions
+source $fomy_dir/../common/functions-bmc
 
 function configure_l3_routing() {
   # configures compute/network node for 'disconnected' DVR/HA scheme
