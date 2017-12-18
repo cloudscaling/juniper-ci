@@ -11,13 +11,13 @@ function configure_l3_routing() {
   local mch=$1
 
   # enable forwarding
-  juju ssh $mch "sudo sysctl -w net.ipv4.ip_forward=1"
+  juju-ssh $mch "sudo sysctl -w net.ipv4.ip_forward=1"
   # assign gateway of public network to br-ex (OVSBridge)
-  juju ssh $mch "sudo ip link set up dev $brex_iface ; sudo ip addr add $public_network_addr.1/32 broadcast $public_network_addr.1 dev $brex_iface"
+  juju-ssh $mch "sudo ip link set up dev $brex_iface ; sudo ip addr add $public_network_addr.1/32 broadcast $public_network_addr.1 dev $brex_iface"
   # add route for public CIDR to virtual zone
-  juju ssh $mch "sudo ip route add $public_network_addr.0/24 dev $brex_iface"
+  juju-ssh $mch "sudo ip route add $public_network_addr.0/24 dev $brex_iface"
   # add route for all traffic from virtual zone to host's default gateway
-  juju ssh $mch "sudo ip rule add from all iif $brex_iface pref 10 table 120 ; sudo ip route add 0.0.0.0/0 table 120 via $addr.1 dev $IF1"
+  juju-ssh $mch "sudo ip rule add from all iif $brex_iface pref 10 table 120 ; sudo ip route add 0.0.0.0/0 table 120 via $addr.1 dev $IF1"
 
   # copy & install neutron_router_helper
   tmpf=$(mktemp)
@@ -25,16 +25,16 @@ function configure_l3_routing() {
   sed -i -e "s/{{public_iface}}/$brex_iface/g" $tmpf
   sed -i -e "s|{{public_cidr}}|$public_network_addr.0/24|g" $tmpf
   sed -i -e "s/{{public_gateway}}/$public_network_addr.1/g" $tmpf
-  juju scp $HOME/neutron-router-helper.tgz $mch:
-  juju scp $tmpf $mch:neutron-router-helper.yaml
-  juju ssh $mch "tar -xf neutron-router-helper.tgz ; cd neutron-router-helper-master ; sudo PBR_VERSION='0.1.0' python setup.py install --install-scripts=/usr/local/bin &>/dev/null"
-  juju ssh $mch "sudo mv neutron-router-helper.yaml /etc/neutron/neutron-router-helper.yaml"
-  juju ssh $mch "sudo systemctl daemon-reload ; sudo systemctl start neutron-router-helper.timer ; sudo systemctl restart rsyslog"
+  juju-scp $HOME/neutron-router-helper.tgz $mch:
+  juju-scp $tmpf $mch:neutron-router-helper.yaml
+  juju-ssh $mch "tar -xf neutron-router-helper.tgz ; cd neutron-router-helper-master ; sudo PBR_VERSION='0.1.0' python setup.py install --install-scripts=/usr/local/bin &>/dev/null"
+  juju-ssh $mch "sudo mv neutron-router-helper.yaml /etc/neutron/neutron-router-helper.yaml"
+  juju-ssh $mch "sudo systemctl daemon-reload ; sudo systemctl start neutron-router-helper.timer ; sudo systemctl restart rsyslog"
 }
 
 function _install_dr() {
-  juju scp $HOME/neutron-dynamic-routing.tgz $mch:
-  juju ssh $mch "tar -xf neutron-dynamic-routing.tgz ; cd neutron-dynamic-routing ; git checkout 30a9f0b ; sudo python setup.py install --install-scripts=/usr/bin --install-data=/ &>/dev/null"
+  juju-scp $HOME/neutron-dynamic-routing.tgz $mch:
+  juju-ssh $mch "tar -xf neutron-dynamic-routing.tgz ; cd neutron-dynamic-routing ; git checkout 30a9f0b ; sudo python setup.py install --install-scripts=/usr/bin --install-data=/ &>/dev/null"
 }
 
 function _run_dr_agent() {
@@ -50,10 +50,10 @@ debug=False
 bgp_speaker_driver = neutron_dynamic_routing.services.bgp.agent.driver.ryu.driver.RyuBgpDriver
 bgp_router_id = $ip
 EOS
-  juju scp $ftmp $mch:bgp_dragent.ini
-  juju scp $my_dir/files/neutron-bgp-dragent.service $mch:neutron-bgp-dragent.service
-  juju ssh $mch "sudo mkdir -p /usr/lib/systemd/system ; sudo cp ./neutron-bgp-dragent.service /usr/lib/systemd/system/neutron-bgp-dragent.service"
-  juju ssh $mch "sudo cp ./bgp_dragent.ini /etc/neutron/bgp_dragent.ini ; sudo chmod 644 /etc/neutron/bgp_dragent.ini ; sudo systemctl start neutron-bgp-dragent.service"
+  juju-scp $ftmp $mch:bgp_dragent.ini
+  juju-scp $my_dir/files/neutron-bgp-dragent.service $mch:neutron-bgp-dragent.service
+  juju-ssh $mch "sudo mkdir -p /usr/lib/systemd/system ; sudo cp ./neutron-bgp-dragent.service /usr/lib/systemd/system/neutron-bgp-dragent.service"
+  juju-ssh $mch "sudo cp ./bgp_dragent.ini /etc/neutron/bgp_dragent.ini ; sudo chmod 644 /etc/neutron/bgp_dragent.ini ; sudo systemctl start neutron-bgp-dragent.service"
 }
 
 function configure_bgp_neutron_api() {
@@ -61,14 +61,14 @@ function configure_bgp_neutron_api() {
   _install_dr $mch
 
   # run dr agent
-  local ip=`juju ssh $mch "hostname -i" 2>/dev/null`
+  local ip=`juju-ssh $mch "hostname -i" 2>/dev/null`
   _run_dr_agent $mch $ip
 
   # configure dr plugin
   local path='/usr/local/lib/python2.7/dist-packages/neutron_dynamic_routing/db/migration/alembic_migrations/versions/'
-  juju ssh $mch "sudo mv $path/pike/expand/* $path/newton/expand/"
-  juju ssh $mch "sudo neutron-db-manage upgrade heads"
-  juju config neutron-api "manage-neutron-plugin-legacy-mode=False"
+  juju-ssh $mch "sudo mv $path/pike/expand/* $path/newton/expand/"
+  juju-ssh $mch "sudo neutron-db-manage upgrade heads"
+  juju-set neutron-api "manage-neutron-plugin-legacy-mode=False"
 }
 
 function configure_bgp_agent() {
@@ -83,5 +83,5 @@ function create_adv_ip() {
   local host=$1
   local ip=$2
 
-  juju ssh neutron-api/0 "sudo neutron-bgp-manage-adv-ip create --ip $ip --adv-host $host"
+  juju-ssh neutron-api/0 "sudo neutron-bgp-manage-adv-ip create --ip $ip --adv-host $host"
 }

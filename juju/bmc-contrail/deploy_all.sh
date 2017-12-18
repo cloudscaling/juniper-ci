@@ -73,7 +73,7 @@ function catch_errors() {
   echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
   trap - ERR EXIT
 
-  juju status || /bin/true
+  juju-status-tabular || /bin/true
   $my_dir/../save-logs.sh
 
   if [[ "$CLEAN_ENV" == 'always' ]] ; then
@@ -90,7 +90,7 @@ env|sort
 
 echo "INFO: creating environment $(date)"
 "$my_dir"/create_env.sh
-juju status
+juju-status-tabular
 
 "$my_dir"/deploy_manual.sh
 

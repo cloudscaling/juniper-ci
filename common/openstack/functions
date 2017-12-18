@@ -316,7 +316,7 @@ function _check_instance_log() {
 function _get_machine_by_ip() {
   local ip=$1
   if [[ "$SSH_CMD" == 'juju-ssh' ]] ; then
-    juju status $ip --format tabular | grep -A 1 "^Machine" | tail -1 | awk '{print $1}'
+    juju-status-tabular $ip | grep -A 1 "^Machine" | tail -1 | awk '{print $1}'
   else
     echo heat-admin@$ip
   fi

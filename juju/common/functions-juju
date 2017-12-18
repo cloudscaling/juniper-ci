@@ -1,55 +1,55 @@
-# /bin/bash
+#!/bin/bash
 
 function juju-status() {
-  juju status --format yaml $@
+  juju status $juju_model_arg --format yaml $@
 }
 
 function juju-status-tabular() {
-  juju status --format tabular $@
+  juju status $juju_model_arg --format tabular $@
 }
 
 function juju-status-json() {
-  juju status --format json $@
+  juju status $juju_model_arg --format json $@
 }
 
 function juju-deploy() {
-  juju deploy "$@"
+  juju deploy $juju_model_arg "$@"
 }
 
 function juju-add-unit () {
-  juju add-unit "$@"
+  juju add-unit $juju_model_arg "$@"
 }
 
 function juju-remove-unit () {
-  juju remove-unit "$@"
+  juju remove-unit $juju_model_arg "$@"
 }
 
 function juju-expose () {
-  juju expose "$@"
+  juju expose $juju_model_arg "$@"
 }
 
 function juju-add-relation () {
-  juju add-relation "$@"
+  juju add-relation $juju_model_arg "$@"
 }
 
 function juju-remove-relation () {
-  juju remove-relation "$@"
+  juju remove-relation $juju_model_arg "$@"
 }
 
 function juju-ssh () {
-  juju ssh "$@"
+  juju ssh $juju_model_arg "$@"
 }
 
 function juju-scp () {
-  juju scp "$@"
+  juju scp $juju_model_arg "$@"
 }
 
 function juju-add-machine () {
-  juju add-machine "$@"
+  juju add-machine $juju_model_arg "$@"
 }
 
 function juju-resolved () {
-  juju resolved "$@"
+  juju resolved $juju_model_arg "$@"
 }
 
 function get_machines_index_by_service() {

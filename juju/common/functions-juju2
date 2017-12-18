@@ -24,15 +24,15 @@ function juju-deploy-bundle() {
 }
 
 function juju-set() {
-  juju config "$@"
+  juju config $juju_model_arg "$@"
 }
 
 function juju-remove-service() {
-  juju remove-application "$@"
+  juju remove-application $juju_model_arg "$@"
 }
 
 function juju-get() {
-  local value=`juju config $1 | grep -v "^      " | grep -A 4 " $2:"`
+  local value=`juju config $juju_model_arg $1 | grep -v "^      " | grep -A 4 " $2:"`
   if echo "$value" | grep -q "value:" ; then
     echo "$value" | grep "value:" | awk '{print $2}'
   else
@@ -42,21 +42,21 @@ function juju-get() {
 
 function get_machine() {
   local service=$1
-  juju status $service --format tabular | grep "$service/" | head -1 | awk '{print $4}'
+  juju status $juju_model_arg $service --format tabular | grep "$service/" | head -1 | awk '{print $4}'
 }
 
 function get_machine_ip() {
   local service=$1
-  juju status $service --format tabular | grep "$service/" | head -1 | awk '{print $5}'
+  juju status $juju_model_arg $service --format tabular | grep "$service/" | head -1 | awk '{print $5}'
 }
 
 function get_machine_by_ip() {
   local ip=$1
-  juju status $ip --format tabular | grep -A 1 "^Machine" | tail -1 | awk '{print $1}'
+  juju status $juju_model_arg $ip --format tabular | grep -A 1 "^Machine" | tail -1 | awk '{print $1}'
 }
 
 function juju-get-machines() {
-  juju machines | awk '/started/{print $1}'
+  juju machines $juju_model_arg | awk '/started/{print $1}'
 }
 
 function get-machine-ip-by-number() {
@@ -66,7 +66,7 @@ function get-machine-ip-by-number() {
     local mch=`echo "$1" | cut -d '/' -f 1`
     local path=".get('$mch', {}).get('containers', {})"
   fi
-  if output=`juju machines --format json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']${path}.get('$1', {}).get('dns-name'))" 2>&1` ; then
+  if output=`juju machines $juju_model_arg --format json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']${path}.get('$1', {}).get('dns-name'))" 2>&1` ; then
     echo $output
   fi
 }
@@ -78,11 +78,11 @@ function get-machine-id-by-number() {
     local mch=`echo "$1" | cut -d '/' -f 1`
     local path=".get('$mch', {}).get('containers', {})"
   fi
-  if output=`juju machines --format json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']${path}.get('$1', {}).get('instance-id'))" 2>&1` ; then
+  if output=`juju machines $juju_model_arg --format json | python -c "import sys; import json; sys.stdout.write(json.load(sys.stdin)['machines']${path}.get('$1', {}).get('instance-id'))" 2>&1` ; then
     echo $output
   fi
 }
 
 function juju-attach() {
-  juju attach "$@"
+  juju attach $juju_model_arg "$@"
 }

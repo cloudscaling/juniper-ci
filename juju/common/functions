@@ -3,6 +3,12 @@
 fmy_file="${BASH_SOURCE[0]}"
 fmy_dir="$(dirname $fmy_file)"
 jver="$(juju --version | cut -d . -f 1)"
+
+if [[ $jver != '2' ]] ; then
+  echo "ERROR: Juju version 2 is only supported"
+  exit 127
+fi
+
 source $fmy_dir/functions-juju$jver
 
 function wait_absence_status_for_services() {
@@ -126,7 +132,8 @@ function create_stackrc() {
   if [[ "$USE_SSL_OS" != "true" ]] ; then
     local proto="http"
   fi
-  local kver=`juju config keystone preferred-api-version`
+  local kver=`juju-get keystone preferred-api-version`
+  echo "INFO: detected keystone version is $kver"
   echo "# created by CI" > $WORKSPACE/stackrc
   if [[ "$kver" == '3' ]] ; then
     echo "export OS_AUTH_URL=$proto://$auth_ip:5000/v3" >> $WORKSPACE/stackrc

@@ -44,7 +44,7 @@ function hack_openstack() {
         if [[ ${mch_sets[$i]} != '0' ]] ; then
           continue;
         fi
-        local addr_count=`juju machines --format json | python -c "import sys; import json; sys.stdout.write(str(len(json.load(sys.stdin)['machines'].get('${mchs[$i]}', {}).get('ip-addresses', []))))"`
+        local addr_count=`juju machines $juju_model_arg --format json | python -c "import sys; import json; sys.stdout.write(str(len(json.load(sys.stdin)['machines'].get('${mchs[$i]}', {}).get('ip-addresses', []))))"`
         if [[ $addr_count != '0' ]] ; then
           local ip=`get-machine-ip-by-number ${mchs[$i]}`
           echo "INFO: Update hostnames of ${mch_srvs[$i]} with IP=$ip"

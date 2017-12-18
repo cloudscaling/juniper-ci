@@ -109,7 +109,6 @@ done
 
 echo "INFO: bootstraping juju controller $(date)"
 juju bootstrap manual/$cont_ip $juju_controller_name
-wait_cmd="juju ssh"
 
 declare -A machines
 
@@ -125,7 +124,7 @@ function run_cloud_machine() {
   echo "INFO: start machine $name waiting $name $(date)"
   wait_kvm_machine $ip
   echo "INFO: adding machine $name to juju controller $(date)"
-  juju add-machine ssh:ubuntu@$ip
+  juju-add-machine ssh:ubuntu@$ip
   echo "INFO: machine $name is ready $(date)"
 }
 
@@ -138,12 +137,11 @@ function run_compute() {
   run_cloud_machine comp-$index $mac_suffix 4096 $ip
 
   echo "INFO: preparing compute $index $(date)"
-  kernel_version=`juju ssh ubuntu@$ip uname -r 2>/dev/null | tr -d '\r'`
-  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget openvswitch-switch" &>>$log_dir/apt.log
-  juju scp "$my_dir/files/50-cloud-init-compute-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
-  juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
-  juju ssh ubuntu@$ip "echo 'supersede routers $addr.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
-  juju ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
+  juju-ssh ubuntu@$ip "sudo apt-get -fy install mc wget openvswitch-switch" &>>$log_dir/apt.log
+  juju-scp "$my_dir/files/50-cloud-init-compute-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
+  juju-ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
+  juju-ssh ubuntu@$ip "echo 'supersede routers $addr.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
+  juju-ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $ip
 }
 
@@ -156,12 +154,11 @@ function run_network() {
   run_cloud_machine net-$index $mac_suffix 4096 $ip
 
   echo "INFO: preparing network $index $(date)"
-  kernel_version=`juju ssh ubuntu@$ip uname -r 2>/dev/null | tr -d '\r'`
-  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget openvswitch-switch" &>>$log_dir/apt.log
-  juju scp "$my_dir/files/50-cloud-init-compute-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
-  juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
-  juju ssh ubuntu@$ip "echo 'supersede routers $addr.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
-  juju ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
+  juju-ssh ubuntu@$ip "sudo apt-get -fy install mc wget openvswitch-switch" &>>$log_dir/apt.log
+  juju-scp "$my_dir/files/50-cloud-init-compute-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
+  juju-ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
+  juju-ssh ubuntu@$ip "echo 'supersede routers $addr.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
+  juju-ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $ip
 }
 
@@ -176,15 +173,15 @@ function run_controller() {
   run_cloud_machine cont-$index $mac_suffix $mem $ip
 
   echo "INFO: preparing controller $index $(date)"
-  juju ssh ubuntu@$ip "sudo apt-get -fy install mc wget bridge-utils" &>>$log_dir/apt.log
+  juju-ssh ubuntu@$ip "sudo apt-get -fy install mc wget bridge-utils" &>>$log_dir/apt.log
   if [[ "$prepare_for_openstack" == '1' ]]; then
-    juju ssh ubuntu@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge" 2>/dev/null
-    juju ssh ubuntu@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-$IF1\"/m' /etc/default/lxd-bridge" 2>/dev/null
+    juju-ssh ubuntu@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge" 2>/dev/null
+    juju-ssh ubuntu@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-$IF1\"/m' /etc/default/lxd-bridge" 2>/dev/null
   fi
-  juju scp "$my_dir/files/50-cloud-init-controller-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
-  juju ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
-  juju ssh ubuntu@$ip "echo 'supersede routers $addr.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
-  juju ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
+  juju-scp "$my_dir/files/50-cloud-init-controller-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
+  juju-ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
+  juju-ssh ubuntu@$ip "echo 'supersede routers $addr.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
+  juju-ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $ip
 }
 
@@ -207,9 +204,9 @@ echo "INFO: Applying hosts file and hostnames $(date)"
 for m in ${!machines[@]} ; do
   ip=${machines[$m]}
   echo "INFO: Apply $m for $ip"
-  juju scp $WORKSPACE/hosts ubuntu@$ip:hosts
-  juju ssh ubuntu@$ip "sudo bash -c 'echo $m > /etc/hostname ; hostname $m'" 2>/dev/null
-  juju ssh ubuntu@$ip 'sudo bash -c "cat ./hosts >> /etc/hosts"' 2>/dev/null
+  juju-scp $WORKSPACE/hosts ubuntu@$ip:hosts
+  juju-ssh ubuntu@$ip "sudo bash -c 'echo $m > /etc/hostname ; hostname $m'" 2>/dev/null
+  juju-ssh ubuntu@$ip 'sudo bash -c "cat ./hosts >> /etc/hosts"' 2>/dev/null
 done
 rm $WORKSPACE/hosts
 

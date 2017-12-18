@@ -29,14 +29,14 @@ repo_key=`curl -s http://$repo_ip/ubuntu/repo.key`
 repo_key=`echo "$repo_key" | awk '{printf("      %s\r", $0)}'`
 
 comp1_ip="$addr.$os_comp_1_idx"
-comp1=`juju status | grep $comp1_ip | awk '{print $1}'`
+comp1=`get_machine_by_ip $comp1_ip`
 echo "INFO: compute 1: $comp1 / $comp1_ip"
 comp2_ip="$addr.$os_comp_2_idx"
-comp2=`juju status | grep $comp2_ip | awk '{print $1}'`
+comp2=`get_machine_by_ip $comp2_ip`
 echo "INFO: compute 2: $comp2 / $comp2_ip"
 
 cont0_ip="$addr.$os_cont_0_idx"
-cont0=`juju status | grep $cont0_ip | awk '{print $1}'`
+cont0=`get_machine_by_ip $cont0_ip`
 echo "INFO: controller 0 (OpenStack): $cont0 / $cont0_ip"
 
 if [[ "$DEPLOY_MODE" == "one" ]] ; then
@@ -44,16 +44,16 @@ if [[ "$DEPLOY_MODE" == "one" ]] ; then
   cont1="$cont0"
 else
   cont1_ip="$addr.$os_cont_1_idx"
-  cont1=`juju status | grep $cont1_ip | awk '{print $1}'`
+  cont1=`get_machine_by_ip $cont1_ip`
 fi
 echo "INFO: controller 1 (Contrail): $cont1 / $cont1_ip"
 
 if [ "$DEPLOY_MODE" == 'ha' ] ; then
   cont2_ip="$addr.$os_cont_2_idx"
-  cont2=`juju status | grep $cont2_ip | awk '{print $1}'`
+  cont2=`get_machine_by_ip $cont2_ip`
   echo "INFO: controller 2 (Contrail): $cont2 / $cont3_ip"
   cont3_ip="$addr.$os_cont_3_idx"
-  cont3=`juju status | grep $cont3_ip | awk '{print $1}'`
+  cont3=`get_machine_by_ip $cont3_ip`
   echo "INFO: controller 3 (Contrail): $cont3 / $cont3_ip"
 fi
 

@@ -1,8 +1,9 @@
 #!/bin/bash
 
 job_prefix="jovs"
-
 juju_controller_name="${job_prefix}-cloud"
+juju_model_arg="-m ${juju_controller_name}:default"
+
 poolname="${job_prefix}images"
 net_driver=${net_driver:-e1000}
 nname="$job_prefix"
