@@ -3,7 +3,7 @@ SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerA
 SCP="scp -i $WORKSPACE/kp $SSH_OPTS"
 
 source $ENV_FILE
-SSH_DEST="$SSH_USER@$public_ip_helm"
+SSH_DEST="$SSH_USER@$public_ip_cloud"
 SSH="ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_DEST"
 
 SSH_DEST_BUILD="$SSH_USER@$public_ip_build"

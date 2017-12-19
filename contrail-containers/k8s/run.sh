@@ -4,7 +4,7 @@ my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
 if [[ "$CLEAN_BEFORE" == 'true' || "$CLEAN_BEFORE" == 'clean_and_exit' ]] ; then
-  $my_dir/${HOST}/cleanup.sh || /bin/true
+  $my_dir/../common/${HOST}/cleanup.sh || /bin/true
   if [[ "$CLEAN_BEFORE" == 'clean_and_exit' ]] ; then
     exit
   fi
@@ -14,7 +14,7 @@ rm -rf "$WORKSPACE/logs"
 mkdir -p "$WORKSPACE/logs"
 
 function save_logs() {
-  source "$my_dir/${HOST}/ssh-defs"
+  source "$my_dir/../common/${HOST}/ssh-defs"
   set +e
   # save common docker logs
   for dest in ${SSH_DEST_WORKERS[@]} ; do
@@ -26,7 +26,7 @@ function save_logs() {
 
   # save env host specific logs
   # (should save into ~/logs folder on the SSH host)
-  $my_dir/${HOST}/save-logs.sh
+  $my_dir/../common/${HOST}/save-logs.sh
 
   # save to workspace
   for dest in ${SSH_DEST_WORKERS[@]} ; do
@@ -58,21 +58,21 @@ function catch_errors() {
 
   save_logs
   if [[ "$CLEAN_ENV" == 'always' ]] ; then
-    $my_dir/${HOST}/cleanup.sh
+    $my_dir/../common/${HOST}/cleanup.sh
   fi
 
   exit $exit_code
 }
 
-$my_dir/${HOST}/create-vm.sh
-source "$my_dir/${HOST}/ssh-defs"
+$my_dir/../common/${HOST}/create-vm.sh
+source "$my_dir/../common/${HOST}/ssh-defs"
 
 for dest in ${SSH_DEST_WORKERS[@]} ; do
   # TODO: when repo be splitted to containers & build here will be containers repo only,
   # then build repo should be added to be copied below
   $SCP -r "$WORKSPACE/contrail-container-builder" ${dest}:./
 done
-$my_dir/${HOST}/setup-nodes.sh
+$my_dir/../common/${HOST}/setup-nodes.sh
 
 $SCP "$my_dir/../__build-${BUILD_TARGET}.sh" $SSH_DEST_BUILD:build-${BUILD_TARGET}.sh
 $SCP "$my_dir/../__functions" $SSH_DEST_BUILD:functions
@@ -88,5 +88,5 @@ timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_HELM_URL=$OP
 trap - ERR
 save_logs
 if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
-  $my_dir/${HOST}/cleanup.sh
+  $my_dir/../common/${HOST}/cleanup.sh
 fi

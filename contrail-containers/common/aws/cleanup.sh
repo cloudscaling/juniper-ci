@@ -11,12 +11,12 @@ source $ENV_FILE
 
 errors="0"
 
-if [[ -n "$instance_id_helm" ]] ; then
-  aws ${AWS_FLAGS} ec2 terminate-instances --instance-ids $instance_id_helm
+if [[ -n "$instance_id_cloud" ]] ; then
+  aws ${AWS_FLAGS} ec2 terminate-instances --instance-ids $instance_id_cloud
   [[ $? == 0 ]] || errors="1"
   if [[ $? == 0 ]]; then
-    aws ${AWS_FLAGS} ec2 wait instance-terminated --instance-ids $instance_id_helm
-    echo "INFO: Helm instance terminated."
+    aws ${AWS_FLAGS} ec2 wait instance-terminated --instance-ids $instance_id_cloud
+    echo "INFO: Cloud instance terminated."
   fi
 fi
 

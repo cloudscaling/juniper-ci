@@ -114,8 +114,8 @@ function run_instance() {
   fi
 }
 
-# instance for helm
-run_instance c4.4xlarge helm true
+# instance for OpenStack cloud
+run_instance c4.4xlarge cloud true
 
 # instance for build
 run_instance m4.xlarge build false
