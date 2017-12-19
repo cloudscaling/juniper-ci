@@ -172,7 +172,7 @@ function run_controller() {
   if [[ "$prepare_for_openstack" == '1' && "$SERIES" == 'trusty' ]]; then
     # NOTE: run juju processes to install/configure lxd and then reconfigure it again
     mch=$(get_machine_by_ip $ip)
-    local lxd_mch=`juju-add-machine lxd:$mch 2>&1 | tail -1 | awk '{print $3}'`
+    local lxd_mch=`juju-add-machine --series=$SERIES lxd:$mch 2>&1 | tail -1 | awk '{print $3}'`
     wait_for_machines $lxd_mch
     juju-remove-machine $lxd_mch
     juju-ssh ubuntu@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge" 2>/dev/null
