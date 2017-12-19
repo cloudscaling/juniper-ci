@@ -80,6 +80,7 @@ wait_cmd="ssh"
 function wait_kvm_machine() {
   local ip=$1
   local iter=0
+  sleep 10
   while ! $wait_cmd ubuntu@$ip "uname -a" &>/dev/null ; do
     ((++iter))
     if (( iter > 9 )) ; then
@@ -180,6 +181,8 @@ run_compute 2
 run_network 1
 run_network 2
 run_network 3
+
+wait_for_all_machines
 
 echo "INFO: creating hosts file $(date)"
 truncate -s 0 $WORKSPACE/hosts
