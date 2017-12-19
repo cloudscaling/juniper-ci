@@ -94,19 +94,6 @@ cont_ip="$addr.$cont_idx"
 run_machine ${job_prefix}-cont 1 2048 $cont_idx $cont_ip
 wait_kvm_machine $cont_ip
 
-# wait for controller machine
-iter=0
-truncate -s 0 ./tmp_file
-while ! scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -B ./tmp_file ubuntu@$cont_ip:/tmp/tmp_file ; do
-  if (( iter >= 20 )) ; then
-    echo "ERROR: Could not connect to controller"
-    exit 1
-  fi
-  echo "INFO: Waiting for controller... $(date)"
-  sleep 30
-  ((++iter))
-done
-
 echo "INFO: bootstraping juju controller $(date)"
 juju bootstrap manual/$cont_ip $juju_controller_name
 
