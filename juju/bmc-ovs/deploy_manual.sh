@@ -35,8 +35,6 @@ echo "INFO: network 1: $net3 / $net3_ip"
 
 # OpenStack base
 
-wait_for_machines $cont0 $comp1 $comp2 $net1
-
 echo "INFO: Deploy all $(date)"
 juju-deploy cs:$SERIES/ntp
 

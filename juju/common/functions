@@ -101,6 +101,10 @@ function wait_for_machines() {
   done
 }
 
+function wait_for_all_machines() {
+  wait_for_machines `juju-machines-tabular | tail -n +2 | awk '{print $1}'`
+}
+
 function create_machine() {
   local constraints="$@"
 

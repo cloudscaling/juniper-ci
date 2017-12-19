@@ -12,6 +12,10 @@ function juju-status-json() {
   juju status $juju_model_arg --format json $@
 }
 
+function juju-machines-tabular() {
+  juju machines $juju_model_arg --format tabular $@
+}
+
 function juju-deploy() {
   juju deploy $juju_model_arg "$@"
 }
