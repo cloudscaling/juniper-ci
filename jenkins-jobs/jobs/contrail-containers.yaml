@@ -22,6 +22,11 @@
           name: OPENSTACK_HELM_URL
           default: https://github.com/cloudscaling/openstack-helm
           description: "repository with OpenStack Helm project"
+      - choice:
+          name: OPENSTACK_VERSION
+          choices:
+            - newton
+            - ocata
     scm:
       - juniper-ci
       - contrail-build-poc
@@ -31,7 +36,7 @@
           #!/bin/bash -e
           export CONTRAIL_VERSION='{contrail_version}'
           # use newton for now. openstack-helm uses containers from newton...
-          export OPENSTACK_VERSION=newton
+          export OPENSTACK_VERSION=${OPENSTACK_VERSION:-'newton'}
           export WAY=$(echo {project} | cut -d '-' -f 1)
           export HOST=$(echo {project} | cut -d '-' -f 2)
           export ENVIRONMENT_OS=$(echo {project} | cut -d '-' -f 3)
