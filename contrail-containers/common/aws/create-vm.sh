@@ -39,7 +39,7 @@ cmd="aws ${AWS_FLAGS} ec2 create-subnet --vpc-id $vpc_id --cidr-block $VM_CIDR"
 subnet_id=$(get_value_from_json "$cmd" ".Subnet.SubnetId")
 echo "INFO: SUBNET_ID: $subnet_id"
 echo "subnet_id=$subnet_id" >> $ENV_FILE
-az=$(aws ${AWS_FLAGS} describe-subnets --subnet-id $subnet_id --query 'Subnets[*].AvailabilityZone' --output text)
+az=$(aws ${AWS_FLAGS} ec2 describe-subnets --subnet-id $subnet_id --query 'Subnets[*].AvailabilityZone' --output text)
 echo "INFO: Availability zone for current deployment: $az"
 echo "az=$az" >> $ENV_FILE
 sleep 2
