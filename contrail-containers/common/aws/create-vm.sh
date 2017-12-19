@@ -129,7 +129,7 @@ function run_instance() {
     aws ${AWS_FLAGS} ec2 modify-network-interface-attribute --network-interface-id $eni_id --attachment AttachmentId=$eni_attach_id,DeleteOnTermination=true
     echo "INFO: additional interface $eni_id is attached: $eni_attach_id"
     sleep 20
-    $ssh ifconfig 2>/dev/null | grep -A 1 "^[a-z].*" | grep -v "\-\-"
+    $ssh ifconfig 2>/dev/null
   fi
 }
 
