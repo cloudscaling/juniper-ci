@@ -9,6 +9,14 @@ VPC_CIDR="192.168.0.0/16"
 VM_CIDR="192.168.130.0/24"
 VM_CIDR_EXT="192.168.131.0/24"
 
+trap 'catch_errors_cvm $LINENO' ERR EXIT
+function catch_errors_cvm() {
+  local exit_code=$?
+  echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
+  trap - ERR EXIT
+  exit $exit_code
+}
+
 source "$my_dir/${ENVIRONMENT_OS}"
 
 echo "INFO: Image ID: $IMAGE_ID"
@@ -127,20 +135,9 @@ function run_instance() {
     eni_id=`aws ${AWS_FLAGS} ec2 create-network-interface --subnet-id $subnet_ext_id --query 'NetworkInterface.NetworkInterfaceId' --output text`
     eni_attach_id=`aws ${AWS_FLAGS} ec2 attach-network-interface --network-interface-id $eni_id --instance-id $instance_id --device-index 1 --query 'AttachmentId' --output text`
     aws ${AWS_FLAGS} ec2 modify-network-interface-attribute --network-interface-id $eni_id --attachment AttachmentId=$eni_attach_id,DeleteOnTermination=true
-    sleep 5
     echo "INFO: additional interface $eni_id is attached: $eni_attach_id"
-    for i in {1..4} ; do
-      nif=`$ssh "sudo lshw" 2>/dev/null | grep -A 10 'network.*DISABLED' | awk '/logical name/{print $3}' | head -1 | tr -d '\r'`
-      if [ -n "$nif" ] ; then
-        break
-      fi
-      sleep 5
-    done
-    echo "INFO: interface $nif detected"
-    $ssh "sudo bash -c 'echo \"auto $nif\" > /etc/network/interfaces.d/$nif.cfg && echo \"iface $nif inet dhcp\" >> /etc/network/interfaces.d/$nif.cfg && ifup $nif &>ifup.out'" 2>/dev/null
-    echo "INFO: interface $nif added"
-    sleep 5
-    $ssh ifconfig 2>/dev/null | grep -A 1 "^[a-z].*" | grep -v "\-\-"
+    sleep 20
+    $ssh "/usr/sbin/ifconfig" 2>/dev/null | grep -A 1 "^[a-z].*" | grep -v "\-\-"
   fi
 }
 
@@ -149,5 +146,7 @@ run_instance c4.4xlarge cloud true
 
 # instance for build
 run_instance m4.xlarge build false
+
+trap - ERR EXIT
 
 echo "INFO: Environment ready"
