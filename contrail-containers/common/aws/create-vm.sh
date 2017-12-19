@@ -9,6 +9,14 @@ VPC_CIDR="192.168.0.0/16"
 VM_CIDR="192.168.130.0/24"
 VM_CIDR_EXT="192.168.131.0/24"
 
+trap 'catch_errors_cvm $LINENO' ERR EXIT
+function catch_errors_cvm() {
+  local exit_code=$?
+  echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
+  trap - ERR EXIT
+  exit $exit_code
+}
+
 source "$my_dir/${ENVIRONMENT_OS}"
 
 echo "INFO: Image ID: $IMAGE_ID"
@@ -129,7 +137,7 @@ function run_instance() {
     aws ${AWS_FLAGS} ec2 modify-network-interface-attribute --network-interface-id $eni_id --attachment AttachmentId=$eni_attach_id,DeleteOnTermination=true
     echo "INFO: additional interface $eni_id is attached: $eni_attach_id"
     sleep 20
-    $ssh ifconfig 2>/dev/null
+    $ssh "/usr/sbin/ifconfig" 2>/dev/null | grep -A 1 "^[a-z].*" | grep -v "\-\-"
   fi
 }
 
@@ -138,5 +146,7 @@ run_instance c4.4xlarge cloud true
 
 # instance for build
 run_instance m4.xlarge build false
+
+trap - ERR EXIT
 
 echo "INFO: Environment ready"
