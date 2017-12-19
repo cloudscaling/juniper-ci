@@ -48,6 +48,10 @@ function juju-add-machine () {
   juju add-machine $juju_model_arg "$@"
 }
 
+function juju-remove-machine () {
+  juju remove-machine $juju_model_arg "$@"
+}
+
 function juju-resolved () {
   juju resolved $juju_model_arg "$@"
 }
