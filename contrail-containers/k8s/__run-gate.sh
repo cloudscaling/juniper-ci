@@ -22,7 +22,8 @@ function wait_cluster() {
   local total=0
   local running=0
   local i=0
-  for (( i=0 ; i < 600 ; ++i )) ; do
+  for (( i=0 ; i < 120 ; ++i )) ; do
+    sleep 5
     (( total=1 + $(kubectl get pods --all-namespaces=true | grep -c "$pods_rgx") ))
      (( running=1 + $(kubectl get pods --all-namespaces=true | grep "$pods_rgx" | grep -ic 'running') ))
     log_info "  components up: ${running}/${total}"
@@ -39,7 +40,11 @@ function wait_cluster() {
 
 log_info "create Contrail cluster"
 kubectl create -f ~/my-contrail.yaml
-wait_cluster "Contrail" "contrail\|zookeeper\|rabbit\|kafka\|redis"
+wait_cluster "Contrail" "contrail\|zookeeper\|rabbit\|kafka\|redis\|cassandra"
+
+wait_contrail_sec=60
+log_info "Wait Contrail cluster to up till $wait_contrail_sec seconds..."
+sleep $wait_contrail_sec
 
 log_info "Run test application: nginx"
 cat <<EOF > ~/test_app.yaml
