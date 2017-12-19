@@ -5,7 +5,9 @@ my_dir="$(dirname $my_file)"
 
 SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
 ENV_FILE="$WORKSPACE/cloudrc"
+VPC_CIDR="192.168.0.0/16"
 VM_CIDR="192.168.130.0/24"
+VM_CIDR_EXT="192.168.131.0/24"
 
 source "$my_dir/${ENVIRONMENT_OS}"
 
@@ -27,7 +29,7 @@ echo "AWS_FLAGS='${AWS_FLAGS}'" >> $ENV_FILE
 echo "SSH_USER='${SSH_USER}'" >> $ENV_FILE
 echo "INFO: -------------------------------------------------------------------------- $(date)"
 
-cmd="aws ${AWS_FLAGS} ec2 create-vpc --cidr-block $VM_CIDR"
+cmd="aws ${AWS_FLAGS} ec2 create-vpc --cidr-block $VPC_CIDR"
 vpc_id=$(get_value_from_json "$cmd" ".Vpc.VpcId")
 echo "INFO: VPC_ID: $vpc_id"
 echo "vpc_id=$vpc_id" >> $ENV_FILE
@@ -37,6 +39,14 @@ cmd="aws ${AWS_FLAGS} ec2 create-subnet --vpc-id $vpc_id --cidr-block $VM_CIDR"
 subnet_id=$(get_value_from_json "$cmd" ".Subnet.SubnetId")
 echo "INFO: SUBNET_ID: $subnet_id"
 echo "subnet_id=$subnet_id" >> $ENV_FILE
+az=$(aws ${AWS_FLAGS} describe-subnets --subnet-id $subnet_id --query 'Subnets[*].AvailabilityZone' --output text)
+echo "INFO: Availability zone for current deployment: $az"
+echo "az=$az" >> $ENV_FILE
+sleep 2
+cmd="aws ${AWS_FLAGS} ec2 create-subnet --vpc-id $vpc_id --cidr-block $VM_CIDR_EXT --availability-zone $az"
+subnet_ext_id=$(get_value_from_json "$cmd" ".Subnet.SubnetId")
+echo "INFO: SUBNET_EXT_ID: $subnet_ext_id"
+echo "subnet_ext_id=$subnet_ext_id" >> $ENV_FILE
 sleep 2
 
 cmd="aws ${AWS_FLAGS} ec2 create-internet-gateway"
@@ -78,9 +88,9 @@ chmod 600 kp
 function run_instance() {
   local type=$1
   local env_var_suffix=$2
-  local kube_vm=$3
+  local cloud_vm=$3
 
-  if [[ $kube_vm == "true" ]]; then
+  if [[ $cloud_vm == "true" ]]; then
     # it means that additional disks must be created for VM
     local bdm='{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}}'
   else
@@ -108,9 +118,29 @@ function run_instance() {
     echo "WARNING: Machine isn't accessible yet"
     sleep 2
   done
-  if [[ $kube_vm == "true" ]]; then
+  if [[ $cloud_vm == "true" ]]; then
+    echo "INFO: Configure additional disk for cloud VM"
     $ssh "(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | sudo fdisk /dev/xvdf"
     $ssh "sudo mkfs.ext4 /dev/xvdf1 ; sudo mkdir -p /var/lib/docker ; sudo su -c \"echo '/dev/xvdf1  /var/lib/docker  auto  defaults,auto  0  0' >> /etc/fstab\" ; sudo mount /var/lib/docker"
+
+    echo "INFO: Configure additional interface for cloud VM"
+    eni_id=`aws ${AWS_FLAGS} ec2 create-network-interface --subnet-id $subnet_ext_id --query 'NetworkInterface.NetworkInterfaceId' --output text`
+    eni_attach_id=`aws ${AWS_FLAGS} ec2 attach-network-interface --network-interface-id $eni_id --instance-id $instance_id --device-index 1 --query 'AttachmentId' --output text`
+    aws ${AWS_FLAGS} ec2 modify-network-interface-attribute --network-interface-id $eni_id --attachment AttachmentId=$eni_attach_id,DeleteOnTermination=true
+    sleep 5
+    echo "INFO: additional interface $eni_id is attached: $eni_attach_id"
+    for i in {1..4} ; do
+      nif=`$ssh "sudo lshw" 2>/dev/null | grep -A 10 'network.*DISABLED' | awk '/logical name/{print $3}' | head -1 | tr -d '\r'`
+      if [ -n "$nif" ] ; then
+        break
+      fi
+      sleep 5
+    done
+    echo "INFO: interface $nif detected"
+    $ssh "sudo bash -c 'echo \"auto $nif\" > /etc/network/interfaces.d/$nif.cfg && echo \"iface $nif inet dhcp\" >> /etc/network/interfaces.d/$nif.cfg && ifup $nif &>ifup.out'" 2>/dev/null
+    echo "INFO: interface $nif added"
+    sleep 5
+    $ssh ifconfig 2>/dev/null | grep -A 1 "^[a-z].*" | grep -v "\-\-"
   fi
 }
 
