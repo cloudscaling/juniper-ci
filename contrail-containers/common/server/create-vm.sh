@@ -121,7 +121,10 @@ hname="node-\$(echo $ip | tr '.' '-')"
 echo \$hname > /etc/hostname
 hostname \$hname
 domainname localdomain
-echo ${ip}  \${hname}.localdomain  \${hname} >> /etc/hosts
+for i in ${ips[@]} ; do
+  hname="node-\$(echo \$i | tr '.' '-')"
+  echo \$i  \${hname}.localdomain  \${hname} >> /etc/hosts
+done
 EOF
 done
 
