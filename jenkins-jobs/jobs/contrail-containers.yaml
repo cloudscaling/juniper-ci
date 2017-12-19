@@ -55,9 +55,6 @@
 - project:
     name: contrail-containers
     project:
-      - helm-aws-ubuntu:
-          slavenode: master
-          contrail_version: 4.1.0.0-6
       - helm-aws-centos:
           slavenode: master
           contrail_version: 4.1.0.0-6
@@ -66,6 +63,9 @@
           contrail_version: 4.2.0.0-1
       - k8s-server-centos:
           slavenode: slave01
+          contrail_version: 4.1.0.0-6
+      - kolla-aws-centos:
+          slavenode: master
           contrail_version: 4.1.0.0-6
     jobs:
       - 'contrail-{project}'
