@@ -12,7 +12,7 @@ function log_error() {
 export PATH=${PATH}:/usr/sbin
 
 pushd contrail-container-builder/kubernetes/manifests/
-./resolve-manifest.sh <contrail-template.yaml > ~/my-contrail.yaml
+./resolve-manifest.sh <contrail-template-3p.yaml > ~/my-contrail.yaml
 popd
 
 function wait_cluster() {
