@@ -43,20 +43,13 @@ if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
 fi
 
 # base image for VMs
-if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-  DEFAULT_BASE_IMAGE_NAME="${WAY}-${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION}-${OPENSTACK_VERSION}.qcow2"
+if [[ -n "$ENVIRONMENT_OS_VERSION" ]] ; then
+  DEFAULT_BASE_IMAGE_NAME="${WAY}-${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION}.qcow2"
 else
-  DEFAULT_BASE_IMAGE_NAME="${WAY}-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}.qcow2"
+  DEFAULT_BASE_IMAGE_NAME="${WAY}-${ENVIRONMENT_OS}.qcow2"
 fi
 BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-"$DEFAULT_BASE_IMAGE_NAME"}
 BASE_IMAGE_POOL=${BASE_IMAGE_POOL:-'images'}
-BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
-BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
-
-if [[ ! -f ${BASE_IMAGE} ]] ; then
-  echo "There is no image file ${BASE_IMAGE}"
-  exit 1
-fi
 
 source "$my_dir/../../../common/virsh/functions"
 

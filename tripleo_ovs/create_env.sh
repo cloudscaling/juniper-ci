@@ -20,11 +20,12 @@ my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
 # base image for VMs
-DEFAULT_BASE_IMAGE_NAME="undercloud-${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION}.qcow2"
+if [[ -n "$ENVIRONMENT_OS_VERSION" ]] ; then
+  DEFAULT_BASE_IMAGE_NAME="undercloud-${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION}.qcow2"
+else
+  DEFAULT_BASE_IMAGE_NAME="undercloud-${ENVIRONMENT_OS}.qcow2"
+fi
 BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-"$DEFAULT_BASE_IMAGE_NAME"}
-BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
-mkdir -p ${BASE_IMAGE_DIR}
-BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
 BASE_IMAGE_POOL=${BASE_IMAGE_POOL:-'images'}
 
 BRIDGE_NAME_MGMT=${BRIDGE_NAME_MGMT:-"e${NUM}-mgmt"}
