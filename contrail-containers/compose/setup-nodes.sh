@@ -48,7 +48,7 @@ cat <<EOM > ./inventory/hosts
 container_hosts:
   hosts:
 EOM
-for i in  ${dest[@]} ; do
+for i in ${ips[@]} ; do
   cat <<EOM >> ./inventory/hosts
     \${i}:
       ansible_ssh_pass: qwe123QWE
