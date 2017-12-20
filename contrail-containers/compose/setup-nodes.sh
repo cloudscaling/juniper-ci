@@ -95,8 +95,15 @@ popd
 
 yum install -y epel-release
 yum install -y ansible docker docker-compose
+
+cat <<EOM > /etc/docker/daemon.json
+ {
+   "insecure-registries": ["${DOCKER_REGISTRY_ADDR}:5000"]
+ }
+EOM
+
 systemctl enable docker
-systemctl start docker
+systemctl restart docker
 EOF
 }
 
