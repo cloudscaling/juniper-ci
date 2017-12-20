@@ -44,12 +44,12 @@ cat common.env
 popd
 
 pushd ~/contrail-ansible-deployer
-cat <<OEM > ./inventory/hosts
+cat <<EOM > ./inventory/hosts
 container_hosts:
   hosts:
 EOM
 for i in  ${dest[@]} ; do
-  cat <<OEM >> ./inventory/hosts
+  cat <<EOM >> ./inventory/hosts
     \${i}:
       ansible_ssh_pass: qwe123QWE
 EOM
