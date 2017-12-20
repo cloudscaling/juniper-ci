@@ -88,6 +88,8 @@ popd
 
 yum install -y epel-release
 yum install -y ansible docker docker-compose
+systemctl enable docker
+systemctl start docker
 EOF
 }
 
