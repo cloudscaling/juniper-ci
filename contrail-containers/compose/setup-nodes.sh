@@ -13,8 +13,8 @@ done
 controllers=( ${ips[@]:0:3} )
 agents=( ${ips[@]:3} )
 export DOCKER_REGISTRY_ADDR=${controllers[0]}
-export CONTROLLER_NODES=$(echo $controllers | sed 's/ /,/g')
-export AGENT_NODES=$(echo $agents | sed 's/ /,/g')
+export CONTROLLER_NODES=$(echo ${controllers[@]} | sed 's/ /,/g')
+export AGENT_NODES=$(echo ${agents[@]} | sed 's/ /,/g')
 
 function assert_empty() {
   if [[ -z "${!1}" ]] ; then
@@ -64,10 +64,10 @@ contrail_configuration:
   CONTROLLER_NODES: $CONTROLLER_NODES
   CLOUD_ORCHESTRATOR: kubernetes
   RABBITMQ_NODE_PORT: 5673
+roles:
 EOM
 for i in ${controllers[@]} ; do
   cat <<EOM >> ./inventory/group_vars/container_hosts.yml
-roles:
   \${i}:
     configdb:
     config:
@@ -79,7 +79,6 @@ EOM
 done
 for i in ${agents[@]} ; do
   cat <<EOM >> ./inventory/group_vars/container_hosts.yml
-roles:
   \${i}:
     vrouter:
 EOM
