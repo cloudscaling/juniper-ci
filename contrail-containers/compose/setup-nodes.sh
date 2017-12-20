@@ -87,7 +87,7 @@ cat ./inventory/group_vars/container_hosts.yml
 popd
 
 yum install -y epel-release
-yum install -y ansible docker docker-compose
+yum install -y ansible docker-engine docker-compose
 systemctl enable docker
 systemctl start docker
 EOF
