@@ -1,19 +1,19 @@
 #!/bin/bash
 
 function juju-status() {
-  juju status $juju_model_arg --format yaml $@
+  timeout -s 9 30 juju status $juju_model_arg --format yaml $@
 }
 
 function juju-status-tabular() {
-  juju status $juju_model_arg --format tabular $@
+  timeout -s 9 30 juju status $juju_model_arg --format tabular $@
 }
 
 function juju-status-json() {
-  juju status $juju_model_arg --format json $@
+  timeout -s 9 30 juju status $juju_model_arg --format json $@
 }
 
 function juju-machines-tabular() {
-  juju machines $juju_model_arg --format tabular $@
+  timeout -s 9 30 juju machines $juju_model_arg --format tabular $@
 }
 
 function juju-deploy() {
