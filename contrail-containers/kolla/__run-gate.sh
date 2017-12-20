@@ -55,11 +55,16 @@ pip install kolla-ansible
 if [ "x$HOST_OS" == "xubuntu" ]; then
   cp -r /usr/local/share/kolla-ansible/etc_examples/kolla /etc/kolla/
   cp /usr/local/share/kolla-ansible/ansible/inventory/* .
+  sed -i -e "s/{{if1}}/ens3/g" global.yaml
+  sed -i -e "s/{{if1}}/ens4/g" global.yaml
 elif [ "x$HOST_OS" == "xcentos" ]; then
   cp -r /usr/share/kolla-ansible/etc_examples/kolla /etc/kolla/
   cp /usr/share/kolla-ansible/ansible/inventory/* .
+  sed -i -e "s/{{if1}}/eth0/g" global.yaml
+  sed -i -e "s/{{if1}}/eth1/g" global.yaml
 fi
-# TODO: write network interface and other params dynamically depends on OS. or create two files for CentOS and Ubuntu.
+sed -i -e "s/{{base_distro}}/$HOST_OS/g" global.yaml
+see -i -e "s/{{openstack_version}}/$OPENSTACK_VERSION/g" global.yaml
 cp global.yml /etc/kolla
 
 kolla-genpwd
