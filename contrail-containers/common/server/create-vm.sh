@@ -21,6 +21,7 @@ export DISK_SIZE=${DISK_SIZE:-'128'}
 export POOL_NAME=${POOL_NAME:-${WAY}}
 export NET_DRIVER=${NET_DRIVER:-'e1000'}
 export BRIDGE_NAME=${BRIDGE_NAME:-${WAY}}
+export SSH_USER=${SSH_USER:-'stack'}
 
 VCPUS=4
 OS_VARIANT='rhel7'
@@ -125,6 +126,19 @@ for i in ${ips[@]} ; do
   hname="node-\$(echo \$i | tr '.' '-')"
   echo \$i  \${hname}.localdomain  \${hname} >> /etc/hosts
 done
+
+cat <<EOM > /root/.ssh/config
+Host *
+  StrictHostKeyChecking no
+  UserKnownHostsFile=/dev/null
+EOM
+
+cat <<EOM > /home/stack/.ssh/config
+Host *
+  StrictHostKeyChecking no
+  UserKnownHostsFile=/dev/null
+EOM
+
 EOF
 done
 
@@ -147,7 +161,7 @@ master_ip=${ips[0]}
 
 # save env file
 cat <<EOF >$ENV_FILE
-SSH_USER=stack
+SSH_USER=$SSH_USER
 public_ip=$master_ip
 public_ip_build=$master_ip
 public_ip_helm=$master_ip

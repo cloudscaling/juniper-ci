@@ -10,6 +10,9 @@ if [[ "$CLEAN_BEFORE" == 'true' || "$CLEAN_BEFORE" == 'clean_and_exit' ]] ; then
   fi
 fi
 
+# Work with docker-compose udner root
+export SSH_USER=root
+
 rm -rf "$WORKSPACE/logs"
 mkdir -p "$WORKSPACE/logs"
 
@@ -71,6 +74,7 @@ for dest in ${SSH_DEST_WORKERS[@]} ; do
   # TODO: when repo be splitted to containers & build here will be containers repo only,
   # then build repo should be added to be copied below
   $SCP -r "$WORKSPACE/contrail-container-builder" ${dest}:./
+  $SCP -r "$WORKSPACE/contrail-ansible-deployer" ${dest}:./
 done
 $my_dir/setup-nodes.sh
 

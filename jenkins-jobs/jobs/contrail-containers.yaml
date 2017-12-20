@@ -31,6 +31,7 @@
       - juniper-ci
       - contrail-build-poc
       - contrail-container-builder
+      - contrail-ansible-deployer
     builders:
       - shell: |
           #!/bin/bash -e
@@ -61,6 +62,9 @@
           slavenode: master
           contrail_version: 4.2.0.0-1
       - k8s-server-centos:
+          slavenode: slave01
+          contrail_version: 4.1.0.0-6
+      - compose-server-centos:
           slavenode: slave01
           contrail_version: 4.1.0.0-6
       - kolla-aws-centos:

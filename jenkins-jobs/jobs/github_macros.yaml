@@ -78,8 +78,12 @@
       - github:
           organization: juniper
           repo: contrail-container-builder
-
-
+- scm:
+    name: contrail-ansible-deployer
+    scm:
+      - github:
+          organization: juniper
+          repo: contrail-ansible-deployer
 - scm:
     name: juniper-contrail-charms-branch
     scm:
