@@ -146,6 +146,7 @@ function create_stackrc() {
     echo "export OS_USER_DOMAIN_NAME=admin_domain" >> $WORKSPACE/stackrc
   else
     echo "export OS_AUTH_URL=$proto://$auth_ip:5000/v2.0" >> $WORKSPACE/stackrc
+    echo "export OS_IDENTITY_API_VERSION=2" >> $WORKSPACE/stackrc
   fi
   echo "export OS_USERNAME=admin" >> $WORKSPACE/stackrc
   echo "export OS_TENANT_NAME=admin" >> $WORKSPACE/stackrc
