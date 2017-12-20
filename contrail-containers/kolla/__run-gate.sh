@@ -43,12 +43,6 @@ elif [ "x$HOST_OS" == "xcentos" ]; then
   #insmod ./vrouter.ko
 fi
 
-if [ "x$HOST_OS" == "xubuntu" ]; then
-  ;;
-elif [ "x$HOST_OS" == "xcentos" ]; then
-  ;;
-fi
-
 pip install -U pip
 if [ "x$HOST_OS" == "xubuntu" ]; then
   apt-get install -y python-dev libffi-dev gcc libssl-dev python-selinux
