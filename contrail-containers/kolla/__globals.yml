@@ -87,8 +87,8 @@ api_interface: "{{ network_interface }}"
 # addresses for that reason.
 neutron_external_interface: "{{if2}}"
 
-# Valid options are [ openvswitch, linuxbridge, vmware_nsxv, vmware_dvs, opendaylight ]
-#neutron_plugin_agent: "openvswitch"
+# Valid options are [ openvswitch, linuxbridge, vmware_nsxv, vmware_dvs, opendaylight, opencontrail ]
+neutron_plugin_agent: "opencontrail"
 
 
 ####################
@@ -193,7 +193,7 @@ neutron_external_interface: "{{if2}}"
 #enable_nova_serialconsole_proxy: "no"
 #enable_octavia: "no"
 #enable_opendaylight: "no"
-#enable_openvswitch: "{{ neutron_plugin_agent != 'linuxbridge' }}"
+#enable_openvswitch: "{{ neutron_plugin_agent not in ['linuxbridge', 'opencontrail'] }}"
 #enable_ovs_dpdk: "no"
 #enable_osprofiler: "no"
 #enable_panko: "no"
@@ -381,3 +381,16 @@ tempest_floating_network_name:
 #vmware_datastore_name:
 #vmware_vcenter_name:
 #vmware_vcenter_cluster_name:
+
+###################################
+# OpenContrail support
+###################################
+opencontrail_release: "4.1.0.0-6-{{ openstack_release }}"
+enable_neutron_bgp_dragent: "no"
+enable_neutron_dvr: "no"
+enable_neutron_lbaas: "no"
+enable_neutron_fwaas: "no"
+enable_neutron_qos: "no"
+enable_neutron_agent_ha: "no"
+enable_neutron_vpnaas: "no"
+enable_neutron_sfc: "no"
