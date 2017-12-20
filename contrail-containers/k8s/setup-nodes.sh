@@ -3,7 +3,7 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
-source "$my_dir/ssh-defs"
+source "$my_dir/../common/${HOST}/ssh-defs"
 
 dest=( ${SSH_DEST_WORKERS[@]} )
 ips=()
