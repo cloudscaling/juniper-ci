@@ -9,11 +9,11 @@ echo "--------------------------------------------------- Save LOGS ---"
 log_dir=$WORKSPACE/logs
 
 # save status to file
-juju-status > $log_dir/juju_status.log
-juju-status-tabular > $log_dir/juju_status_tabular.log
+timeout -s 9 30 juju-status > $log_dir/juju_status.log
+timeout -s 9 30 juju-status-tabular > $log_dir/juju_status_tabular.log
 
 truncate -s 0 $log_dir/juju_unit_statuses.log
-for unit in `juju status $juju_model_arg --format oneline | awk '{print $2}' | sed 's/://g'` ; do
+for unit in `timeout -s 9 30 juju status $juju_model_arg --format oneline | awk '{print $2}' | sed 's/://g'` ; do
   if [[ -z "$unit" || "$unit" =~ "ubuntu/" || "$unit" =~ "ntp/" ]] ; then
     continue
   fi
@@ -21,7 +21,7 @@ for unit in `juju status $juju_model_arg --format oneline | awk '{print $2}' | s
   juju show-status-log $juju_model_arg --days 1 $unit >> $log_dir/juju_unit_statuses.log
 done
 
-for mch in $(juju-get-machines) ; do
+for mch in $(timeout -s 9 30 juju-get-machines) ; do
   mkdir -p "$log_dir/$mch"
   juju-ssh $mch "df -hT" &>"$log_dir/$mch/df.log"
   juju-scp "$my_dir/__save-logs.sh" $mch:save_logs.sh 2>/dev/null
