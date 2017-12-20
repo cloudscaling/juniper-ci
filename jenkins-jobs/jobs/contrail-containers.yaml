@@ -21,12 +21,8 @@
       - choice:
           name: OPENSTACK_VERSION
           choices:
-            - newton
             - ocata
-      - string:
-          name: OPENSTACK_HELM_URL
-          default: https://github.com/cloudscaling/openstack-helm
-          description: "repository with OpenStack Helm project"
+            - newton
     scm:
       - juniper-ci
       - contrail-build-poc

@@ -13,7 +13,7 @@ juju-status > $log_dir/juju_status.log
 juju-status-tabular > $log_dir/juju_status_tabular.log
 
 truncate -s 0 $log_dir/juju_unit_statuses.log
-for unit in `juju status $juju_model_arg --format oneline | awk '{print $2}' | sed 's/://g'` ; do
+for unit in `timeout -s 9 30 juju status $juju_model_arg --format oneline | awk '{print $2}' | sed 's/://g'` ; do
   if [[ -z "$unit" || "$unit" =~ "ubuntu/" || "$unit" =~ "ntp/" ]] ; then
     continue
   fi

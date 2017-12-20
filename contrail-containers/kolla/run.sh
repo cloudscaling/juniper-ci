@@ -63,7 +63,8 @@ $SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERS
 set +o pipefail
 
 $SCP "$my_dir/__run-gate.sh" $SSH_DEST:run-gate.sh
-timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION ./run-gate.sh $public_ip_build"
+$SCP "$my_dir/__globals.yml" $SSH_DEST:globals.yml
+timeout -s 9 60m $SSH "sudo CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION ./run-gate.sh $public_ip_build"
 
 trap - ERR
 save_logs
