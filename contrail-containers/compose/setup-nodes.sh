@@ -53,6 +53,7 @@ for i in  ${dest[@]} ; do
     \${i}:
       ansible_ssh_pass: qwe123QWE
 EOM
+done
 cat ./inventory/hosts
 
 cat <<EOM > ./inventory/group_vars/container_hosts.yml
