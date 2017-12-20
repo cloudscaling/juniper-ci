@@ -9,7 +9,7 @@ if [[ -z "$WORKSPACE" ]] ; then
 fi
 
 if [[ -z "$WAY" ]] ; then
-  echo "WAY variable is expected: oshelm/k8s"
+  echo "WAY variable is expected: helm/k8s/kolla"
   exit -1
 fi
 

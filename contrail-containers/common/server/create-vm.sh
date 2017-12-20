@@ -9,7 +9,7 @@ if [[ -z "$WORKSPACE" ]] ; then
 fi
 
 if [[ -z "$WAY" ]] ; then
-  echo "WAY variable is expected: oshelm/k8s"
+  echo "WAY variable is expected: helm/k8s/kolla"
   exit -1
 fi
 
@@ -150,7 +150,7 @@ cat <<EOF >$ENV_FILE
 SSH_USER=stack
 public_ip=$master_ip
 public_ip_build=$master_ip
-public_ip_helm=$master_ip
+public_ip_cloud=$master_ip
 ssh_key_file=/home/jenkins/.ssh/id_rsa
 nodes="${NODES[@]}"
 nodes_ips="${ips[@]}"

@@ -44,7 +44,8 @@ elif [ "x$HOST_OS" == "xcentos" ]; then
   sudo insmod ./vrouter.ko
 fi
 
-git clone ${OPENSTACK_HELM_URL:-https://github.com/openstack/openstack-helm}
+# TODO: switch to openstack's repo when work is done
+git clone ${OPENSTACK_HELM_URL:-https://github.com/cloudscaling/openstack-helm}
 cd openstack-helm
 
 export OPENCONTRAIL_REGISTRY_URL="${registry_ip}:5000"

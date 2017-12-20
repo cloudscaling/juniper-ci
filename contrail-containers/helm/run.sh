@@ -74,7 +74,7 @@ fi
 # ceph.repo file is needed ONLY fow centos on aws.
 $SCP "$my_dir/__ceph.repo" $SSH_DEST:ceph.repo
 $SCP "$my_dir/__run-gate.sh" $SSH_DEST:run-gate.sh
-timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION OPENSTACK_HELM_URL=$OPENSTACK_HELM_URL ./run-gate.sh $public_ip_build"
+timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION ./run-gate.sh $public_ip_build"
 
 trap - ERR
 save_logs

@@ -13,14 +13,23 @@ if [[ "$registry_ip" != 'localhost' ]] ; then
 EOF
 fi
 
+kolla_path=''
 if [[ -x $(command -v apt-get 2>/dev/null) ]]; then
   HOST_OS='ubuntu'
+  kolla_path='/usr/local/share'
+  sed -i -e "s/{{if1}}/ens3/g" globals.yml
+  sed -i -e "s/{{if2}}/ens4/g" globals.yml
 elif [[ -x $(command -v yum 2>/dev/null) ]]; then
   HOST_OS='centos'
+  kolla_path='/usr/share'
+  sed -i -e "s/{{if1}}/eth0/g" globals.yml
+  sed -i -e "s/{{if2}}/eth1/g" globals.yml
 else
   echo "ERROR: Unable to find apt-get or yum"
   exit 1
 fi
+sed -i -e "s/{{base_distro}}/$HOST_OS/g" globals.yml
+sed -i -e "s/{{openstack_version}}/$OPENSTACK_VERSION/g" globals.yml
 
 echo "INFO: Preparing instances"
 if [ "x$HOST_OS" == "xubuntu" ]; then
@@ -52,20 +61,9 @@ elif [ "x$HOST_OS" == "xcentos" ]; then
   yum install -y ansible
 fi
 pip install kolla-ansible
-if [ "x$HOST_OS" == "xubuntu" ]; then
-  cp -r /usr/local/share/kolla-ansible/etc_examples/kolla /etc/kolla/
-  cp /usr/local/share/kolla-ansible/ansible/inventory/* .
-  sed -i -e "s/{{if1}}/ens3/g" global.yaml
-  sed -i -e "s/{{if1}}/ens4/g" global.yaml
-elif [ "x$HOST_OS" == "xcentos" ]; then
-  cp -r /usr/share/kolla-ansible/etc_examples/kolla /etc/kolla/
-  cp /usr/share/kolla-ansible/ansible/inventory/* .
-  sed -i -e "s/{{if1}}/eth0/g" global.yaml
-  sed -i -e "s/{{if1}}/eth1/g" global.yaml
-fi
-sed -i -e "s/{{base_distro}}/$HOST_OS/g" global.yaml
-see -i -e "s/{{openstack_version}}/$OPENSTACK_VERSION/g" global.yaml
-cp global.yml /etc/kolla
+cp -r $kolla_path/kolla-ansible/etc_examples/kolla /etc/kolla/
+cp $kolla_path/kolla-ansible/ansible/inventory/* .
+cp globals.yml /etc/kolla
 
 kolla-genpwd
 kolla-ansible -i all-in-one bootstrap-servers
@@ -79,12 +77,13 @@ virt_type = qemu
 cpu_mode = none
 EOF
 
-kolla-ansible prechecks -i /path/to/all-in-one
-kolla-ansible deploy -i /path/to/all-in-one
+kolla-ansible prechecks -i all-in-one
+kolla-ansible deploy -i all-in-one
 docker ps -a
 kolla-ansible post-deploy
 
-
-#TODO: add kolla here
+# test it
+pip install python-openstackclient
+$kolla_path/kolla-ansible/init-runonce
 
 exit $err
