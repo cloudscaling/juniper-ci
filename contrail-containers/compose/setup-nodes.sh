@@ -84,6 +84,13 @@ for i in ${agents[@]} ; do
 EOM
 done
 cat ./inventory/group_vars/container_hosts.yml
+
+cat <<EOM > ./inventory/group_vars/all.yml
+BUILD_VMS: false
+CONFIGURE_VMS: false
+CREATE_CONTAINERS: true
+EOM
+cat ./inventory/group_vars/all.yml
 popd
 
 yum install -y epel-release
