@@ -30,7 +30,7 @@ else
 fi
 sed -i -e "s/{{base_distro}}/$HOST_OS/g" globals.yml
 sed -i -e "s/{{openstack_version}}/$OPENSTACK_VERSION/g" globals.yml
-sed -i -e "s/{{contrail_version}}/$CONTRAIL_VERSION/g" globals.yml
+sed -i -e "s/{{contrail_version}}/$CONTRAIL_VERSION-$OPENSTACK_VERSION/g" globals.yml
 
 echo "INFO: Preparing instances"
 if [ "x$HOST_OS" == "xubuntu" ]; then
@@ -76,8 +76,10 @@ cp globals.yml /etc/kolla
 
 kolla-genpwd
 kolla-ansible -i all-in-one bootstrap-servers
-docker pull $registry_ip:5000/contrail-openstack-neutron-contrail-backend:$CONTRAIL_VERSION
-docker pull $registry_ip:5000/contrail-openstack-compute-contrail-backend:$CONTRAIL_VERSION
+docker pull $registry_ip:5000/contrail-openstack-neutron-contrail-backend:$CONTRAIL_VERSION-$OPENSTACK_VERSION
+docker tag $registry_ip:5000/contrail-openstack-neutron-contrail-backend:$CONTRAIL_VERSION-$OPENSTACK_VERSION contrail-openstack-neutron-contrail-backend:$CONTRAIL_VERSION-$OPENSTACK_VERSION
+docker pull $registry_ip:5000/contrail-openstack-compute-contrail-backend:$CONTRAIL_VERSION-$OPENSTACK_VERSION
+docker tag $registry_ip:5000/contrail-openstack-compute-contrail-backend:$CONTRAIL_VERSION-$OPENSTACK_VERSION contrail-openstack-compute-contrail-backend:$CONTRAIL_VERSION-$OPENSTACK_VERSION
 kolla-ansible pull -i all-in-one
 docker images
 
@@ -95,6 +97,10 @@ kolla-ansible post-deploy
 
 # test it
 pip install python-openstackclient
+source /etc/kolla/admin-openrc.sh
 $kolla_path/kolla-ansible/init-runonce
+
+mkdir -p $HOME/logs
+cp -r /var/lib/docker/volumes/kolla_logs/_data $HOME/logs/
 
 exit $err
