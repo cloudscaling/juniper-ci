@@ -76,10 +76,12 @@ cp globals.yml /etc/kolla
 
 kolla-genpwd
 kolla-ansible -i all-in-one bootstrap-servers
-docker pull $registry_ip:5000/contrail-openstack-neutron-contrail-backend:$CONTRAIL_VERSION-$OPENSTACK_VERSION
-docker tag $registry_ip:5000/contrail-openstack-neutron-contrail-backend:$CONTRAIL_VERSION-$OPENSTACK_VERSION contrail-openstack-neutron-contrail-backend:$CONTRAIL_VERSION-$OPENSTACK_VERSION
-docker pull $registry_ip:5000/contrail-openstack-compute-contrail-backend:$CONTRAIL_VERSION-$OPENSTACK_VERSION
-docker tag $registry_ip:5000/contrail-openstack-compute-contrail-backend:$CONTRAIL_VERSION-$OPENSTACK_VERSION contrail-openstack-compute-contrail-backend:$CONTRAIL_VERSION-$OPENSTACK_VERSION
+neutron_init="contrail-openstack-neutron-init"
+docker pull $registry_ip:5000/$neutron_init:$CONTRAIL_VERSION-$OPENSTACK_VERSION
+docker tag $registry_ip:5000/$neutron_init:$CONTRAIL_VERSION-$OPENSTACK_VERSION $neutron_init:$CONTRAIL_VERSION-$OPENSTACK_VERSION
+compute_init="contrail-openstack-compute-init"
+docker pull $registry_ip:5000/$compute_init:$CONTRAIL_VERSION-$OPENSTACK_VERSION
+docker tag $registry_ip:5000/$compute_init:$CONTRAIL_VERSION-$OPENSTACK_VERSION $compute_init:$CONTRAIL_VERSION-$OPENSTACK_VERSION
 kolla-ansible pull -i all-in-one
 docker images
 
