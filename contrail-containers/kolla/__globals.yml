@@ -385,7 +385,7 @@ tempest_floating_network_name:
 ###################################
 # OpenContrail support
 ###################################
-opencontrail_release: "4.1.0.0-6-{{ openstack_release }}"
+opencontrail_release: "{{contrail_version}}"
 enable_neutron_bgp_dragent: "no"
 enable_neutron_dvr: "no"
 enable_neutron_lbaas: "no"
