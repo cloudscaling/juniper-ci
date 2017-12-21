@@ -60,7 +60,14 @@ elif [ "x$HOST_OS" == "xcentos" ]; then
   yum install -y python-devel libffi-devel gcc openssl-devel libselinux-python
   yum install -y ansible
 fi
-pip install kolla-ansible
+
+# TODO: switch to openstack's repo when work is done
+#pip install kolla-ansible
+git clone https://github.com/cloudscaling/kolla-ansible
+cd kolla-ansible
+python setup.py install
+cd ..
+
 cp -r $kolla_path/kolla-ansible/etc_examples/kolla /etc/kolla/
 cp $kolla_path/kolla-ansible/ansible/inventory/* .
 cp globals.yml /etc/kolla
