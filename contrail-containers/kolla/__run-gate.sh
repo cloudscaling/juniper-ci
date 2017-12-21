@@ -30,6 +30,7 @@ else
 fi
 sed -i -e "s/{{base_distro}}/$HOST_OS/g" globals.yml
 sed -i -e "s/{{openstack_version}}/$OPENSTACK_VERSION/g" globals.yml
+sed -i -e "s/{{contrail_version}}/$CONTRAIL_VERSION-$OPENSTACK_VERSION/g" globals.yml
 
 echo "INFO: Preparing instances"
 if [ "x$HOST_OS" == "xubuntu" ]; then
@@ -60,13 +61,27 @@ elif [ "x$HOST_OS" == "xcentos" ]; then
   yum install -y python-devel libffi-devel gcc openssl-devel libselinux-python
   yum install -y ansible
 fi
-pip install kolla-ansible
+
+# TODO: switch to openstack's repo when work is done
+#pip install kolla-ansible
+git clone https://github.com/cloudscaling/kolla-ansible
+cd kolla-ansible
+pip install -r requirements.txt
+python setup.py install
+cd ..
+
 cp -r $kolla_path/kolla-ansible/etc_examples/kolla /etc/kolla/
 cp $kolla_path/kolla-ansible/ansible/inventory/* .
 cp globals.yml /etc/kolla
 
 kolla-genpwd
 kolla-ansible -i all-in-one bootstrap-servers
+neutron_init="contrail-openstack-neutron-init"
+docker pull $registry_ip:5000/$neutron_init:$CONTRAIL_VERSION-$OPENSTACK_VERSION
+docker tag $registry_ip:5000/$neutron_init:$CONTRAIL_VERSION-$OPENSTACK_VERSION $neutron_init:$CONTRAIL_VERSION-$OPENSTACK_VERSION
+compute_init="contrail-openstack-compute-init"
+docker pull $registry_ip:5000/$compute_init:$CONTRAIL_VERSION-$OPENSTACK_VERSION
+docker tag $registry_ip:5000/$compute_init:$CONTRAIL_VERSION-$OPENSTACK_VERSION $compute_init:$CONTRAIL_VERSION-$OPENSTACK_VERSION
 kolla-ansible pull -i all-in-one
 docker images
 
@@ -84,6 +99,10 @@ kolla-ansible post-deploy
 
 # test it
 pip install python-openstackclient
+source /etc/kolla/admin-openrc.sh
 $kolla_path/kolla-ansible/init-runonce
+
+mkdir -p $HOME/logs
+cp -r /var/lib/docker/volumes/kolla_logs/_data $HOME/logs/
 
 exit $err
