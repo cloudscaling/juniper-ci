@@ -10,9 +10,6 @@ if [[ "$CLEAN_BEFORE" == 'true' || "$CLEAN_BEFORE" == 'clean_and_exit' ]] ; then
   fi
 fi
 
-# Work with docker-compose udner root
-export SSH_USER=root
-
 rm -rf "$WORKSPACE/logs"
 mkdir -p "$WORKSPACE/logs"
 
@@ -67,6 +64,9 @@ function catch_errors() {
   exit $exit_code
 }
 
+# Work with docker-compose udner root
+export SSH_USER=root
+export NET_ADDR=${NET_ADDR:-"192.168.221.0"}
 $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
 

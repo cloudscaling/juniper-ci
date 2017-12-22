@@ -13,6 +13,11 @@ if [[ -z "$WAY" ]] ; then
   exit -1
 fi
 
+if [[ -z "$NET_ADDR" ]] ; then
+  echo "NET_ADDR variable is expected: e.g. 192.168.222.0"
+  exit -1
+fi
+
 export ENV_FILE="$WORKSPACE/cloudrc"
 
 export VM_NAME=${VM_NAME:-"${WAY}-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}"}
@@ -61,12 +66,7 @@ done
 
 # re-create network
 delete_network_dhcp $NET_NAME
-if [[ "$ENVIRONMENT_OS" == 'rhel' ]]; then
-  net_addr="192.168.221.0"
-else
-  net_addr="192.168.222.0"
-fi
-create_network_dhcp $NET_NAME $net_addr $BRIDGE_NAME
+create_network_dhcp $NET_NAME $NET_ADDR $BRIDGE_NAME
 
 # create pool
 create_pool $POOL_NAME
