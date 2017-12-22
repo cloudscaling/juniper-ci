@@ -386,6 +386,10 @@ tempest_floating_network_name:
 # OpenContrail support
 ###################################
 opencontrail_release: "{{contrail_version}}"
+# while opencontrail is not a role in ansible and we didn't patch group_vars/all.yml we set fake IP here
+opencontrail_api_server_ip: "1.1.1.1"
+opencontrail_api_server_port: "8082"
+enable_openvswitch: "no"
 enable_neutron_bgp_dragent: "no"
 enable_neutron_dvr: "no"
 enable_neutron_lbaas: "no"
@@ -394,3 +398,5 @@ enable_neutron_qos: "no"
 enable_neutron_agent_ha: "no"
 enable_neutron_vpnaas: "no"
 enable_neutron_sfc: "no"
+neutron_opencontrail_init_image_full: "contrail-openstack-neutron-init:{{contrail_version}}"
+nova_compute_opencontrail_init_image_full: "contrail-openstack-compute-init:{{contrail_version}}"
