@@ -94,9 +94,10 @@ timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION ./run-gate.sh $public_
 # Validate cluster
 # TODO: rename run-gate since now check of cluster is here
 source "$my_dir/../common/check-functions"
-dest_to_check=$(echo ${SSH_DEST_WORKERS[@]} | sed 's/ /,/g')
+dest_to_check=$(echo ${SSH_DEST_WORKERS[@]:0:3} | sed 's/ /,/g')
 check_rabbitmq_cluster "$dest_to_check"
 expected_number_of_services=41
+dest_to_check=$(echo ${SSH_DEST_WORKERS[@]} | sed 's/ /,/g')
 check_introspection $expected_number_of_services "$dest_to_check"
 
 trap - ERR
