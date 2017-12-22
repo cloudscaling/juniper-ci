@@ -75,6 +75,8 @@ for dest in ${SSH_DEST_WORKERS[@]} ; do
   # then build repo should be added to be copied below
   $SCP -r "$WORKSPACE/contrail-container-builder" ${dest}:./
   $SCP -r "$WORKSPACE/contrail-ansible-deployer" ${dest}:./
+  $SCP "$my_dir/../__check_rabbitmq.sh" ${dest}:check_rabbitmq.sh
+  $SCP "$my_dir/../__check_introspection.sh" ${dest}:./check_introspection.sh
 done
 $my_dir/setup-nodes.sh
 
@@ -88,6 +90,14 @@ set +o pipefail
 
 $SCP "$my_dir/__run-gate.sh" $SSH_DEST:run-gate.sh
 timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION ./run-gate.sh $public_ip_build"
+
+# Validate cluster
+# TODO: rename run-gate since now check of cluster is here
+source "$my_dir/../common/check-functions"
+dest_to_check=$(echo ${SSH_DEST_WORKERS[@]} | sed 's/ /,/g')
+check_rabbitmq_cluster "$dest_to_check"
+expected_number_of_services=41
+check_introspection $expected_number_of_services "$dest_to_check"
 
 trap - ERR
 save_logs
