@@ -1,5 +1,24 @@
 #!/bin/bash -ex
 
+my_file="$(readlink -e "$0")"
+my_dir="$(dirname $my_file)"
+
+# assume that this file is in home directory of ssh_user
+mkdir -p $my_dir/logs
+
+function save_logs() {
+  cp -r /var/lib/docker/volumes/kolla_logs/_data $my_dir/logs/ || /bin/true
+}
+
+trap 'catch_errors $LINENO' ERR
+function catch_errors() {
+  local exit_code=$?
+  echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
+  trap - ERR
+  save_logs
+  exit $exit_code
+}
+
 # tune some host settings
 sysctl -w vm.max_map_count=1048575
 
@@ -102,7 +121,5 @@ pip install python-openstackclient
 source /etc/kolla/admin-openrc.sh
 $kolla_path/kolla-ansible/init-runonce
 
-mkdir -p $HOME/logs
-cp -r /var/lib/docker/volumes/kolla_logs/_data $HOME/logs/
-
-exit $err
+trap - ERR
+save_logs
