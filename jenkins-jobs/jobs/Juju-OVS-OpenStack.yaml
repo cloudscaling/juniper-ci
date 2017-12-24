@@ -17,24 +17,14 @@
             - always
             - on_success
             - never
-      - choice:
-          name: VERSION
-          description: "Version of the OpenStack. mitaka implies trusty and newton/ocata implies xenial."
-          choices:
-            - ocata
     scm:
-      - juniper-ci
+      - progmaticlab-ci
     builders:
       - shell: |
           #!/bin/bash -e
-          desc="$VERSION $DEPLOY_TYPE"
-          echo "DESCRIPTION $desc"
-      - description-setter:
-          regexp: "DESCRIPTION (.*)"
-      - shell: |
-          #!/bin/bash -e
           export SERIES='xenial'
-          ./juniper-ci/juju/bmc-ovs/deploy_all.sh
+          export VERSION='ocata'
+          ./ci/juju/deploy_all.sh
     publishers:
       - archive:
           artifacts: 'logs/**'
