@@ -46,11 +46,32 @@
           wipe-workspace: true
           skip-tag: true
 
+# Repository in Progmaticlab github
+- scm:
+    name: pmlgithub
+    scm:
+      - git:
+          url: 'https://github.com/progmaticlab/{repo}.git'
+          basedir: '{repo}'
+          branches:
+            - '*/master'
+          clean:
+              after: true
+              before: true
+          prune: true
+          wipe-workspace: true
+          skip-tag: true
+
 - scm:
     name: juniper-ci
     scm:
       - cspgithub:
           repo: "juniper-ci"
+- scm:
+    name: progmaticlab-ci
+    scm:
+      - pmlgithub:
+          repo: "ci"
 
 - scm:
     name: tempest

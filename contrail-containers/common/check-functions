@@ -1,0 +1,36 @@
+#!/bin/bash
+
+function check_rabbitmq_cluster() {
+  local dest=( $(echo $1 | sed 's/,/ /g') )
+  local err=0
+  for d in ${dest[@]} ; do
+    if ! $SSH_WORKER $d ./check_rabbitmq.sh ; then
+      echo ERROR: rabbitmq_cluster_check failed on dest=$d
+      (( err+=1 ))
+    fi
+  done
+  return $err
+}
+
+function check_introspection() {
+  local expected=$1
+  local dest=( $(echo $2 | sed 's/,/ /g') )
+  local err=0
+  local count=0
+  for d in ${dest[@]} ; do
+    local res=$($SSH_WORKER $d ./check_introspection.sh)
+    echo "$res"
+    if [[ ! $? -eq 0 ]]  ; then
+      echo "ERROR: check_introspection failed on dest=$d"
+      (( err+=1 ))
+    else
+      local tmp=$(echo "$res" | awk '/TRACE:.*Functional=/{print($2)}' | cut -d '=' -f 2)
+      (( count+=tmp ))
+    fi
+  done
+  if (( expected != count )) ; then
+    echo "ERROR: excpected number of functional services is $expected but there is $count running"
+    (( err+=1 ))
+  fi
+  return $err
+}
