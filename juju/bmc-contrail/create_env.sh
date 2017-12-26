@@ -112,12 +112,12 @@ function run_cloud_machine() {
   wait_kvm_machine $image_user@$ip
   echo "INFO: adding machine $name to juju controller $(date)"
   juju-add-machine ssh:$image_user@$ip
+  machines["$name"]=$ip
   mch=`get_machine_by_ip $ip`
   wait_kvm_machine $mch juju-ssh
   # after first boot we must remove cloud-init
   juju-ssh $mch "sudo rm -rf /etc/systemd/system/cloud-init.target.wants /lib/systemd/system/cloud*"
   echo "INFO: machine $name (juju machine: $mch) is ready $(date)"
-  machines["$name"]=$mch
 }
 
 function run_compute() {
@@ -222,7 +222,8 @@ done
 cat $WORKSPACE/hosts
 echo "INFO: Applying hosts file and hostnames $(date)"
 for m in ${!machines[@]} ; do
-  mch=${machines[$m]}
+  ip=${machines[$m]}
+  mch=`get_machine_by_ip $ip`
   echo "INFO: Apply $m for $mch"
   juju-scp $WORKSPACE/hosts $mch:hosts
   juju-ssh $mch "sudo bash -c 'echo $m > /etc/hostname ; hostname $m'" 2>/dev/null
