@@ -101,13 +101,13 @@ juju bootstrap manual/$image_user@$cont_ip $juju_controller_name
 declare -A machines
 
 function run_cloud_machine() {
-  local name=$1
+  local name=${job_prefix}-$1
   local mac_suffix=$2
   local mem=$3
   local ip=$4
 
   local ip="$addr.$mac_suffix"
-  run_machine ${job_prefix}-os-$name 4 $mem $mac_suffix $ip "$addr_vm.$mac_suffix"
+  run_machine $name 4 $mem $mac_suffix $ip "$addr_vm.$mac_suffix"
   echo "INFO: start machine $name waiting $name $(date)"
   wait_kvm_machine $image_user@$ip
   echo "INFO: adding machine $name to juju controller $(date)"
@@ -215,21 +215,21 @@ esac
 wait_for_all_machines
 
 echo "INFO: creating hosts file $(date)"
-truncate -s 0 $WORKSPACE/hosts
-for m in ${!machines[@]} ; do
-  echo "${machines[$m]}    $m" >> $WORKSPACE/hosts
-done
-cat $WORKSPACE/hosts
+#truncate -s 0 $WORKSPACE/hosts
+#for m in ${!machines[@]} ; do
+#  echo "${machines[$m]}    $m" >> $WORKSPACE/hosts
+#done
+#cat $WORKSPACE/hosts
 echo "INFO: Applying hosts file and hostnames $(date)"
 for m in ${!machines[@]} ; do
   ip=${machines[$m]}
   mch=`get_machine_by_ip $ip`
   echo "INFO: Apply $m for $mch"
-  juju-scp $WORKSPACE/hosts $mch:hosts
+  #juju-scp $WORKSPACE/hosts $mch:hosts
   juju-ssh $mch "sudo bash -c 'echo $m > /etc/hostname ; hostname $m'" 2>/dev/null
-  juju-ssh $mch 'sudo bash -c "cat ./hosts >> /etc/hosts"' 2>/dev/null
+  #juju-ssh $mch 'sudo bash -c "cat ./hosts >> /etc/hosts"' 2>/dev/null
 done
-rm $WORKSPACE/hosts
+#rm -f $WORKSPACE/hosts
 
 echo "INFO: Environment created $(date)"
 
