@@ -20,10 +20,16 @@ ret=0
 tmpdir=$(mktemp -d)
 mount ${nbd_dev}p1 $tmpdir || ret=1
 sleep 2
+
+# patch image
 pushd $tmpdir
-sed -i -e 's/^disable_root.*$/disable_root: false/' etc/cloud/cloud.cfg
+# disable metadata requests
 echo 'datasource_list: [ None ]' > etc/cloud/cloud.cfg.d/90_dpkg.cfg
+# enable root login
+sed -i -e 's/^disable_root.*$/disable_root: false/' etc/cloud/cloud.cfg
+# set root password: 123
 sed -i -e 's/^root:\*:/root:$1$4M4PEgVt$hm9dzVolsUtVFoZE5mTsf0:/' etc/shadow
+# add ssh keys for root account
 mkdir -p root/.ssh
 cat $SSH_KEY > root/.ssh/authorized_keys
 cat $SSH_KEY > root/.ssh/authorized_keys2

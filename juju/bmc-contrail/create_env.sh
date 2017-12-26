@@ -63,7 +63,7 @@ function run_machine() {
     --noautoconsole \
     --graphics vnc,listen=0.0.0.0 \
     --network network=$nname,model=$net_driver,mac=$mac_base:$mac_suffix \
-    --cpu SandyBridge,+vmx,+ssse3 \
+    --cpu host \
     --boot hd \
     $params \
     --dry-run --print-xml > /tmp/oc-$name.xml
