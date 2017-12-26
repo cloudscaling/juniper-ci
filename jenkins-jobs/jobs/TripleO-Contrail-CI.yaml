@@ -86,6 +86,10 @@
           name: TSN
           description: Deploy vRouter in TSN mode or not.
           default: false
+      - bool:
+          name: SR-IOV
+          description: Deploy with SR-IOV configuration or not.
+          default: false
       - choice:
           name: CONTROLLER_COUNT
           description: "Count of OS controllers to deploy"
