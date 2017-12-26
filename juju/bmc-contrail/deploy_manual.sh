@@ -19,7 +19,7 @@ check_containers
 PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
 
 repo_ip="$addr.$cont_idx"
-mrepo="ubuntu@$repo_ip"
+mrepo="$image_user@$repo_ip"
 echo "INFO: Prepare apt-repo on $mrepo"
 scp "$HOME/docker/$packages" "$mrepo:contrail_debs.tgz"
 scp "$my_dir/../common/create-aptrepo.sh" $mrepo:create-aptrepo.sh

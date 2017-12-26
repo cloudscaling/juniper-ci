@@ -4,6 +4,7 @@
 
 export LIBVIRT_DEFAULT_URI=qemu:///system
 virsh_cmd="virsh"
+image_user="root"
 
 # base image for VMs is a ubuntu cloud image with:
 # 1) removed cloud-init (echo 'datasource_list: [ None ]' | sudo -s tee /etc/cloud/cloud.cfg.d/90_dpkg.cfg ; sudo apt-get purge cloud-init ; sudo rm -rf /etc/cloud/; sudo rm -rf /var/lib/cloud/ )

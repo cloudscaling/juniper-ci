@@ -81,7 +81,7 @@ function wait_kvm_machine() {
   local ip=$1
   local iter=0
   sleep 10
-  while ! $wait_cmd ubuntu@$ip "uname -a" &>/dev/null ; do
+  while ! $wait_cmd $image_user@$ip "uname -a" &>/dev/null ; do
     ((++iter))
     if (( iter > 9 )) ; then
       echo "ERROR: machine $ip is not accessible $(date)"
@@ -112,7 +112,7 @@ function run_cloud_machine() {
   echo "INFO: start machine $name waiting $name $(date)"
   wait_kvm_machine $ip
   echo "INFO: adding machine $name to juju controller $(date)"
-  juju-add-machine ssh:ubuntu@$ip
+  juju-add-machine ssh:$image_user@$ip
   echo "INFO: machine $name is ready $(date)"
 }
 
@@ -125,19 +125,19 @@ function run_compute() {
   run_cloud_machine comp-$index $mac_suffix 4096 $ip
 
   echo "INFO: preparing compute $index $(date)"
-  kernel_version=`juju-ssh ubuntu@$ip uname -r 2>/dev/null | tr -d '\r'`
+  kernel_version=`juju-ssh $image_user@$ip uname -r 2>/dev/null | tr -d '\r'`
   if [[ "$SERIES" == 'trusty' ]]; then
-    juju-ssh ubuntu@$ip "sudo add-apt-repository -y cloud-archive:mitaka ; sudo apt-get update" &>>$log_dir/apt.log
+    juju-ssh $image_user@$ip "sudo add-apt-repository -y cloud-archive:mitaka ; sudo apt-get update" &>>$log_dir/apt.log
   fi
-  juju-ssh ubuntu@$ip "sudo apt-get -fy install linux-image-extra-$kernel_version dpdk mc wget apparmor-profiles" &>>$log_dir/apt.log
-  juju-scp "$my_dir/files/50-cloud-init-compute-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
-  juju-ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
+  juju-ssh $image_user@$ip "sudo apt-get -fy install linux-image-extra-$kernel_version dpdk mc wget apparmor-profiles" &>>$log_dir/apt.log
+  juju-scp "$my_dir/files/50-cloud-init-compute-$SERIES.cfg" $image_user@$ip:50-cloud-init.cfg 2>/dev/null
+  juju-ssh $image_user@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
   if [[ "$SERIES" == 'trusty' ]]; then
     # '50-cloud-init.cfg' is default name for xenial and it is overwritten
-    juju-ssh ubuntu@$ip "sudo rm /etc/network/interfaces.d/eth0.cfg" 2>/dev/null
+    juju-ssh $image_user@$ip "sudo rm /etc/network/interfaces.d/eth0.cfg" 2>/dev/null
   fi
-  juju-ssh ubuntu@$ip "echo 'supersede routers $addr.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
-  juju-ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
+  juju-ssh $image_user@$ip "echo 'supersede routers $addr.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
+  juju-ssh $image_user@$ip "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $ip
 }
 
@@ -152,22 +152,22 @@ function run_controller() {
   run_cloud_machine cont-$index $mac_suffix $mem $ip
 
   echo "INFO: preparing controller $index $(date)"
-  juju-ssh ubuntu@$ip "sudo apt-get -fy install mc wget bridge-utils" &>>$log_dir/apt.log
+  juju-ssh $image_user@$ip "sudo apt-get -fy install mc wget bridge-utils" &>>$log_dir/apt.log
   if [[ "$prepare_for_openstack" == '1' ]]; then
     if [[ "$SERIES" == 'trusty' ]]; then
-      juju-ssh ubuntu@$ip "sudo add-apt-repository -y cloud-archive:mitaka ; sudo apt-get update ; sudo apt-get install -fy lxd" &>>$log_dir/apt.log
+      juju-ssh $image_user@$ip "sudo add-apt-repository -y cloud-archive:mitaka ; sudo apt-get update ; sudo apt-get install -fy lxd" &>>$log_dir/apt.log
     fi
-    juju-ssh ubuntu@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge" 2>/dev/null
-    juju-ssh ubuntu@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-$IF1\"/m' /etc/default/lxd-bridge" 2>/dev/null
+    juju-ssh $image_user@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge" 2>/dev/null
+    juju-ssh $image_user@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-$IF1\"/m' /etc/default/lxd-bridge" 2>/dev/null
   fi
-  juju-scp "$my_dir/files/50-cloud-init-controller-$SERIES.cfg" ubuntu@$ip:50-cloud-init.cfg 2>/dev/null
-  juju-ssh ubuntu@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
+  juju-scp "$my_dir/files/50-cloud-init-controller-$SERIES.cfg" $image_user@$ip:50-cloud-init.cfg 2>/dev/null
+  juju-ssh $image_user@$ip "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
   if [[ "$SERIES" == 'trusty' ]]; then
     # '50-cloud-init.cfg' is default name for xenial and it is overwritten
-    juju-ssh ubuntu@$ip "sudo rm /etc/network/interfaces.d/eth0.cfg" 2>/dev/null
+    juju-ssh $image_user@$ip "sudo rm /etc/network/interfaces.d/eth0.cfg" 2>/dev/null
   fi
-  juju-ssh ubuntu@$ip "echo 'supersede routers $addr.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
-  juju-ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
+  juju-ssh $image_user@$ip "echo 'supersede routers $addr.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
+  juju-ssh $image_user@$ip "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $ip
 
   if [[ "$prepare_for_openstack" == '1' && "$SERIES" == 'trusty' ]]; then
@@ -176,9 +176,9 @@ function run_controller() {
     local lxd_mch=`juju-add-machine --series=$SERIES lxd:$mch 2>&1 | tail -1 | awk '{print $3}'`
     wait_for_machines $lxd_mch
     juju-remove-machine $lxd_mch
-    juju-ssh ubuntu@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge" 2>/dev/null
-    juju-ssh ubuntu@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-$IF1\"/m' /etc/default/lxd-bridge" 2>/dev/null
-    juju-ssh ubuntu@$ip "sudo reboot" 2>/dev/null || /bin/true
+    juju-ssh $image_user@$ip "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge" 2>/dev/null
+    juju-ssh $image_user@$ip "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-$IF1\"/m' /etc/default/lxd-bridge" 2>/dev/null
+    juju-ssh $image_user@$ip "sudo reboot" 2>/dev/null || /bin/true
     wait_kvm_machine $ip
   fi
 }
@@ -218,9 +218,9 @@ echo "INFO: Applying hosts file and hostnames $(date)"
 for m in ${!machines[@]} ; do
   ip=${machines[$m]}
   echo "INFO: Apply $m for $ip"
-  juju-scp $WORKSPACE/hosts ubuntu@$ip:hosts
-  juju-ssh ubuntu@$ip "sudo bash -c 'echo $m > /etc/hostname ; hostname $m'" 2>/dev/null
-  juju-ssh ubuntu@$ip 'sudo bash -c "cat ./hosts >> /etc/hosts"' 2>/dev/null
+  juju-scp $WORKSPACE/hosts $image_user@$ip:hosts
+  juju-ssh $image_user@$ip "sudo bash -c 'echo $m > /etc/hostname ; hostname $m'" 2>/dev/null
+  juju-ssh $image_user@$ip 'sudo bash -c "cat ./hosts >> /etc/hosts"' 2>/dev/null
 done
 rm $WORKSPACE/hosts
 
