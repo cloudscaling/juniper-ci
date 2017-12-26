@@ -1,7 +1,0 @@
-options:
-  service-plugins:
-    type: string
-    description: |
-      Neutron's service plugins.
-      This is default value from neutron-charm plus bgp plugin. We need to redefine it cause neutron-api charm doesn't allow to pass just additional plugins
-    default: "neutron_dynamic_routing.services.bgp.bgp_plugin.BgpPlugin,neutron.services.l3_router.l3_router_plugin.L3RouterPlugin,neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPluginv2,neutron.services.vpn.plugin.VPNDriverPlugin"

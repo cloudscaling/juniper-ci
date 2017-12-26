@@ -19,6 +19,7 @@ function wait_absence_status_for_services() {
   local iter=0
   while juju-status | grep -P $check_str &>/dev/null
   do
+    juju-status-tabular &> $WORKSPACE/logs/juju-status-latest
     echo "Waiting for all service to be active - $iter/$max_iter"
     if ((iter >= max_iter)); then
       echo "ERROR: Services didn't up."
@@ -49,6 +50,7 @@ function wait_for_removed() {
   local iter=0
   while juju-status | grep "$check_str/" &>/dev/null
   do
+    juju-status-tabular &> $WORKSPACE/logs/juju-status-latest
     echo "Waiting for all units to be removed - $iter/$max_iter"
     if ((iter >= max_iter)); then
       echo "ERROR: Units didn't removed."
@@ -69,6 +71,7 @@ function wait_for_machines() {
   # wait for machines
   sleep 30
   for machine in $@ ; do
+    juju-status-tabular &> $WORKSPACE/logs/juju-status-latest
     echo "Waiting for machine: $machine"
     local fail=0
     while ! output=`juju-ssh $machine "sudo apt-get install -fy joe mc" 2>/dev/null` ; do

@@ -545,11 +545,9 @@ if (( CONT_COUNT < 2 )) ; then
   echo "  EnableGalera: false" >> $misc_opts
 fi
 
-if [[ "$OPENSTACK_VERSION" != 'newton' ]] ; then
-  cat <<EOF >> $misc_opts
+cat <<EOF >> $misc_opts
   ContrailControlRNDCSecret: sHE1SM8nsySdgsoRxwARtA==
 EOF
-fi
 
 if [[ "$DPDK" == 'true' ]] ; then
   cat <<EOF >> $misc_opts

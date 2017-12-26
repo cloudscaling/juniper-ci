@@ -4,16 +4,9 @@
 
 export LIBVIRT_DEFAULT_URI=qemu:///system
 virsh_cmd="virsh"
-
-# base image for VMs is a ubuntu cloud image with:
-# 1) removed cloud-init (echo 'datasource_list: [ None ]' | sudo -s tee /etc/cloud/cloud.cfg.d/90_dpkg.cfg ; sudo apt-get purge cloud-init ; sudo rm -rf /etc/cloud/; sudo rm -rf /var/lib/cloud/ )
-# 2) added jenkins's key to authorized keys for ubuntu user
-# 3) added password '123' for user ubuntu
-# 4) root disk resized to 60G ( truncate -s 60G temp.raw ; virt-resize --expand /dev/vda1 ubuntu-xenial.qcow2 temp.raw ; qemu-img convert -O qcow2 temp.raw ubuntu-xenial-new.qcow2 )
-# step 1-3 can be done for mounted image
-BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-"ubuntu-$SERIES.qcow2"}
-BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
-BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
+# please see prepare-image.sh with instructions how to create these images
+base_image="/var/lib/libvirt/images/ubuntu-$SERIES.qcow2"
+image_user="root"
 
 # KVM helpers
 
