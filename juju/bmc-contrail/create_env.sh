@@ -96,7 +96,7 @@ run_machine ${job_prefix}-cont 1 2048 $cont_idx $cont_ip
 wait_kvm_machine $cont_ip
 
 echo "INFO: bootstraping juju controller $(date)"
-juju bootstrap manual/$cont_ip $juju_controller_name
+juju bootstrap manual/$image_user@$cont_ip $juju_controller_name
 
 declare -A machines
 
