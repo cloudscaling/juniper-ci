@@ -2,7 +2,6 @@
     name: contrail-{project}
     description: "Deploys Kubernetes plus Contrail in AIO mode: {project}"
     defaults: global
-    node: '{slavenode}'
     properties:
       - build-discarder
     parameters:
@@ -23,6 +22,13 @@
           choices:
             - ocata
             - newton
+      - node:
+          name: SLAVE_NAME
+          description: "Select slave: one for specific node or multiple for any node."
+          default-slaves: '{obj:slavenode}'
+          allowed-slaves: '{obj:slavenode}'
+          ignore-offline-nodes: false
+          allowed-multiselect: true
     scm:
       - juniper-ci
       - contrail-build-poc
@@ -52,19 +58,28 @@
     name: contrail-containers
     project:
       - helm-aws-centos:
-          slavenode: master
+          slavenode:
+            - master
           contrail_version: 4.1.0.0-6
       - helm-aws-centos-all:
-          slavenode: master
+          slavenode:
+            - master
           contrail_version: 4.2.0.0-1
       - k8s-server-centos:
-          slavenode: slave01
+          slavenode:
+            - slave01
+            - slave02
+            - slave03
           contrail_version: 4.1.0.0-6
       - compose-server-centos:
-          slavenode: slave01
+          slavenode:
+            - slave01
+            - slave02
+            - slave03
           contrail_version: 4.1.0.0-6
       - kolla-aws-centos:
-          slavenode: master
+          slavenode:
+            - master
           contrail_version: 4.1.0.0-6
     jobs:
       - 'contrail-{project}'
