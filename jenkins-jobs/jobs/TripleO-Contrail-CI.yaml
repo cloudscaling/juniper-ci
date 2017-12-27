@@ -87,7 +87,7 @@
           description: Deploy vRouter in TSN mode or not.
           default: false
       - bool:
-          name: SR-IOV
+          name: SRIOV
           description: Deploy with SR-IOV configuration or not.
           default: false
       - choice:
@@ -158,6 +158,9 @@
           fi
           if [[ "$TSN" == 'true' ]] ; then
             desc+=' tsn'
+          fi
+          if [[ "$SRIOV" == 'true' ]] ; then
+            desc+=' sriov'
           fi
           desc+=' $AAA_MODE'
           if [[ "$AAA_MODE_ANALYTICS" != 'auto' ]] ; then

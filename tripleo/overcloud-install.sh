@@ -607,7 +607,7 @@ openstack overcloud deploy --templates tripleo-heat-templates/ \
   -e $contrail_net_file \
   -e $contrail_vip_env \
   -e $misc_opts \
-  $multi_nic_opts $ha_opts
+  $multi_nic_opts $ha_opts $sriov_opts
 
 errors=$?
 
