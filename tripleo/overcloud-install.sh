@@ -582,9 +582,9 @@ sriov_opts=''
 if [[ "$SRIOV" == 'true' ]] ; then
   sriov_file='tripleo-heat-templates/environments/contrail/contrail-sriov.yaml'
   cat <<EOF >> $sriov_file
-  NeutronSriovNumVFs: "eth0:1"
+  NeutronSriovNumVFs: "ens3:1"
   NovaPCIPassthrough:
-    - devname: "eth0"
+    - devname: "ens3"
       physical_network: "datacentre"
 EOF
   sriov_opts+=" -e $sriov_file"
