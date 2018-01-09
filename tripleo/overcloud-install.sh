@@ -580,7 +580,14 @@ fi
 
 sriov_opts=''
 if [[ "$SRIOV" == 'true' ]] ; then
-  sriov_opts+=' -e tripleo-heat-templates/environments/contrail/contrail-sriov.yaml'
+  sriov_file='tripleo-heat-templates/environments/contrail/contrail-sriov.yaml'
+  cat <<EOF >> $sriov_file
+  NeutronSriovNumVFs: "eth0:1"
+  NovaPCIPassthrough:
+    - devname: "eth0"
+      physical_network: "datacentre"
+EOF
+  sriov_opts+=" -e $sriov_file"
 fi
 
 if [[ "$DEPLOY" != '1' ]] ; then
