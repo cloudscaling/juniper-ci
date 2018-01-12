@@ -86,6 +86,10 @@
           name: TSN
           description: Deploy vRouter in TSN mode or not.
           default: false
+      - bool:
+          name: SRIOV
+          description: Deploy with SR-IOV configuration or not.
+          default: false
       - choice:
           name: CONTROLLER_COUNT
           description: "Count of OS controllers to deploy"
@@ -154,6 +158,9 @@
           fi
           if [[ "$TSN" == 'true' ]] ; then
             desc+=' tsn'
+          fi
+          if [[ "$SRIOV" == 'true' ]] ; then
+            desc+=' sriov'
           fi
           desc+=' $AAA_MODE'
           if [[ "$AAA_MODE_ANALYTICS" != 'auto' ]] ; then

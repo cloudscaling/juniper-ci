@@ -63,7 +63,7 @@ function run_machine() {
     --noautoconsole \
     --graphics vnc,listen=0.0.0.0 \
     --network network=$nname,model=$net_driver,mac=$mac_base:$mac_suffix \
-    --cpu SandyBridge,+vmx,+ssse3 \
+    --cpu host \
     --boot hd \
     $params \
     --dry-run --print-xml > /tmp/oc-$name.xml
@@ -98,8 +98,6 @@ wait_kvm_machine $image_user@$cont_ip
 echo "INFO: bootstraping juju controller $(date)"
 juju bootstrap manual/$image_user@$cont_ip $juju_controller_name
 
-declare -A machines
-
 function run_cloud_machine() {
   local name=${job_prefix}-$1
   local mac_suffix=$2
@@ -112,9 +110,10 @@ function run_cloud_machine() {
   wait_kvm_machine $image_user@$ip
   echo "INFO: adding machine $name to juju controller $(date)"
   juju-add-machine ssh:$image_user@$ip
-  machines["$name"]=$ip
   mch=`get_machine_by_ip $ip`
   wait_kvm_machine $mch juju-ssh
+  # apply hostname for machine
+  juju-ssh $mch "sudo bash -c 'echo $name > /etc/hostname ; hostname $name'" 2>/dev/null
   # after first boot we must remove cloud-init
   juju-ssh $mch "sudo rm -rf /etc/systemd/system/cloud-init.target.wants /lib/systemd/system/cloud*"
   echo "INFO: machine $name (juju machine: $mch) is ready $(date)"
@@ -213,23 +212,6 @@ case "$DEPLOY_MODE" in
 esac
 
 wait_for_all_machines
-
-echo "INFO: creating hosts file $(date)"
-#truncate -s 0 $WORKSPACE/hosts
-#for m in ${!machines[@]} ; do
-#  echo "${machines[$m]}    $m" >> $WORKSPACE/hosts
-#done
-#cat $WORKSPACE/hosts
-echo "INFO: Applying hosts file and hostnames $(date)"
-for m in ${!machines[@]} ; do
-  ip=${machines[$m]}
-  mch=`get_machine_by_ip $ip`
-  echo "INFO: Apply $m for $mch"
-  #juju-scp $WORKSPACE/hosts $mch:hosts
-  juju-ssh $mch "sudo bash -c 'echo $m > /etc/hostname ; hostname $m'" 2>/dev/null
-  #juju-ssh $mch 'sudo bash -c "cat ./hosts >> /etc/hosts"' 2>/dev/null
-done
-#rm -f $WORKSPACE/hosts
 
 echo "INFO: Environment created $(date)"
 

@@ -26,6 +26,11 @@ if [[ -z "$TSN" ]] ; then
   exit 1
 fi
 
+if [[ -z "$SRIOV" ]] ; then
+  echo "SRIOV is expected (e.g. export SRIOV=true/false)"
+  exit 1
+fi
+
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   if [[ -z "$RHEL_ACCOUNT_FILE" ]] ; then
     echo "ERROR: for rhel environemnt the environment variable RHEL_ACCOUNT_FILE is required"

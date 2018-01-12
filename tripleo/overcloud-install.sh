@@ -23,6 +23,11 @@ if [[ -z "$TSN" ]] ; then
   exit 1
 fi
 
+if [[ -z "$SRIOV" ]] ; then
+  echo "SRIOV is expected (e.g. export SRIOV=true/false)"
+  exit 1
+fi
+
 if [[ -z "$AAA_MODE" ]] ; then
   echo "AAA_MODE is expected (e.g. export AAA_MODE=rbac/cloud-admin/no-auth)"
   exit 1
@@ -573,6 +578,18 @@ if (( CONT_COUNT > 1 )) ; then
   ha_opts="-e tripleo-heat-templates/environments/puppet-pacemaker.yaml"
 fi
 
+sriov_opts=''
+if [[ "$SRIOV" == 'true' ]] ; then
+  sriov_file='tripleo-heat-templates/environments/contrail/contrail-sriov.yaml'
+  cat <<EOF >> $sriov_file
+  NeutronSriovNumVFs: "ens3:1"
+  NovaPCIPassthrough:
+    - devname: "ens3"
+      physical_network: "datacentre"
+EOF
+  sriov_opts+=" -e $sriov_file"
+fi
+
 if [[ "$DEPLOY" != '1' ]] ; then
   # deploy overcloud. if you do it manually then I recommend to do it in screen.
   echo "openstack overcloud deploy --templates tripleo-heat-templates/ \
@@ -582,7 +599,7 @@ if [[ "$DEPLOY" != '1' ]] ; then
       -e $contrail_net_file \
       -e $contrail_vip_env \
       -e $misc_opts \
-      $multi_nic_opts $ha_opts"
+      $multi_nic_opts $ha_opts $sriov_opts"
   echo "Add '-e templates/firstboot/firstboot.yaml' if you use swap"
   exit
 fi
@@ -597,7 +614,7 @@ openstack overcloud deploy --templates tripleo-heat-templates/ \
   -e $contrail_net_file \
   -e $contrail_vip_env \
   -e $misc_opts \
-  $multi_nic_opts $ha_opts
+  $multi_nic_opts $ha_opts $sriov_opts
 
 errors=$?
 
