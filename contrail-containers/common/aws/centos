@@ -4,3 +4,4 @@ export SSH_USER=ec2-user
 # us-east-2 : ami-a0fddfc5
 # us-west-2 : ami-82bd4ffa
 export IMAGE_ID=ami-82bd4ffa
+export IFCONFIG_PATH=/usr/sbin

@@ -4,3 +4,4 @@ export SSH_USER=ubuntu
 # us-east-2 : ami-336b4456
 # us-west-2 : ami-0a00ce72
 export IMAGE_ID=ami-0a00ce72
+export IFCONFIG_PATH=/sbin
