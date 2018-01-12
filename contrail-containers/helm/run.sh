@@ -50,6 +50,8 @@ function catch_errors() {
   exit $exit_code
 }
 
+#TODO: add into job-parameters
+export LINUX_DISTR=${LINUX_DISTR:-'centos'}
 export NET_ADDR=${NET_ADDR:-"192.168.220.0"}
 $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
@@ -68,14 +70,14 @@ if [[ "$BUILD_TARGET" == 'containers' ]] ; then
 else
   # but in case full build time is not so critical...
   set -o pipefail
-  $SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION timeout -s 9 180m ./build-${BUILD_TARGET}.sh" |& tee $WORKSPACE/logs/build.log
+  $SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION LINUX_DISTR=$LINUX_DISTR timeout -s 9 180m ./build-${BUILD_TARGET}.sh" |& tee $WORKSPACE/logs/build.log
   set +o pipefail
 fi
 
 # ceph.repo file is needed ONLY fow centos on aws.
 $SCP "$my_dir/__ceph.repo" $SSH_DEST:ceph.repo
 $SCP "$my_dir/__run-gate.sh" $SSH_DEST:run-gate.sh
-timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION ./run-gate.sh $public_ip_build"
+timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION LINUX_DISTR=$LINUX_DISTR ./run-gate.sh $public_ip_build"
 
 trap - ERR
 save_logs
