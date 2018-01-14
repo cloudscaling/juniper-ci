@@ -55,7 +55,7 @@
             export BUILD_TARGET="containers"
           fi
           if [[ "$LINUX_DISTR" == 'same_as_host_os' ]] ; then
-            export LINUX_DISTR="$HOST"
+            export LINUX_DISTR="$ENVIRONMENT_OS"
           fi
           env|sort
           ./juniper-ci/contrail-containers/$WAY/run.sh
