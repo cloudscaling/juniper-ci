@@ -72,6 +72,10 @@
           slavenode:
             - master
           contrail_version: 4.1.0.0-6
+      - helm-aws-centos:
+          slavenode:
+            - master
+          contrail_version: 4.1.0.0-6
 #      - helm-aws-centos-all:
 #          slavenode:
 #            - master
