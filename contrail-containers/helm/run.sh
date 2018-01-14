@@ -50,9 +50,6 @@ function catch_errors() {
   exit $exit_code
 }
 
-#TODO: add into job-parameters
-export LINUX_DISTR=${LINUX_DISTR:-'centos'}
-export NET_ADDR=${NET_ADDR:-"192.168.220.0"}
 $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
 

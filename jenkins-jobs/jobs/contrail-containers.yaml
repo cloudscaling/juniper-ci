@@ -23,6 +23,13 @@
           choices:
             - ocata
             - newton
+      - choice:
+          name: LINUX_DISTR
+          description: OS to build containers for
+          choices:
+            - same_as_host_os
+            - centos
+            - ubuntu
       - node:
           name: SLAVE_NAME
           description: "Select slave: one for specific node or multiple for any node."
@@ -46,6 +53,9 @@
           export BUILD_TARGET=$(echo {project} | cut -d '-' -f 4)
           if [[ -z "$BUILD_TARGET" ]] ; then
             export BUILD_TARGET="containers"
+          fi
+          if [[ "$LINUX_DISTR" == 'same_as_host_os' ]] ; then
+            export LINUX_DISTR="$HOST"
           fi
           env|sort
           ./juniper-ci/contrail-containers/$WAY/run.sh
