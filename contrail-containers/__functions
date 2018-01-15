@@ -3,9 +3,9 @@
 function prepare_build_machine() {
   if [[ -x $(command -v apt-get 2>/dev/null) ]]; then
     echo "INFO: Preparing Ubuntu host to build containers  $(date)"
-    sudo apt-get -y update
-    sudo DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade
-    sudo apt-get install -y --no-install-recommends mc git wget ntp
+    sudo apt-get -y update &>>$HOME/apt.log
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$HOME/apt.log
+    sudo apt-get install -y --no-install-recommends mc git wget ntp &>>$HOME/apt.log
   elif [[ -x $(command -v yum 2>/dev/null) ]]; then
     echo "INFO: Preparing CentOS host to build containers  $(date)"
     sudo yum install -y epel-release

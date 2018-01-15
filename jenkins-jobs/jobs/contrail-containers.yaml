@@ -23,6 +23,13 @@
           choices:
             - ocata
             - newton
+      - choice:
+          name: LINUX_DISTR
+          description: OS to build containers for
+          choices:
+            - same_as_host_os
+            - centos
+            - ubuntu
       - node:
           name: SLAVE_NAME
           description: "Select slave: one for specific node or multiple for any node."
@@ -47,6 +54,13 @@
           if [[ -z "$BUILD_TARGET" ]] ; then
             export BUILD_TARGET="containers"
           fi
+          if [[ "$LINUX_DISTR" == 'same_as_host_os' ]] ; then
+            export LINUX_DISTR="$ENVIRONMENT_OS"
+          fi
+          if [[ "$LINUX_DISTR" == 'ubuntu' ]] ; then
+            # hardcode it for now
+            export ENVIRONMENT_OS_VERSION='xenial'
+          fi
           env|sort
           ./juniper-ci/contrail-containers/$WAY/run.sh
     publishers:
@@ -61,7 +75,11 @@
       - helm-aws-ubuntu:
           slavenode:
             - master
-          contrail_version: 4.1.0.0-6
+          contrail_version: 4.1.0.0-8
+      - helm-aws-centos:
+          slavenode:
+            - master
+          contrail_version: 4.1.0.0-8
 #      - helm-aws-centos-all:
 #          slavenode:
 #            - master
@@ -71,16 +89,28 @@
             - slave01
             - slave02
             - slave03
-          contrail_version: 4.1.0.0-6
+          contrail_version: 4.1.0.0-8
+      - k8s-server-ubuntu:
+          slavenode:
+            - slave01
+            - slave02
+            - slave03
+          contrail_version: 4.1.0.0-8
       - compose-server-centos:
           slavenode:
             - slave01
             - slave02
             - slave03
-          contrail_version: 4.1.0.0-6
+          contrail_version: 4.1.0.0-8
+      - compose-server-ubuntu:
+          slavenode:
+            - slave01
+            - slave02
+            - slave03
+          contrail_version: 4.1.0.0-8
       - kolla-aws-centos:
           slavenode:
             - master
-          contrail_version: 4.1.0.0-6
+          contrail_version: 4.1.0.0-8
     jobs:
       - 'contrail-{project}'

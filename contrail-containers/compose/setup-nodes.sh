@@ -60,6 +60,7 @@ cat <<EOM > ./inventory/group_vars/container_hosts.yml
 CONTAINER_REGISTRY: ${DOCKER_REGISTRY_ADDR}:5000
 contrail_configuration:
   OPENSTACK_VERSION: $OPENSTACK_VERSION
+  LINUX_DISTR: $LINUX_DISTR
   CONTRAIL_VERSION: $CONTRAIL_VERSION
   CONTROLLER_NODES: $CONTROLLER_NODES
   CLOUD_ORCHESTRATOR: kubernetes
@@ -93,8 +94,12 @@ EOM
 cat ./inventory/group_vars/all.yml
 popd
 
-yum install -y epel-release
-yum install -y ansible docker docker-compose
+if [[ -x \$(command -v yum 2>/dev/null) ]] ; then
+  yum install -y epel-release
+  yum install -y ansible docker docker-compose
+else
+  apt-get install -y ansible docker docker-compose
+fi
 
 cat <<EOM > /etc/docker/daemon.json
  {
