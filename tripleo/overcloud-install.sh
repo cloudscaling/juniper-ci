@@ -77,6 +77,7 @@ fi
 
 ((prov_ip_addr=176+NUM*10))
 prov_ip="192.168.${prov_ip_addr}.2"
+fixed_vip="192.168.${prov_ip_addr}.200"
 
 ((addr=BASE_ADDR+NUM*10))
 virt_host_ip="192.168.${addr}.1"
@@ -522,6 +523,7 @@ fi
 
 cat <<EOF >> $misc_opts
 parameter_defaults:
+  InternalApiVirtualFixedIPs: [{'ip_address':'$fixed_vip'}]
   CloudDomain: $CLOUD_DOMAIN_NAME
   GlanceBackend: file
   RabbitUserName: contrail
@@ -590,6 +592,44 @@ EOF
   sriov_opts+=" -e $sriov_file"
 fi
 
+ssl_opts=''
+if [[ "$TLS" == 'true' ]] ; then
+
+  # prepare for certificates creation
+  sudo touch /etc/pki/CA/index.txt
+  echo 1000 | sudo tee /etc/pki/CA/serial
+
+  # create root cert
+  openssl genrsa -out ca.key.pem 4096
+  openssl req -key ca.key.pem -new -x509 -days 365 -extensions v3_ca -out ca.crt.pem \
+    -subj "/C=RU/ST=Moscow/L=Moscow/O=ProgmaticLab/OU=TestCA/CN=${prov_ip}"
+
+  # create server certificate
+  openssl genrsa -out server.key.pem 2048
+  openssl req -key server.key.pem -new -out server.csr.pem \
+    -subj "/C=RU/ST=Moscow/L=Moscow/O=ProgmaticLab/OU=TestServer/CN=${fixed_vip}"
+  yes | sudo openssl ca -extensions v3_req -days 365 -in server.csr.pem \
+    -out server.crt.pem -cert ca.crt.pem -keyfile ca.key.pem
+  sudo chown stack:stack server.crt.pem
+
+  ssl_opts+=' -e enable-tls.yaml'
+  ssl_opts+=' -e tripleo-heat-templates/environments/ssl/tls-endpoints-public-ip.yaml'
+  cat <<EOF > enable-tls.yaml
+resource_registry:
+  OS::TripleO::NodeTLSData: tripleo-heat-templates/puppet/extraconfig/tls/tls-cert-inject.yaml
+  OS::TripleO::NodeTLSCAData: tripleo-heat-templates/puppet/extraconfig/tls/ca-inject.yaml
+parameter_defaults:
+  ContrailSslEnabled: true
+  SSLIntermediateCertificate: ''
+  SSLCertificate: |
+EOF
+  while read l ; do echo "    $l" ; done < server.crt.pem >> enable-tls.yaml
+  echo "  SSLKey: |" >> enable-tls.yaml
+  while read l ; do echo "    $l" ; done < server.key.pem >> enable-tls.yaml
+  echo "  SSLRootCertificate: |" >> enable-tls.yaml
+  while read l ; do echo "    $l" ; done < ca.crt.pem >> enable-tls.yaml
+fi
+
 if [[ "$DEPLOY" != '1' ]] ; then
   # deploy overcloud. if you do it manually then I recommend to do it in screen.
   echo "openstack overcloud deploy --templates tripleo-heat-templates/ \
@@ -599,7 +639,7 @@ if [[ "$DEPLOY" != '1' ]] ; then
       -e $contrail_net_file \
       -e $contrail_vip_env \
       -e $misc_opts \
-      $multi_nic_opts $ha_opts $sriov_opts"
+      $ssl_opts $multi_nic_opts $ha_opts $sriov_opts"
   echo "Add '-e templates/firstboot/firstboot.yaml' if you use swap"
   exit
 fi
@@ -614,7 +654,7 @@ openstack overcloud deploy --templates tripleo-heat-templates/ \
   -e $contrail_net_file \
   -e $contrail_vip_env \
   -e $misc_opts \
-  $multi_nic_opts $ha_opts $sriov_opts
+  $ssl_opts $multi_nic_opts $ha_opts $sriov_opts
 
 errors=$?
 

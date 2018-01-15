@@ -79,6 +79,10 @@
             - 'rbac'
             - 'no-auth'
       - bool:
+          name: TLS
+          description: Deploy with TLS enabled (for all components).
+          default: false
+      - bool:
           name: DPDK
           description: Deploy vRouter in DPDK mode or not.
           default: false
@@ -161,6 +165,9 @@
           fi
           if [[ "$SRIOV" == 'true' ]] ; then
             desc+=' sriov'
+          fi
+          if [[ "$TLS" == 'true' ]] ; then
+            desc+=' tls'
           fi
           desc+=' $AAA_MODE'
           if [[ "$AAA_MODE_ANALYTICS" != 'auto' ]] ; then
