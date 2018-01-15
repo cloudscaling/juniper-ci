@@ -105,6 +105,7 @@ if [[ -x \$(command -v yum 2>/dev/null) ]] ; then
   yum install -y epel-release
   yum install -y ansible docker docker-compose
 else
+  apt-get update -qqy
   apt-get install -y ansible docker docker-compose
 fi
 
