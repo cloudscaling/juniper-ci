@@ -16,6 +16,13 @@ export DOCKER_REGISTRY_ADDR=${controllers[0]}
 export CONTROLLER_NODES=$(echo ${controllers[@]} | sed 's/ /,/g')
 export AGENT_NODES=$(echo ${agents[@]} | sed 's/ /,/g')
 
+linux_image_tag="$LINUX_DISTR"
+if [[ "$linux_image_tag" == 'centos' ]] ; then
+  linux_image_tag='centos7'
+elif [[ "$linux_image_tag" == 'ubuntu' ]] ; then
+  linux_image_tag='ubuntu16'
+fi
+
 function assert_empty() {
   if [[ -z "${!1}" ]] ; then
     echo "ERROR: $1 is empty"
@@ -60,7 +67,7 @@ cat <<EOM > ./inventory/group_vars/container_hosts.yml
 CONTAINER_REGISTRY: ${DOCKER_REGISTRY_ADDR}:5000
 contrail_configuration:
   OPENSTACK_VERSION: $OPENSTACK_VERSION
-  LINUX_DISTR: $LINUX_DISTR
+  LINUX_DISTR: $linux_image_tag
   CONTRAIL_VERSION: $CONTRAIL_VERSION
   CONTROLLER_NODES: $CONTROLLER_NODES
   CLOUD_ORCHESTRATOR: kubernetes
