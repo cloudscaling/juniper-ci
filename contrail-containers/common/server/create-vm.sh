@@ -26,10 +26,10 @@ export DISK_SIZE=${DISK_SIZE:-'128'}
 export POOL_NAME=${POOL_NAME:-${WAY}}
 export NET_DRIVER=${NET_DRIVER:-'e1000'}
 export BRIDGE_NAME=${BRIDGE_NAME:-${WAY}}
-export SSH_USER=${SSH_USER:-'stack'}
+
+source "$my_dir/${ENVIRONMENT_OS}"
 
 VCPUS=4
-OS_VARIANT='rhel7'
 
 if [[ -z "$ENVIRONMENT_OS" ]] ; then
   echo "ENVIRONMENT_OS is expected (e.g. export ENVIRONMENT_OS=centos)"
@@ -78,15 +78,6 @@ function define_node() {
   local vol_name=$vm_name
   delete_volume $vol_name $POOL_NAME
   local vol_path=$(create_volume_from $vol_name $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
-
-  if [[ "$ENVIRONMENT_OS" == 'ubuntu' ]] ; then
-    if [[ ${ENVIRONMENT_OS_VERSION} == 'xenial' ]] ; then
-      OS_VARIANT='ubuntu16.04'
-    else
-      echo "Unsupported OS version: ${ENVIRONMENT_OS_VERSION}"
-      exit 1
-    fi
-  fi
   define_machine $vm_name $VCPUS $mem $OS_VARIANT $NET_NAME $vol_path $DISK_SIZE
 }
 
@@ -138,7 +129,7 @@ Host *
   UserKnownHostsFile=/dev/null
 EOM
 
-cat <<EOM > /home/stack/.ssh/config
+cat <<EOM > /home/$SSH_USER/.ssh/config
 Host *
   StrictHostKeyChecking no
   UserKnownHostsFile=/dev/null
