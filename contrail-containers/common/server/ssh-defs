@@ -1,6 +1,6 @@
 ENV_FILE="$WORKSPACE/cloudrc"
 
-source $ENV_FILE
+[ -f $ENV_FILE ] && source $ENV_FILE
 
 SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
 
