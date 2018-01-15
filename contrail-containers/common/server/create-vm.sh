@@ -80,7 +80,8 @@ function define_node() {
   local vol_path=$(create_volume_from $vol_name $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
 
   if [[ "$ENVIRONMENT_OS" == 'ubuntu' ]] ; then
-    OS_VARIANT='ubuntu'
+    # TODO: define this somewhere
+    OS_VARIANT='ubuntu16.04'
   fi
   define_machine $vm_name $VCPUS $mem $OS_VARIANT $NET_NAME $vol_path $DISK_SIZE
 }
