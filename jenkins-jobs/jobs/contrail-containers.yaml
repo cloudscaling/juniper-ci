@@ -86,6 +86,12 @@
             - slave02
             - slave03
           contrail_version: 4.1.0.0-8
+      - k8s-server-ubuntu:
+          slavenode:
+            - slave01
+            - slave02
+            - slave03
+          contrail_version: 4.1.0.0-8
       - compose-server-centos:
           slavenode:
             - slave01
