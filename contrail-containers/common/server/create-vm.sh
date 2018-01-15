@@ -129,11 +129,13 @@ Host *
   UserKnownHostsFile=/dev/null
 EOM
 
+if [[ "$SSH_USER" != 'root' ]] ; then
 cat <<EOM > /home/$SSH_USER/.ssh/config
 Host *
   StrictHostKeyChecking no
   UserKnownHostsFile=/dev/null
 EOM
+fi
 
 EOF
 done
