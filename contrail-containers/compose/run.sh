@@ -92,7 +92,7 @@ $SCP "$my_dir/__run-gate.sh" $SSH_DEST:run-gate.sh
 timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION ./run-gate.sh $public_ip_build"
 
 # Validate cluster
-# TODO: rename run-gate since now check of cluster is here
+# TODO: rename run-gate since now check of cluster is here. no. move this code to run-gate or another file.
 source "$my_dir/../common/check-functions"
 dest_to_check=$(echo ${SSH_DEST_WORKERS[@]:0:3} | sed 's/ /,/g')
 check_rabbitmq_cluster "$dest_to_check"

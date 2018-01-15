@@ -52,13 +52,11 @@ popd
 
 pushd ~/contrail-ansible-deployer
 cat <<EOM > ./inventory/hosts
-container_hosts:
-  hosts:
+[container_hosts]
 EOM
 for i in ${ips[@]} ; do
   cat <<EOM >> ./inventory/hosts
-    \${i}:
-      ansible_ssh_pass: qwe123QWE
+\${i} ansible_user: $SSH_USER
 EOM
 done
 cat ./inventory/hosts
@@ -106,7 +104,7 @@ if [[ -x \$(command -v yum 2>/dev/null) ]] ; then
   yum install -y ansible docker docker-compose
 else
   apt-get update -qqy
-  apt-get install -y ansible docker docker-compose
+  apt-get install -y ansible docker docker-compose sshpass
 fi
 
 cat <<EOM > /etc/docker/daemon.json

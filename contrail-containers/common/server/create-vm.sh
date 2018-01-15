@@ -107,6 +107,8 @@ for ip in ${ips[@]} ; do
   wait_ssh $ip
 done
 
+id_rsa="$(cat ~/.ssh/id_rsa)"
+id_rsa_pub="$(cat ~/.ssh/id_rsa_pub)"
 # prepare host name
 SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
 index=0
@@ -128,13 +130,21 @@ Host *
   StrictHostKeyChecking no
   UserKnownHostsFile=/dev/null
 EOM
+cat "$id_rsa" > /root/.ssh/id_rsa
+chmod 600 /root/.ssh/id_rsa
+cat "$id_rsa_pub" > /root/.ssh/id_rsa.pub
+chmod 600 /root/.ssh/id_rsa.pub
 
 if [[ "$SSH_USER" != 'root' ]] ; then
-cat <<EOM > /home/$SSH_USER/.ssh/config
+  cat <<EOM > /home/$SSH_USER/.ssh/config
 Host *
   StrictHostKeyChecking no
   UserKnownHostsFile=/dev/null
 EOM
+  cat "$id_rsa" > /home/$SSH_USER/.ssh/id_rsa
+  chmod 600 /home/$SSH_USER/.ssh/id_rsa
+  cat "$id_rsa_pub" > /home/$SSH_USER/.ssh/id_rsa.pub
+  chmod 600 /home/$SSH_USER/.ssh/id_rsa.pub
 fi
 
 EOF
