@@ -20,7 +20,7 @@ fi
 
 export ENV_FILE="$WORKSPACE/cloudrc"
 
-export VM_NAME=${VM_NAME:-"${WAY}-${ENVIRONMENT_OS}-${OPENSTACK_VERSION}"}
+export VM_NAME=${VM_NAME:-"$WAY-$ENVIRONMENT_OS-$OPENSTACK_VERSION"}
 export NET_NAME="${VM_NAME}"
 export DISK_SIZE=${DISK_SIZE:-'128'}
 export POOL_NAME=${POOL_NAME:-${WAY}}
@@ -80,8 +80,12 @@ function define_node() {
   local vol_path=$(create_volume_from $vol_name $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
 
   if [[ "$ENVIRONMENT_OS" == 'ubuntu' ]] ; then
-    # TODO: define this somewhere
-    OS_VARIANT='ubuntu16.04'
+    if [[ ${ENVIRONMENT_OS_VERSION} == 'xenial' ]] ; then
+      OS_VARIANT='ubuntu16.04'
+    else
+      echo "Unsupported OS version: ${ENVIRONMENT_OS_VERSION}"
+      exit 1
+    fi
   fi
   define_machine $vm_name $VCPUS $mem $OS_VARIANT $NET_NAME $vol_path $DISK_SIZE
 }
