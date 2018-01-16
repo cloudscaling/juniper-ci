@@ -104,6 +104,9 @@ if [[ -x \$(command -v yum 2>/dev/null) ]] ; then
   yum install -y ansible docker docker-compose
 else
   apt-get update -qqy
+  apt-get install -qqy software-properties-common
+  apt-add-repository -y ppa:ansible/ansible
+  apt-get update -qqy
   apt-get install -y ansible docker docker-compose sshpass
 fi
 
