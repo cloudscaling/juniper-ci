@@ -108,7 +108,7 @@ for ip in ${ips[@]} ; do
 done
 
 id_rsa="$(cat ~/.ssh/id_rsa)"
-id_rsa_pub="$(cat ~/.ssh/id_rsa_pub)"
+id_rsa_pub="$(cat ~/.ssh/id_rsa.pub)"
 # prepare host name
 SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
 index=0
