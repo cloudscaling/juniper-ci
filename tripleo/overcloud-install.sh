@@ -621,7 +621,11 @@ if [[ "$TLS" == 'true' ]] ; then
   sudo chown stack:stack keystone.crt.pem
 
   ssl_opts+=' -e enable-tls.yaml'
-  ssl_opts+=' -e tripleo-heat-templates/environments/ssl/tls-endpoints-public-ip.yaml'
+  if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
+    ssl_opts+=' -e tripleo-heat-templates/environments/tls-endpoints-public-ip.yaml'
+  else
+    ssl_opts+=' -e tripleo-heat-templates/environments/ssl/tls-endpoints-public-ip.yaml'
+  fi
   cat <<EOF > enable-tls.yaml
 resource_registry:
   OS::TripleO::NodeTLSData: tripleo-heat-templates/puppet/extraconfig/tls/tls-cert-inject.yaml
