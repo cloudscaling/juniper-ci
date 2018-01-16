@@ -124,9 +124,9 @@ Host *
   StrictHostKeyChecking no
   UserKnownHostsFile=/dev/null
 EOM
-cat "$id_rsa" > /root/.ssh/id_rsa
+echo "$id_rsa" > /root/.ssh/id_rsa
 chmod 600 /root/.ssh/id_rsa
-cat "$id_rsa_pub" > /root/.ssh/id_rsa.pub
+echo "$id_rsa_pub" > /root/.ssh/id_rsa.pub
 chmod 600 /root/.ssh/id_rsa.pub
 
 if [[ "$SSH_USER" != 'root' ]] ; then
