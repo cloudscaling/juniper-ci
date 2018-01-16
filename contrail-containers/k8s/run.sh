@@ -64,7 +64,10 @@ function catch_errors() {
   exit $exit_code
 }
 
-export NET_ADDR=${NET_ADDR:-"192.168.222.0"}
+# definition for baremetal deployment
+export JOB_RND=$((RANDOM % 100))
+export NET_ADDR=${NET_ADDR:-"10.1.$JOB_RND.0"}
+
 $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
 
