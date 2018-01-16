@@ -20,8 +20,10 @@ function save_logs() {
   for dest in ${SSH_DEST_WORKERS[@]} ; do
     # TODO: when repo be splitted to containers & build here will be containers repo only,
     # then build repo should be added to be copied below
-    $SCP "$my_dir/../__save-docker-logs.sh" ${dest}:save-docker-logs.sh
-    ssh -i $ssh_key_file $SSH_OPTS ${dest} "./save-docker-logs.sh"
+    timeout -s 9 20s $SCP "$my_dir/../__save-docker-logs.sh" ${dest}:save-docker-logs.sh
+    if [[ $? == 0 ]] ; then
+      ssh -i $ssh_key_file $SSH_OPTS ${dest} "./save-docker-logs.sh"
+    fi
   done
 
   # save env host specific logs
@@ -30,10 +32,10 @@ function save_logs() {
 
   # save to workspace
   for dest in ${SSH_DEST_WORKERS[@]} ; do
-    if ssh -i $ssh_key_file $SSH_OPTS ${dest} "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
+    if timeout -s 9 30s ssh -i $ssh_key_file $SSH_OPTS ${dest} "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
       local lname=$(echo $dest | cut -d '@' -f 2)
       mkdir -p "$WORKSPACE/logs/$lname"
-      $SCP ${dest}:logs.tar.gz "$WORKSPACE/logs/${lname}/logs.tar.gz"
+      timeout -s 9 10s $SCP ${dest}:logs.tar.gz "$WORKSPACE/logs/${lname}/logs.tar.gz"
       pushd "$WORKSPACE/logs/$lname"
       tar -xf logs.tar.gz
       rm logs.tar.gz
@@ -42,8 +44,8 @@ function save_logs() {
   done
 
   # save to workspace
-  if $SSH_BUILD "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
-    $SCP $SSH_DEST_BUILD:logs.tar.gz "$WORKSPACE/logs/build_logs.tar.gz"
+  if timeout -s 9 30s $SSH_BUILD "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
+    timeout -s 9 10s $SCP $SSH_DEST_BUILD:logs.tar.gz "$WORKSPACE/logs/build_logs.tar.gz"
     pushd "$WORKSPACE/logs"
     tar -xf build_logs.tar.gz
     rm build_logs.tar.gz

@@ -5,7 +5,7 @@ my_dir="$(dirname $my_file)"
 
 source "$my_dir/ssh-defs"
 
-cat <<EOF | $SSH
+cat <<EOF | timeout -s 9 60s $SSH
 set -x
 export PATH=\${PATH}:/usr/sbin
 mkdir -p ~/logs/kube-info
@@ -21,7 +21,7 @@ EOF
 for dest in ${SSH_DEST_WORKERS[@]} ; do
   # TODO: when repo be splitted to containers & build here will be containers repo only,
   # then build repo should be added to be copied below
-  cat <<EOF | ssh -i $ssh_key_file $SSH_OPTS ${dest}
+  cat <<EOF | timeout -s 9 60s ssh -i $ssh_key_file $SSH_OPTS ${dest}
 mkdir -p ~/logs/k8s
 for i in /var/log/contrail /var/log/containers /etc/cni ; do
   cp -r \$i ~/logs/k8s/ || true
