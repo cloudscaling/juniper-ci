@@ -20,12 +20,13 @@ fi
 
 export ENV_FILE="$WORKSPACE/cloudrc"
 
-export VM_NAME=${VM_NAME:-"$WAY-$ENVIRONMENT_OS-$OPENSTACK_VERSION"}
-export NET_NAME="${VM_NAME}"
+suffix=$RANDOM
+export VM_NAME=${VM_NAME:-"$WAY-$ENVIRONMENT_OS-$OPENSTACK_VERSION-$suffix"}
+export NET_NAME="$VM_NAME-$suffix"
 export DISK_SIZE=${DISK_SIZE:-'128'}
-export POOL_NAME=${POOL_NAME:-${WAY}}
+export POOL_NAME=${POOL_NAME:-$WAY-$ENVIRONMENT_OS-$suffix}
 export NET_DRIVER=${NET_DRIVER:-'e1000'}
-export BRIDGE_NAME=${BRIDGE_NAME:-${WAY}}
+export BRIDGE_NAME=${BRIDGE_NAME:-$WAY-$ENVIRONMENT_OS-$suffix}
 
 source "$my_dir/${ENVIRONMENT_OS}"
 

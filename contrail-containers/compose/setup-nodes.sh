@@ -56,7 +56,7 @@ cat <<EOM > ./inventory/hosts
 EOM
 for i in ${ips[@]} ; do
   cat <<EOM >> ./inventory/hosts
-\${i} ansible_user: $SSH_USER
+\${i} ansible_user=$SSH_USER
 EOM
 done
 cat ./inventory/hosts
