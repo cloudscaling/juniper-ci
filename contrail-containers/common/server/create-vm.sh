@@ -135,9 +135,9 @@ Host *
   StrictHostKeyChecking no
   UserKnownHostsFile=/dev/null
 EOM
-  cat "$id_rsa" > /home/$SSH_USER/.ssh/id_rsa
+  echo "$id_rsa" > /home/$SSH_USER/.ssh/id_rsa
   chmod 600 /home/$SSH_USER/.ssh/id_rsa
-  cat "$id_rsa_pub" > /home/$SSH_USER/.ssh/id_rsa.pub
+  echo "$id_rsa_pub" > /home/$SSH_USER/.ssh/id_rsa.pub
   chmod 600 /home/$SSH_USER/.ssh/id_rsa.pub
 fi
 
