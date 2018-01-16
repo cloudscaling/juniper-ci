@@ -604,13 +604,21 @@ if [[ "$TLS" == 'true' ]] ; then
   openssl req -key ca.key.pem -new -x509 -days 365 -extensions v3_ca -out ca.crt.pem \
     -subj "/C=RU/ST=Moscow/L=Moscow/O=ProgmaticLab/OU=TestCA/CN=${prov_ip}"
 
-  # create server certificate
+  # create haproxy server certificate (VIPs)
   openssl genrsa -out server.key.pem 2048
   openssl req -key server.key.pem -new -out server.csr.pem \
     -subj "/C=RU/ST=Moscow/L=Moscow/O=ProgmaticLab/OU=TestServer/CN=${fixed_vip}"
   yes | sudo openssl ca -extensions v3_req -days 365 -in server.csr.pem \
     -out server.crt.pem -cert ca.crt.pem -keyfile ca.key.pem
   sudo chown stack:stack server.crt.pem
+
+  # create keystone certificate
+  openssl genrsa -out keystone.key.pem 2048
+  openssl req -key keystone.key.pem -new -out keystone.csr.pem \
+    -subj "/C=RU/ST=Moscow/L=Moscow/O=ProgmaticLab/OU=TestKeystone/CN=${fixed_vip}"
+  yes | sudo openssl ca -extensions v3_req -days 365 -in keystone.csr.pem \
+    -out keystone.crt.pem -cert ca.crt.pem -keyfile ca.key.pem
+  sudo chown stack:stack keystone.crt.pem
 
   ssl_opts+=' -e enable-tls.yaml'
   ssl_opts+=' -e tripleo-heat-templates/environments/ssl/tls-endpoints-public-ip.yaml'
@@ -619,6 +627,7 @@ resource_registry:
   OS::TripleO::NodeTLSData: tripleo-heat-templates/puppet/extraconfig/tls/tls-cert-inject.yaml
   OS::TripleO::NodeTLSCAData: tripleo-heat-templates/puppet/extraconfig/tls/ca-inject.yaml
 parameter_defaults:
+  RabbitClientUseSSL: true
   ContrailSslEnabled: true
   SSLIntermediateCertificate: ''
   SSLCertificate: |
@@ -629,6 +638,11 @@ EOF
   while read l ; do echo "    $l" ; done < server.key.pem >> enable-tls.yaml
   echo "  SSLRootCertificate: |" >> enable-tls.yaml
   while read l ; do echo "    $l" ; done < ca.crt.pem >> enable-tls.yaml
+  echo "  KeystoneSSLCertificate: |" >> enable-tls.yaml
+  sed '/BEGIN CERTIFICATE/,/END CERTIFICATE/!d' keystone.crt.pem > clean.keystone.crt.pem
+  while read l ; do echo "    $l" ; done < clean.keystone.crt.pem >> enable-tls.yaml
+  echo "  KeystoneSSLCertificateKey: |" >> enable-tls.yaml
+  while read l ; do echo "    $l" ; done < keystone.key.pem >> enable-tls.yaml
 fi
 
 if [[ "$DEPLOY" != '1' ]] ; then
