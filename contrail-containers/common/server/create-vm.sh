@@ -20,13 +20,7 @@ fi
 
 export ENV_FILE="$WORKSPACE/cloudrc"
 
-export VM_NAME=${VM_NAME:-"$WAY-$ENVIRONMENT_OS-$OPENSTACK_VERSION"}
-export NET_NAME="${VM_NAME}"
-export DISK_SIZE=${DISK_SIZE:-'128'}
-export POOL_NAME=${POOL_NAME:-${WAY}}
-export NET_DRIVER=${NET_DRIVER:-'e1000'}
-export BRIDGE_NAME=${BRIDGE_NAME:-${WAY}}
-
+source "$my_dir/definitions"
 source "$my_dir/${ENVIRONMENT_OS}"
 
 VCPUS=4
@@ -107,6 +101,8 @@ for ip in ${ips[@]} ; do
   wait_ssh $ip
 done
 
+id_rsa="$(cat ~/.ssh/id_rsa)"
+id_rsa_pub="$(cat ~/.ssh/id_rsa.pub)"
 # prepare host name
 SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
 index=0
@@ -128,13 +124,21 @@ Host *
   StrictHostKeyChecking no
   UserKnownHostsFile=/dev/null
 EOM
+echo "$id_rsa" > /root/.ssh/id_rsa
+chmod 600 /root/.ssh/id_rsa
+echo "$id_rsa_pub" > /root/.ssh/id_rsa.pub
+chmod 600 /root/.ssh/id_rsa.pub
 
 if [[ "$SSH_USER" != 'root' ]] ; then
-cat <<EOM > /home/$SSH_USER/.ssh/config
+  cat <<EOM > /home/$SSH_USER/.ssh/config
 Host *
   StrictHostKeyChecking no
   UserKnownHostsFile=/dev/null
 EOM
+  echo "$id_rsa" > /home/$SSH_USER/.ssh/id_rsa
+  chmod 600 /home/$SSH_USER/.ssh/id_rsa
+  echo "$id_rsa_pub" > /home/$SSH_USER/.ssh/id_rsa.pub
+  chmod 600 /home/$SSH_USER/.ssh/id_rsa.pub
 fi
 
 EOF

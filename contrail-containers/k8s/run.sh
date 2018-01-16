@@ -13,6 +13,10 @@ fi
 rm -rf "$WORKSPACE/logs"
 mkdir -p "$WORKSPACE/logs"
 
+# definition for baremetal deployment
+export JOB_RND=$((RANDOM % 100))
+export NET_ADDR=${NET_ADDR:-"10.3.$JOB_RND.0"}
+
 function save_logs() {
   source "$my_dir/../common/${HOST}/ssh-defs"
   set +e
@@ -64,7 +68,6 @@ function catch_errors() {
   exit $exit_code
 }
 
-export NET_ADDR=${NET_ADDR:-"192.168.222.0"}
 $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
 

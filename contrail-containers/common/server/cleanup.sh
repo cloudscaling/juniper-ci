@@ -16,10 +16,7 @@ fi
 export ENVIRONMENT_OS=${1:-${ENVIRONMENT_OS:-''}}
 export OPENSTACK_VERSION=${2:-${OPENSTACK_VERSION:-''}}
 
-export VM_NAME=${VM_NAME:-"$WAY-$ENVIRONMENT_OS-$OPENSTACK_VERSION"}
-export NET_NAME="${VM_NAME}"
-export POOL_NAME=${POOL_NAME:-${WAY}}
-
+source "$my_dir/definitions"
 source "$my_dir/../../../common/virsh/functions"
 
 NODES=( "${VM_NAME}_1" "${VM_NAME}_2" "${VM_NAME}_3" "${VM_NAME}_4" )

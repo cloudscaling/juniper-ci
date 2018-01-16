@@ -467,7 +467,7 @@ function wait_dhcp() {
     filter+=".*${host}"
   fi
   while true ; do
-    local ips=( $(virsh net-dhcp-leases $net | sed 1,2d | grep "$filter" | awk '{print($5)}' | cut -d '/' -f 1) )
+    local ips=( `virsh net-dhcp-leases $net | sed 1,2d | grep "$filter" | awk '{print($5)}' | cut -d '/' -f 1` )
     if (( ${#ips[@]} == count )) ; then
       echo "${ips[@]}"
       break

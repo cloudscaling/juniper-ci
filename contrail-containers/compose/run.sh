@@ -13,6 +13,10 @@ fi
 rm -rf "$WORKSPACE/logs"
 mkdir -p "$WORKSPACE/logs"
 
+# definition for baremetal deployment
+export JOB_RND=$((RANDOM % 100))
+export NET_ADDR=${NET_ADDR:-"10.1.$JOB_RND.0"}
+
 function save_logs() {
   source "$my_dir/../common/${HOST}/ssh-defs"
   set +e
@@ -20,8 +24,10 @@ function save_logs() {
   for dest in ${SSH_DEST_WORKERS[@]} ; do
     # TODO: when repo be splitted to containers & build here will be containers repo only,
     # then build repo should be added to be copied below
-    $SCP "$my_dir/../__save-docker-logs.sh" ${dest}:save-docker-logs.sh
-    ssh -i $ssh_key_file $SSH_OPTS ${dest} "./save-docker-logs.sh"
+    timeout -s 9 20s $SCP "$my_dir/../__save-docker-logs.sh" ${dest}:save-docker-logs.sh
+    if [[ $? == 0 ]] ; then
+      ssh -i $ssh_key_file $SSH_OPTS ${dest} "./save-docker-logs.sh"
+    fi
   done
 
   # save env host specific logs
@@ -30,10 +36,10 @@ function save_logs() {
 
   # save to workspace
   for dest in ${SSH_DEST_WORKERS[@]} ; do
-    if ssh -i $ssh_key_file $SSH_OPTS ${dest} "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
+    if timeout -s 9 30s ssh -i $ssh_key_file $SSH_OPTS ${dest} "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
       local lname=$(echo $dest | cut -d '@' -f 2)
       mkdir -p "$WORKSPACE/logs/$lname"
-      $SCP ${dest}:logs.tar.gz "$WORKSPACE/logs/${lname}/logs.tar.gz"
+      timeout -s 9 10s $SCP ${dest}:logs.tar.gz "$WORKSPACE/logs/${lname}/logs.tar.gz"
       pushd "$WORKSPACE/logs/$lname"
       tar -xf logs.tar.gz
       rm logs.tar.gz
@@ -42,8 +48,8 @@ function save_logs() {
   done
 
   # save to workspace
-  if $SSH_BUILD "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
-    $SCP $SSH_DEST_BUILD:logs.tar.gz "$WORKSPACE/logs/build_logs.tar.gz"
+  if timeout -s 9 30s $SSH_BUILD "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
+    timeout -s 9 10s $SCP $SSH_DEST_BUILD:logs.tar.gz "$WORKSPACE/logs/build_logs.tar.gz"
     pushd "$WORKSPACE/logs"
     tar -xf build_logs.tar.gz
     rm build_logs.tar.gz
@@ -66,7 +72,6 @@ function catch_errors() {
 
 # Work with docker-compose udner root
 export SSH_USER=root
-export NET_ADDR=${NET_ADDR:-"192.168.221.0"}
 $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
 
@@ -92,7 +97,7 @@ $SCP "$my_dir/__run-gate.sh" $SSH_DEST:run-gate.sh
 timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION ./run-gate.sh $public_ip_build"
 
 # Validate cluster
-# TODO: rename run-gate since now check of cluster is here
+# TODO: rename run-gate since now check of cluster is here. no. move this code to run-gate or another file.
 source "$my_dir/../common/check-functions"
 dest_to_check=$(echo ${SSH_DEST_WORKERS[@]:0:3} | sed 's/ /,/g')
 check_rabbitmq_cluster "$dest_to_check"

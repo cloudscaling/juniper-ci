@@ -1,0 +1,10 @@
+#!/bin/bash
+
+suffix=${JOB_RND:-0}
+export VM_NAME=${VM_NAME:-"$WAY-$ENVIRONMENT_OS-$OPENSTACK_VERSION-$suffix"}
+export NET_NAME="$VM_NAME"
+export POOL_NAME=${POOL_NAME:-$WAY}
+_bridge_name="${WAY}-${ENVIRONMENT_OS:0:1}-$suffix"
+export BRIDGE_NAME=${BRIDGE_NAME:-$_bridge_name}
+export DISK_SIZE=${DISK_SIZE:-'128'}
+export NET_DRIVER=${NET_DRIVER:-'e1000'}
