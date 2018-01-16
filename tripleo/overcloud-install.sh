@@ -523,7 +523,7 @@ fi
 
 cat <<EOF >> $misc_opts
 parameter_defaults:
-  InternalApiVirtualFixedIPs: [{'ip_address':'$fixed_vip'}]
+  ControlFixedIPs: [{'ip_address':'$fixed_vip'}]
   CloudDomain: $CLOUD_DOMAIN_NAME
   GlanceBackend: file
   RabbitUserName: contrail
