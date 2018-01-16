@@ -21,12 +21,14 @@ fi
 export ENV_FILE="$WORKSPACE/cloudrc"
 
 suffix=$(cat /dev/urandom | tr -dc 'a-zA-Z' | fold -w 8 | head -n 1)
-export VM_NAME=${VM_NAME:-"$WAY-$ENVIRONMENT_OS-$OPENSTACK_VERSION-$suffix"}
+prefix="${WAY}_${ENVIRONMENT_OS}"
+rname="${prefix}_${suffix}"
+export VM_NAME=${VM_NAME:-"$prefix-$OPENSTACK_VERSION-$suffix"}
 export NET_NAME="$VM_NAME"
 export DISK_SIZE=${DISK_SIZE:-'128'}
-export POOL_NAME=${POOL_NAME:-$WAY-$ENVIRONMENT_OS-$suffix}
+export POOL_NAME=${POOL_NAME:-$rname}
 export NET_DRIVER=${NET_DRIVER:-'e1000'}
-export BRIDGE_NAME=${BRIDGE_NAME:-$WAY-$ENVIRONMENT_OS-$suffix}
+export BRIDGE_NAME=${BRIDGE_NAME:-$rname}
 
 source "$my_dir/${ENVIRONMENT_OS}"
 
