@@ -70,7 +70,7 @@ for d in ${dest[@]} ; do
     master_dest="$d"
     for (( i=0; i < 10; ++i )) ; do
       echo "get k8s cluster token ${i}/10"
-      token=`$SSH_WORKER $d "set -x; sudo kubeadm token list | tail -n 1 | awk '{print(\$1)}'"`
+      token=`$SSH_WORKER $d "sudo kubeadm token list" | tail -n 1 | awk '{print($1)}'`
       if [[ -n "$token" ]] ; then
         echo "get k8s cluster token done: $token"
         break
@@ -80,5 +80,6 @@ for d in ${dest[@]} ; do
   fi
 done
 
+# wait a bit for last node connection establishing
+sleep 30
 $SSH_WORKER $master_dest  "set -x; export PATH=\${PATH}:/usr/sbin; cd ~/contrail-container-builder/kubernetes/manifests && ./set-node-labels.sh"
-
