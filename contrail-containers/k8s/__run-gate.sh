@@ -25,7 +25,7 @@ function wait_cluster() {
   for (( i=0 ; i < 120 ; ++i )) ; do
     sleep 5
     (( total=1 + $(kubectl get pods --all-namespaces=true | grep -c "$pods_rgx") ))
-     (( running=1 + $(kubectl get pods --all-namespaces=true | grep "$pods_rgx" | grep -ic 'running') ))
+    (( running=1 + $(kubectl get pods --all-namespaces=true | grep "$pods_rgx" | grep -ic 'running') ))
     log_info "  components up: ${running}/${total}"
     if (( total != 1 && total == running )) ; then
       log_info "$name is running"
@@ -39,6 +39,7 @@ function wait_cluster() {
 }
 
 log_info "create Contrail cluster"
+# do not validate yaml file cause it contains empty fields for VIP-s
 kubectl create --validate=false -f ~/my-contrail.yaml
 wait_cluster "Contrail" "contrail\|zookeeper\|rabbit\|kafka\|redis\|cassandra"
 
@@ -75,7 +76,7 @@ spec:
 EOF
 
 log_info "run test application"
-kubectl create --validate=false -f ~/test_app.yaml
+kubectl create -f ~/test_app.yaml
 wait_cluster "nginx" "nginx"
 
 # TODO: test connectivities
