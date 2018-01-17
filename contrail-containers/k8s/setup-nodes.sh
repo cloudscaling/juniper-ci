@@ -35,10 +35,6 @@ function setup_k8s() {
   cat <<EOF | $SSH_WORKER $dest
 set -x
 export PATH=\${PATH}:/usr/sbin
-
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-
 cd ~/contrail-container-builder
 cat <<EOM > common.env
 LOG_LEVEL=SYS_DEBUG
