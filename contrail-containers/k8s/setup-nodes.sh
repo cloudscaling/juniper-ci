@@ -80,5 +80,6 @@ for d in ${dest[@]} ; do
   fi
 done
 
+# wait a bit for last node connection establishing
+sleep 30
 $SSH_WORKER $master_dest  "set -x; export PATH=\${PATH}:/usr/sbin; cd ~/contrail-container-builder/kubernetes/manifests && ./set-node-labels.sh"
-
