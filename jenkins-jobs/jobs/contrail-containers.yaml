@@ -32,7 +32,10 @@
             - ubuntu
       - string:
           name: CCB_PATCHSET
-          description: "Additional command to fetch patchset from review to check"
+          description: "Additional command to fetch patchset for contrail-container-builer repo. Ex: git fetch https://review.opencontrail.org/Juniper/contrail-container-builder refs/changes/43/38943/1 && git cherry-pick FETCH_HEAD"
+      - string:
+          name: CAD_PATCHSET
+          description: "Additional command to fetch patchset for contrail-ansible-deployer. Ex: same as previous."
       - node:
           name: SLAVE_NAME
           description: "Select slave: one for specific node or multiple for any node."
@@ -50,7 +53,12 @@
           #!/bin/bash -e
           if [[ -n "$CCB_PATCHSET" ]]; then
             pushd contrail-container-builder
-            $CCB_PATCHSET
+            eval "$CCB_PATCHSET"
+            popd
+          fi
+          if [[ -n "$CAD_PATCHSET" ]]; then
+            pushd contrail-ansible-deployer
+            eval "$CAD_PATCHSET"
             popd
           fi
           export CONTRAIL_VERSION='{contrail_version}'
