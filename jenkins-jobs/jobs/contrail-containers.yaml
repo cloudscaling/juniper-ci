@@ -30,6 +30,12 @@
             - same_as_host_os
             - centos
             - ubuntu
+      - string:
+          name: CCB_PATCHSET
+          description: "Additional command to fetch patchset for contrail-container-builer repo. Ex: git fetch https://review.opencontrail.org/Juniper/contrail-container-builder refs/changes/43/38943/1 && git cherry-pick FETCH_HEAD"
+      - string:
+          name: CAD_PATCHSET
+          description: "Additional command to fetch patchset for contrail-ansible-deployer. Ex: same as previous."
       - node:
           name: SLAVE_NAME
           description: "Select slave: one for specific node or multiple for any node."
@@ -45,6 +51,16 @@
     builders:
       - shell: |
           #!/bin/bash -e
+          if [[ -n "$CCB_PATCHSET" ]]; then
+            pushd contrail-container-builder
+            eval "$CCB_PATCHSET"
+            popd
+          fi
+          if [[ -n "$CAD_PATCHSET" ]]; then
+            pushd contrail-ansible-deployer
+            eval "$CAD_PATCHSET"
+            popd
+          fi
           export CONTRAIL_VERSION='{contrail_version}'
           # use newton for now. openstack-helm uses containers from newton...
           export WAY=$(echo {project} | cut -d '-' -f 1)
