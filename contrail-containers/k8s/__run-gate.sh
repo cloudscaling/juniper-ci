@@ -39,7 +39,7 @@ function wait_cluster() {
 }
 
 log_info "create Contrail cluster"
-kubectl create -f ~/my-contrail.yaml
+kubectl create --validate=false -f ~/my-contrail.yaml
 wait_cluster "Contrail" "contrail\|zookeeper\|rabbit\|kafka\|redis\|cassandra"
 
 wait_contrail_sec=60
@@ -75,7 +75,7 @@ spec:
 EOF
 
 log_info "run test application"
-kubectl create -f ~/test_app.yaml
+kubectl create --validate=false -f ~/test_app.yaml
 wait_cluster "nginx" "nginx"
 
 # TODO: test connectivities
