@@ -69,7 +69,7 @@ create_pool $POOL_NAME
 function define_node() {
   local vm_name=$1
   local mem=$2
-  local vol_name=$vm_name
+  local vol_name="$vm_name.qcow2"
   delete_volume $vol_name $POOL_NAME
   local vol_path=$(create_volume_from $vol_name $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
   define_machine $vm_name $VCPUS $mem $OS_VARIANT $NET_NAME $vol_path $DISK_SIZE
