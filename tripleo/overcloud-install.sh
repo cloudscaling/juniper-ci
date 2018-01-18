@@ -613,12 +613,13 @@ if [[ "$TLS" == 'true' ]] ; then
   sudo chown stack:stack server.crt.pem
 
   # create keystone certificate
-  openssl genrsa -out keystone.key.pem 2048
-  openssl req -key keystone.key.pem -new -out keystone.csr.pem \
-    -subj "/C=RU/ST=Moscow/L=Moscow/O=ProgmaticLab/OU=TestKeystone/CN=${fixed_vip}"
-  yes | sudo openssl ca -extensions v3_req -days 365 -in keystone.csr.pem \
-    -out keystone.crt.pem -cert ca.crt.pem -keyfile ca.key.pem
-  sudo chown stack:stack keystone.crt.pem
+  # TODO: is not used in newton
+#  openssl genrsa -out keystone.key.pem 2048
+#  openssl req -key keystone.key.pem -new -out keystone.csr.pem \
+#    -subj "/C=RU/ST=Moscow/L=Moscow/O=ProgmaticLab/OU=TestKeystone/CN=${fixed_vip}"
+#  yes | sudo openssl ca -extensions v3_req -days 365 -in keystone.csr.pem \
+#    -out keystone.crt.pem -cert ca.crt.pem -keyfile ca.key.pem
+#  sudo chown stack:stack keystone.crt.pem
 
   ssl_opts+=' -e enable-tls.yaml'
   if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
@@ -642,11 +643,12 @@ EOF
   while read l ; do echo "    $l" ; done < server.key.pem >> enable-tls.yaml
   echo "  SSLRootCertificate: |" >> enable-tls.yaml
   while read l ; do echo "    $l" ; done < ca.crt.pem >> enable-tls.yaml
-  echo "  KeystoneSSLCertificate: |" >> enable-tls.yaml
-  sed '/BEGIN CERTIFICATE/,/END CERTIFICATE/!d' keystone.crt.pem > clean.keystone.crt.pem
-  while read l ; do echo "    $l" ; done < clean.keystone.crt.pem >> enable-tls.yaml
-  echo "  KeystoneSSLCertificateKey: |" >> enable-tls.yaml
-  while read l ; do echo "    $l" ; done < keystone.key.pem >> enable-tls.yaml
+# TODO: not used in newton
+#  echo "  KeystoneSSLCertificate: |" >> enable-tls.yaml
+#  sed '/BEGIN CERTIFICATE/,/END CERTIFICATE/!d' keystone.crt.pem > clean.keystone.crt.pem
+#  while read l ; do echo "    $l" ; done < clean.keystone.crt.pem >> enable-tls.yaml
+#  echo "  KeystoneSSLCertificateKey: |" >> enable-tls.yaml
+#  while read l ; do echo "    $l" ; done < keystone.key.pem >> enable-tls.yaml
 fi
 
 if [[ "$DEPLOY" != '1' ]] ; then
