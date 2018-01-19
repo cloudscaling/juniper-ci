@@ -50,6 +50,7 @@ fi
 sed -i -e "s/{{base_distro}}/$HOST_OS/g" globals.yml
 sed -i -e "s/{{openstack_version}}/$OPENSTACK_VERSION/g" globals.yml
 sed -i -e "s/{{contrail_version}}/$CONTRAIL_VERSION-$OPENSTACK_VERSION/g" globals.yml
+sed -i -e "s/{{contrail_docker_registry}}/$registry_ip:5000/g" globals.yml
 
 echo "INFO: Preparing instances"
 if [ "x$HOST_OS" == "xubuntu" ]; then
@@ -95,12 +96,6 @@ cp globals.yml /etc/kolla
 
 kolla-genpwd
 kolla-ansible -i all-in-one bootstrap-servers
-neutron_init="contrail-openstack-neutron-init"
-docker pull $registry_ip:5000/$neutron_init:$CONTRAIL_VERSION-$OPENSTACK_VERSION
-docker tag $registry_ip:5000/$neutron_init:$CONTRAIL_VERSION-$OPENSTACK_VERSION $neutron_init:$CONTRAIL_VERSION-$OPENSTACK_VERSION
-compute_init="contrail-openstack-compute-init"
-docker pull $registry_ip:5000/$compute_init:$CONTRAIL_VERSION-$OPENSTACK_VERSION
-docker tag $registry_ip:5000/$compute_init:$CONTRAIL_VERSION-$OPENSTACK_VERSION $compute_init:$CONTRAIL_VERSION-$OPENSTACK_VERSION
 kolla-ansible pull -i all-in-one
 docker images
 
