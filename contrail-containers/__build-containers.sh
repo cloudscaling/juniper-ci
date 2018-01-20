@@ -21,6 +21,10 @@ if [ -d $HOME/containers-cache ] && [[ $(ls -l $HOME/containers-cache | grep 'co
 
   for ff in `ls $HOME/containers-cache` ; do
     gunzip -c $HOME/containers-cache/$ff | sudo docker load
+    id=`sudo docker images | awk '/<none>/{print $3}'`
+    name=`echo $ff | sed "s/-$CONTRAIL_VERSION.*//"`
+    tag=`echo $ff | sed "s/$name-//" | sed 's/.tgz//'`
+    sudo docker tag $id "$name:$tag"
   done
 else
   ./setup-for-build.sh
