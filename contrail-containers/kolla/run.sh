@@ -61,6 +61,9 @@ $SCP "$my_dir/../__build-${BUILD_TARGET}.sh" $SSH_DEST_BUILD:build-${BUILD_TARGE
 $SCP "$my_dir/../__functions" $SSH_DEST_BUILD:functions
 $SCP -r "$WORKSPACE/contrail-container-builder" $SSH_DEST_BUILD:./
 $SCP -r "$WORKSPACE/contrail-build-poc" $SSH_DEST_BUILD:./
+if [[ -d "$HOME/containers-cache" ]]; then
+  $SCP -r "$HOME/containers-cache" $SSH_DEST_BUILD:./
+fi
 
 set -o pipefail
 $SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION timeout -s 9 180m ./build-${BUILD_TARGET}.sh" |& tee $WORKSPACE/logs/build.log

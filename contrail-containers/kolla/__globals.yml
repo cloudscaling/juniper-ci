@@ -57,6 +57,7 @@ openstack_logging_debug: "True"
 ###################################
 # OpenContrail support
 ###################################
+enable_opencontrail: "yes"
 opencontrail_release: "{{contrail_version}}"
 opencontrail_docker_registry: "{{contrail_docker_registry}}"
 # while opencontrail is not a role in ansible and we didn't patch group_vars/all.yml we set fake IP here
