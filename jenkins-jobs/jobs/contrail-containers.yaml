@@ -62,6 +62,7 @@
             popd
           fi
           export CONTRAIL_VERSION='{contrail_version}'
+          export CONTRAIL_INSTALL_PACKAGES_URL='{packages_url}'
           # use newton for now. openstack-helm uses containers from newton...
           export WAY=$(echo {project} | cut -d '-' -f 1)
           export HOST=$(echo {project} | cut -d '-' -f 2)
@@ -92,10 +93,12 @@
           slavenode:
             - master
           contrail_version: 4.1.0.0-8
+          packages_url: ''
       - helm-aws-centos:
           slavenode:
             - master
           contrail_version: 4.1.0.0-8
+          packages_url: ''
 #      - helm-aws-centos-all:
 #          slavenode:
 #            - master
@@ -106,27 +109,46 @@
             - slave02
             - slave03
           contrail_version: 4.1.0.0-8
+          packages_url: ''
       - k8s-server-ubuntu:
           slavenode:
             - slave01
             - slave02
             - slave03
           contrail_version: 4.1.0.0-8
+          packages_url: ''
+      - k8s-server-centos-containers-mainline:
+          slavenode:
+            - slave01
+            - slave02
+            - slave03
+          contrail_version: 5.0.0-126
+          packages_url: 'https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-126-ocata.tgz'
+      - k8s-server-ubuntu-containers-mainline:
+          slavenode:
+            - slave01
+            - slave02
+            - slave03
+          contrail_version: 4.1.0.0-8
+          packages_url: 'https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-93-ocata.tgz'
       - compose-server-centos:
           slavenode:
             - slave01
             - slave02
             - slave03
           contrail_version: 4.1.0.0-8
+          packages_url: ''
       - compose-server-ubuntu:
           slavenode:
             - slave01
             - slave02
             - slave03
           contrail_version: 4.1.0.0-8
+          packages_url: ''
       - kolla-aws-centos:
           slavenode:
             - master
           contrail_version: 4.1.0.0-8
+          packages_url: ''
     jobs:
       - 'contrail-{project}'
