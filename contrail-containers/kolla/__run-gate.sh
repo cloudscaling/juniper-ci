@@ -49,7 +49,7 @@ else
 fi
 sed -i -e "s/{{base_distro}}/$HOST_OS/g" globals.yml
 sed -i -e "s/{{openstack_version}}/$OPENSTACK_VERSION/g" globals.yml
-sed -i -e "s/{{contrail_version}}/$CONTRAIL_VERSION-$OPENSTACK_VERSION/g" globals.yml
+sed -i -e "s/{{contrail_version}}/$CONTRAIL_VERSION/g" globals.yml
 sed -i -e "s/{{contrail_docker_registry}}/$registry_ip:5000/g" globals.yml
 
 echo "INFO: Preparing instances"
