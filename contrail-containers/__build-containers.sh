@@ -14,6 +14,7 @@ echo "INFO: Run setup-for-build  $(date)"
 cd contrail-container-builder/containers
 
 # there are 30 images (all images without base images)
+# TODO: make check not so strong, add check for version/distro/openstack-version
 if [ -d $HOME/containers-cache ] && [[ $(ls -l $HOME/containers-cache | grep 'contrail-' | wc -l) == '30' ]] ; then
   echo "INFO: using cached containers... $(date)"
   ./validate-docker.sh
