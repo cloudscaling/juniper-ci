@@ -129,7 +129,7 @@
             - slave01
             - slave02
             - slave03
-          contrail_version: 4.1.0.0-8
+          contrail_version: 5.0.0-93
           packages_url: 'https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-93-ocata.tgz'
       - compose-server-centos:
           slavenode:
