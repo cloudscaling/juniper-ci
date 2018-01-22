@@ -57,27 +57,19 @@ if [ "x$HOST_OS" == "xubuntu" ]; then
   apt-get -y update
   DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade
   apt-get install -y --no-install-recommends mc git wget ntp ntpdate python-pip
+
+  pip install -U pip
+  apt-get install -y python-dev libffi-dev gcc libssl-dev python-selinux
+  pip install -U ansible
 elif [ "x$HOST_OS" == "xcentos" ]; then
   # ip is located in /usr/sbin that is not in path...
   export PATH=${PATH}:/usr/sbin
 
   yum install -y epel-release
   yum install -y mc git wget ntp python-pip
+  systemctl enable ntpd.service && systemctl start ntpd.service
 
-  systemctl enable ntpd.service
-  systemctl start ntpd.service
-
-  # TODO: remove this hack
-  #wget -nv http://$registry_ip/$CONTRAIL_VERSION-$OPENSTACK_VERSION/vrouter.ko
-  #chmod 755 vrouter.ko
-  #insmod ./vrouter.ko
-fi
-
-pip install -U pip
-if [ "x$HOST_OS" == "xubuntu" ]; then
-  apt-get install -y python-dev libffi-dev gcc libssl-dev python-selinux
-  pip install -U ansible
-elif [ "x$HOST_OS" == "xcentos" ]; then
+  pip install -U pip
   yum install -y python-devel libffi-devel gcc openssl-devel libselinux-python
   yum install -y ansible
 fi
