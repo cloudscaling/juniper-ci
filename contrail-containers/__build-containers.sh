@@ -20,12 +20,16 @@ if [ -d $HOME/containers-cache ] && [[ $(ls -l $HOME/containers-cache | grep 'co
   ./validate-docker.sh
   ./install-registry.sh
 
+  default_interface=`ip route show | grep "default via" | awk '{print $5}'`
+  default_ip=`ip address show dev $default_interface | head -3 | tail -1 | tr "/" " " | awk '{print $2}'`
+
   for ff in `ls $HOME/containers-cache` ; do
     gunzip -c $HOME/containers-cache/$ff | sudo docker load
     id=`sudo docker images | awk '/<none>/{print $3}'`
     name=`echo $ff | sed "s/-$CONTRAIL_VERSION.*//"`
     tag=`echo $ff | sed "s/$name-//" | sed 's/.tgz//'`
-    sudo docker tag $id "$name:$tag"
+    sudo docker tag $id "$default_ip:5000/$name:$tag"
+    sudo docker push "$default_ip:5000/$name:$tag"
   done
 else
   ./setup-for-build.sh
