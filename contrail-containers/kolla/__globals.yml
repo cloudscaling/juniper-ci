@@ -61,8 +61,6 @@ enable_opencontrail: "yes"
 opencontrail_release: "{{contrail_version}}"
 opencontrail_docker_registry: "{{contrail_docker_registry}}"
 # while opencontrail is not a role in ansible and we didn't patch group_vars/all.yml we set fake IP here
-opencontrail_api_server_ip: "1.1.1.1"
-opencontrail_api_server_port: "8082"
 enable_openvswitch: "no"
 enable_neutron_bgp_dragent: "no"
 enable_neutron_dvr: "no"
