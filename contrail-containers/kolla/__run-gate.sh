@@ -15,6 +15,10 @@ function catch_errors() {
   local exit_code=$?
   echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
   trap - ERR
+  free -h
+  ps ax -H
+  docker ps -a
+  df -h
   save_logs
   exit $exit_code
 }
