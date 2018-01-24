@@ -643,6 +643,12 @@ EOF
   while read l ; do echo "    $l" ; done < server.key.pem >> enable-tls.yaml
   echo "  SSLRootCertificate: |" >> enable-tls.yaml
   while read l ; do echo "    $l" ; done < ca.crt.pem >> enable-tls.yaml
+
+  echo "  ContrailCaCertContent: |" >> enable-tls.yaml
+  while read l ; do echo "    $l" ; done < ca.crt.pem >> enable-tls.yaml
+  echo "  ContrailCaKeyContent: |" >> enable-tls.yaml
+  while read l ; do echo "    $l" ; done < ca.key.pem >> enable-tls.yaml
+
 # TODO: not used in newton
 #  echo "  KeystoneSSLCertificate: |" >> enable-tls.yaml
 #  sed '/BEGIN CERTIFICATE/,/END CERTIFICATE/!d' keystone.crt.pem > clean.keystone.crt.pem
