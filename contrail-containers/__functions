@@ -8,8 +8,8 @@ function prepare_build_machine() {
     sudo apt-get install -y --no-install-recommends mc git wget ntp libxml2-utils &>>$HOME/apt.log
   elif [[ -x $(command -v yum 2>/dev/null) ]]; then
     echo "INFO: Preparing CentOS host to build containers  $(date)"
-    sudo yum install -y epel-release
-    sudo yum install -y mc git wget ntp iptables iproute
+    sudo yum install -y epel-release &>>yum.log
+    sudo yum install -y mc git wget ntp iptables iproute &>>yum.log
     sudo systemctl enable ntpd.service
     sudo systemctl start ntpd.service
   else
