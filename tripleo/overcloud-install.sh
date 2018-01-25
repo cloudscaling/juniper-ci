@@ -641,8 +641,8 @@ EOF
   while read l ; do echo "    $l" ; done < clean.server.crt.pem >> enable-tls.yaml
   echo "  SSLKey: |" >> enable-tls.yaml
   while read l ; do echo "    $l" ; done < server.key.pem >> enable-tls.yaml
-  echo "  SSLRootCertificate: |" >> enable-tls.yaml
-  while read l ; do echo "    $l" ; done < ca.crt.pem >> enable-tls.yaml
+  # echo "  SSLRootCertificate: |" >> enable-tls.yaml
+  # while read l ; do echo "    $l" ; done < ca.crt.pem >> enable-tls.yaml
 
   echo "  ContrailCaCert: |" >> enable-tls.yaml
   while read l ; do echo "    $l" ; done < ca.crt.pem >> enable-tls.yaml
