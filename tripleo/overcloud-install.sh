@@ -644,9 +644,9 @@ EOF
   echo "  SSLRootCertificate: |" >> enable-tls.yaml
   while read l ; do echo "    $l" ; done < ca.crt.pem >> enable-tls.yaml
 
-  echo "  ContrailCaCertContent: |" >> enable-tls.yaml
+  echo "  ContrailCaCert: |" >> enable-tls.yaml
   while read l ; do echo "    $l" ; done < ca.crt.pem >> enable-tls.yaml
-  echo "  ContrailCaKeyContent: |" >> enable-tls.yaml
+  echo "  ContrailCaKey: |" >> enable-tls.yaml
   while read l ; do echo "    $l" ; done < ca.key.pem >> enable-tls.yaml
 
 # TODO: not used in newton
