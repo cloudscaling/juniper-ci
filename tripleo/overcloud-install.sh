@@ -630,9 +630,9 @@ if [[ "$TLS" == 'true' ]] ; then
   cat <<EOF > enable-tls.yaml
 resource_registry:
   OS::TripleO::NodeTLSData: tripleo-heat-templates/puppet/extraconfig/tls/tls-cert-inject.yaml
-  OS::TripleO::NodeTLSCAData: tripleo-heat-templates/puppet/extraconfig/tls/ca-inject.yaml
+  # OS::TripleO::NodeTLSCAData: tripleo-heat-templates/puppet/extraconfig/tls/ca-inject.yaml
 parameter_defaults:
-#  RabbitClientUseSSL: true
+  # RabbitClientUseSSL: true
   ContrailSslEnabled: true
   SSLIntermediateCertificate: ''
   SSLCertificate: |
