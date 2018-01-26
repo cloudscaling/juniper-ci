@@ -18,7 +18,7 @@ if [[ "$DPDK" == 'true' ]]; then
 elif [[ "$TSN" == 'true' ]] ; then
   node_name_regexp='tsn'
 fi
-for mid in `nova list | grep "$node_name_regexp" |  awk '{print $12}'` ; do
+for mid in `nova --insecure list | grep "$node_name_regexp" |  awk '{print $12}'` ; do
   mip="`echo $mid | cut -d '=' -f 2`"
   ssh heat-admin@$mip sudo yum install -y sshpass
 done
@@ -56,7 +56,7 @@ function check_ui_ip () {
 
 ret=0
 source ${WORKSPACE}/stackrc
-for ctrl in `openstack server list | grep contrailcontroller | grep -o "ctlplane=[0-9\.]*" | cut -d '=' -f 2` ; do
+for ctrl in `openstack --insecure server list | grep contrailcontroller | grep -o "ctlplane=[0-9\.]*" | cut -d '=' -f 2` ; do
   check_ui_ip $ctrl || ret=1
 done
 ha_ip=`cat ${WORKSPACE}/overcloudrc | grep OS_AUTH_URL | grep -o "[0-9][0-9\.]*:" | cut -d ':' -f 1`

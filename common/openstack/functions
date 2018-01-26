@@ -144,13 +144,13 @@ function create_flavors() {
   if ! openstack --insecure flavor show 51 &>/dev/null ; then
     openstack --insecure flavor create --disk 1 --vcpus 1 --ram 128 --id 51 test_flavor1 >/dev/null
     if [[ "$DPDK" == 'true' ]]; then
-      openstack flavor set --property hw:mem_page_size=any 51
+      openstack --insecure flavor set --property hw:mem_page_size=any 51
     fi
   fi
   if ! openstack --insecure flavor show 52 &>/dev/null ; then
     openstack --insecure flavor create --disk 1 --vcpus 1 --ram 256 --id 52 test_flavor2 >/dev/null
     if [[ "$DPDK" == 'true' ]]; then
-      openstack flavor set --property hw:mem_page_size=any 52
+      openstack --insecure flavor set --property hw:mem_page_size=any 52
     fi
   fi
   deactivate_venv
@@ -163,7 +163,7 @@ function create_network() {
   echo "INFO: Create public network and subnet"
   openstack --insecure network create --external public-$netsfx
   # bug https://bugs.launchpad.net/juniperopenstack/+bug/1713810
-  sleep 5 ; openstack network set --no-share public-$netsfx
+  sleep 5 ; openstack --insecure network set --no-share public-$netsfx
   local public_net_id=`openstack --insecure network show public-$netsfx -f value -c id`
   openstack --insecure subnet create --no-dhcp --network $public_net_id --subnet-range 10.5.0.0/24 --gateway 0.0.0.0 public-$netsfx
 
@@ -177,7 +177,7 @@ function create_network() {
   openstack --insecure router create p-ext-$netsfx
   local router_id=`openstack --insecure router show p-ext-$netsfx -f value -c id`
   #openstack --insecure router set --external-gateway $public_net_id $router_id
-  neutron router-gateway-set $router_id $public_net_id
+  neutron --insecure router-gateway-set $router_id $public_net_id
   openstack --insecure router add subnet $router_id $private_subnet_id
 
   echo "INFO: Add rules to default security group"
@@ -216,8 +216,8 @@ function prep_os_checks() {
   if [[ "${KEYSTONE_API_VERSION}" != '2' ]] ; then
     echo "INFO: For keystone V3 add for user admin the role for domain"
     activate_venv
-    if ! openstack role assignment list --domain default --user ${OS_USERNAME} | grep -qi default ; then
-      openstack role add --domain default --user admin  admin
+    if ! openstack --insecure role assignment list --domain default --user ${OS_USERNAME} | grep -qi default ; then
+      openstack --insecure role add --domain default --user admin  admin
     fi
     deactivate_venv
   fi
@@ -229,7 +229,7 @@ function run_os_checks() {
 
   echo "INFO: Check CLI versions:"
   set_x -x
-  openstack --version
+  openstack --insecure --version
   set_x +x
 
   echo "INFO: Check OpenStack catalog first"
@@ -351,7 +351,7 @@ function _get_instance_machine() {
   local host=`openstack --insecure server list --long -c ID -c Host | grep $id | awk '{print $4}' | cut -d '.' -f 1`
   local ip=''
   if [[ "$SSH_CMD" == 'juju-ssh' ]] ; then
-    ip=`openstack hypervisor list | grep $host | awk '{print $8}'`
+    ip=`openstack --insecure hypervisor list | grep $host | awk '{print $8}'`
   else
     _access_undercloud
     ip=`openstack --insecure server list | grep $host | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+' | head -n 1`
