@@ -599,18 +599,23 @@ if [[ "$TLS" == 'true' ]] ; then
   sudo touch /etc/pki/CA/index.txt
   echo 1000 | sudo tee /etc/pki/CA/serial
 
-  # create root cert
+  # create haproxy CA
   openssl genrsa -out ca.key.pem 4096
   openssl req -key ca.key.pem -new -x509 -days 365 -extensions v3_ca -out ca.crt.pem \
-    -subj "/C=RU/ST=Moscow/L=Moscow/O=ProgmaticLab/OU=TestCA/CN=${prov_ip}"
+    -subj "/C=RU/ST=Moscow/L=Moscow/O=ProgmaticLab/OU=TestCAHaproxy/CN=${prov_ip}"
 
   # create haproxy server certificate (VIPs)
   openssl genrsa -out server.key.pem 2048
   openssl req -key server.key.pem -new -out server.csr.pem \
-    -subj "/C=RU/ST=Moscow/L=Moscow/O=ProgmaticLab/OU=TestServer/CN=${fixed_vip}"
+    -subj "/C=RU/ST=Moscow/L=Moscow/O=ProgmaticLab/OU=TestHaproxy/CN=${fixed_vip}"
   yes | sudo openssl ca -extensions v3_req -days 365 -in server.csr.pem \
     -out server.crt.pem -cert ca.crt.pem -keyfile ca.key.pem
   sudo chown stack:stack server.crt.pem
+
+  # create contrail CA certificate
+  openssl genrsa -out contrail.ca.key.pem 4096
+  openssl req -key contrail.ca.key.pem -new -x509 -days 365 -extensions v3_ca -out contrail.ca.crt.pem \
+    -subj "/C=RU/ST=Moscow/L=Moscow/O=ProgmaticLab/OU=TestCAContrail/CN=${prov_ip}"
 
   # create keystone certificate
   # TODO: is not used in newton
@@ -630,7 +635,7 @@ if [[ "$TLS" == 'true' ]] ; then
   cat <<EOF > enable-tls.yaml
 resource_registry:
   OS::TripleO::NodeTLSData: tripleo-heat-templates/puppet/extraconfig/tls/tls-cert-inject.yaml
-  # OS::TripleO::NodeTLSCAData: tripleo-heat-templates/puppet/extraconfig/tls/ca-inject.yaml
+  OS::TripleO::NodeTLSCAData: tripleo-heat-templates/puppet/extraconfig/tls/ca-inject.yaml
 parameter_defaults:
   # RabbitClientUseSSL: true
   ContrailSslEnabled: true
@@ -641,13 +646,14 @@ EOF
   while read l ; do echo "    $l" ; done < clean.server.crt.pem >> enable-tls.yaml
   echo "  SSLKey: |" >> enable-tls.yaml
   while read l ; do echo "    $l" ; done < server.key.pem >> enable-tls.yaml
-  # echo "  SSLRootCertificate: |" >> enable-tls.yaml
-  # while read l ; do echo "    $l" ; done < ca.crt.pem >> enable-tls.yaml
+
+  echo "  SSLRootCertificate: |" >> enable-tls.yaml
+  while read l ; do echo "    $l" ; done < ca.crt.pem >> enable-tls.yaml
 
   echo "  ContrailCaCert: |" >> enable-tls.yaml
-  while read l ; do echo "    $l" ; done < ca.crt.pem >> enable-tls.yaml
+  while read l ; do echo "    $l" ; done < contrail.ca.crt.pem >> enable-tls.yaml
   echo "  ContrailCaKey: |" >> enable-tls.yaml
-  while read l ; do echo "    $l" ; done < ca.key.pem >> enable-tls.yaml
+  while read l ; do echo "    $l" ; done < contrail.ca.key.pem >> enable-tls.yaml
 
 # TODO: not used in newton
 #  echo "  KeystoneSSLCertificate: |" >> enable-tls.yaml
