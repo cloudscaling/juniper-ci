@@ -12,8 +12,8 @@ function detect_machines() {
 function cleanup_computes() {
   # purge this ugly package. it breaks contrail vrouter deployment
   echo "INFO: Purge ubuntu-fan package"
-  juju-ssh $m2 "while ! sudo apt-get purge --auto-remove ubuntu-fan ; do sleep 1 ; done" 2>/dev/null
-  juju-ssh $m3 "while ! sudo apt-get purge --auto-remove ubuntu-fan ; do sleep 1 ; done" 2>/dev/null
+  while ! juju-ssh $m2 "sudo apt-get purge -fy --auto-remove ubuntu-fan" 2>/dev/null ; do sleep 1 ; done
+  while ! juju-ssh $m3 "sudo apt-get purge -fy --auto-remove ubuntu-fan" 2>/dev/null ; do sleep 1 ; done
 }
 
 function open_port() {
