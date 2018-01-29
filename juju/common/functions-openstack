@@ -376,13 +376,7 @@ function check_instance_simple() {
   done
 
   if [[ $ret == 0 ]] ; then
-
-    echo "DEBUG: start for instance id=$instance_id"
-    openstack server list --long -c ID -c Host
-    openstack hypervisor list
-    echo "DEBUG: end for instance id=$instance_id"
-
-    local mch=`_get_instance_machine $instance_id | tail -1`
+    local mch=`_get_instance_machine $instance_id`
     echo "INFO: Instance is on machine $mch"
 
     _check_instance_log $instance_id || ret=1

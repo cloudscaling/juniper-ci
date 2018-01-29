@@ -52,7 +52,9 @@ function get_machine_ip() {
 
 function get_machine_by_ip() {
   local ip=$1
-  juju machines $juju_model_arg | grep $ip | awk '{print $1}'
+  juju status $ip | grep -A 1 "^Machine" | tail -1 | awk '{print $1}'
+  # next doesn't work if ip is private
+  #juju machines $juju_model_arg | grep $ip | awk '{print $1}'
 }
 
 function juju-get-machines() {
