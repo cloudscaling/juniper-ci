@@ -79,6 +79,8 @@ if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
   done
 fi
 
+cleanup_computes
+
 juju-status-tabular
 
 # OpenStack base

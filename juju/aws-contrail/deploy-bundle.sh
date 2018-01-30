@@ -71,8 +71,10 @@ if [ "$USE_EXTERNAL_RABBITMQ" == 'true' ]; then
   juju-add-relation "contrail-controller" "rabbitmq-server:amqp"
 fi
 
-echo "INFO: Set endpoints $(date)"
+echo "INFO: Detect machines $(date)"
 detect_machines
+cleanup_computes
+echo "INFO: Set endpoints $(date)"
 hack_openstack
 echo "INFO: Apply SSL flag if set $(date)"
 apply_ssl
