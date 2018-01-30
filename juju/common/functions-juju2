@@ -32,12 +32,7 @@ function juju-remove-service() {
 }
 
 function juju-get() {
-  local value=`juju config $juju_model_arg $1 | grep -v "^      " | grep -A 4 " $2:"`
-  if echo "$value" | grep -q "value:" ; then
-    echo "$value" | grep "value:" | awk '{print $2}'
-  else
-    echo "$value" | grep "default:" | awk '{print $2}'
-  fi
+  juju config $juju_model_arg $1 | python -c "import sys, json; data = json.load(sys.stdin); s = data['settings']['$2'] ; print s.get('value', s.get('default', ''))"
 }
 
 function get_machine() {
