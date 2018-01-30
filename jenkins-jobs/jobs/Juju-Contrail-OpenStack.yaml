@@ -17,6 +17,12 @@
             - on_success
             - never
       - choice:
+          name: CONTRAIL_BUILD
+          choices:
+            - 4.1.0.0-8
+            - 4.0.2.0-34
+            - 4.0.1.0-32
+      - choice:
           name: VERSION
           description: "Version of the OpenStack. mitaka implies trusty and newton/ocata implies xenial."
           choices:
@@ -140,6 +146,12 @@
             - always
             - on_success
             - never
+      - choice:
+          name: CONTRAIL_BUILD
+          choices:
+            - 4.1.0.0-8
+            - 4.0.2.0-34
+            - 4.0.1.0-32
       - choice:
           name: VERSION
           description: "Version of the OpenStack. mitaka implies trusty and newton/ocata implies xenial."
