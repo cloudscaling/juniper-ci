@@ -330,9 +330,11 @@ sed -i "s/ControlPlaneDefaultRoute:.*/ControlPlaneDefaultRoute: ${prov_ip}/g" $c
 sed -i "s/EC2MetadataIp:.*/EC2MetadataIp: ${prov_ip}/g" $contrail_net_file
 if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
   sed -i "s/VrouterPhysicalInterface:.*/VrouterPhysicalInterface: ${vrouter_iface}/g" $contrail_net_file
+  sed -i "s/VrouterDpdkPhysicalInterface:.*/VrouterDpdkPhysicalInterface: ${vrouter_iface}/g" $contrail_net_file
   sed -i "s/VrouterGateway:.*/VrouterGateway: ${prov_ip}/g" $contrail_net_file
 else
   sed -i "s/ContrailVrouterPhysicalInterface:.*/ContrailVrouterPhysicalInterface: ${vrouter_iface}/g" $contrail_net_file
+  sed -i "s/ContrailVrouterDpdkPhysicalInterface:.*/ContrailVrouterDpdkPhysicalInterface: ${vrouter_iface}/g" $contrail_net_file
   sed -i "s/ContrailVrouterGateway:.*/ContrailVrouterGateway: ${prov_ip}/g" $contrail_net_file
 fi
 sed -i "s/ControlVirtualInterface:.*/ControlVirtualInterface: ens3/g" $contrail_net_file
