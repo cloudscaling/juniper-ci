@@ -630,10 +630,13 @@ if [[ "$TLS" == 'true' ]] ; then
 
   ssl_opts+=' -e enable-tls.yaml'
   if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
-    ssl_opts+=' -e tripleo-heat-templates/environments/tls-endpoints-public-ip.yaml'
+    endpoints_file='tripleo-heat-templates/environments/tls-endpoints-public-ip.yaml'
   else
-    ssl_opts+=' -e tripleo-heat-templates/environments/ssl/tls-endpoints-public-ip.yaml'
+    endpoints_file='tripleo-heat-templates/environments/ssl/tls-endpoints-public-ip.yaml'
   fi
+  ssl_opts+=" -e $endpoints_file"
+  sed -i 's/\(KeystoneAdmin\)\(.*\)http/\1\2https/g' $endpoints_file
+  sed -i 's/\(KeystoneInternal\)\(.*\)http/\1\2https/g' $endpoints_file
   cat <<EOF > enable-tls.yaml
 resource_registry:
   OS::TripleO::NodeTLSData: tripleo-heat-templates/puppet/extraconfig/tls/tls-cert-inject.yaml
@@ -663,6 +666,11 @@ EOF
 #  while read l ; do echo "    $l" ; done < clean.keystone.crt.pem >> enable-tls.yaml
 #  echo "  KeystoneSSLCertificateKey: |" >> enable-tls.yaml
 #  while read l ; do echo "    $l" ; done < keystone.key.pem >> enable-tls.yaml
+
+  # enable internal TLS
+  controllerExtraConfig:
+    tripleo::haproxy::internal_certificate: /etc/pki/tls/private/overcloud_endpoint.pem
+
 fi
 
 if [[ "$DEPLOY" != '1' ]] ; then
