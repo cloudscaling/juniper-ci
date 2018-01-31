@@ -635,8 +635,8 @@ if [[ "$TLS" == 'true' ]] ; then
     endpoints_file='tripleo-heat-templates/environments/ssl/tls-endpoints-public-ip.yaml'
   fi
   ssl_opts+=" -e $endpoints_file"
-  sed -i 's/\(KeystoneAdmin\)\(.*\)http/\1\2https/g' $endpoints_file
-  sed -i 's/\(KeystoneInternal\)\(.*\)http/\1\2https/g' $endpoints_file
+  sed -i 's/\(Admin\)\(.*\)http/\1\2https/g' $endpoints_file
+  sed -i 's/\(Internal\)\(.*\)http/\1\2https/g' $endpoints_file
   cat <<EOF > enable-tls.yaml
 resource_registry:
   OS::TripleO::NodeTLSData: tripleo-heat-templates/puppet/extraconfig/tls/tls-cert-inject.yaml
