@@ -89,7 +89,7 @@
           fi
       - shell: |
           #!/bin/bash -e
-          desc="$VERSION $DEPLOY_TYPE $AAA_MODE"
+          desc="$VERSION $CONTRAIL_BUILD $DEPLOY_TYPE $AAA_MODE"
           if [[ "$DEPLOY_AS_HA_MODE" == "true" ]] ; then desc="$desc +HA" ; fi
           if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
           if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
@@ -190,7 +190,7 @@
     builders:
       - shell: |
           #!/bin/bash -e
-          desc="$SLAVE_NAME $VERSION $DEPLOY_TYPE mode=$DEPLOY_MODE $AAA_MODE"
+          desc="$SLAVE_NAME $VERSION $CONTRAIL_BUILD $DEPLOY_TYPE mode=$DEPLOY_MODE $AAA_MODE"
           if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
           if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
           if [[ "$USE_DPDK" == "true" ]] ; then desc="$desc +DPDK" ; fi
