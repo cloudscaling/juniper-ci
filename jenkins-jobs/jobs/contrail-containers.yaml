@@ -3,8 +3,6 @@
     description: "Deploys Kubernetes plus Contrail in AIO mode: {project}"
     defaults: global
     concurrent: true
-    properties:
-      - build-discarder
     parameters:
       - choice:
           name: CLEAN_BEFORE
