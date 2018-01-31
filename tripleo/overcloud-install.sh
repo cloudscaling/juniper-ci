@@ -646,6 +646,10 @@ parameter_defaults:
   ContrailSslEnabled: true
   SSLIntermediateCertificate: ''
   SSLCertificate: |
+
+  # enable internal TLS
+  controllerExtraConfig:
+    tripleo::haproxy::internal_certificate: /etc/pki/tls/private/overcloud_endpoint.pem
 EOF
   sed '/BEGIN CERTIFICATE/,/END CERTIFICATE/!d' server.crt.pem > clean.server.crt.pem
   while read l ; do echo "    $l" ; done < clean.server.crt.pem >> enable-tls.yaml
@@ -666,10 +670,6 @@ EOF
 #  while read l ; do echo "    $l" ; done < clean.keystone.crt.pem >> enable-tls.yaml
 #  echo "  KeystoneSSLCertificateKey: |" >> enable-tls.yaml
 #  while read l ; do echo "    $l" ; done < keystone.key.pem >> enable-tls.yaml
-
-  # enable internal TLS
-  controllerExtraConfig:
-    tripleo::haproxy::internal_certificate: /etc/pki/tls/private/overcloud_endpoint.pem
 
 fi
 
