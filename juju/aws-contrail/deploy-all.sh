@@ -29,19 +29,15 @@ if [[ "$jver" == 1 ]] ; then
   exit 1
 fi
 
-declare -A BUILDS
 # for builds of R4.0 from 1 to 20 version is 4.0.0.0
 # for builds of R4.0 from 21 to 32 version is 4.0.1.0
 # stable builds:
 # 4.0.1.0-32
 # 4.0.2.0-34
 # 4.1.0.0-8
-BUILDS=([mitaka]=8 [newton]=8 [ocata]=8)
-export CONTRAIL_VERSION="${CONTRAIL_VERSION:-4.1.0.0}"
 export SERIES="${SERIES:-trusty}"
 export VERSION="${VERSION:-mitaka}"
 export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
-export BUILD="${BUILD:-${BUILDS[$VERSION]}}"
 export DEPLOY_AS_HA_MODE="${DEPLOY_AS_HA_MODE:-false}"
 export USE_SSL_OS="${USE_SSL_OS:-false}"
 export USE_SSL_CONTRAIL="${USE_SSL_CONTRAIL:-false}"

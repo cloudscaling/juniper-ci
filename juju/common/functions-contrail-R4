@@ -31,7 +31,7 @@ function wget_file() {
 
 function check_containers() {
   mkdir -p "$HOME/docker"
-  packages="contrail_debs-${BUILD}-${VERSION}.tgz"
+  packages="contrail_debs-${CONTRAIL_BUILD}-${VERSION}.tgz"
   wget_file "$packages"
 
   local uver=""
@@ -40,15 +40,15 @@ function check_containers() {
   elif [[ "$SERIES" == "xenial" ]] ; then
     local uver="16.04"
   fi
-  image_controller="contrail-controller-ubuntu${uver}-${CONTRAIL_VERSION}-${BUILD}.tar.gz"
-  image_analytics="contrail-analytics-ubuntu${uver}-${CONTRAIL_VERSION}-${BUILD}.tar.gz"
-  image_analyticsdb="contrail-analyticsdb-ubuntu${uver}-${CONTRAIL_VERSION}-${BUILD}.tar.gz"
+  image_controller="contrail-controller-ubuntu${uver}-${CONTRAIL_BUILD}.tar.gz"
+  image_analytics="contrail-analytics-ubuntu${uver}-${CONTRAIL_BUILD}.tar.gz"
+  image_analyticsdb="contrail-analyticsdb-ubuntu${uver}-${CONTRAIL_BUILD}.tar.gz"
   if [[ -f "$HOME/docker/$image_controller" && -f "$HOME/docker/$image_analytics" && -f"$HOME/docker/$image_analyticsdb" ]] ; then
     echo "INFO: container images are in place. skipping download"
     return
   fi
 
-  di_file="contrail-docker-images_${CONTRAIL_VERSION}-${BUILD}-$SERIES.tgz"
+  di_file="contrail-docker-images_${CONTRAIL_BUILD}-$SERIES.tgz"
   if ! curl --head -s "${base_url}/${di_file}" | grep "200 OK" ; then
     echo "ERROR: There is no file '${base_url}/${di_file}'. Exiting..."
     exit 1
