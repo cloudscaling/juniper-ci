@@ -170,7 +170,7 @@
             desc+=' sriov'
           fi
           if [[ "$TLS" != 'off' ]] ; then
-            desc+="" tls=$$TLS"
+            desc+=" tls=$$TLS"
           fi
           desc+=' $AAA_MODE'
           if [[ "$AAA_MODE_ANALYTICS" != 'auto' ]] ; then
