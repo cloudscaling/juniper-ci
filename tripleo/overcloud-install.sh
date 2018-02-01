@@ -643,13 +643,12 @@ resource_registry:
   OS::TripleO::NodeTLSCAData: tripleo-heat-templates/puppet/extraconfig/tls/ca-inject.yaml
 parameter_defaults:
   # RabbitClientUseSSL: true
-  ContrailSslEnabled: true
-  SSLIntermediateCertificate: ''
-  SSLCertificate: |
-
   # enable internal TLS
   controllerExtraConfig:
     tripleo::haproxy::internal_certificate: /etc/pki/tls/private/overcloud_endpoint.pem
+  ContrailSslEnabled: true
+  SSLIntermediateCertificate: ''
+  SSLCertificate: |
 EOF
   sed '/BEGIN CERTIFICATE/,/END CERTIFICATE/!d' server.crt.pem > clean.server.crt.pem
   while read l ; do echo "    $l" ; done < clean.server.crt.pem >> enable-tls.yaml
