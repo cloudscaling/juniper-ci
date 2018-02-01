@@ -647,6 +647,7 @@ parameter_defaults:
   controllerExtraConfig:
     tripleo::haproxy::internal_certificate: /etc/pki/tls/private/overcloud_endpoint.pem
   ContrailSslEnabled: true
+  ContrailInternalApiSsl: true
   SSLIntermediateCertificate: ''
   SSLCertificate: |
 EOF
