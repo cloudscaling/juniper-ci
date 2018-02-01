@@ -78,9 +78,6 @@ elif [ "x$HOST_OS" == "xcentos" ]; then
   yum install -y ansible
 fi
 
-# set hostname as short name because fqdn couldn't be resolved inside cassandra container
-hostname $(hostname -s)
-
 # TODO: switch to openstack's repo when work is done
 #pip install kolla-ansible
 git clone https://github.com/cloudscaling/kolla-ansible
