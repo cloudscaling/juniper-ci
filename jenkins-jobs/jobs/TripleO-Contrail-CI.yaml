@@ -78,10 +78,13 @@
             - 'cloud-admin'
             - 'rbac'
             - 'no-auth'
-      - bool:
+      - choice:
           name: TLS
           description: Deploy with TLS enabled (for all components).
-          default: false
+          choices:
+            - 'off'
+            - 'xmpp_sandesh'
+            - 'all'
       - bool:
           name: DPDK
           description: Deploy vRouter in DPDK mode or not.
@@ -166,8 +169,8 @@
           if [[ "$SRIOV" == 'true' ]] ; then
             desc+=' sriov'
           fi
-          if [[ "$TLS" == 'true' ]] ; then
-            desc+=' tls'
+          if [[ "$TLS" != 'off' ]] ; then
+            desc+="" tls=$$TLS"
           fi
           desc+=' $AAA_MODE'
           if [[ "$AAA_MODE_ANALYTICS" != 'auto' ]] ; then

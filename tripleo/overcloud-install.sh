@@ -595,7 +595,7 @@ EOF
 fi
 
 ssl_opts=''
-if [[ "$TLS" == 'true' ]] ; then
+if [[ "$TLS" != 'off' ]] ; then
 
   # prepare for certificates creation
   sudo touch /etc/pki/CA/index.txt
@@ -635,19 +635,27 @@ if [[ "$TLS" == 'true' ]] ; then
     endpoints_file='tripleo-heat-templates/environments/ssl/tls-endpoints-public-ip.yaml'
   fi
   ssl_opts+=" -e $endpoints_file"
-  sed -i 's/\(Admin\)\(.*\)http/\1\2https/g' $endpoints_file
-  sed -i 's/\(Internal\)\(.*\)http/\1\2https/g' $endpoints_file
+  if [[ "$TLS" == 'all' ]] ; then
+    sed -i 's/\(Admin\)\(.*\)http/\1\2https/g' $endpoints_file
+    sed -i 's/\(Internal\)\(.*\)http/\1\2https/g' $endpoints_file
+  fi
   cat <<EOF > enable-tls.yaml
 resource_registry:
   OS::TripleO::NodeTLSData: tripleo-heat-templates/puppet/extraconfig/tls/tls-cert-inject.yaml
   OS::TripleO::NodeTLSCAData: tripleo-heat-templates/puppet/extraconfig/tls/ca-inject.yaml
 parameter_defaults:
   # RabbitClientUseSSL: true
+EOF
+  if [[ "$TLS" == 'all' ]] ; then
+    cat <<EOF >> enable-tls.yaml
   # enable internal TLS
   controllerExtraConfig:
     tripleo::haproxy::internal_certificate: /etc/pki/tls/private/overcloud_endpoint.pem
-  ContrailSslEnabled: true
   ContrailInternalApiSsl: true
+EOF
+  fi
+  cat <<EOF >> enable-tls.yaml
+  ContrailSslEnabled: true
   SSLIntermediateCertificate: ''
   SSLCertificate: |
 EOF

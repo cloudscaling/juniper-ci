@@ -34,7 +34,7 @@ run_os_checks
 function check_ui_ip () {
   local ip="$1"
   local ret=0
-  if [[ "$TLS" == 'false' ]] ; then
+  if [[ "$TLS" == 'off' ]] ; then
     echo "INFO: check controller $ip port 8180"
     if ! curl -I  http://$ip:8180/ 2>/dev/null| grep "302" ; then
       echo "ERROR: response from port 8180 is not HTTP 302:"
