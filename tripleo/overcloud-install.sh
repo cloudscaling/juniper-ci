@@ -658,6 +658,7 @@ EOF
   fi
   cat <<EOF >> enable-tls.yaml
   ContrailSslEnabled: true
+  ContrailInsecure: false
   SSLIntermediateCertificate: ''
   SSLCertificate: |
 EOF
@@ -673,6 +674,9 @@ EOF
   while read l ; do echo "    $l" ; done < contrail.ca.crt.pem >> enable-tls.yaml
   echo "  ContrailCaKey: |" >> enable-tls.yaml
   while read l ; do echo "    $l" ; done < contrail.ca.key.pem >> enable-tls.yaml
+
+  echo "  ContrailAuthCaCert: |" >> enable-tls.yaml
+  while read l ; do echo "    $l" ; done < ca.crt.pem >> enable-tls.yaml
 
 # TODO: not used in newton
 #  echo "  KeystoneSSLCertificate: |" >> enable-tls.yaml
