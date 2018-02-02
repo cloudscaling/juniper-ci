@@ -78,6 +78,8 @@ elif [ "x$HOST_OS" == "xcentos" ]; then
   yum install -y ansible
 fi
 
+hostname -b $(hostname -s)
+
 # TODO: switch to openstack's repo when work is done
 #pip install kolla-ansible
 git clone https://github.com/cloudscaling/kolla-ansible
@@ -102,7 +104,12 @@ virt_type = qemu
 cpu_mode = none
 EOF
 
+hostname -b $(hostname -s)
+
 kolla-ansible prechecks -i all-in-one
+
+hostname -b $(hostname -s)
+
 kolla-ansible deploy -i all-in-one
 docker ps -a
 kolla-ansible post-deploy
