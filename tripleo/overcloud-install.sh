@@ -78,6 +78,7 @@ fi
 ((prov_ip_addr=176+NUM*10))
 prov_ip="192.168.${prov_ip_addr}.2"
 fixed_vip="192.168.${prov_ip_addr}.200"
+fixed_controller_ip="192.168.${prov_ip_addr}.210"
 
 ((addr=BASE_ADDR+NUM*10))
 virt_host_ip="192.168.${addr}.1"
@@ -596,28 +597,102 @@ fi
 
 ssl_opts=''
 if [[ "$TLS" != 'off' ]] ; then
-
   # prepare for certificates creation
-  sudo touch /etc/pki/CA/index.txt
-  echo 1000 | sudo tee /etc/pki/CA/serial
+  ssl_working_dir="$(pwd)/contrail_ssl_gen"
+  csr_file="${ssl_working_dir}/server.pem.csr"
+  openssl_config_file="${ssl_working_dir}/contrail_openssl.cfg"
+  rm -rf $ssl_working_dir
+  mkdir -p $ssl_working_dir/certs
+  touch ${ssl_working_dir}/index.txt ${ssl_working_dir}/index.txt.attr
+  echo 1000 >${ssl_working_dir}/serial.txt
+  cat <<EOF > $openssl_config_file
+[req]
+default_bits = 2048
+prompt = no
+default_md = sha256
+default_days = 375
+req_extensions = v3_req
+distinguished_name = req_distinguished_name
+x509_extensions = v3_ca
 
-  # create haproxy CA
+[ req_distinguished_name ]
+countryName = US
+stateOrProvinceName = California
+localityName = Sannyvale
+0.organizationName = OpenContrail
+commonName = ${prov_ip}
+
+[ v3_req ]
+basicConstraints = CA:false
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = `hostname`
+DNS.2 = `hostname -f`
+
+[ ca ]
+default_ca = CA_default
+
+[ CA_default ]
+# Directory and file locations.
+dir               = $ssl_working_dir
+crl_dir           = \$dir/crl
+new_certs_dir     = \$dir/certs
+database          = \$dir/index.txt
+serial            = \$dir/serial.txt
+RANDFILE          = \$dir/.rand
+# For certificate revocation lists.
+crlnumber         = \$dir/crlnumber
+crl               = \$dir/crl/crl.pem
+crl_extensions    = crl_ext
+default_crl_days  = 30
+# The root key and root certificate.
+private_key       = ca.key.pem
+certificate       = ca.crt.pem
+# SHA-1 is deprecated, so use SHA-2 instead.
+default_md        = sha256
+name_opt          = ca_default
+cert_opt          = ca_default
+default_days      = 375
+preserve          = no
+policy            = policy_optional
+
+[ policy_optional ]
+countryName            = optional
+stateOrProvinceName    = optional
+organizationName       = optional
+organizationalUnitName = optional
+commonName             = supplied
+emailAddress           = optional
+
+[ v3_ca]
+# Extensions for a typical CA
+# PKIX recommendation.
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints = CA:true
+
+[ crl_ext ]
+authorityKeyIdentifier=keyid:always,issuer:always
+EOF
+
+  # create root CA
   openssl genrsa -out ca.key.pem 4096
-  openssl req -key ca.key.pem -new -x509 -days 365 -extensions v3_ca -out ca.crt.pem \
-    -subj "/C=RU/ST=Moscow/L=Moscow/O=ProgmaticLab/OU=TestCAHaproxy/CN=${prov_ip}"
+  openssl req -config $openssl_config_file -new -x509 -days 365 -extensions v3_ca -key ca.key.pem -out ca.crt.pem
+
+  # create contrail root CA
+  openssl genrsa -out contrail.ca.key.pem 4096
+  openssl req -config $openssl_config_file -new -x509 -days 365 -extensions v3_ca -key contrail.ca.key.pem -out contrail.ca.crt.pem
 
   # create haproxy server certificate (VIPs)
+  sed -i "s/commonName = .*/commonName = overcloud-controller-0/g" $openssl_config_file
+  sed -i "s/DNS.1 = .*/DNS.1 = ${fixed_vip}/g" $openssl_config_file
+  sed -i "s/DNS.2 = .*/DNS.2 = ${fixed_controller_ip}/g" $openssl_config_file
   openssl genrsa -out server.key.pem 2048
-  openssl req -key server.key.pem -new -out server.csr.pem \
-    -subj "/C=RU/ST=Moscow/L=Moscow/O=ProgmaticLab/OU=TestHaproxy/CN=${fixed_vip}"
-  yes | sudo openssl ca -extensions v3_req -days 365 -in server.csr.pem \
-    -out server.crt.pem -cert ca.crt.pem -keyfile ca.key.pem
-  sudo chown stack:stack server.crt.pem
+  openssl req -config $openssl_config_file -new -key server.key.pem -new -out server.csr.pem
+  yes | openssl ca -config $openssl_config_file -extensions v3_req -days 365 -in server.csr.pem -out server.crt.pem
 
-  # create contrail CA certificate
-  openssl genrsa -out contrail.ca.key.pem 4096
-  openssl req -key contrail.ca.key.pem -new -x509 -days 365 -extensions v3_ca -out contrail.ca.crt.pem \
-    -subj "/C=RU/ST=Moscow/L=Moscow/O=ProgmaticLab/OU=TestCAContrail/CN=${prov_ip}"
 
   # create keystone certificate
   # TODO: is not used in newton
@@ -639,7 +714,11 @@ if [[ "$TLS" != 'off' ]] ; then
 resource_registry:
   OS::TripleO::NodeTLSData: tripleo-heat-templates/puppet/extraconfig/tls/tls-cert-inject.yaml
   OS::TripleO::NodeTLSCAData: tripleo-heat-templates/puppet/extraconfig/tls/ca-inject.yaml
+  OS::TripleO::Controller::Ports::InternalApiPort: tripleo-heat-templates/network/ports/internal_api_from_pool.yaml
 parameter_defaults:
+  ControllerIPs:
+    ctlplane_api:
+    - ${fixed_controller_ip}
 EOF
   if [[ "$TLS" == 'all' || "$TLS" == 'all_except_rabbit' ]] ; then
     sed -i 's/\(Admin\)\(.*\)http/\1\2https/g' $endpoints_file
