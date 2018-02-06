@@ -714,11 +714,10 @@ EOF
 resource_registry:
   OS::TripleO::NodeTLSData: tripleo-heat-templates/puppet/extraconfig/tls/tls-cert-inject.yaml
   OS::TripleO::NodeTLSCAData: tripleo-heat-templates/puppet/extraconfig/tls/ca-inject.yaml
-  OS::TripleO::Controller::Ports::InternalApiPort: tripleo-heat-templates/network/ports/internal_api_from_pool.yaml
 parameter_defaults:
-  ControllerIPs:
-    ctlplane_api:
-    - ${fixed_controller_ip}
+  # ControllerIPs:
+  #   ctlplane:
+  #   - ${fixed_controller_ip}
 EOF
   if [[ "$TLS" == 'all' || "$TLS" == 'all_except_rabbit' ]] ; then
     sed -i 's/\(Admin\)\(.*\)http/\1\2https/g' $endpoints_file
