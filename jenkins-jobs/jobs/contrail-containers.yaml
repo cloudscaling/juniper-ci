@@ -90,42 +90,33 @@
 - project:
     name: contrail-containers
     project:
-      - helm-aws-ubuntu:
-          slavenode:
-            - master
-          contrail_version: 4.1.0.0-8
-          packages_url: ''
-      - helm-aws-centos:
-          slavenode:
-            - master
-          contrail_version: 4.1.0.0-8
-          packages_url: ''
+#      - helm-aws-ubuntu:
+#          slavenode:
+#            - master
+#          contrail_version: 4.1.0.0-8
+#          packages_url: ''
+#      - helm-aws-centos:
+#          slavenode:
+#            - master
+#          contrail_version: 4.1.0.0-8
+#          packages_url: ''
 #      - helm-aws-centos-all:
 #          slavenode:
 #            - master
 #          contrail_version: 4.2.0.0-1
+
+# for old packages use this:
+#          contrail_version: 4.1.0.0-8
+#          packages_url: ''
+
       - k8s-server-centos:
-          slavenode:
-            - slave01
-            - slave02
-            - slave03
-          contrail_version: 4.1.0.0-8
-          packages_url: ''
-      - k8s-server-ubuntu:
-          slavenode:
-            - slave01
-            - slave02
-            - slave03
-          contrail_version: 4.1.0.0-8
-          packages_url: ''
-      - k8s-server-centos-containers-mainline:
           slavenode:
             - slave01
             - slave02
             - slave03
           contrail_version: 5.0.0-126
           packages_url: 'https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-126-ocata.tgz'
-      - k8s-server-ubuntu-containers-mainline:
+      - k8s-server-ubuntu:
           slavenode:
             - slave01
             - slave02
@@ -137,19 +128,19 @@
             - slave01
             - slave02
             - slave03
-          contrail_version: 4.1.0.0-8
-          packages_url: ''
+          contrail_version: 5.0.0-126
+          packages_url: 'https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-126-ocata.tgz'
       - compose-server-ubuntu:
           slavenode:
             - slave01
             - slave02
             - slave03
-          contrail_version: 4.1.0.0-8
-          packages_url: ''
+          contrail_version: 5.0.0-93
+          packages_url: 'https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-93-ocata.tgz'
       - kolla-aws-centos:
           slavenode:
             - master
-          contrail_version: 4.1.0.0-8
-          packages_url: ''
+          contrail_version: 5.0.0-126
+          packages_url: 'https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-126-ocata.tgz'
     jobs:
       - 'contrail-{project}'
