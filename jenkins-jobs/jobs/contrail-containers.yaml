@@ -37,7 +37,10 @@
       - string:
           name: CAD_PATCHSET
           description: "Additional command to fetch patchset for contrail-ansible-deployer. Ex: same as previous."
-      - node:
+        - string:
+          name: CCB_REPO
+          description: "Custom remote URL for contrail-container-builer. If empty Juniper one is used."
+        - node:
           name: SLAVE_NAME
           description: "Select slave: one for specific node or multiple for any node."
           default-slaves: '{obj:slavenode}'
@@ -52,6 +55,13 @@
     builders:
       - shell: |
           #!/bin/bash -e
+          if [[ -n "$CCB_REPO" ]]; then
+            pushd contrail-container-builder
+            git remote add custom $CCB_REPO
+            git fetch custom
+            git checkout custom/master
+            popd
+          fi
           if [[ -n "$CCB_PATCHSET" ]]; then
             pushd contrail-container-builder
             eval "$CCB_PATCHSET"
