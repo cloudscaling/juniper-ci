@@ -33,14 +33,14 @@
             - ubuntu
       - string:
           name: CCB_PATCHSET
-          description: "Additional command to fetch patchset for contrail-container-builer repo. Ex: git fetch https://review.opencontrail.org/Juniper/contrail-container-builder refs/changes/43/38943/1 && git cherry-pick FETCH_HEAD"
+          description: "Additional command to fetch patchset for contrail-container-builer repo."
       - string:
           name: CAD_PATCHSET
           description: "Additional command to fetch patchset for contrail-ansible-deployer. Ex: same as previous."
-        - string:
+      - string:
           name: CCB_REPO
           description: "Custom remote URL for contrail-container-builer. If empty Juniper one is used."
-        - node:
+      - node:
           name: SLAVE_NAME
           description: "Select slave: one for specific node or multiple for any node."
           default-slaves: '{obj:slavenode}'

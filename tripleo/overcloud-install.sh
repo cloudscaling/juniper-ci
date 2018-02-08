@@ -77,8 +77,9 @@ fi
 
 ((prov_ip_addr=176+NUM*10))
 prov_ip="192.168.${prov_ip_addr}.2"
-fixed_vip="192.168.${prov_ip_addr}.200"
-fixed_controller_ip="192.168.${prov_ip_addr}.210"
+fixed_ip_base="192.168.${prov_ip_addr}"
+fixed_vip="${fixed_ip_base}.200"
+fixed_controller_ip="${fixed_ip_base}.211"
 
 ((addr=BASE_ADDR+NUM*10))
 virt_host_ip="192.168.${addr}.1"
@@ -710,14 +711,30 @@ EOF
     endpoints_file='tripleo-heat-templates/environments/ssl/tls-endpoints-public-ip.yaml'
   fi
   ssl_opts+=" -e $endpoints_file"
+  cat <<EOF > ctlplane-port.yaml
+parameters:
+  Hostname:
+    type: string
+  DeployedServerPortMap:
+    default: {}
+    type: json
+outputs:
+  ip_address:
+    value: {get_param: [DeployedServerPortMap, {get_param: Hostname}, ip_address]}
+EOF
   cat <<EOF > enable-tls.yaml
 resource_registry:
   OS::TripleO::NodeTLSData: tripleo-heat-templates/puppet/extraconfig/tls/tls-cert-inject.yaml
   OS::TripleO::NodeTLSCAData: tripleo-heat-templates/puppet/extraconfig/tls/ca-inject.yaml
+  # OS::TripleO::Controller::Ports::InternalApiPort: tripleo-heat-templates/network/ports/internal_api_from_pool.yaml
+  OS::TripleO::Controller::ControlPlanePort: ctlplane-port.yaml
 parameter_defaults:
   # ControllerIPs:
   #   ctlplane:
-  #   - ${fixed_controller_ip}
+  #     - $fixed_controller_ip
+  DeployedServerPortMap:
+    controller-ctlplane:
+      - ip_address: $fixed_controller_ip
 EOF
   if [[ "$TLS" == 'all' || "$TLS" == 'all_except_rabbit' ]] ; then
     sed -i 's/\(Admin\)\(.*\)http/\1\2https/g' $endpoints_file
