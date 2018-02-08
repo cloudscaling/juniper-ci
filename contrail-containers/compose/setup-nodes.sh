@@ -62,8 +62,8 @@ done
 cat ./inventory/hosts
 
 cat <<EOM > ./inventory/group_vars/container_hosts.yml
-CONTAINER_REGISTRY: ${DOCKER_REGISTRY_ADDR}:5000
 contrail_configuration:
+  CONTAINER_REGISTRY: ${DOCKER_REGISTRY_ADDR}:5000
   OPENSTACK_VERSION: $OPENSTACK_VERSION
   LINUX_DISTR: $linux_image_tag
   CONTRAIL_VERSION: $CONTRAIL_VERSION
