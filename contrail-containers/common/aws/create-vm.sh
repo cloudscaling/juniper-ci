@@ -147,13 +147,13 @@ function run_instance() {
 
   echo "INFO: Update packages on machine and install additional packages $(date)"
   if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
-    $ssh "yum install -y epel-release &>>yum.log"
-    $ssh "yum install -y mc git wget ntp ntpdate iptables iproute libxml2-utils python2.7 &>>yum.log"
-    $ssh "systemctl enable ntpd.service && systemctl start ntpd.service"
+    $ssh "sudo yum install -y epel-release &>>yum.log"
+    $ssh "sudo yum install -y mc git wget ntp ntpdate iptables iproute libxml2-utils python2.7 &>>yum.log"
+    $ssh "sudo systemctl enable ntpd.service && sudo systemctl start ntpd.service"
   elif [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
-    $ssh "apt-get -y update &>>$HOME/apt.log"
-    $ssh 'DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$HOME/apt.log'
-    $ssh "apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 &>>$HOME/apt.log"
+    $ssh "sudo apt-get -y update &>>$HOME/apt.log"
+    $ssh 'DEBIAN_FRONTEND=noninteractive sudo -E apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$HOME/apt.log'
+    $ssh "sudo apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 &>>$HOME/apt.log"
   fi
 }
 
