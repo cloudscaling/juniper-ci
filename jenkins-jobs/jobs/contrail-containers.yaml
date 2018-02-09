@@ -152,5 +152,10 @@
             - master
           contrail_version: 5.0.0-126
           packages_url: 'https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-126-ocata.tgz'
+      - kolla-aws-ubuntu:
+          slavenode:
+            - master
+          contrail_version: 5.0.0-93
+          packages_url: 'https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-93-ocata.tgz'
     jobs:
       - 'contrail-{project}'
