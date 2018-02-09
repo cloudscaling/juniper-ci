@@ -59,7 +59,7 @@ sed -i -e "s/{{contrail_docker_registry}}/$registry_ip:5000/g" globals.yml
 echo "INFO: Preparing instances"
 if [ "x$HOST_OS" == "xubuntu" ]; then
   apt-get install -y --no-install-recommends python-pip
-  pip install -U pip
+  pip install -U pip setuptools
   apt-get install -y python-dev libffi-dev gcc libssl-dev python-selinux
   pip install -U ansible
 elif [ "x$HOST_OS" == "xcentos" ]; then
