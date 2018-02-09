@@ -77,7 +77,7 @@ function define_node() {
 
 # First 3 are controllers,
 # latest is agent
-MEM_MAP=( 16284 16284 16284 4096 )
+MEM_MAP=( 16384 16384 16384 4096 )
 CTRL_MEM_LIMIT=10000
 for (( i=0; i < ${#NODES[@]}; ++i )) ; do
   define_node "${NODES[$i]}" ${MEM_MAP[$i]}
@@ -139,6 +139,16 @@ EOM
   chmod 600 /home/$SSH_USER/.ssh/id_rsa
   echo "$id_rsa_pub" > /home/$SSH_USER/.ssh/id_rsa.pub
   chmod 600 /home/$SSH_USER/.ssh/id_rsa.pub
+fi
+
+if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
+  yum install -y epel-release &>>yum.log
+  yum install -y mc git wget ntp iptables iproute libxml2-utils python2.7 &>>yum.log
+  systemctl enable ntpd.service && systemctl start ntpd.service
+elif [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
+  apt-get -y update &>>$HOME/apt.log
+  DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$HOME/apt.log
+  apt-get install -y --no-install-recommends mc git wget ntp libxml2-utils python2.7 &>>$HOME/apt.log
 fi
 
 EOF

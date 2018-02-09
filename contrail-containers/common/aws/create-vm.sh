@@ -144,6 +144,17 @@ function run_instance() {
     sleep 20
     $ssh "$IFCONFIG_PATH/ifconfig" 2>/dev/null | grep -A 1 "^[a-z].*" | grep -v "\-\-"
   fi
+
+  echo "INFO: Update packages on machine and install additional packages $(date)"
+  if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
+    $ssh "yum install -y epel-release &>>yum.log"
+    $ssh "yum install -y mc git wget ntp iptables iproute libxml2-utils python2.7 &>>yum.log"
+    $ssh "systemctl enable ntpd.service && systemctl start ntpd.service"
+  elif [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
+    $ssh "apt-get -y update &>>$HOME/apt.log"
+    $ssh 'DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$HOME/apt.log'
+    $ssh "apt-get install -y --no-install-recommends mc git wget ntp libxml2-utils python2.7 &>>$HOME/apt.log"
+  fi
 }
 
 # instance for OpenStack cloud
