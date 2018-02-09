@@ -146,9 +146,9 @@ if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
   yum install -y mc git wget ntp ntpdate iptables iproute libxml2-utils python2.7 &>>yum.log
   systemctl enable ntpd.service && systemctl start ntpd.service
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
-  apt-get -y update &>>$HOME/apt.log
-  DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$HOME/apt.log
-  apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 &>>$HOME/apt.log
+  apt-get -y update &>>apt.log
+  DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>apt.log
+  apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 &>>apt.log
 fi
 
 EOF
