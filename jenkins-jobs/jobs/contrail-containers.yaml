@@ -32,10 +32,10 @@
             - centos
             - ubuntu
       - choice:
-        name: AGENT_MODE
-        choices:
-          - kmod
-          - dpdk
+          name: AGENT_MODE
+          choices:
+            - kmod
+            - dpdk
       - string:
           name: CCB_PATCHSET
           description: "Additional command to fetch patchset for contrail-container-builer repo."
