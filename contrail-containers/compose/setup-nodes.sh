@@ -100,16 +100,12 @@ cat ./inventory/group_vars/all.yml
 popd
 
 if [[ -x \$(command -v yum 2>/dev/null) ]] ; then
-  yum install -y epel-release
-  yum install -y ansible docker docker-compose ntp
-  systemctl enable ntpd.service
-  systemctl start ntpd.service
+  yum install -y ansible docker docker-compose
 else
-  apt-get update -qqy
   apt-get install -qqy software-properties-common
   apt-add-repository -y ppa:ansible/ansible
   apt-get update -qqy
-  apt-get install -y ansible docker docker-compose sshpass libxml2-utils ntp
+  apt-get install -y ansible docker docker-compose sshpass
 fi
 
 cat <<EOM > /etc/docker/daemon.json

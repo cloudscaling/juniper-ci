@@ -23,25 +23,10 @@ else
 fi
 
 echo "INFO: Preparing instances"
-if [ "x$HOST_OS" == "xubuntu" ]; then
-  sudo apt-get -y update &>>$HOME/apt.log
-  sudo DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$HOME/apt.log
-  sudo apt-get install -y --no-install-recommends mc git wget ntp ntpdate &>>$HOME/apt.log
-elif [ "x$HOST_OS" == "xcentos" ]; then
+if [ "x$HOST_OS" == "xcentos" ]; then
   # ip is located in /usr/sbin that is not in path...
   export PATH=${PATH}:/usr/sbin
-
-  sudo yum install -y epel-release
   sudo cp ./ceph.repo /etc/yum.repos.d/ceph.repo
-  sudo yum install -y mc git wget ntp
-
-  sudo systemctl enable ntpd.service
-  sudo systemctl start ntpd.service
-
-  # TODO: remove this hack
-  wget -nv http://$registry_ip/$CONTRAIL_VERSION-$OPENSTACK_VERSION/vrouter.ko
-  chmod 755 vrouter.ko
-  sudo insmod ./vrouter.ko
 fi
 
 # TODO: switch to openstack's repo when work is done
