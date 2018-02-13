@@ -89,7 +89,7 @@ $SSH_BUILD "$ssh_env timeout -s 9 180m ./build-${BUILD_TARGET}.sh" |& tee $WORKS
 set +o pipefail
 
 $SCP "$my_dir/__run-gate.sh" $SSH_DEST:run-gate.sh
-timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION ./run-gate.sh $public_ip_build"
+timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION AGENT_MODE=$AGENT_MODE ./run-gate.sh $public_ip_build"
 
 trap - ERR
 save_logs
