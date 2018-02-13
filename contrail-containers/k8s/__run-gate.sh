@@ -12,7 +12,15 @@ function log_error() {
 export PATH=${PATH}:/usr/sbin
 
 pushd contrail-container-builder/kubernetes/manifests/
-./resolve-manifest.sh <contrail-template.yaml > ~/my-contrail.yaml
+case $AGENT_MODE in
+  dpdk)
+    template_name='contrail-template-dpdk.yaml'
+    ;;
+  *)
+    template_name='contrail-template.yaml'
+    ;;
+esac
+./resolve-manifest.sh < $template_name > ~/my-contrail.yaml
 popd
 
 function wait_cluster() {
