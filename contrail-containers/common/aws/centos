@@ -1,3 +1,5 @@
+#!/bin/bash
+
 export AWS_FLAGS="--region us-west-2"
 export SSH_USER=ec2-user
 # CentOS 7.4.1708 - HVM
@@ -5,3 +7,9 @@ export SSH_USER=ec2-user
 # us-west-2 : ami-82bd4ffa
 export IMAGE_ID=ami-82bd4ffa
 export IFCONFIG_PATH=/usr/sbin
+export IF1=eth0
+export IF2=eth1
+
+function create_iface() {
+  ;;
+}

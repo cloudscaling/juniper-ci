@@ -1,3 +1,5 @@
+#!/bin/bash
+
 export AWS_FLAGS="--region us-west-2"
 export SSH_USER=ubuntu
 # ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-201710
@@ -5,3 +7,12 @@ export SSH_USER=ubuntu
 # us-west-2 : ami-0a00ce72
 export IMAGE_ID=ami-0a00ce72
 export IFCONFIG_PATH=/sbin
+export IF1=ens3
+export IF2=ens4
+
+function create_iface() {
+  local iface=$2
+  shift
+  local ssh=$@
+  $ssh "sudo bash -c 'echo \"auto $iface\" > /etc/network/interfaces.d/$iface.cfg && echo \"iface $iface inet dhcp\" >> /etc/network/interfaces.d/$iface.cfg && ifup $iface'"
+}

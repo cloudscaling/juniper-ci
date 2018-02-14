@@ -141,7 +141,8 @@ function run_instance() {
     eni_attach_id=`aws ${AWS_FLAGS} ec2 attach-network-interface --network-interface-id $eni_id --instance-id $instance_id --device-index 1 --query 'AttachmentId' --output text`
     aws ${AWS_FLAGS} ec2 modify-network-interface-attribute --network-interface-id $eni_id --attachment AttachmentId=$eni_attach_id,DeleteOnTermination=true
     echo "INFO: additional interface $eni_id is attached: $eni_attach_id"
-    sleep 20
+    create_iface $IF2 $ssh
+    sleep 10
     $ssh "$IFCONFIG_PATH/ifconfig" 2>/dev/null | grep -A 1 "^[a-z].*" | grep -v "\-\-"
   fi
 
