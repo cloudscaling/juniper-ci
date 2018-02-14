@@ -57,15 +57,14 @@ function catch_errors() {
 $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
 
-$SCP "$my_dir/../__build-${BUILD_TARGET}.sh" $SSH_DEST_BUILD:build-${BUILD_TARGET}.sh
+$SCP "$my_dir/../__build-containers.sh" $SSH_DEST_BUILD:build-containers.sh
 $SCP -r "$WORKSPACE/contrail-container-builder" $SSH_DEST_BUILD:./
-$SCP -r "$WORKSPACE/contrail-build-poc" $SSH_DEST_BUILD:./
 if [[ -d "$HOME/containers-cache" ]]; then
   $SCP -r "$HOME/containers-cache" $SSH_DEST_BUILD:./
 fi
 
 set -o pipefail
-$SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION LINUX_DISTR=$LINUX_DISTR CONTRAIL_INSTALL_PACKAGES_URL=$CONTRAIL_INSTALL_PACKAGES_URL timeout -s 9 180m ./build-${BUILD_TARGET}.sh" |& tee $WORKSPACE/logs/build.log
+$SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION LINUX_DISTR=$LINUX_DISTR CONTRAIL_INSTALL_PACKAGES_URL=$CONTRAIL_INSTALL_PACKAGES_URL timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
 set +o pipefail
 
 $SCP "$my_dir/__run-gate.sh" $SSH_DEST:run-gate.sh

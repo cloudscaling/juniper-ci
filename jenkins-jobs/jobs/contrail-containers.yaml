@@ -25,13 +25,6 @@
             - ocata
             - newton
       - choice:
-          name: LINUX_DISTR
-          description: OS to build containers for
-          choices:
-            - same_as_host_os
-            - centos
-            - ubuntu
-      - choice:
           name: AGENT_MODE
           choices:
             - kmod
@@ -54,7 +47,6 @@
           allowed-multiselect: true
     scm:
       - juniper-ci
-      - contrail-build-poc
       - contrail-container-builder
       - contrail-ansible-deployer
     builders:
@@ -77,23 +69,14 @@
             eval "$CAD_PATCHSET"
             popd
           fi
-          export CONTRAIL_VERSION='{contrail_version}'
-          export CONTRAIL_INSTALL_PACKAGES_URL='{packages_url}'
-          # use newton for now. openstack-helm uses containers from newton...
+          # only centos images are supported now and thus only one archive with rpm-s is needed
+          export LINUX_DISTR=centos
+          export CONTRAIL_VERSION='5.0.0-126'
+          export CONTRAIL_INSTALL_PACKAGES_URL='https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-126-ocata.tgz'
+
           export WAY=$(echo {project} | cut -d '-' -f 1)
           export HOST=$(echo {project} | cut -d '-' -f 2)
           export ENVIRONMENT_OS=$(echo {project} | cut -d '-' -f 3)
-          export BUILD_TARGET=$(echo {project} | cut -d '-' -f 4)
-          if [[ -z "$BUILD_TARGET" ]] ; then
-            export BUILD_TARGET="containers"
-          fi
-          if [[ "$LINUX_DISTR" == 'same_as_host_os' ]] ; then
-            export LINUX_DISTR="$ENVIRONMENT_OS"
-          fi
-          if [[ "$LINUX_DISTR" == 'ubuntu' ]] ; then
-            # hardcode it for now
-            export ENVIRONMENT_OS_VERSION='xenial'
-          fi
           env|sort
           ./juniper-ci/contrail-containers/$WAY/run.sh
     publishers:
@@ -115,10 +98,6 @@
 #            - master
 #          contrail_version: 4.1.0.0-8
 #          packages_url: ''
-#      - helm-aws-centos-all:
-#          slavenode:
-#            - master
-#          contrail_version: 4.2.0.0-1
 
 # for old packages use this:
 #          contrail_version: 4.1.0.0-8
@@ -127,40 +106,20 @@
       - k8s-server-centos:
           slavenode:
             - slave01
-            - slave02
-            - slave03
-          contrail_version: 5.0.0-126
-          packages_url: 'https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-126-ocata.tgz'
       - k8s-server-ubuntu:
           slavenode:
             - slave01
-            - slave02
-            - slave03
-          contrail_version: 5.0.0-93
-          packages_url: 'https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-93-ocata.tgz'
       - compose-server-centos:
           slavenode:
             - slave01
-            - slave02
-            - slave03
-          contrail_version: 5.0.0-126
-          packages_url: 'https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-126-ocata.tgz'
       - compose-server-ubuntu:
           slavenode:
             - slave01
-            - slave02
-            - slave03
-          contrail_version: 5.0.0-93
-          packages_url: 'https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-93-ocata.tgz'
       - kolla-aws-centos:
           slavenode:
             - master
-          contrail_version: 5.0.0-126
-          packages_url: 'https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-126-ocata.tgz'
       - kolla-aws-ubuntu:
           slavenode:
             - master
-          contrail_version: 5.0.0-93
-          packages_url: 'https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-93-ocata.tgz'
     jobs:
       - 'contrail-{project}'
