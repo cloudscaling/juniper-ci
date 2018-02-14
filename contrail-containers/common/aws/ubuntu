@@ -11,7 +11,7 @@ export IF1=ens3
 export IF2=ens4
 
 function create_iface() {
-  local iface=$2
+  local iface=$1
   shift
   local ssh=$@
   $ssh "sudo bash -c 'echo \"auto $iface\" > /etc/network/interfaces.d/$iface.cfg && echo \"iface $iface inet dhcp\" >> /etc/network/interfaces.d/$iface.cfg && ifup $iface'"
