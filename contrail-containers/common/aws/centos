@@ -11,5 +11,5 @@ export IF1=eth0
 export IF2=eth1
 
 function create_iface() {
-  ;;
+  :
 }
