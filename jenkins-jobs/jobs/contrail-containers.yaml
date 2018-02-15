@@ -75,6 +75,9 @@
           export WAY=$(echo {project} | cut -d '-' -f 1)
           export HOST=$(echo {project} | cut -d '-' -f 2)
           export ENVIRONMENT_OS=$(echo {project} | cut -d '-' -f 3)
+          if [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
+            export ENVIRONMENT_OS_VERSION='xenial'
+          fi
           env|sort
           ./juniper-ci/contrail-containers/$WAY/run.sh
     publishers:
