@@ -61,8 +61,6 @@ enable_opencontrail: "yes"
 opencontrail_release: "{{contrail_version}}"
 opencontrail_base_distro: "centos7"
 opencontrail_docker_registry: "{{contrail_docker_registry}}"
-# this globals.yml is for current AWS deployment where we know all addresses
-opencontrail_vrouter_gateway: "192.168.131.1"
 # while opencontrail is not a role in ansible and we didn't patch group_vars/all.yml we set fake IP here
 enable_openvswitch: "no"
 enable_neutron_bgp_dragent: "no"
