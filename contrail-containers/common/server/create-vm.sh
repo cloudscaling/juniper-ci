@@ -148,7 +148,9 @@ if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
   apt-get -y update &>>apt.log
   DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>apt.log
-  apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 &>>apt.log
+  apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 linux-image-extra-\$(uname -r) &>>apt.log
+  mv /etc/os-release /etc/os-release.original
+  cat /etc/os-release.original > /etc/os-release
 fi
 
 EOF
