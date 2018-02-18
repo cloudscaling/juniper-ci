@@ -35,6 +35,10 @@ assert_empty AGENT_NODES
 
 # Set both ZOOKEEPER_PORT and ZOOKEEPER_ANALYTICS_PORT to 2181
 # because there is one zookeeper cluster in this test
+vrouter_role='vrouter'
+if [[ "$AGENT_MODE" == 'dpdk' ]] ; then
+  vrouter_role='vrouter_dpdk'
+fi
 
 function setup_node() {
   local host=$1
@@ -70,6 +74,7 @@ contrail_configuration:
   CONTROLLER_NODES: $CONTROLLER_NODES
   CLOUD_ORCHESTRATOR: kubernetes
   RABBITMQ_NODE_PORT: 5673
+  AGENT_MODE: $AGENT_MODE
 roles:
 EOM
 for i in ${controllers[@]} ; do
@@ -86,7 +91,7 @@ done
 for i in ${agents[@]} ; do
   cat <<EOM >> ./inventory/group_vars/container_hosts.yml
   \${i}:
-    vrouter:
+    $vrouter_role:
 EOM
 done
 cat ./inventory/group_vars/container_hosts.yml
