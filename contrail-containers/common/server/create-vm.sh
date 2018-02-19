@@ -77,7 +77,7 @@ function define_node() {
 
 # First 3 are controllers,
 # latest is agent
-MEM_MAP=( 16384 16384 16384 4096 )
+MEM_MAP=( 16384 16384 16384 6000 )
 CTRL_MEM_LIMIT=10000
 for (( i=0; i < ${#NODES[@]}; ++i )) ; do
   define_node "${NODES[$i]}" ${MEM_MAP[$i]}
