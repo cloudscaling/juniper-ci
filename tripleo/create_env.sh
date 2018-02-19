@@ -347,7 +347,8 @@ echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
 sysctl -p /etc/sysctl.conf
 hostnamectl set-hostname $my_host
 hostnamectl set-hostname --transient $my_host
-echo "127.0.0.1   localhost myhost $my_host" > /etc/hosts
+echo "$addr       myhost $my_host" > /etc/hosts
+echo "127.0.0.1   localhost" >> /etc/hosts
 systemctl restart network
 sleep 5
 EOF
