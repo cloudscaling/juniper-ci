@@ -75,6 +75,7 @@ contrail_configuration:
   CLOUD_ORCHESTRATOR: kubernetes
   RABBITMQ_NODE_PORT: 5673
   AGENT_MODE: $AGENT_MODE
+  PHYSICAL_INTERFACE: \$(ip route get 1 | grep -o 'dev.*' | awk '{print(\$2)}')
 roles:
 EOM
 for i in ${controllers[@]} ; do
