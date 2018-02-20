@@ -739,12 +739,28 @@ EOF
   if [[ "$TLS" == 'all' || "$TLS" == 'all_except_rabbit' ]] ; then
     sed -i 's/\(Admin\)\(.*\)http/\1\2https/g' $endpoints_file
     sed -i 's/\(Internal\)\(.*\)http/\1\2https/g' $endpoints_file
-    cat <<EOF >> enable-tls.yaml
+    if [[ "$OPENSTACK_VERSION" == "newton" ]] ; then
+      cat <<EOF >> enable-tls.yaml
   # enable internal TLS
   controllerExtraConfig:
     tripleo::haproxy::internal_certificate: /etc/pki/tls/private/overcloud_endpoint.pem
   ContrailInternalApiSsl: true
 EOF
+    else
+      cat <<EOF >> enable-tls.yaml
+  # enable internal TLS
+  controllerExtraConfig:
+    tripleo::haproxy::use_internal_certificates: true
+    tripleo::haproxy::internal_certificates_specs:
+      haproxy-contrail_config_network:
+        service_pem: /etc/pki/tls/private/overcloud_endpoint.pem
+      haproxy-contrail_analytics_network:
+        service_pem: /etc/pki/tls/private/overcloud_endpoint.pem
+      haproxy-contrail_webui_network:
+        service_pem: /etc/pki/tls/private/overcloud_endpoint.pem
+  ContrailInternalApiSsl: true
+EOF
+    fi
   fi
   if [[ "$TLS" == 'all' ]] ; then
     cat <<EOF >> enable-tls.yaml
