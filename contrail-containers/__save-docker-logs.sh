@@ -1,11 +1,13 @@
 #!/bin/bash
 
+CNT_NAME_PATTERN=${CNT_NAME_PATTERN:-'2,3'}
+
 # save contrail files
 sudo chown -R $USER logs
 mkdir -p logs/contrail
 pushd logs/contrail
 for cnt in `sudo docker ps | grep contrail | grep -v pause | awk '{print $1}'` ; do
-  cnt_name=`sudo docker inspect $cnt | python -c "import json, sys; data=json.load(sys.stdin); print data[0]['Name']" | cut -d '_' -f 2,3`
+  cnt_name=`sudo docker inspect $cnt | python -c "import json, sys; data=json.load(sys.stdin); print data[0]['Name']" | cut -d '_' -f $CNT_NAME_PATTERN`
   echo "Collecting files from $cnt_name"
   mkdir -p "$cnt_name"
   sudo docker cp $cnt:/var/log/contrail $cnt_name/
@@ -17,7 +19,7 @@ for cnt in `sudo docker ps | grep contrail | grep -v pause | awk '{print $1}'` ;
   mv $cnt_name/contrail $cnt_name/etc
 done
 for cnt in `sudo docker ps -a | grep contrail | grep -v pause | awk '{print $1}'` ; do
-  cnt_name=`sudo docker inspect $cnt | python -c "import json, sys; data=json.load(sys.stdin); print data[0]['Name']" | cut -d '_' -f 2,3`
+  cnt_name=`sudo docker inspect $cnt | python -c "import json, sys; data=json.load(sys.stdin); print data[0]['Name']" | cut -d '_' -f $CNT_NAME_PATTERN`
   mkdir -p "$cnt_name"
   sudo docker inspect $cnt > $cnt_name/inspect.log
   sudo docker logs $cnt &> $cnt_name/docker.log
@@ -34,6 +36,7 @@ function save_introspect_info() {
 save_introspect_info HttpPortConfigNodemgr 8100
 save_introspect_info HttpPortControlNodemgr 8101
 save_introspect_info HttpPortVRouterNodemgr 8102
+save_introspect_info HttpPortDatabaseNodemgr 8103
 save_introspect_info HttpPortAnalyticsNodemgr 8104
 save_introspect_info HttpPortKubeManager 8108
 #save_introspect_info HttpPortMesosManager 8109

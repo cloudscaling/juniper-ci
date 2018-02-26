@@ -21,7 +21,7 @@ function save_logs() {
   source "$my_dir/../common/${HOST}/ssh-defs"
   set +e
   $SCP "$my_dir/../__save-docker-logs.sh" $SSH_DEST:save-docker-logs.sh
-  $SSH "./save-docker-logs.sh"
+  $SSH "CNT_NAME_PATTERN='2-' ./save-docker-logs.sh"
 
   if $SSH "sudo tar -czf logs.tgz ./logs" ; then
     $SCP $SSH_DEST:logs.tgz "$WORKSPACE/logs/logs.tgz"
