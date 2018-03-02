@@ -751,12 +751,14 @@ EOF
   # enable internal TLS
   controllerExtraConfig:
     tripleo::haproxy::use_internal_certificates: true
-    tripleo::haproxy::internal_certificates_specs:
-      haproxy-contrail_config_network:
+    tripleo::profile::base::haproxy::certificates_specs:
+      haproxy-internal_api:
         service_pem: /etc/pki/tls/private/overcloud_endpoint.pem
-      haproxy-contrail_analytics_network:
+      haproxy-ctlplane:
         service_pem: /etc/pki/tls/private/overcloud_endpoint.pem
-      haproxy-contrail_webui_network:
+      haproxy-storage:
+        service_pem: /etc/pki/tls/private/overcloud_endpoint.pem
+      haproxy-storage_mgmt:
         service_pem: /etc/pki/tls/private/overcloud_endpoint.pem
   ContrailInternalApiSsl: true
 EOF
