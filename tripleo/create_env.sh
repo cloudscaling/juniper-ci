@@ -308,6 +308,10 @@ _patch_image "$pool_path/undercloud-$NUM.qcow2" \
   'ifcfg-ethM' $mgmt_ip $mgmt_mac \
   'ifcfg-ethA' $prov_ip $prov_mac
 
+if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
+  export RHEL_POOL_ID='8a85f98c61aca5bf0161ad8a8afc0e23'
+fi
+
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   rhel_register_system_and_customize "$pool_path/undercloud-$NUM.qcow2" 'undercloud'
 fi
