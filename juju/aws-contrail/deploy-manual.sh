@@ -123,12 +123,14 @@ juju-deploy $PLACE/contrail-keystone-auth --to $m6
 
 juju-deploy $PLACE/contrail-controller --to $m6
 juju-expose contrail-controller
-juju-set contrail-controller auth-mode=$AAA_MODE
+juju-set contrail-controller auth-mode=$AAA_MODE "log-level=SYS_DEBUG"
 if [ "$USE_EXTERNAL_RABBITMQ" == 'true' ]; then
   juju-set contrail-controller "use-external-rabbitmq=true"
 fi
 juju-deploy $PLACE/contrail-analyticsdb --to $m6
+juju-set contrail-analyticsdb "log-level=SYS_DEBUG"
 juju-deploy $PLACE/contrail-analytics --to $m6
+juju-set contrail-analytics "log-level=SYS_DEBUG"
 juju-expose contrail-analytics
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
@@ -155,6 +157,7 @@ sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_cv.yaml"
 sed -i -e "s|{{series}}|$SERIES|m" "repo_config_cv.yaml"
 sed -i "s/\r/\n/g" "repo_config_cv.yaml"
 juju-deploy $PLACE/contrail-agent --config repo_config_cv.yaml
+juju-set contrail-agent "log-level=SYS_DEBUG"
 
 if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
   juju-set contrail-controller control-network=$subnet_cidr
