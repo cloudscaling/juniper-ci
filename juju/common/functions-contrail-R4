@@ -29,6 +29,29 @@ function wget_file() {
   fi
 }
 
+function find_images() {
+  image_controller="contrail-controller-ubuntu${uver}-${CONTRAIL_BUILD}.tar.gz"
+  image_analytics="contrail-analytics-ubuntu${uver}-${CONTRAIL_BUILD}.tar.gz"
+  image_analyticsdb="contrail-analyticsdb-ubuntu${uver}-${CONTRAIL_BUILD}.tar.gz"
+  if [[ -f "$HOME/docker/$image_controller" && -f "$HOME/docker/$image_analytics" && -f"$HOME/docker/$image_analyticsdb" ]] ; then
+    echo "INFO: container images found - $image_controller"
+    return
+  fi
+
+  # exact version is not found. try to find latest version for release from controller name.
+  major_ver=`echo $CONTRAIL_BUILD | cut -d '-' -f 1`
+  build_number=`ls -1 $HOME/docker/ | grep "contrail-controller-ubuntu${uver}-${major_ver}" | sed "s/^.*-\([0-9]*\)\.tar\.gz/\1/" | sort -n | tail -1`
+  image_controller="contrail-controller-ubuntu${uver}-${major_ver}-${build_number}.tar.gz"
+  image_analytics="contrail-analytics-ubuntu${uver}-${major_ver}-${build_number}.tar.gz"
+  image_analyticsdb="contrail-analyticsdb-ubuntu${uver}-${major_ver}-${build_number}.tar.gz"
+  if [[ -f "$HOME/docker/$image_controller" && -f "$HOME/docker/$image_analytics" && -f"$HOME/docker/$image_analyticsdb" ]] ; then
+    echo "INFO: container images found - $image_controller"
+    return
+  fi
+
+  return 1
+}
+
 function check_containers() {
   mkdir -p "$HOME/docker"
   packages="contrail_debs-${CONTRAIL_BUILD}-${VERSION}.tgz"
@@ -40,13 +63,10 @@ function check_containers() {
   elif [[ "$SERIES" == "xenial" ]] ; then
     local uver="16.04"
   fi
-  image_controller="contrail-controller-ubuntu${uver}-${CONTRAIL_BUILD}.tar.gz"
-  image_analytics="contrail-analytics-ubuntu${uver}-${CONTRAIL_BUILD}.tar.gz"
-  image_analyticsdb="contrail-analyticsdb-ubuntu${uver}-${CONTRAIL_BUILD}.tar.gz"
-  if [[ -f "$HOME/docker/$image_controller" && -f "$HOME/docker/$image_analytics" && -f"$HOME/docker/$image_analyticsdb" ]] ; then
-    echo "INFO: container images are in place. skipping download"
+  if find_images ; then
     return
   fi
+  echo "INFO: cached images are not found. downloading... $(date)"
 
   di_file="contrail-docker-images_${CONTRAIL_BUILD}-$SERIES.tgz"
   if ! curl --head -s "${base_url}/${di_file}" | grep "200 OK" ; then
@@ -64,4 +84,6 @@ function check_containers() {
   tar -xvf $di_file
   popd
   rm -f "$HOME/docker/$di_file"
+
+  find_images
 }
