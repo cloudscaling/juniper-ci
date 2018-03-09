@@ -27,9 +27,9 @@
           name: VERSION
           description: "Version of the OpenStack. mitaka implies trusty and newton/ocata implies xenial."
           choices:
-            - mitaka
-            - newton
             - ocata
+            - newton
+            - mitaka
       - choice:
           name: DEPLOY_FROM
           description: "A place where to get charms"
@@ -158,9 +158,9 @@
           name: VERSION
           description: "Version of the OpenStack. mitaka implies trusty and newton/ocata implies xenial."
           choices:
+            - ocata
             - newton
             - mitaka
-            - ocata
       - choice:
           name: DEPLOY_MODE
           description: |
