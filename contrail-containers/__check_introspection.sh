@@ -6,6 +6,7 @@ port_map['analytics-topology']=5921
 port_map['config-nodemgr']=8100
 port_map['control-nodemgr']=8101
 port_map['vrouter-nodemgr']=8102
+port_map['database-nodemgr']=8103
 port_map['analytics-nodemgr']=8104
 port_map['analytics-alarm-gen']=5995
 #port_map['analytics-api']=
