@@ -1,12 +1,17 @@
 #!/bin/bash
 
 export AWS_FLAGS="--region us-west-2"
-export SSH_USER=ec2-user
+
+#export SSH_USER=ec2-user
 # CentOS 7.4.1708 - HVM
 # us-east-2 : ami-a0fddfc5
 # us-west-2 : ami-82bd4ffa
 #export IMAGE_ID=ami-82bd4ffa
+
+# official images https://wiki.centos.org/Cloud/AWS
+export SSH_USER=centos
 export IMAGE_ID=ami-a042f4d8
+
 export IFCONFIG_PATH=/usr/sbin
 export IF1=eth0
 export IF2=eth1
