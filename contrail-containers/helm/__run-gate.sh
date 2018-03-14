@@ -47,10 +47,16 @@ fi
 
 # Download openstack-helm code
 git clone https://github.com/Juniper/openstack-helm.git
+pushd openstack-helm
+git fetch https://review.opencontrail.org/Juniper/openstack-helm refs/changes/38/40638/2 && git checkout FETCH_HEAD
+popd
 # Download openstack-helm-infra code
 git clone https://github.com/Juniper/openstack-helm-infra.git
 # Download contrail-helm-deployer code
 git clone https://github.com/Juniper/contrail-helm-deployer.git
+pushd contrail-helm-deployer
+git fetch https://review.opencontrail.org/Juniper/contrail-helm-deployer refs/changes/36/40636/2 && git checkout FETCH_HEAD
+popd
 
 export BASE_DIR=${WORKSPACE:-$(pwd)}
 export OSH_PATH=${BASE_DIR}/openstack-helm
@@ -119,6 +125,8 @@ make build-helm-toolkit
 make build-heat
 
 ./tools/deployment/developer/nfs/091-heat-opencontrail.sh
+
+./tools/deployment/developer/nfs/901-use-it-opencontrail.sh
 
 mv logs ../
 
