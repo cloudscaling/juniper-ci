@@ -113,6 +113,11 @@ helm install --name contrail-vrouter ${CHD_PATH}/contrail-vrouter \
 #  --set contrail_env.vrouter_common.VROUTER_GATEWAY=${VROUTER_GATEWAY}
 
 cd ${OSH_PATH}
+
+# workaround steps. remove later.
+make build-helm-toolkit
+make build-heat
+
 ./tools/deployment/developer/nfs/091-heat-opencontrail.sh
 
 mv logs ../
