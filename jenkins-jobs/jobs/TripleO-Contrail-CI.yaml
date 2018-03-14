@@ -11,10 +11,12 @@
             - slave01
             - slave02
             - slave03
+            - slave04
           allowed-slaves:
             - slave01
             - slave02
             - slave03
+            - slave04
           ignore-offline-nodes: false
           allowed-multiselect: true
       - choice:
@@ -216,10 +218,12 @@
             - slave01
             - slave02
             - slave03
+            - slave04
           allowed-slaves:
             - slave01
             - slave02
             - slave03
+            - slave04
           ignore-offline-nodes: false
           allowed-multiselect: true
       - choice:
