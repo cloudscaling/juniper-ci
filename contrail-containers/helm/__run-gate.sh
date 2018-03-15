@@ -55,7 +55,7 @@ git clone https://github.com/Juniper/openstack-helm-infra.git
 # Download contrail-helm-deployer code
 git clone https://github.com/Juniper/contrail-helm-deployer.git
 pushd contrail-helm-deployer
-git fetch https://review.opencontrail.org/Juniper/contrail-helm-deployer refs/changes/36/40636/2 && git checkout FETCH_HEAD
+git fetch https://review.opencontrail.org/Juniper/contrail-helm-deployer refs/changes/95/40695/1 && git checkout FETCH_HEAD
 popd
 
 export BASE_DIR=${WORKSPACE:-$(pwd)}
