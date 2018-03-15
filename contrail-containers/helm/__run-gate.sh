@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-AAA_MODE=${AAA_MODE:-rbac}
+AAA_MODE=${AAA_MODE:-cloud-admin}
 
 # tune some host settings
 sudo sysctl -w vm.max_map_count=1048575
