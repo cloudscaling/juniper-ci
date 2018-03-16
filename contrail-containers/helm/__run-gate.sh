@@ -111,8 +111,8 @@ helm install --name contrail-analytics ${CHD_PATH}/contrail-analytics \
   --namespace=contrail --set contrail_env.CONTROLLER_NODES=$CONTROL_NODE \
   --set contrail_env.AAA_MODE=$AAA_MODE
 
-# Edit contrail-vrouter/values.yaml and make sure that images.tags.vrouter_kernel_init is right. Image tag name will be different depending upon your linux. Also set the conf.host_os to ubuntu or centos depending on your system
-
+sleep 20
+free -h && sync && echo 3 >/proc/sys/vm/drop_caches && free -h
 helm install --name contrail-vrouter ${CHD_PATH}/contrail-vrouter \
   --namespace=contrail --set contrail_env.vrouter_common.CONTROLLER_NODES=${CONTROL_NODE} \
   --set contrail_env.vrouter_common.CONTROL_NODES=${CONTROL_NODE} \
