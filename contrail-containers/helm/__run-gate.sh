@@ -112,7 +112,7 @@ helm install --name contrail-analytics ${CHD_PATH}/contrail-analytics \
   --set contrail_env.AAA_MODE=$AAA_MODE
 
 sleep 20
-free -h && sync && echo 3 >/proc/sys/vm/drop_caches && free -h
+free -h && sudo sync && sudo bash -c 'echo 3 >/proc/sys/vm/drop_caches' && free -h
 helm install --name contrail-vrouter ${CHD_PATH}/contrail-vrouter \
   --namespace=contrail --set contrail_env.vrouter_common.CONTROLLER_NODES=${CONTROL_NODE} \
   --set contrail_env.vrouter_common.CONTROL_NODES=${CONTROL_NODE} \
