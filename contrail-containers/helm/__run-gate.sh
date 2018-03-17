@@ -47,7 +47,7 @@ git clone https://github.com/Juniper/openstack-helm-infra.git
 # Download contrail-helm-deployer code
 git clone https://github.com/Juniper/contrail-helm-deployer.git
 pushd contrail-helm-deployer
-git fetch https://review.opencontrail.org/Juniper/contrail-helm-deployer refs/changes/62/40762/1 && git checkout FETCH_HEAD
+git fetch https://review.opencontrail.org/Juniper/contrail-helm-deployer refs/changes/62/40762/3 && git checkout FETCH_HEAD
 git pull --rebase origin master
 popd
 
@@ -91,25 +91,21 @@ kubectl replace -f ${CHD_PATH}/rbac/cluster-admin.yaml
 
 helm install --name contrail-thirdparty ${CHD_PATH}/contrail-thirdparty \
   --namespace=contrail --set contrail_env.CONTROLLER_NODES=$CONTROL_NODE \
-  --set contrail_env.AAA_MODE=$AAA_MODE
+  --set contrail_env.AAA_MODE=$AAA_MODE --set contrail_env.LOG_LEVEL=SYS_DEBUG
 
 helm install --name contrail-controller ${CHD_PATH}/contrail-controller \
   --namespace=contrail --set contrail_env.CONTROLLER_NODES=$CONTROL_NODE \
   --set contrail_env.CONTROL_NODES=${CONTROL_NODES} \
-  --set contrail_env.AAA_MODE=$AAA_MODE
+  --set contrail_env.AAA_MODE=$AAA_MODE --set contrail_env.LOG_LEVEL=SYS_DEBUG
 
 helm install --name contrail-analytics ${CHD_PATH}/contrail-analytics \
   --namespace=contrail --set contrail_env.CONTROLLER_NODES=$CONTROL_NODE \
-  --set contrail_env.AAA_MODE=$AAA_MODE
+  --set contrail_env.AAA_MODE=$AAA_MODE --set contrail_env.LOG_LEVEL=SYS_DEBUG
 
-sleep 20
-#free -h && sudo sync && sudo bash -c 'echo 3 >/proc/sys/vm/drop_caches' && free -h
 helm install --name contrail-vrouter ${CHD_PATH}/contrail-vrouter \
   --namespace=contrail --set contrail_env.vrouter_common.CONTROLLER_NODES=${CONTROL_NODE} \
   --set contrail_env.vrouter_common.CONTROL_NODES=${CONTROL_NODE} \
-  --set contrail_env.AAA_MODE=$AAA_MODE
-#  --set contrail_env.vrouter_common.CONTROL_DATA_NET_LIST=${CONTROL_DATA_NET_LIST} \
-#  --set contrail_env.vrouter_common.VROUTER_GATEWAY=${VROUTER_GATEWAY}
+  --set contrail_env.AAA_MODE=$AAA_MODE --set contrail_env.LOG_LEVEL=SYS_DEBUG
 
 cd ${OSH_PATH}
 
@@ -118,6 +114,9 @@ make build-helm-toolkit
 make build-heat
 
 ./tools/deployment/developer/nfs/091-heat-opencontrail.sh
+
+# lets wait for services
+sleep 60
 
 ./tools/deployment/developer/nfs/901-use-it-opencontrail.sh
 
