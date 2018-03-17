@@ -47,7 +47,7 @@ git clone https://github.com/Juniper/openstack-helm-infra.git
 # Download contrail-helm-deployer code
 git clone https://github.com/Juniper/contrail-helm-deployer.git
 pushd contrail-helm-deployer
-git fetch https://review.opencontrail.org/Juniper/contrail-helm-deployer refs/changes/62/40762/3 && git checkout FETCH_HEAD
+git fetch https://review.opencontrail.org/Juniper/contrail-helm-deployer refs/changes/77/40777/1 && git checkout FETCH_HEAD
 git pull --rebase origin master
 popd
 
@@ -103,8 +103,8 @@ helm install --name contrail-analytics ${CHD_PATH}/contrail-analytics \
   --set contrail_env.AAA_MODE=$AAA_MODE --set contrail_env.LOG_LEVEL=SYS_DEBUG
 
 helm install --name contrail-vrouter ${CHD_PATH}/contrail-vrouter \
-  --namespace=contrail --set contrail_env.vrouter_common.CONTROLLER_NODES=${CONTROL_NODE} \
-  --set contrail_env.vrouter_common.CONTROL_NODES=${CONTROL_NODE} \
+  --namespace=contrail --set contrail_env.CONTROLLER_NODES=${CONTROL_NODE} \
+  --set contrail_env.CONTROL_NODES=${CONTROL_NODE} \
   --set contrail_env.AAA_MODE=$AAA_MODE --set contrail_env.LOG_LEVEL=SYS_DEBUG
 
 cd ${OSH_PATH}
