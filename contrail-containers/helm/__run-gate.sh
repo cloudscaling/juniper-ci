@@ -33,23 +33,14 @@ fi
 
 extra_args=''
 if [[ "$AAA_MODE" == 'rbac' ]]; then
-  args=$(mktemp)
-  cat <<EOF >$args
-conf:
-  paste:
-    composite:neutronapi_v2_0:
-      keystone: user_token cors http_proxy_to_wsgi request_id catch_errors authtoken keystonecontext extensions neutronapiapp_v2_0
-    filter:user_token:
-      paste.filter_factory: neutron_plugin_contrail.plugins.opencontrail.neutron_middleware:token_factory
-EOF
-  extra_args="--values $args"
+  extra_args="--values ./tools/overrides/backends/opencontrail/neutron-rbac.yaml"
 fi
 
 # Download openstack-helm code
 git clone https://github.com/Juniper/openstack-helm.git
 pushd openstack-helm
-git fetch https://review.opencontrail.org/Juniper/openstack-helm refs/changes/36/40736/2 && git checkout FETCH_HEAD
-git pull --rebase origin master
+#git fetch https://review.opencontrail.org/Juniper/openstack-helm refs/changes/36/40736/2 && git checkout FETCH_HEAD
+#git pull --rebase origin master
 popd
 # Download openstack-helm-infra code
 git clone https://github.com/Juniper/openstack-helm-infra.git
