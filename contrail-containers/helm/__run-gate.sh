@@ -39,8 +39,8 @@ fi
 # Download openstack-helm code
 git clone https://github.com/Juniper/openstack-helm.git
 pushd openstack-helm
-#git fetch https://review.opencontrail.org/Juniper/openstack-helm refs/changes/36/40736/2 && git checkout FETCH_HEAD
-#git pull --rebase origin master
+git fetch https://review.opencontrail.org/Juniper/openstack-helm refs/changes/36/40736/2 && git checkout FETCH_HEAD
+git pull --rebase origin master
 popd
 # Download openstack-helm-infra code
 git clone https://github.com/Juniper/openstack-helm-infra.git
@@ -103,7 +103,7 @@ helm install --name contrail-analytics ${CHD_PATH}/contrail-analytics \
   --set contrail_env.AAA_MODE=$AAA_MODE
 
 sleep 20
-free -h && sudo sync && sudo bash -c 'echo 3 >/proc/sys/vm/drop_caches' && free -h
+#free -h && sudo sync && sudo bash -c 'echo 3 >/proc/sys/vm/drop_caches' && free -h
 helm install --name contrail-vrouter ${CHD_PATH}/contrail-vrouter \
   --namespace=contrail --set contrail_env.vrouter_common.CONTROLLER_NODES=${CONTROL_NODE} \
   --set contrail_env.vrouter_common.CONTROL_NODES=${CONTROL_NODE} \
