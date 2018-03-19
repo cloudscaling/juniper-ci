@@ -131,44 +131,20 @@ if [[ -z "$ip" ]]; then
 fi
 ping -c 3 $ip
 
-function instance_status() {
-  openstack server show $1 | awk '/ status / {print $4}'
-}
-
-function wait_instance() {
-  local instance_id=$1
-  local max_fail=$2
-  local wait_status=${3:-ACTIVE}
-  echo "INFO: Wait for status '$wait_status' of instance '$instance_id'"
-  local fail=0
-  local timeout=10
-  while [[ true ]] ; do
-    if ((fail >= max_fail)); then
-      echo '' >> errors
-      echo "ERROR: Instance status wait timeout occured" >> errors
-      openstack server show $instance_id >> errors
-      return 1
-    fi
-    echo "attempt $fail of $max_fail"
-    status=$(instance_status $instance_id)
-    if [[ "$status" == "$wait_status" ]]; then
-      break
-    fi
-    if [[ "$status" == "ERROR" || -z "$status" ]]; then
-      echo '' >> errors
-      echo 'ERROR: Instance booting error' >> errors
-      openstack server show $instance_id >> errors
-      return 1
-    fi
-    sleep $timeout
-    ((timeout+=5))
-    ((++fail))
-  done
-}
-
-wait_instance demo1 10
-
 ssh-keyscan "$ip" >> ~/.ssh/known_hosts
+
+echo "INFO: Wait for instance's ssh is ready"
+fail=0
+while ! ssh -i ${HOME}/.ssh/id_rsa cirros@$ip ; do
+  ((++fail))
+  if ((fail > 12)); then
+    echo "ERROR: Instance status wait timeout occured"
+    exit 1
+  fi
+  sleep 10
+  echo "attempt $fail of 12"
+done
+
 # test for outside world
 ssh -i ${HOME}/.ssh/id_rsa cirros@$ip ping -q -c 1 -W 2 8.8.8.8
 # Check the VM can reach the metadata server
