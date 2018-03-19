@@ -124,7 +124,8 @@ fi
 ip=`curl -s http://127.0.0.1:8085/Snh_ItfReq?name=$if_name | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'`
 if [[ -z "$ip" ]]; then
   echo "ERROR: there is no link-local IP for VM"
-  ip link
+  curl -s http://127.0.0.1:8085/Snh_ItfReq?name=$if_name | xmllint --format -
+  ip route
   exit 1
 fi
 ping -c 3 $ip
