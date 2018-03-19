@@ -14,11 +14,12 @@ trap 'catch_errors $LINENO' ERR EXIT
 function catch_errors() {
   local exit_code=$?
   echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
-  trap - ERR
-  free -h
-  ps ax -H
+  trap - ERR EXIT
+  set +x
+  free -h | tee $my_dir/logs/free.log
+  df -h | tee $my_dir/logs/df.log
+  ps ax -H > $my_dir/logs/ps_ax.log
   docker ps -a
-  df -h
   save_logs
   exit $exit_code
 }
@@ -129,6 +130,43 @@ if [[ -z "$ip" ]]; then
   exit 1
 fi
 ping -c 3 $ip
+
+function instance_status() {
+  openstack server show $1 | awk '/ status / {print $4}'
+}
+
+function wait_instance() {
+  local instance_id=$1
+  local max_fail=$2
+  local wait_status=${3:-ACTIVE}
+  echo "INFO: Wait for status '$wait_status' of instance '$instance_id'"
+  local fail=0
+  local timeout=10
+  while [[ true ]] ; do
+    if ((fail >= max_fail)); then
+      echo '' >> errors
+      echo "ERROR: Instance status wait timeout occured" >> errors
+      openstack server show $instance_id >> errors
+      return 1
+    fi
+    echo "attempt $fail of $max_fail"
+    status=$(instance_status $instance_id)
+    if [[ "$status" == "$wait_status" ]]; then
+      break
+    fi
+    if [[ "$status" == "ERROR" || -z "$status" ]]; then
+      echo '' >> errors
+      echo 'ERROR: Instance booting error' >> errors
+      openstack server show $instance_id >> errors
+      return 1
+    fi
+    sleep $timeout
+    ((timeout+=5))
+    ((++fail))
+  done
+}
+
+wait_instance demo1 10
 
 ssh-keyscan "$ip" >> ~/.ssh/known_hosts
 # test for outside world
