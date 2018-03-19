@@ -132,9 +132,9 @@ ping -c 3 $ip
 
 ssh-keyscan "$ip" >> ~/.ssh/known_hosts
 # test for outside world
-ssh -i ${HOME}/.ssh/osh_key cirros@$ip ping -q -c 1 -W 2 8.8.8.8
+ssh -i ${HOME}/.ssh/id_rsa cirros@$ip ping -q -c 1 -W 2 8.8.8.8
 # Check the VM can reach the metadata server
-ssh -i ${HOME}/.ssh/osh_key cirros@$ip curl --verbose --connect-timeout 5 https://169.254.169.254/latest/meta-data/public-ipv4
+ssh -i ${HOME}/.ssh/id_rsa cirros@$ip curl -s --connect-timeout 5 http://169.254.169.254/latest/meta-data/local-ipv4
 
 trap - ERR EXIT
 save_logs
