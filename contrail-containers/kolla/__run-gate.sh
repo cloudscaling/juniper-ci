@@ -10,7 +10,7 @@ function save_logs() {
   cp -r /var/lib/docker/volumes/kolla_logs/_data $my_dir/logs/ || /bin/true
 }
 
-trap 'catch_errors $LINENO' ERR
+trap 'catch_errors $LINENO' ERR EXIT
 function catch_errors() {
   local exit_code=$?
   echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
@@ -110,5 +110,30 @@ pip install python-openstackclient
 source /etc/kolla/admin-openrc.sh
 $kolla_path/kolla-ansible/init-runonce
 
-trap - ERR
+net_id=`openstack network show demo-net -f value -c id`
+openstack server create --image cirros --flavor m1.tiny --key-name mykey --nic net-id=$net_id demo1
+sleep 20
+openstack server show demo1
+# NOTE: assuming that only one VM is running now
+if_name=$(ip link | grep -io "tap[0-9a-z-]*")
+if [[ -z "$if_name" ]]; then
+  echo "ERROR: there is no tap interface for VM"
+  ip link
+  exit 1
+fi
+ip=`curl -s http://127.0.0.1:8085/Snh_ItfReq?name=$if_name | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'`
+if [[ -z "$ip" ]]; then
+  echo "ERROR: there is no link-local IP for VM"
+  ip link
+  exit 1
+fi
+ping -c 3 $ip
+
+ssh-keyscan "$ip" >> ~/.ssh/known_hosts
+# test for outside world
+ssh -i ${HOME}/.ssh/osh_key cirros@$ip ping -q -c 1 -W 2 8.8.8.8
+# Check the VM can reach the metadata server
+ssh -i ${HOME}/.ssh/osh_key cirros@$ip curl --verbose --connect-timeout 5 https://169.254.169.254/latest/meta-data/public-ipv4
+
+trap - ERR EXIT
 save_logs

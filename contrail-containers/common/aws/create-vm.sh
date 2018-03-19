@@ -131,6 +131,12 @@ function run_instance() {
     echo "WARNING: Machine isn't accessible yet"
     sleep 2
   done
+  $ssh "sudo yum -y update ; sudo reboot"
+  echo "INFO: reboot & waiting for instance SSH"
+  while ! $ssh uname -a 2>/dev/null ; do
+    echo "WARNING: Machine isn't accessible yet"
+    sleep 2
+  done
   if [[ $cloud_vm == "true" ]]; then
     echo "INFO: Configure additional disk for cloud VM"
     $ssh "(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | sudo fdisk /dev/xvdf"
