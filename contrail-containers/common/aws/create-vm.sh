@@ -131,7 +131,8 @@ function run_instance() {
     echo "WARNING: Machine isn't accessible yet"
     sleep 2
   done
-  $ssh "sudo yum -y update ; sudo reboot"
+  $ssh "sudo yum -y update"
+  $ssh "sudo reboot" || /bin/true
   echo "INFO: reboot & waiting for instance SSH"
   while ! $ssh uname -a 2>/dev/null ; do
     echo "WARNING: Machine isn't accessible yet"
