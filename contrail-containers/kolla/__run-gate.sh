@@ -106,6 +106,8 @@ kolla-ansible deploy -i all-in-one
 docker ps -a
 kolla-ansible post-deploy
 
+set +x
+
 # test it
 pip install python-openstackclient
 source /etc/kolla/admin-openrc.sh
@@ -131,11 +133,10 @@ if [[ -z "$ip" ]]; then
 fi
 ping -c 3 $ip
 
-ssh-keyscan "$ip" >> ~/.ssh/known_hosts
-
+local ssh_opts='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5 -i ${HOME}/.ssh/id_rsa'
 echo "INFO: Wait for instance's ssh is ready"
 fail=0
-while ! ssh -i ${HOME}/.ssh/id_rsa cirros@$ip ; do
+while ! ssh $ssh_opts  cirros@$ip ; do
   ((++fail))
   if ((fail > 12)); then
     echo "ERROR: Instance status wait timeout occured"
@@ -146,9 +147,9 @@ while ! ssh -i ${HOME}/.ssh/id_rsa cirros@$ip ; do
 done
 
 # test for outside world
-ssh -i ${HOME}/.ssh/id_rsa cirros@$ip ping -q -c 1 -W 2 8.8.8.8
+ssh $ssh_opts -i cirros@$ip ping -q -c 1 -W 2 8.8.8.8
 # Check the VM can reach the metadata server
-ssh -i ${HOME}/.ssh/id_rsa cirros@$ip curl -s --connect-timeout 5 http://169.254.169.254/latest/meta-data/local-ipv4
+ssh $ssh_opts -i cirros@$ip curl -s --connect-timeout 5 http://169.254.169.254/latest/meta-data/local-ipv4
 
 trap - ERR EXIT
 save_logs
