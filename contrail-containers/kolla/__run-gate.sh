@@ -147,9 +147,9 @@ while ! ssh $ssh_opts cirros@$ip whoami ; do
 done
 
 # test for outside world
-ssh $ssh_opts -i cirros@$ip ping -q -c 1 -W 2 8.8.8.8
+ssh $ssh_opts cirros@$ip ping -q -c 1 -W 2 8.8.8.8
 # Check the VM can reach the metadata server
-ssh $ssh_opts -i cirros@$ip curl -s --connect-timeout 5 http://169.254.169.254/latest/meta-data/local-ipv4
+ssh $ssh_opts cirros@$ip curl -s --connect-timeout 5 http://169.254.169.254/latest/meta-data/local-ipv4
 
 trap - ERR EXIT
 save_logs

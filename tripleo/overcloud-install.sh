@@ -834,15 +834,15 @@ overcloud_nodes=$(openstack server list)
 echo "$overcloud_nodes"
 
 echo "INFO: collecting Contrail status"
-for i in $(echo "$overcloud_nodes" | awk '/contrail|compute|dpdk|tsn/ {print($8)}' | cut -d '=' -f 2) ; do
+for i in `echo "$overcloud_nodes" | awk '/contrail|compute|dpdk|tsn/ {print($8)}' | cut -d '=' -f 2` ; do
     contrail_status=$(ssh heat-admin@${i} sudo contrail-status)
     hostname=$(ssh heat-admin@${i} hostname)
     echo ==== $i ====
     echo "$contrail_status"
     if [[ ! $hostname =~ 'contrailcontroller' ]] ; then
-      state=$(echo "$contrail_status" | grep -v '==' |  awk '{print($2)}')
+      state=`echo "$contrail_status" | grep -v '==' |  awk '{print($2)}'`
     else
-      state=$(echo "$contrail_status" | grep -v '==' |  grep -v 'supervisor-database' | awk '{print($2)}')
+      state=`echo "$contrail_status" | grep -v '==' |  grep -v 'supervisor-database' | awk '{print($2)}'`
     fi
     for st in $state; do
       if  [[ ! "active timeout backup" =~ "$st" ]] ; then
