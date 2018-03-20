@@ -136,7 +136,7 @@ ping -c 3 $ip
 ssh_opts="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5 -i ${HOME}/.ssh/id_rsa"
 echo "INFO: Wait for instance's ssh is ready"
 fail=0
-while ! ssh $ssh_opts  cirros@$ip ; do
+while ! ssh $ssh_opts cirros@$ip whoami ; do
   ((++fail))
   if ((fail > 12)); then
     echo "ERROR: Instance status wait timeout occured"
