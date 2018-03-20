@@ -133,7 +133,7 @@ if [[ -z "$ip" ]]; then
 fi
 ping -c 3 $ip
 
-local ssh_opts='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5 -i ${HOME}/.ssh/id_rsa'
+ssh_opts='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5 -i ${HOME}/.ssh/id_rsa'
 echo "INFO: Wait for instance's ssh is ready"
 fail=0
 while ! ssh $ssh_opts  cirros@$ip ; do
