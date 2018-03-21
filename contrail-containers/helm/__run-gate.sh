@@ -92,7 +92,7 @@ kubectl replace -f ${CHD_PATH}/rbac/cluster-admin.yaml
 tee /tmp/contrail.yaml << EOF
 global:
   contrail_env:
-    CONTROLLER_NODES: ${CONTROL_NODES}
+    CONTROLLER_NODES: ${CONTROL_NODE}
     LOG_LEVEL: SYS_DEBUG
     CLOUD_ORCHESTRATOR: openstack
     AAA_MODE: $AAA_MODE
