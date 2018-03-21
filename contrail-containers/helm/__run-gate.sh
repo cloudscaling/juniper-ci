@@ -39,8 +39,8 @@ fi
 # Download openstack-helm code
 git clone https://github.com/Juniper/openstack-helm.git
 pushd openstack-helm
-#git fetch https://review.opencontrail.org/Juniper/openstack-helm refs/changes/36/40736/2 && git checkout FETCH_HEAD
-#git pull --rebase origin master
+git fetch https://review.opencontrail.org/Juniper/openstack-helm refs/changes/81/40881/1 && git checkout FETCH_HEAD
+git pull --rebase origin master
 popd
 # Download openstack-helm-infra code
 git clone https://github.com/Juniper/openstack-helm-infra.git
