@@ -89,23 +89,18 @@ kubectl label node opencontrail.org/vrouter-kernel=enabled --all
 
 kubectl replace -f ${CHD_PATH}/rbac/cluster-admin.yaml
 
-helm install --name contrail-thirdparty ${CHD_PATH}/contrail-thirdparty \
-  --namespace=contrail --set contrail_env.CONTROLLER_NODES=$CONTROL_NODE \
-  --set contrail_env.AAA_MODE=$AAA_MODE --set contrail_env.LOG_LEVEL=SYS_DEBUG
+tee /tmp/contrail.yaml << EOF
+global:
+  contrail_env:
+    CONTROLLER_NODES: ${CONTROL_NODES}
+    LOG_LEVEL: SYS_DEBUG
+    CLOUD_ORCHESTRATOR: openstack
+    AAA_MODE: $AAA_MODE
+EOF
+#CONTROL_DATA_NET_LIST: ${CONTROL_DATA_NET_LIST}
+#VROUTER_GATEWAY: ${VROUTER_GATEWAY}
 
-helm install --name contrail-controller ${CHD_PATH}/contrail-controller \
-  --namespace=contrail --set contrail_env.CONTROLLER_NODES=$CONTROL_NODE \
-  --set contrail_env.CONTROL_NODES=${CONTROL_NODES} \
-  --set contrail_env.AAA_MODE=$AAA_MODE --set contrail_env.LOG_LEVEL=SYS_DEBUG
-
-helm install --name contrail-analytics ${CHD_PATH}/contrail-analytics \
-  --namespace=contrail --set contrail_env.CONTROLLER_NODES=$CONTROL_NODE \
-  --set contrail_env.AAA_MODE=$AAA_MODE --set contrail_env.LOG_LEVEL=SYS_DEBUG
-
-helm install --name contrail-vrouter ${CHD_PATH}/contrail-vrouter \
-  --namespace=contrail --set contrail_env.CONTROLLER_NODES=${CONTROL_NODE} \
-  --set contrail_env.CONTROL_NODES=${CONTROL_NODE} \
-  --set contrail_env.AAA_MODE=$AAA_MODE --set contrail_env.LOG_LEVEL=SYS_DEBUG
+helm install --name contrail ${CHD_PATH}/contrail --namespace=contrail --values=/tmp/contrail.yaml
 
 cd ${OSH_PATH}
 
