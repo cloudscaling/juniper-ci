@@ -1,6 +1,7 @@
 #!/bin/bash -ex
 
 AAA_MODE=${AAA_MODE:-cloud-admin}
+tag='ocata-master-34'
 
 # tune some host settings
 sudo sysctl -w vm.max_map_count=1048575
@@ -35,6 +36,9 @@ extra_args=''
 if [[ "$AAA_MODE" == 'rbac' ]]; then
   extra_args="--values ./tools/overrides/backends/opencontrail/neutron-rbac.yaml"
 fi
+export OSH_EXTRA_HELM_ARGS_NEUTRON="$extra_args --set images.tags.opencontrail_neutron_init=docker.io/opencontrailnightly/contrail-openstack-neutron-init:$tag"
+export OSH_EXTRA_HELM_ARGS_NOVA="--set images.tags.opencontrail_compute_init=docker.io/opencontrailnightly/contrail-openstack-compute-init:$tag"
+export OSH_EXTRA_HELM_ARGS_HEAT="--set images.tags.opencontrail_heat_init=docker.io/opencontrailnightly/contrail-openstack-heat-init:$tag"
 
 # Download openstack-helm code
 git clone https://github.com/Juniper/openstack-helm.git
@@ -71,9 +75,7 @@ cd ${OSH_PATH}
 ./tools/deployment/developer/nfs/100-horizon.sh
 ./tools/deployment/developer/nfs/120-glance.sh
 ./tools/deployment/developer/nfs/151-libvirt-opencontrail.sh
-export OSH_EXTRA_HELM_ARGS="$extra_args"
 ./tools/deployment/developer/nfs/161-compute-kit-opencontrail.sh
-unset OSH_EXTRA_HELM_ARGS
 
 cd $CHD_PATH
 make
@@ -91,6 +93,35 @@ kubectl replace -f ${CHD_PATH}/rbac/cluster-admin.yaml
 
 tee /tmp/contrail.yaml << EOF
 global:
+  images:
+    tags:
+      kafka: "docker.io/opencontrailnightly/contrail-external-kafka:$tag"
+      cassandra: "docker.io/opencontrailnightly/contrail-external-cassandra:$tag"
+      redis: "redis:4.0.2"
+      zookeeper: "docker.io/opencontrailnightly/contrail-external-zookeeper:$tag"
+      contrail_control: "docker.io/opencontrailnightly/contrail-controller-control-control:$tag"
+      control_dns: "docker.io/opencontrailnightly/contrail-controller-control-dns:$tag"
+      control_named: "docker.io/opencontrailnightly/contrail-controller-control-named:$tag"
+      config_api: "docker.io/opencontrailnightly/contrail-controller-config-api:$tag"
+      config_devicemgr: "docker.io/opencontrailnightly/contrail-controller-config-devicemgr:$tag"
+      config_schema_transformer: "docker.io/opencontrailnightly/contrail-controller-config-schema:$tag"
+      config_svcmonitor: "docker.io/opencontrailnightly/contrail-controller-config-svcmonitor:$tag"
+      webui_middleware: "docker.io/opencontrailnightly/contrail-controller-webui-job:$tag"
+      webui: "docker.io/opencontrailnightly/contrail-controller-webui-web:$tag"
+      analytics_api: "docker.io/opencontrailnightly/contrail-analytics-api:$tag"
+      contrail_collector: "docker.io/opencontrailnightly/contrail-analytics-collector:$tag"
+      analytics_alarm_gen: "docker.io/opencontrailnightly/contrail-analytics-alarm-gen:$tag"
+      analytics_query_engine: "docker.io/opencontrailnightly/contrail-analytics-query-engine:$tag"
+      analytics_snmp_collector: "docker.io/opencontrailnightly/contrail-analytics-snmp-collector:$tag"
+      contrail_topology: "docker.io/opencontrailnightly/contrail-analytics-topology:$tag"
+      build_driver_init: "docker.io/opencontrailnightly/contrail-vrouter-kernel-build-init:$tag"
+      vrouter_agent: "docker.io/opencontrailnightly/contrail-vrouter-agent:$tag"
+      vrouter_init_kernel: "docker.io/opencontrailnightly/contrail-vrouter-kernel-init:$tag"
+      vrouter_dpdk: "docker.io/opencontrailnightly/contrail-vrouter-agent-dpdk:$tag"
+      vrouter_init_dpdk: "docker.io/opencontrailnightly/contrail-vrouter-kernel-init-dpdk:$tag"
+      dpdk_watchdog: "docker.io/opencontrailnightly/contrail-vrouter-net-watchdog:$tag"
+      nodemgr: "docker.io/opencontrailnightly/contrail-nodemgr:$tag"
+      dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
   contrail_env:
     CONTROLLER_NODES: ${CONTROL_NODE}
     LOG_LEVEL: SYS_DEBUG
