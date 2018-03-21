@@ -127,9 +127,9 @@ global:
     LOG_LEVEL: SYS_DEBUG
     CLOUD_ORCHESTRATOR: openstack
     AAA_MODE: $AAA_MODE
+    CONTROL_DATA_NET_LIST:
+    VROUTER_GATEWAY:
 EOF
-#CONTROL_DATA_NET_LIST: ${CONTROL_DATA_NET_LIST}
-#VROUTER_GATEWAY: ${VROUTER_GATEWAY}
 
 helm install --name contrail ${CHD_PATH}/contrail --namespace=contrail --values=/tmp/contrail.yaml
 
