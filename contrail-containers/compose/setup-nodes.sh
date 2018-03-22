@@ -56,11 +56,13 @@ popd
 
 pushd ~/contrail-ansible-deployer
 cat <<EOM > ./inventory/hosts
-[container_hosts]
+container_hosts:
+  hosts:
 EOM
 for i in ${ips[@]} ; do
   cat <<EOM >> ./inventory/hosts
-\${i} ansible_user=$SSH_USER
+    \${i}:
+      ansible_ssh_user=$SSH_USER
 EOM
 done
 cat ./inventory/hosts
@@ -81,12 +83,12 @@ EOM
 for i in ${controllers[@]} ; do
   cat <<EOM >> ./inventory/group_vars/container_hosts.yml
   \${i}:
-    configdb:
+    config_database:
     config:
     control:
     webui:
     analytics:
-    analyticsdb:
+    analytics_database:
 EOM
 done
 for i in ${agents[@]} ; do
@@ -98,6 +100,7 @@ done
 cat ./inventory/group_vars/container_hosts.yml
 
 cat <<EOM > ./inventory/group_vars/all.yml
+---
 BUILD_VMS: false
 CONFIGURE_VMS: false
 CREATE_CONTAINERS: true
