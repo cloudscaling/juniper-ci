@@ -32,19 +32,26 @@ if [ "x$HOST_OS" == "xcentos" ]; then
   sudo cp ./ceph.repo /etc/yum.repos.d/ceph.repo
 fi
 
-extra_args=''
+extra_neutron_args=''
 if [[ "$AAA_MODE" == 'rbac' ]]; then
-  extra_args="--values ./tools/overrides/backends/opencontrail/neutron-rbac.yaml"
+  extra_neutron_args="--values ./tools/overrides/backends/opencontrail/neutron-rbac.yaml"
 fi
-export OSH_EXTRA_HELM_ARGS_NEUTRON="$extra_args --set images.tags.opencontrail_neutron_init=docker.io/opencontrailnightly/contrail-openstack-neutron-init:$tag"
-export OSH_EXTRA_HELM_ARGS_NOVA="--set images.tags.opencontrail_compute_init=docker.io/opencontrailnightly/contrail-openstack-compute-init:$tag"
+export OSH_EXTRA_HELM_ARGS_NEUTRON="$extra_neutron_args --set images.tags.opencontrail_neutron_init=docker.io/opencontrailnightly/contrail-openstack-neutron-init:$tag"
+echo "INFO: extra neutron args: $OSH_EXTRA_HELM_ARGS_NEUTRON"
+extra_nova_args=''
+if [[ "$OPENSTACK_VERSION" == 'ocata' ]]; then
+  extra_nova_args="--set compute_patch=true"
+fi
+export OSH_EXTRA_HELM_ARGS_NOVA="$extra_nova_args --set images.tags.opencontrail_compute_init=docker.io/opencontrailnightly/contrail-openstack-compute-init:$tag"
+echo "INFO: extra nova args: $OSH_EXTRA_HELM_ARGS_NOVA"
 export OSH_EXTRA_HELM_ARGS_HEAT="--set images.tags.opencontrail_heat_init=docker.io/opencontrailnightly/contrail-openstack-heat-init:$tag"
+echo "INFO: extra heat args: $OSH_EXTRA_HELM_ARGS_HEAT"
 
 # Download openstack-helm code
 git clone https://github.com/Juniper/openstack-helm.git
 pushd openstack-helm
-#git fetch https://review.opencontrail.org/Juniper/openstack-helm refs/changes/81/40881/1 && git checkout FETCH_HEAD
-#git pull --rebase origin master
+git fetch https://review.opencontrail.org/Juniper/openstack-helm refs/changes/52/40952/3 && git checkout FETCH_HEAD
+git pull --rebase origin master
 popd
 # Download openstack-helm-infra code
 git clone https://github.com/Juniper/openstack-helm-infra.git
