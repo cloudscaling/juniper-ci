@@ -43,15 +43,15 @@ export OSH_EXTRA_HELM_ARGS_HEAT="--set images.tags.opencontrail_heat_init=docker
 # Download openstack-helm code
 git clone https://github.com/Juniper/openstack-helm.git
 pushd openstack-helm
-git fetch https://review.opencontrail.org/Juniper/openstack-helm refs/changes/81/40881/1 && git checkout FETCH_HEAD
-git pull --rebase origin master
+#git fetch https://review.opencontrail.org/Juniper/openstack-helm refs/changes/81/40881/1 && git checkout FETCH_HEAD
+#git pull --rebase origin master
 popd
 # Download openstack-helm-infra code
 git clone https://github.com/Juniper/openstack-helm-infra.git
 # Download contrail-helm-deployer code
 git clone https://github.com/Juniper/contrail-helm-deployer.git
 pushd contrail-helm-deployer
-git fetch https://review.opencontrail.org/Juniper/contrail-helm-deployer refs/changes/75/40875/3 && git checkout FETCH_HEAD
+git fetch https://review.opencontrail.org/Juniper/contrail-helm-deployer refs/changes/37/40937/1 && git checkout FETCH_HEAD
 git pull --rebase origin master
 popd
 
@@ -132,6 +132,7 @@ global:
 EOF
 
 helm install --name contrail ${CHD_PATH}/contrail --namespace=contrail --values=/tmp/contrail.yaml
+${OSH_PATH}/tools/deployment/common/wait-for-pods.sh contrail
 
 cd ${OSH_PATH}
 
