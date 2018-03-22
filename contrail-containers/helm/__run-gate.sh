@@ -50,7 +50,7 @@ echo "INFO: extra heat args: $OSH_EXTRA_HELM_ARGS_HEAT"
 # Download openstack-helm code
 git clone https://github.com/Juniper/openstack-helm.git
 pushd openstack-helm
-git fetch https://review.opencontrail.org/Juniper/openstack-helm refs/changes/52/40952/3 && git checkout FETCH_HEAD
+git fetch https://review.opencontrail.org/Juniper/openstack-helm refs/changes/52/40952/4 && git checkout FETCH_HEAD
 git pull --rebase origin master
 popd
 # Download openstack-helm-infra code
