@@ -89,7 +89,7 @@ $SCP "$my_dir/../__build-containers.sh" $SSH_DEST_BUILD:build-containers.sh
 
 set -o pipefail
 ssh_env="CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION"
-ssh_env+=" LINUX_DISTR=$LINUX_DISTR CONTRAIL_INSTALL_PACKAGES_URL=$CONTRAIL_INSTALL_PACKAGES_URL"
+ssh_env+=" CONTRAIL_INSTALL_PACKAGES_URL=$CONTRAIL_INSTALL_PACKAGES_URL"
 ssh_env+=" AGENT_MODE=$AGENT_MODE"
 $SSH_BUILD "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
 set +o pipefail
