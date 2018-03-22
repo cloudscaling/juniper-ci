@@ -49,13 +49,11 @@ popd
 
 pushd ~/contrail-ansible-deployer
 cat <<EOM > ./inventory/hosts
-container_hosts:
-  hosts:
+[container_hosts]
 EOM
 for i in ${ips[@]} ; do
   cat <<EOM >> ./inventory/hosts
-    \${i}:
-      ansible_ssh_user=$SSH_USER
+\${i}    ansible_ssh_user=$SSH_USER
 EOM
 done
 cat ./inventory/hosts
