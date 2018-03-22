@@ -68,9 +68,8 @@
           fi
           # only centos images are supported now and thus only one archive with rpm-s is needed
           export LINUX_DISTR=centos
-          export CONTRAIL_VERSION='5.0.0-150'
-          #export CONTRAIL_INSTALL_PACKAGES_URL='https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-126-ocata.tgz'
-          export CONTRAIL_INSTALL_PACKAGES_URL='https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-150-ocata.tgz'
+          export CONTRAIL_VERSION='5.0.0-34'
+          export CONTRAIL_INSTALL_PACKAGES_URL='https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_5.0.0-34-ocata.tgz'
 
           export WAY=$(echo {project} | cut -d '-' -f 1)
           export HOST=$(echo {project} | cut -d '-' -f 2)
@@ -89,21 +88,9 @@
 - project:
     name: contrail-containers
     project:
-#      - helm-aws-ubuntu:
-#          slavenode:
-#            - master
-#          contrail_version: 4.1.0.0-8
-#          packages_url: ''
-#      - helm-aws-centos:
-#          slavenode:
-#            - master
-#          contrail_version: 4.1.0.0-8
-#          packages_url: ''
-
-# for old packages use this:
-#          contrail_version: 4.1.0.0-8
-#          packages_url: ''
-
+      - helm-aws-ubuntu:
+          slavenode:
+            - master
       - k8s-server-centos:
           slavenode:
             - slave01
@@ -122,5 +109,10 @@
       - kolla-aws-ubuntu:
           slavenode:
             - master
+
+# for old packages use this additions:
+#          contrail_version: 4.1.0.0-8
+#          packages_url: ''
+
     jobs:
       - 'contrail-{project}'

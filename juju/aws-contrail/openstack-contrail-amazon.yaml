@@ -99,6 +99,7 @@ services:
     series: %SERIES%
     num_units: 1
     options:
+      log-level: "SYS_DEBUG"
       use-external-rabbitmq: "%USE_EXTERNAL_RABBITMQ%"
       auth-mode: "%AUTH_MODE%"
     expose: true
@@ -108,6 +109,8 @@ services:
     charm: "%JUJU_REPO%/contrail-analyticsdb"
     series: %SERIES%
     num_units: 1
+    options:
+      log-level: "SYS_DEBUG"
     expose: true
     to:
       - "5"
@@ -115,6 +118,8 @@ services:
     charm: "%JUJU_REPO%/contrail-analytics"
     series: %SERIES%
     num_units: 1
+    options:
+      log-level: "SYS_DEBUG"
     expose: true
     to:
       - "5"
@@ -130,6 +135,7 @@ services:
     charm: "%JUJU_REPO%/contrail-agent"
     series: %SERIES%
     options:
+      log-level: "SYS_DEBUG"
       install-sources: "deb http://%REPO_IP%/ubuntu %SERIES% main"
       install-keys: |
         - |

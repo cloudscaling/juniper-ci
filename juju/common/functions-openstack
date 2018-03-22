@@ -404,13 +404,13 @@ function check_instance_simple() {
       # add VGW to second compute host and check ping/ssh from there
       local another_compute_host=`get_machines_index_by_service nova-compute | grep -v $mch`
       echo "INFO: Adding vgw to another compute: $another_compute_host"
-      $SSH_CMD $another_compute_host sudo /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx
+      $SSH_CMD $another_compute_host sudo /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf $VGW_DOMAIN:admin:public-$netsfx:public-$netsfx
 
       _check_instance_ping $another_compute_host $fip || ret=1
       _check_instance_ssh_and_metadata $another_compute_host $fip $fip || ret=1
 
       # remove VGW
-      $SSH_CMD $another_compute_host sudo /opt/contrail/utils/provision_vgw_interface.py --oper delete --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx
+      $SSH_CMD $another_compute_host sudo /opt/contrail/utils/provision_vgw_interface.py --oper delete --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf $VGW_DOMAIN:admin:public-$netsfx:public-$netsfx
     else
       echo "WARNING: TODO: SKipped for DPDK the test of access by FIP via VGW"
     fi

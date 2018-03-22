@@ -10,15 +10,16 @@ function save_logs() {
   cp -r /var/lib/docker/volumes/kolla_logs/_data $my_dir/logs/ || /bin/true
 }
 
-trap 'catch_errors $LINENO' ERR
+trap 'catch_errors $LINENO' ERR EXIT
 function catch_errors() {
   local exit_code=$?
   echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
-  trap - ERR
-  free -h
-  ps ax -H
+  trap - ERR EXIT
+  set +x
+  free -h | tee $my_dir/logs/free.log
+  df -h | tee $my_dir/logs/df.log
+  ps ax -H > $my_dir/logs/ps_ax.log
   docker ps -a
-  df -h
   save_logs
   exit $exit_code
 }
@@ -105,10 +106,50 @@ kolla-ansible deploy -i all-in-one
 docker ps -a
 kolla-ansible post-deploy
 
+set +x
+
 # test it
 pip install python-openstackclient
 source /etc/kolla/admin-openrc.sh
 $kolla_path/kolla-ansible/init-runonce
 
-trap - ERR
+net_id=`openstack network show demo-net -f value -c id`
+openstack server create --image cirros --flavor m1.tiny --key-name mykey --nic net-id=$net_id demo1
+sleep 20
+openstack server show demo1
+# NOTE: assuming that only one VM is running now
+if_name=$(ip link | grep -io "tap[0-9a-z-]*")
+if [[ -z "$if_name" ]]; then
+  echo "ERROR: there is no tap interface for VM"
+  ip link
+  exit 1
+fi
+ip=`curl -s http://127.0.0.1:8085/Snh_ItfReq?name=$if_name | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'`
+if [[ -z "$ip" ]]; then
+  echo "ERROR: there is no link-local IP for VM"
+  curl -s http://127.0.0.1:8085/Snh_ItfReq?name=$if_name | xmllint --format -
+  ip route
+  exit 1
+fi
+ping -c 3 $ip
+
+ssh_opts="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5 -i ${HOME}/.ssh/id_rsa"
+echo "INFO: Wait for instance's ssh is ready"
+fail=0
+while ! ssh $ssh_opts cirros@$ip whoami ; do
+  ((++fail))
+  if ((fail > 12)); then
+    echo "ERROR: Instance status wait timeout occured"
+    exit 1
+  fi
+  sleep 10
+  echo "attempt $fail of 12"
+done
+
+# test for outside world
+ssh $ssh_opts cirros@$ip ping -q -c 1 -W 2 8.8.8.8
+# Check the VM can reach the metadata server
+ssh $ssh_opts cirros@$ip curl -s --connect-timeout 5 http://169.254.169.254/latest/meta-data/local-ipv4
+
+trap - ERR EXIT
 save_logs

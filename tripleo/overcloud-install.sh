@@ -739,12 +739,30 @@ EOF
   if [[ "$TLS" == 'all' || "$TLS" == 'all_except_rabbit' ]] ; then
     sed -i 's/\(Admin\)\(.*\)http/\1\2https/g' $endpoints_file
     sed -i 's/\(Internal\)\(.*\)http/\1\2https/g' $endpoints_file
-    cat <<EOF >> enable-tls.yaml
+    if [[ "$OPENSTACK_VERSION" == "newton" ]] ; then
+      cat <<EOF >> enable-tls.yaml
   # enable internal TLS
   controllerExtraConfig:
     tripleo::haproxy::internal_certificate: /etc/pki/tls/private/overcloud_endpoint.pem
   ContrailInternalApiSsl: true
 EOF
+    else
+      cat <<EOF >> enable-tls.yaml
+  # enable internal TLS
+  controllerExtraConfig:
+    tripleo::haproxy::use_internal_certificates: true
+    tripleo::profile::base::haproxy::certificates_specs:
+      haproxy-internal_api:
+        service_pem: /etc/pki/tls/private/overcloud_endpoint.pem
+      haproxy-ctlplane:
+        service_pem: /etc/pki/tls/private/overcloud_endpoint.pem
+      haproxy-storage:
+        service_pem: /etc/pki/tls/private/overcloud_endpoint.pem
+      haproxy-storage_mgmt:
+        service_pem: /etc/pki/tls/private/overcloud_endpoint.pem
+  ContrailInternalApiSsl: true
+EOF
+    fi
   fi
   if [[ "$TLS" == 'all' ]] ; then
     cat <<EOF >> enable-tls.yaml
@@ -806,7 +824,7 @@ openstack overcloud deploy --templates tripleo-heat-templates/ \
   -e $contrail_net_file \
   -e $contrail_vip_env \
   -e $misc_opts \
-  $ssl_opts $multi_nic_opts $ha_opts $sriov_opts
+  $ssl_opts $multi_nic_opts $ha_opts $sriov_opts --timeout 300
 
 errors=$?
 
@@ -816,15 +834,15 @@ overcloud_nodes=$(openstack server list)
 echo "$overcloud_nodes"
 
 echo "INFO: collecting Contrail status"
-for i in $(echo "$overcloud_nodes" | awk '/contrail|compute|dpdk|tsn/ {print($8)}' | cut -d '=' -f 2) ; do
+for i in `echo "$overcloud_nodes" | awk '/contrail|compute|dpdk|tsn/ {print($8)}' | cut -d '=' -f 2` ; do
     contrail_status=$(ssh heat-admin@${i} sudo contrail-status)
     hostname=$(ssh heat-admin@${i} hostname)
     echo ==== $i ====
     echo "$contrail_status"
     if [[ ! $hostname =~ 'contrailcontroller' ]] ; then
-      state=$(echo "$contrail_status" | grep -v '==' |  awk '{print($2)}')
+      state=`echo "$contrail_status" | grep -v '==' |  awk '{print($2)}'`
     else
-      state=$(echo "$contrail_status" | grep -v '==' |  grep -v 'supervisor-database' | awk '{print($2)}')
+      state=`echo "$contrail_status" | grep -v '==' |  grep -v 'supervisor-database' | awk '{print($2)}'`
     fi
     for st in $state; do
       if  [[ ! "active timeout backup" =~ "$st" ]] ; then

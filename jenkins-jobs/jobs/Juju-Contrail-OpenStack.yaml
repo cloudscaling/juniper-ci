@@ -19,6 +19,7 @@
       - choice:
           name: CONTRAIL_BUILD
           choices:
+            - 4.1.1.0-0
             - 4.1.0.0-8
             - 4.0.2.0-34
             - 4.0.1.0-32
@@ -26,9 +27,9 @@
           name: VERSION
           description: "Version of the OpenStack. mitaka implies trusty and newton/ocata implies xenial."
           choices:
-            - mitaka
-            - newton
             - ocata
+            - newton
+            - mitaka
       - choice:
           name: DEPLOY_FROM
           description: "A place where to get charms"
@@ -128,10 +129,12 @@
             - slave01
             - slave02
             - slave03
+            - slave04
           allowed-slaves:
             - slave01
             - slave02
             - slave03
+            - slave04
           ignore-offline-nodes: false
           allowed-multiselect: true
       - choice:
@@ -149,6 +152,7 @@
       - choice:
           name: CONTRAIL_BUILD
           choices:
+            - 4.1.1.0-0
             - 4.1.0.0-8
             - 4.0.2.0-34
             - 4.0.1.0-32
@@ -156,9 +160,9 @@
           name: VERSION
           description: "Version of the OpenStack. mitaka implies trusty and newton/ocata implies xenial."
           choices:
+            - ocata
             - newton
             - mitaka
-            - ocata
       - choice:
           name: DEPLOY_MODE
           description: |
