@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 AAA_MODE=${AAA_MODE:-cloud-admin}
 tag='ocata-master-34'
@@ -146,7 +146,5 @@ make build-heat
 sleep 60
 
 ./tools/deployment/developer/nfs/901-use-it-opencontrail.sh
-
-mv logs ../
 
 exit $err
