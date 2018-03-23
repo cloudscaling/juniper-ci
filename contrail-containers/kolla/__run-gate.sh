@@ -108,6 +108,9 @@ kolla-ansible post-deploy
 
 set +x
 
+sleep 30
+contrail-status
+
 # test it
 pip install python-openstackclient
 source /etc/kolla/admin-openrc.sh
