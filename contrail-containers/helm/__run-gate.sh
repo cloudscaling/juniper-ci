@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 AAA_MODE=${AAA_MODE:-cloud-admin}
-tag='ocata-master-34'
+tag='ocata-master-39'
 
 # tune some host settings
 sudo sysctl -w vm.max_map_count=1048575
