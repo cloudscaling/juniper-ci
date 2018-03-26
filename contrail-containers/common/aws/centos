@@ -17,5 +17,11 @@ export IF1=eth0
 export IF2=eth1
 
 function create_iface() {
-  :
+  local iface=$1
+  shift
+  local ssh=$@
+  mac=`$ssh "/usr/sbin/ip link" 2>/dev/null | grep -A 1 " $iface:" | tail -1 | awk '{print $2}'`
+  echo "INFO: create if script for iface=$iface with mac=$mac"
+  if_path="/etc/sysconfig/network-scripts/ifcfg-$iface"
+  $ssh "sudo bash -c 'echo \"BOOTPROTO=dhcp\" > $if_path && echo \"DEVICE=$iface\" >> $if_path && echo \"HWADDR=$mac\" >> $if_path && echo \"ONBOOT=yes\" >> $if_path && echo \"TYPE=Ethernet\" >> $if_path && echo \"USERCTL=no\" >> $if_path && echo \"DEFROUTE=no\" >> $if_path && ifup $iface'"
 }

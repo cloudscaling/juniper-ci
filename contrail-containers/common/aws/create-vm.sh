@@ -131,17 +131,18 @@ function run_instance() {
     echo "WARNING: Machine isn't accessible yet"
     sleep 2
   done
-  if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
-    # there are some cases when AWS image has strange kernel version and vrouter can't be loaded
-    $ssh "sudo yum -y update"
-    $ssh "sudo reboot" || /bin/true
-    echo "INFO: reboot & waiting for instance SSH"
-    while ! $ssh uname -a 2>/dev/null ; do
-      echo "WARNING: Machine isn't accessible yet"
-      sleep 2
-    done
-  fi
   if [[ $cloud_vm == "true" ]]; then
+    if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
+      # there are some cases when AWS image has strange kernel version and vrouter can't be loaded
+      $ssh "sudo yum -y update"
+      $ssh "sudo reboot" || /bin/true
+      echo "INFO: reboot & waiting for instance SSH"
+      while ! $ssh uname -a 2>/dev/null ; do
+        echo "WARNING: Machine isn't accessible yet"
+        sleep 2
+      done
+    fi
+
     echo "INFO: Configure additional disk for cloud VM"
     $ssh "(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | sudo fdisk /dev/xvdf"
     $ssh "sudo mkfs.ext4 /dev/xvdf1 ; sudo mkdir -p /var/lib/docker ; sudo su -c \"echo '/dev/xvdf1  /var/lib/docker  auto  defaults,auto  0  0' >> /etc/fstab\" ; sudo mount /var/lib/docker"
