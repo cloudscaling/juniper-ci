@@ -101,13 +101,34 @@ timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION AGENT_MODE=$AGENT_MODE
 # TODO: rename run-gate since now check of cluster is here. no. move this code to run-gate or another file.
 source "$my_dir/../common/check-functions"
 dest_to_check=$(echo ${SSH_DEST_WORKERS[@]:0:3} | sed 's/ /,/g')
-check_rabbitmq_cluster "$dest_to_check"
-expected_number_of_services=41
+
+# TODO: wait till cluster up and initialized
+sleep 300
+res=0
+if ! check_rabbitmq_cluster "$dest_to_check" ; then
+  # TODO: temporary disable rabbit claster check"
+  echo "ERROR: rebbitmq cluster check was faild"
+  res=1
+fi
+
 dest_to_check=$(echo ${SSH_DEST_WORKERS[@]} | sed 's/ /,/g')
-check_introspection $expected_number_of_services "$dest_to_check"
+expected_number_of_services=41
+count=1
+limit=3
+while ! check_introspection $expected_number_of_services "$dest_to_check" ; do
+  echo "INFO: check_introspection ${count}/${limit} failed"
+  if (( count == limit )) ; then
+    res=1
+    break
+  fi
+  (( count+=1 ))
+  sleep 10
+done
 
 trap - ERR
 save_logs
 if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
   $my_dir/../common/${HOST}/cleanup.sh
 fi
+
+return $res
