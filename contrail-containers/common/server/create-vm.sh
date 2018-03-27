@@ -142,7 +142,7 @@ EOM
 fi
 
 if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
-  yum update -y
+  yum update -y &>>yum.log
   yum install -y epel-release &>>yum.log
   yum install -y mc git wget ntp ntpdate iptables iproute libxml2-utils python2.7 &>>yum.log
   systemctl enable ntpd.service && systemctl start ntpd.service
