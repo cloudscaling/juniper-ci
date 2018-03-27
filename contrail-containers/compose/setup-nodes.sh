@@ -60,6 +60,7 @@ cat ./inventory/hosts
 
 cat <<EOM > ./inventory/group_vars/container_hosts.yml
 contrail_configuration:
+  LOG_LEVEL: SYS_DEBUG
   CONTAINER_REGISTRY: ${DOCKER_REGISTRY_ADDR}:5000
   OPENSTACK_VERSION: $OPENSTACK_VERSION
   CONTRAIL_VERSION: $CONTRAIL_VERSION
