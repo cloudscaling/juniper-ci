@@ -108,6 +108,12 @@ SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerA
 index=0
 for ip in ${ips[@]} ; do
   (( index+=1 ))
+
+  logs_dir='/root/logs'
+  if [[ "$SSH_USER" != 'root' ]] ; then
+    logs_dir="/home/$SSH_USER/logs"
+  fi
+
   cat <<EOF | ssh $SSH_OPTS root@${ip}
 set -x
 hname="node-\$(echo $ip | tr '.' '-')"
@@ -129,7 +135,6 @@ chmod 600 /root/.ssh/id_rsa
 echo "$id_rsa_pub" > /root/.ssh/id_rsa.pub
 chmod 600 /root/.ssh/id_rsa.pub
 
-logs_dir='/root/logs'
 if [[ "$SSH_USER" != 'root' ]] ; then
   cat <<EOM > /home/$SSH_USER/.ssh/config
 Host *
@@ -140,10 +145,9 @@ EOM
   chmod 600 /home/$SSH_USER/.ssh/id_rsa
   echo "$id_rsa_pub" > /home/$SSH_USER/.ssh/id_rsa.pub
   chmod 600 /home/$SSH_USER/.ssh/id_rsa.pub
-  logs_dir="/home/$SSH_USER/logs"
 fi
-mkdir -p $logs_dir
 
+mkdir -p $logs_dir
 if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
   yum update -y &>>$logs_dir/yum.log
   yum install -y epel-release &>>$logs_dir/yum.log
