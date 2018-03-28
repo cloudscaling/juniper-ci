@@ -3,6 +3,7 @@
 CNT_NAME_PATTERN=${CNT_NAME_PATTERN:-'2,3'}
 
 # save contrail files
+mkdir -p logs
 sudo chown -R $USER logs
 mkdir -p logs/contrail
 pushd logs/contrail

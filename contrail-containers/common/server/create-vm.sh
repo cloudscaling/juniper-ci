@@ -129,6 +129,7 @@ chmod 600 /root/.ssh/id_rsa
 echo "$id_rsa_pub" > /root/.ssh/id_rsa.pub
 chmod 600 /root/.ssh/id_rsa.pub
 
+log_dir='/root/logs'
 if [[ "$SSH_USER" != 'root' ]] ; then
   cat <<EOM > /home/$SSH_USER/.ssh/config
 Host *
@@ -139,17 +140,19 @@ EOM
   chmod 600 /home/$SSH_USER/.ssh/id_rsa
   echo "$id_rsa_pub" > /home/$SSH_USER/.ssh/id_rsa.pub
   chmod 600 /home/$SSH_USER/.ssh/id_rsa.pub
+  logs_dir="/home/$SSH_USER/logs"
 fi
+mkdir -p $logs_dir
 
 if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
-  yum update -y &>>yum.log
-  yum install -y epel-release &>>yum.log
-  yum install -y mc git wget ntp ntpdate iptables iproute libxml2-utils python2.7 &>>yum.log
+  yum update -y &>>$logs_dir/yum.log
+  yum install -y epel-release &>>$logs_dir/yum.log
+  yum install -y mc git wget ntp ntpdate iptables iproute libxml2-utils python2.7 &>>$logs_dir/yum.log
   systemctl enable ntpd.service && systemctl start ntpd.service
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
-  apt-get -y update &>>apt.log
-  DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>apt.log
-  apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 linux-image-extra-\$(uname -r) &>>apt.log
+  apt-get -y update &>>$logs_dir/apt.log
+  DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$logs_dir/apt.log
+  apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 linux-image-extra-\$(uname -r) &>>$logs_dir/apt.log
   mv /etc/os-release /etc/os-release.original
   cat /etc/os-release.original > /etc/os-release
 fi
