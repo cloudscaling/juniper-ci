@@ -56,12 +56,10 @@ sed -i -e "s/{{base_distro}}/$HOST_OS/g" globals.yml
 sed -i -e "s/{{openstack_version}}/$OPENSTACK_VERSION/g" globals.yml
 sed -i -e "s/{{contrail_version}}/$CONTRAIL_VERSION/g" globals.yml
 sed -i -e "s/{{contrail_docker_registry}}/$registry_ip:5000/g" globals.yml
+echo 'opencontrail_vrouter_gateway: "192.168.131.1"' >> globals.yml
 
 echo "INFO: Preparing instances"
 if [ "x$HOST_OS" == "xubuntu" ]; then
-  # add gateway info in case of ubuntu
-  echo 'opencontrail_vrouter_gateway: "192.168.131.1"' >> globals.yml
-
   apt-get install -y --no-install-recommends python-pip
   pip install -U pip setuptools
   apt-get install -y python-dev libffi-dev gcc libssl-dev python-selinux
