@@ -129,7 +129,7 @@ chmod 600 /root/.ssh/id_rsa
 echo "$id_rsa_pub" > /root/.ssh/id_rsa.pub
 chmod 600 /root/.ssh/id_rsa.pub
 
-log_dir='/root/logs'
+logs_dir='/root/logs'
 if [[ "$SSH_USER" != 'root' ]] ; then
   cat <<EOM > /home/$SSH_USER/.ssh/config
 Host *
@@ -152,7 +152,8 @@ if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
   apt-get -y update &>>$logs_dir/apt.log
   DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$logs_dir/apt.log
-  apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 linux-image-extra-\$(uname -r) &>>$logs_dir/apt.log
+  apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 python-pip linux-image-extra-\$(uname -r) &>>$logs_dir/apt.log
+  pip install pip --upgrade &>>$logs_dir/apt.log
   mv /etc/os-release /etc/os-release.original
   cat /etc/os-release.original > /etc/os-release
 fi
