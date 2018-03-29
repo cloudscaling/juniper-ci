@@ -258,6 +258,11 @@ function _patch_image() {
   qemu-nbd -d $nbd_dev || true
   qemu-nbd -n -c $nbd_dev $image
   sleep 5
+  if [ ! -f ${nbd_dev}p1 ] ; then
+    echo "No dev ${nbd_dev}p1 after nbd mount, try to update manually"
+    partx -a $nbd_dev
+    lsblk
+  fi
   local ret=0
   local tmpdir=$(mktemp -d)
   mount ${nbd_dev}p1 $tmpdir || ret=1
