@@ -16,6 +16,11 @@ nbd_dev="/dev/nbd0"
 qemu-nbd -d $nbd_dev || true
 qemu-nbd -n -c $nbd_dev ./$BASE_IMAGE_NAME
 sleep 5
+if [ ! -f ${nbd_dev}p1 ] ; then
+  echo "No dev ${nbd_dev}p1 after nbd mount, try to update manually"
+  partx -a $nbd_dev
+  lsblk
+fi
 ret=0
 tmpdir=$(mktemp -d)
 mount ${nbd_dev}p1 $tmpdir || ret=1
