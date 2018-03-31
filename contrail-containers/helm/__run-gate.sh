@@ -154,7 +154,7 @@ make build-heat
 
 # lets wait for services
 sleep 60
-contrail-status
+sudo contrail-status
 
 ./tools/deployment/developer/nfs/901-use-it-opencontrail.sh
 
