@@ -128,8 +128,8 @@ global:
       vrouter_init_dpdk: "docker.io/opencontrailnightly/contrail-vrouter-kernel-init-dpdk:$tag"
       dpdk_watchdog: "docker.io/opencontrailnightly/contrail-vrouter-net-watchdog:$tag"
       nodemgr: "docker.io/opencontrailnightly/contrail-nodemgr:$tag"
-      contrail_status: "docker.io/opencontrailnightly/contrail-status:ocata-master-$tag"
-      node_init: "docker.io/opencontrailnightly/contrail-node-init:ocata-master-$tag"
+      contrail_status: "docker.io/opencontrailnightly/contrail-status:$tag"
+      node_init: "docker.io/opencontrailnightly/contrail-node-init:$tag"
       dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
   contrail_env:
     CONTROLLER_NODES: ${CONTROL_NODE}
