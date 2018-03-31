@@ -12,7 +12,9 @@ for d in ${dest[@]} ; do
 done
 export DOCKER_REGISTRY_ADDR=${ips[0]}
 export KUBERNETES_API_SERVER=${ips[0]}
+# here we define controller nodes as a ips[0:2]
 export CONTROLLER_NODES=$(echo ${ips[@]:0:3} | sed 's/ /,/g')
+# agent nodes are ips [3:]
 export AGENT_NODES=$(echo ${ips[@]:3} | sed 's/ /,/g')
 
 function assert_empty() {
@@ -54,7 +56,7 @@ kubernetes/setup-k8s.sh $token_opts
 # wait docker because ot is restarted at the end for setup-k8s.sh
 for (( i=0; i < 10 ; ++i )); do
   echo \"docker wait \${i}/10...\"
-  sleep 3
+  sleep 5
   if docker ps ; then
     echo \"docker wait done\"
     break

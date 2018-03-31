@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 AAA_MODE=${AAA_MODE:-cloud-admin}
-tag='ocata-master-39'
+tag='ocata-master-46'
 
 # tune some host settings
 sudo sysctl -w vm.max_map_count=1048575
@@ -128,6 +128,8 @@ global:
       vrouter_init_dpdk: "docker.io/opencontrailnightly/contrail-vrouter-kernel-init-dpdk:$tag"
       dpdk_watchdog: "docker.io/opencontrailnightly/contrail-vrouter-net-watchdog:$tag"
       nodemgr: "docker.io/opencontrailnightly/contrail-nodemgr:$tag"
+      contrail_status: "docker.io/opencontrailnightly/contrail-status:ocata-master-$tag"
+      node_init: "docker.io/opencontrailnightly/contrail-node-init:ocata-master-$tag"
       dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
   contrail_env:
     CONTROLLER_NODES: ${CONTROL_NODE}
@@ -152,6 +154,7 @@ make build-heat
 
 # lets wait for services
 sleep 60
+contrail-status
 
 ./tools/deployment/developer/nfs/901-use-it-opencontrail.sh
 
