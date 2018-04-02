@@ -27,6 +27,8 @@ for cnt in `sudo docker ps -a | grep contrail | grep -v pause | awk '{print $1}'
 done
 popd
 
+/usr/bin/contrail-status |& tee logs/contrail/contrail-status.log
+
 function save_introspect_info() {
   echo "INFO: saving introspect output for $1"
   timeout -s 9 30 curl -s http://localhost:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - | grep -P "state|<type|<status" > logs/contrail/$1-introspect.log
