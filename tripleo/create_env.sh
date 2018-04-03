@@ -150,7 +150,7 @@ define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT 4096
 define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT 8192
 
 # copy image for undercloud and resize them
-cp $BASE_IMAGE $pool_path/undercloud-$NUM.qcow2
+cp -p $BASE_IMAGE $pool_path/undercloud-$NUM.qcow2
 
 # for RHEL make a copy of disk to run one more VM for test server
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
