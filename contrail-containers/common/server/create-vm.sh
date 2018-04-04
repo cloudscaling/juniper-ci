@@ -151,6 +151,15 @@ fi
 
 mkdir -p $logs_dir
 if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
+  mac_if2=\$(ip link show ens4 | awk '/link/{print \$2}')
+  cat <<EOM > /etc/sysconfig/network-scripts/ifcfg-ens4
+BOOTPROTO=dhcp
+DEVICE=ens4
+HWADDR=\$mac_if2
+ONBOOT=yes
+TYPE=Ethernet
+USERCTL=no
+EOM
   yum update -y &>>$logs_dir/yum.log
   yum install -y epel-release &>>$logs_dir/yum.log
   yum install -y mc git wget ntp ntpdate iptables iproute libxml2-utils python2.7 &>>$logs_dir/yum.log
