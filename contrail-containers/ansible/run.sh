@@ -17,7 +17,7 @@ mkdir -p "$WORKSPACE/logs"
 export JOB_RND=$((RANDOM % 100))
 export NET_ADDR=${NET_ADDR:-"10.9.$JOB_RND.0"}
 export NET_PREFIX=$(echo $NET_ADDR | cut -d '.' -f 1,2,3)
-export NET_ADDR_VR=${NET_ADDR:-"10.10.$JOB_RND.0"}
+export NET_ADDR_VR=${NET_ADDR_VR:-"10.10.$JOB_RND.0"}
 
 function save_logs() {
   source "$my_dir/../common/${HOST}/ssh-defs"
