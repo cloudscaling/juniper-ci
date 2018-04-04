@@ -15,7 +15,7 @@ mkdir -p "$WORKSPACE/logs"
 
 # definition for baremetal deployment
 export JOB_RND=$((RANDOM % 100))
-export NET_ADDR=${NET_ADDR:-"10.3.$JOB_RND.0"}
+export NET_ADDR=${NET_ADDR:-"10.5.$JOB_RND.0"}
 
 function save_logs() {
   source "$my_dir/../common/${HOST}/ssh-defs"

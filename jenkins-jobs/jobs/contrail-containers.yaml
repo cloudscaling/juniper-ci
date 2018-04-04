@@ -103,6 +103,12 @@
       - compose-server-ubuntu:
           slavenode:
             - slave01
+      - ansible-server-centos:
+          slavenode:
+            - slave01
+      - ansible-server-ubuntu:
+          slavenode:
+            - slave01
       - kolla-aws-centos:
           slavenode:
             - master

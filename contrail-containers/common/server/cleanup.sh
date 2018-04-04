@@ -9,7 +9,7 @@ if [[ -z "$WORKSPACE" ]] ; then
 fi
 
 if [[ -z "$WAY" ]] ; then
-  echo "WAY variable is expected: helm/k8s/kolla"
+  echo "WAY variable is expected: helm/k8s/kolla/ansible"
   exit -1
 fi
 
@@ -46,4 +46,5 @@ for job in $existed_jobs ; do
     delete_node $i
   done
   delete_network_dhcp $VM_NAME
+  delete_network_dhcp ${VM_NAME}_VR
 done

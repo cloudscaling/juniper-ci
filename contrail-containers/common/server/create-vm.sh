@@ -61,6 +61,11 @@ done
 # re-create network
 delete_network_dhcp $NET_NAME
 create_network_dhcp $NET_NAME $NET_ADDR $BRIDGE_NAME
+# second network can be used for vrouter
+if [[ -n "$NET_ADDR_VR" ]]; then
+  delete_network_dhcp $NET_NAME_VR
+  create_network_dhcp $NET_NAME_VR $NET_ADDR_VR $BRIDGE_NAME_VR
+fi
 
 # create pool
 create_pool $POOL_NAME
@@ -72,7 +77,11 @@ function define_node() {
   local vol_name="$vm_name.qcow2"
   delete_volume $vol_name $POOL_NAME
   local vol_path=$(create_volume_from $vol_name $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
-  define_machine $vm_name $VCPUS $mem $OS_VARIANT $NET_NAME $vol_path $DISK_SIZE
+  local net="$NET_NAME"
+  if [[ -n "$NET_ADDR_VR" ]]; then
+    net="$NET_NAME,$NET_NAME_VR"
+  fi
+  define_machine $vm_name $VCPUS $mem $OS_VARIANT $net $vol_path $DISK_SIZE
 }
 
 # First 3 are controllers,
@@ -82,13 +91,6 @@ CTRL_MEM_LIMIT=10000
 for (( i=0; i < ${#NODES[@]}; ++i )) ; do
   define_node "${NODES[$i]}" ${MEM_MAP[$i]}
 done
-
-# customize domain to set root password
-# TODO: access denied under non root...
-# customized manually for now
-#for i in ${NODES[@]} ; do
-#  domain_customize $i ${WAY}.local
-#done
 
 # start nodes
 for i in ${NODES[@]} ; do

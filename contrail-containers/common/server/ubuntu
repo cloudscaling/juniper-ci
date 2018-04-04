@@ -1,3 +1,5 @@
 export SSH_USER=${SSH_USER:-'root'}
 OS_VARIANT='ubuntu16.04'
 
+export IF1=ens3
+export IF2=ens4
