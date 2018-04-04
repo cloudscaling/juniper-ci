@@ -45,6 +45,6 @@ for job in $existed_jobs ; do
   for i in ${NODES[@]} ; do
     delete_node $i
   done
-  delete_network_dhcp $VM_NAME
-  delete_network_dhcp $VM_NAME_VR
+  delete_network_dhcp $NET_NAME
+  delete_network_dhcp $NET_NAME_VR
 done
