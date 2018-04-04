@@ -100,7 +100,6 @@ else
   exit 1
 fi
 
-source $my_dir/cloudrc
 source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
 CONTRAIL_REGISTRY=${nodes_ips[0]}
