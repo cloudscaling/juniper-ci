@@ -85,12 +85,20 @@ for dest in ${SSH_DEST_WORKERS[@]} ; do
   $SCP "$my_dir/../__check_introspection.sh" ${dest}:./check_introspection.sh
 done
 
-$SCP "$my_dir/../__build-containers.sh" $SSH_DEST_BUILD:build-containers.sh
-set -o pipefail
-ssh_env="CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION"
-ssh_env+=" CONTRAIL_INSTALL_PACKAGES_URL=$CONTRAIL_INSTALL_PACKAGES_URL"
-$SSH_BUILD "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
-set +o pipefail
+if [[ "$REGISTRY" == 'build' || -z "$REGISTRY" ]]; then
+  $SCP "$my_dir/../__build-containers.sh" $SSH_DEST_BUILD:build-containers.sh
+  set -o pipefail
+  ssh_env="CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION"
+  ssh_env+=" CONTRAIL_INSTALL_PACKAGES_URL=$CONTRAIL_INSTALL_PACKAGES_URL"
+  $SSH_BUILD "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
+  set +o pipefail
+elif [[ "$REGISTRY" == 'opencontrailnightly' ]]; then
+  CONTAINER_REGISTRY='opencontrailnightly'
+  CONTRAIL_VERSION='latest'
+else
+  echo "ERROR: unsupported REGISTRY = $REGISTRY"
+  exit 1
+fi
 
 source $my_dir/cloudrc
 source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"

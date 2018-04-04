@@ -20,6 +20,11 @@
             - on_success
             - never
       - choice:
+          name: REGISTRY
+          choices:
+            - build
+            - opencontrailnightly
+      - choice:
           name: OPENSTACK_VERSION
           choices:
             - ocata
