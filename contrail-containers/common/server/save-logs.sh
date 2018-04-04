@@ -9,9 +9,11 @@ cat <<EOF | timeout -s 9 60s $SSH
 set -x
 export PATH=\${PATH}:/usr/sbin
 mkdir -p ~/logs/kube-info
-kubectl get nodes -o wide > ~/logs/kube-info/nodes 2>&1 || true
-kubectl get pods -o wide --all-namespaces=true > ~/logs/kube-info/pods 2>&1 || true
-kubectl get all -o wide --all-namespaces=true > ~/logs/kube-info/apps 2>&1 || true
+if [[ command -v kubectl ]]; then
+  kubectl get nodes -o wide > ~/logs/kube-info/nodes 2>&1 || true
+  kubectl get pods -o wide --all-namespaces=true > ~/logs/kube-info/pods 2>&1 || true
+  kubectl get all -o wide --all-namespaces=true > ~/logs/kube-info/apps 2>&1 || true
+fi
 for i in ~/my-contrail.yaml ~/test_app.yaml ; do
   cp \$i ~/logs/ || true
 done
