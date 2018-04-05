@@ -132,7 +132,7 @@ if [[ -z "$image" ]]; then
   docker rm cprep-$JOB_RND
 fi
 
-docker run -it --rm --entrypoint /bin/bash -v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer -v $HOME/.ssh:/.ssh -v $my_dir/__run-gate.sh:/root/run-gate.sh --network host centos-soft -c "/root/run-gate.sh"
+docker run -i --rm --entrypoint /bin/bash -v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer -v $HOME/.ssh:/.ssh -v $my_dir/__run-gate.sh:/root/run-gate.sh --network host centos-soft -c "/root/run-gate.sh"
 
 
 # Validate cluster
