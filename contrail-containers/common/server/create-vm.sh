@@ -151,6 +151,7 @@ fi
 
 mkdir -p $logs_dir
 if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
+  rm -f /etc/sysconfig/network-scripts/ifcfg-eth0
   mac_if2=\$(ip link show ens4 | awk '/link/{print \$2}')
   cat <<EOM > /etc/sysconfig/network-scripts/ifcfg-ens4
 BOOTPROTO=dhcp

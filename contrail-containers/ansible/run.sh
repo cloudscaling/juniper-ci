@@ -124,9 +124,16 @@ templ=$(cat $my_dir/instances.yaml.tmpl)
 content=$(eval "echo \"$templ\"")
 echo "$content" > $config
 
-cd $WORKSPACE/contrail-ansible-deployer
-ansible-playbook -v -i inventory/ -e config_file=$config playbooks/configure_instances.yml
-ansible-playbook -v -i inventory/ -e config_file=$config playbooks/install_contrail.yml
+image=`docker images -a -q centos-soft`
+if [[ -z "$image" ]]; then
+  docker pull centos
+  docker run -it --name cprep-$JOB_RND --entrypoint /bin/bash centos -c "yum install -y epel-release && yum install -y ansible python-ipaddress git python-pip sudo vim && pip install pip --upgrade"
+  docker commit cprep-$JOB_RND centos-soft
+  docker rm cprep-$JOB_RND
+fi
+
+docker run -it -rm --entrypoint /bin/bash -v $(pwd):/root/contrail-ansible-deployer -v $HOME/.ssh:/root/.ssh -v $my_dir/__run-gate.sh:/root/run-gate.sh --network host centos-soft -c "/root/run-gate.sh"
+
 
 # Validate cluster
 # TODO: rename run-gate since now check of cluster is here. no. move this code to run-gate or another file.
