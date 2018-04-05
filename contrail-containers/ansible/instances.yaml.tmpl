@@ -1,9 +1,8 @@
-REGISTRY_PRIVATE_INSECURE: True
-CONTAINER_REGISTRY: ${CONTAINER_REGISTRY}
 provider_config:
  bms:
    domainsuffix: local
    ssh_user: ${SSH_USER}
+   ssh_pwd:
 
 instances:
  server1:
@@ -47,6 +46,7 @@ instances:
          vrouter: null
 
 contrail_configuration:
+ REGISTRY_PRIVATE_INSECURE: True
  CONTAINER_REGISTRY: ${CONTAINER_REGISTRY}
  CONTRAIL_VERSION: ${CONTRAIL_VERSION}
  CLOUD_ORCHESTRATOR: openstack

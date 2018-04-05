@@ -102,22 +102,31 @@ fi
 
 source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
-CONTRAIL_REGISTRY=${nodes_ips[0]}
-IP_CONT_01=${nodes_ips[0]}
-IP_CONT_02=${nodes_ips[1]}
-IP_CONT_03=${nodes_ips[2]}
-IP_COMP_01=${nodes_ips[3]}
+IP_CONT_01=`echo ${SSH_DEST_WORKERS[0]} | cut -d '@' -f 2`
+IP_CONT_02=`echo ${SSH_DEST_WORKERS[1]} | cut -d '@' -f 2`
+IP_CONT_03=`echo ${SSH_DEST_WORKERS[2]} | cut -d '@' -f 2`
+IP_COMP_01=`echo ${SSH_DEST_WORKERS[3]} | cut -d '@' -f 2`
+CONTRAIL_REGISTRY=$IP_CONT_01
 IP_VIP=${NET_PREFIX}.254
+IP_GW=${NET_PREFIX}.1
 
+cat <<EOF > $WORKSPACE/contrail-ansible-deployer/inventory/hosts
+container_hosts:
+  hosts:
+    $IP_CONT_01:
+    $IP_CONT_02:
+    $IP_CONT_03:
+    $IP_COMP_01:
+EOF
+
+config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
 templ=$(cat $my_dir/instances.yaml.tmpl)
 content=$(eval "echo \"$templ\"")
-echo "$content" > $my_dir/instances.yaml
-
-cat $my_dir/instances.yaml
+echo "$content" > $config
 
 cd $WORKSPACE/contrail-ansible-deployer
-ansible-playbook -i inventory/ -e config_file=$my_dir/instances.yaml playbooks/configure_instances.yml
-ansible-playbook -i inventory/ -e config_file=$my_dir/instances.yaml playbooks/install_contrail.yml
+ansible-playbook -v -i inventory/ -e config_file=$config playbooks/configure_instances.yml
+ansible-playbook -v -i inventory/ -e config_file=$config playbooks/install_contrail.yml
 
 # Validate cluster
 # TODO: rename run-gate since now check of cluster is here. no. move this code to run-gate or another file.
