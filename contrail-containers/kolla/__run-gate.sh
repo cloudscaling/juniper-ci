@@ -31,7 +31,7 @@ if [[ "$REGISTRY_INSECURE" == '1' ]] ; then
   mkdir -p /etc/docker
   cat <<EOF > /etc/docker/daemon.json
 {
-    "insecure-registries": ["$CONTRAIL_REGISTRY"]
+    "insecure-registries": ["$CONTAINER_REGISTRY"]
 }
 EOF
 fi
@@ -54,7 +54,7 @@ fi
 sed -i -e "s/{{base_distro}}/$HOST_OS/g" globals.yml
 sed -i -e "s/{{openstack_version}}/$OPENSTACK_VERSION/g" globals.yml
 sed -i -e "s/{{contrail_tag}}/$CONTRAIL_VERSION/g" globals.yml
-sed -i -e "s/{{contrail_docker_registry}}/$CONTRAIL_REGISTRY/g" globals.yml
+sed -i -e "s/{{contrail_docker_registry}}/$CONTAINER_REGISTRY/g" globals.yml
 echo 'opencontrail_vrouter_gateway: "192.168.131.1"' >> globals.yml
 
 echo "INFO: Preparing instances"
