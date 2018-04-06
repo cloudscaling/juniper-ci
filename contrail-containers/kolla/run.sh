@@ -65,6 +65,7 @@ if [[ "$REGISTRY" == 'build' || -z "$REGISTRY" ]]; then
   $SSH_BUILD "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
   set +o pipefail
   CONTRAIL_REGISTRY="$public_ip_build:5000"
+  CONTRAIL_VERSION="ocata-$CONTRAIL_VERSION"
   REGISTRY_INSECURE=1
 elif [[ "$REGISTRY" == 'opencontrailnightly' ]]; then
   CONTAINER_REGISTRY='opencontrailnightly'

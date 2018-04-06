@@ -53,7 +53,7 @@ else
 fi
 sed -i -e "s/{{base_distro}}/$HOST_OS/g" globals.yml
 sed -i -e "s/{{openstack_version}}/$OPENSTACK_VERSION/g" globals.yml
-sed -i -e "s/{{contrail_version}}/$CONTRAIL_VERSION/g" globals.yml
+sed -i -e "s/{{contrail_tag}}/$CONTRAIL_VERSION/g" globals.yml
 sed -i -e "s/{{contrail_docker_registry}}/$CONTRAIL_REGISTRY/g" globals.yml
 echo 'opencontrail_vrouter_gateway: "192.168.131.1"' >> globals.yml
 
