@@ -102,12 +102,6 @@
       - k8s-server-ubuntu:
           slavenode:
             - slave01
-      - compose-server-centos:
-          slavenode:
-            - slave01
-      - compose-server-ubuntu:
-          slavenode:
-            - slave01
       - ansible-server-centos:
           slavenode:
             - slave01
