@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -143,11 +143,7 @@ dest_to_check=$(echo ${SSH_DEST_WORKERS[@]:0:3} | sed 's/ /,/g')
 # TODO: wait till cluster up and initialized
 sleep 300
 res=0
-if ! check_rabbitmq_cluster "$dest_to_check" ; then
-  # TODO: temporary disable rabbit claster check"
-  echo "ERROR: rebbitmq cluster check was faild"
-  res=1
-fi
+
 
 dest_to_check=$(echo ${SSH_DEST_WORKERS[@]} | sed 's/ /,/g')
 expected_number_of_services=41

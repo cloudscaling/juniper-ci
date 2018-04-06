@@ -165,7 +165,7 @@ EOM
   ifup ens4
   yum update -y &>>$logs_dir/yum.log
   yum install -y epel-release &>>$logs_dir/yum.log
-  yum install -y mc git wget ntp ntpdate iptables iproute libxml2-utils python2.7 &>>$logs_dir/yum.log
+  yum install -y mc git wget ntp ntpdate iptables iproute libxml2-utils python2.7 lsof &>>$logs_dir/yum.log
   systemctl enable ntpd.service && systemctl start ntpd.service
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
   cat <<EOM > /etc/network/interfaces.d/ens4.cfg
@@ -175,7 +175,7 @@ EOM
   ifup ens4
   apt-get -y update &>>$logs_dir/apt.log
   DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$logs_dir/apt.log
-  apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 python-pip linux-image-extra-\$(uname -r) &>>$logs_dir/apt.log
+  apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 lsof python-pip linux-image-extra-\$(uname -r) &>>$logs_dir/apt.log
   pip install pip --upgrade &>>$logs_dir/apt.log
   mv /etc/os-release /etc/os-release.original
   cat /etc/os-release.original > /etc/os-release
