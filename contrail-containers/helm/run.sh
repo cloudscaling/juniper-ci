@@ -57,17 +57,29 @@ function catch_errors() {
 $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
 
-$SCP "$my_dir/../__build-containers.sh" $SSH_DEST_BUILD:build-containers.sh
-$SCP -r "$WORKSPACE/contrail-container-builder" $SSH_DEST_BUILD:./
-
-#set -o pipefail
-#$SSH_BUILD "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION LINUX_DISTR=$LINUX_DISTR CONTRAIL_INSTALL_PACKAGES_URL=$CONTRAIL_INSTALL_PACKAGES_URL timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
-#set +o pipefail
+if [[ "$REGISTRY" == 'build' || -z "$REGISTRY" ]]; then
+  $SCP "$my_dir/../__build-containers.sh" $SSH_DEST_BUILD:build-containers.sh
+  $SCP -r "$WORKSPACE/contrail-container-builder" $SSH_DEST_BUILD:./
+  set -o pipefail
+  ssh_env="CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION LINUX_DISTR=$LINUX_DISTR CONTRAIL_INSTALL_PACKAGES_URL=$CONTRAIL_INSTALL_PACKAGES_URL"
+  $SSH_BUILD "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
+  set +o pipefail
+  CONTAINER_REGISTRY="$public_ip_build:5000"
+  CONTRAIL_VERSION="ocata-$CONTRAIL_VERSION"
+  REGISTRY_INSECURE=1
+elif [[ "$REGISTRY" == 'opencontrailnightly' ]]; then
+  CONTAINER_REGISTRY='opencontrailnightly'
+  CONTRAIL_VERSION='latest'
+  REGISTRY_INSECURE=0
+else
+  echo "ERROR: unsupported REGISTRY = $REGISTRY"
+  exit 1
+fi
 
 # ceph.repo file is needed ONLY fow centos on aws.
 $SCP "$my_dir/__ceph.repo" $SSH_DEST:ceph.repo
 $SCP "$my_dir/__run-gate.sh" $SSH_DEST:run-gate.sh
-timeout -s 9 60m $SSH "CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION LINUX_DISTR=$LINUX_DISTR ./run-gate.sh $public_ip_build"
+timeout -s 9 60m $SSH "CONTAINER_REGISTRY=$CONTAINER_REGISTRY REGISTRY_INSECURE=$REGISTRY_INSECURE CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION LINUX_DISTR=$LINUX_DISTR ./run-gate.sh $public_ip_build"
 
 trap - ERR
 save_logs

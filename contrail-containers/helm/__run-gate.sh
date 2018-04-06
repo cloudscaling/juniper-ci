@@ -1,17 +1,16 @@
 #!/bin/bash -e
 
 AAA_MODE=${AAA_MODE:-cloud-admin}
-tag='ocata-master-46'
+tag="$CONTRAIL_VERSION"
 
 # tune some host settings
 sudo sysctl -w vm.max_map_count=1048575
 
-registry_ip=${1:-localhost}
-if [[ "$registry_ip" != 'localhost' ]] ; then
+if [[ "$REGISTRY_INSECURE" == '1' ]] ; then
   sudo mkdir -p /etc/docker
   cat | sudo tee /etc/docker/daemon.json << EOF
 {
-    "insecure-registries": ["$registry_ip:5000"]
+    "insecure-registries": ["$CONTAINER_REGISTRY"]
 }
 EOF
 fi
@@ -36,15 +35,15 @@ extra_neutron_args=''
 if [[ "$AAA_MODE" == 'rbac' ]]; then
   extra_neutron_args="--values ./tools/overrides/backends/opencontrail/neutron-rbac.yaml"
 fi
-export OSH_EXTRA_HELM_ARGS_NEUTRON="$extra_neutron_args --set images.tags.opencontrail_neutron_init=docker.io/opencontrailnightly/contrail-openstack-neutron-init:$tag"
+export OSH_EXTRA_HELM_ARGS_NEUTRON="$extra_neutron_args --set images.tags.opencontrail_neutron_init=$CONTAINER_REGISTRY/contrail-openstack-neutron-init:$tag"
 echo "INFO: extra neutron args: $OSH_EXTRA_HELM_ARGS_NEUTRON"
 extra_nova_args=''
 if [[ "$OPENSTACK_VERSION" == 'ocata' ]]; then
   extra_nova_args="--set compute_patch=true"
 fi
-export OSH_EXTRA_HELM_ARGS_NOVA="$extra_nova_args --set images.tags.opencontrail_compute_init=docker.io/opencontrailnightly/contrail-openstack-compute-init:$tag"
+export OSH_EXTRA_HELM_ARGS_NOVA="$extra_nova_args --set images.tags.opencontrail_compute_init=$CONTAINER_REGISTRY/contrail-openstack-compute-init:$tag"
 echo "INFO: extra nova args: $OSH_EXTRA_HELM_ARGS_NOVA"
-export OSH_EXTRA_HELM_ARGS_HEAT="--set images.tags.opencontrail_heat_init=docker.io/opencontrailnightly/contrail-openstack-heat-init:$tag"
+export OSH_EXTRA_HELM_ARGS_HEAT="--set images.tags.opencontrail_heat_init=$CONTAINER_REGISTRY/contrail-openstack-heat-init:$tag"
 echo "INFO: extra heat args: $OSH_EXTRA_HELM_ARGS_HEAT"
 
 # Download openstack-helm code
@@ -102,34 +101,34 @@ tee /tmp/contrail.yaml << EOF
 global:
   images:
     tags:
-      kafka: "docker.io/opencontrailnightly/contrail-external-kafka:$tag"
-      cassandra: "docker.io/opencontrailnightly/contrail-external-cassandra:$tag"
+      kafka: "$CONTAINER_REGISTRY/contrail-external-kafka:$tag"
+      cassandra: "$CONTAINER_REGISTRY/contrail-external-cassandra:$tag"
       redis: "redis:4.0.2"
-      zookeeper: "docker.io/opencontrailnightly/contrail-external-zookeeper:$tag"
-      contrail_control: "docker.io/opencontrailnightly/contrail-controller-control-control:$tag"
-      control_dns: "docker.io/opencontrailnightly/contrail-controller-control-dns:$tag"
-      control_named: "docker.io/opencontrailnightly/contrail-controller-control-named:$tag"
-      config_api: "docker.io/opencontrailnightly/contrail-controller-config-api:$tag"
-      config_devicemgr: "docker.io/opencontrailnightly/contrail-controller-config-devicemgr:$tag"
-      config_schema_transformer: "docker.io/opencontrailnightly/contrail-controller-config-schema:$tag"
-      config_svcmonitor: "docker.io/opencontrailnightly/contrail-controller-config-svcmonitor:$tag"
-      webui_middleware: "docker.io/opencontrailnightly/contrail-controller-webui-job:$tag"
-      webui: "docker.io/opencontrailnightly/contrail-controller-webui-web:$tag"
-      analytics_api: "docker.io/opencontrailnightly/contrail-analytics-api:$tag"
-      contrail_collector: "docker.io/opencontrailnightly/contrail-analytics-collector:$tag"
-      analytics_alarm_gen: "docker.io/opencontrailnightly/contrail-analytics-alarm-gen:$tag"
-      analytics_query_engine: "docker.io/opencontrailnightly/contrail-analytics-query-engine:$tag"
-      analytics_snmp_collector: "docker.io/opencontrailnightly/contrail-analytics-snmp-collector:$tag"
-      contrail_topology: "docker.io/opencontrailnightly/contrail-analytics-topology:$tag"
-      build_driver_init: "docker.io/opencontrailnightly/contrail-vrouter-kernel-build-init:$tag"
-      vrouter_agent: "docker.io/opencontrailnightly/contrail-vrouter-agent:$tag"
-      vrouter_init_kernel: "docker.io/opencontrailnightly/contrail-vrouter-kernel-init:$tag"
-      vrouter_dpdk: "docker.io/opencontrailnightly/contrail-vrouter-agent-dpdk:$tag"
-      vrouter_init_dpdk: "docker.io/opencontrailnightly/contrail-vrouter-kernel-init-dpdk:$tag"
-      dpdk_watchdog: "docker.io/opencontrailnightly/contrail-vrouter-net-watchdog:$tag"
-      nodemgr: "docker.io/opencontrailnightly/contrail-nodemgr:$tag"
-      contrail_status: "docker.io/opencontrailnightly/contrail-status:$tag"
-      node_init: "docker.io/opencontrailnightly/contrail-node-init:$tag"
+      zookeeper: "$CONTAINER_REGISTRY/contrail-external-zookeeper:$tag"
+      contrail_control: "$CONTAINER_REGISTRY/contrail-controller-control-control:$tag"
+      control_dns: "$CONTAINER_REGISTRY/contrail-controller-control-dns:$tag"
+      control_named: "$CONTAINER_REGISTRY/contrail-controller-control-named:$tag"
+      config_api: "$CONTAINER_REGISTRY/contrail-controller-config-api:$tag"
+      config_devicemgr: "$CONTAINER_REGISTRY/contrail-controller-config-devicemgr:$tag"
+      config_schema_transformer: "$CONTAINER_REGISTRY/contrail-controller-config-schema:$tag"
+      config_svcmonitor: "$CONTAINER_REGISTRY/contrail-controller-config-svcmonitor:$tag"
+      webui_middleware: "$CONTAINER_REGISTRY/contrail-controller-webui-job:$tag"
+      webui: "$CONTAINER_REGISTRY/contrail-controller-webui-web:$tag"
+      analytics_api: "$CONTAINER_REGISTRY/contrail-analytics-api:$tag"
+      contrail_collector: "$CONTAINER_REGISTRY/contrail-analytics-collector:$tag"
+      analytics_alarm_gen: "$CONTAINER_REGISTRY/contrail-analytics-alarm-gen:$tag"
+      analytics_query_engine: "$CONTAINER_REGISTRY/contrail-analytics-query-engine:$tag"
+      analytics_snmp_collector: "$CONTAINER_REGISTRY/contrail-analytics-snmp-collector:$tag"
+      contrail_topology: "$CONTAINER_REGISTRY/contrail-analytics-topology:$tag"
+      build_driver_init: "$CONTAINER_REGISTRY/contrail-vrouter-kernel-build-init:$tag"
+      vrouter_agent: "$CONTAINER_REGISTRY/contrail-vrouter-agent:$tag"
+      vrouter_init_kernel: "$CONTAINER_REGISTRY/contrail-vrouter-kernel-init:$tag"
+      vrouter_dpdk: "$CONTAINER_REGISTRY/contrail-vrouter-agent-dpdk:$tag"
+      vrouter_init_dpdk: "$CONTAINER_REGISTRY/contrail-vrouter-kernel-init-dpdk:$tag"
+      dpdk_watchdog: "$CONTAINER_REGISTRY/contrail-vrouter-net-watchdog:$tag"
+      nodemgr: "$CONTAINER_REGISTRY/contrail-nodemgr:$tag"
+      contrail_status: "$CONTAINER_REGISTRY/contrail-status:$tag"
+      node_init: "$CONTAINER_REGISTRY/contrail-node-init:$tag"
       dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
   contrail_env:
     CONTROLLER_NODES: ${CONTROL_NODE}
