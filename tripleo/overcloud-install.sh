@@ -257,12 +257,19 @@ else
 fi
 
 # TODO: replace personal repo with Juniper. or make switch with available repos.
-git_repo_ctp="cloudscaling"
-git_repo_pc="cloudscaling"
+if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
+  git_repo_ctp="cloudscaling"
+  git_repo_pc="cloudscaling"
+else
+  git_repo_ctp="Juniper"
+  git_repo_pc="Juniper"
+fi
 # patch for nova with DPDK is still in private repo
 #git_repo_pc="alexey-mr"
 artifact_opts=""
-if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
+# temporary change for using Juniper repo
+# TODO: replace build with new
+#if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
   rm -rf usr/share/openstack-puppet/modules
   mkdir -p usr/share/openstack-puppet/modules
   git clone https://github.com/${git_repo_ctp}/contrail-tripleo-puppet -b $git_branch_ctp usr/share/openstack-puppet/modules/tripleo
@@ -270,7 +277,7 @@ if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
   tar czvf puppet-modules.tgz usr/
   upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
   artifact_opts="-e .tripleo/environments/deployment-artifacts.yaml"
-fi
+#fi
 
 # prepare tripleo heat templates
 if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
