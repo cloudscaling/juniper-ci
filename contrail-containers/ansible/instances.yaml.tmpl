@@ -61,6 +61,8 @@ contrail_configuration:
  AAA_MODE: cloud-admin
  PHYSICAL_INTERFACE: ${IF2}
  VROUTER_GATEWAY: ${IP_GW}
+ CONFIG_NODEMGR__DEFAULTS__minimum_diskGB: "2"
+ DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
  two_interface: true
 
 kolla_config:
