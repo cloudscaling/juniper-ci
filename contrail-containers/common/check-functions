@@ -26,3 +26,52 @@ function check_introspection() {
   done
   return $err
 }
+
+function check_simple_instance() {
+  local net_id=`openstack network show demo-net -f value -c id`
+  openstack server create --image cirros --flavor m1.tiny --key-name mykey --nic net-id=$net_id demo1
+  sleep 20
+  openstack server show demo1
+  local iip=`openstack server show demo1 | awk '/addresses/{print $4}' | cut -d '=' -f 2`
+  local hhost=`openstack server show demo1 | awk '/OS-EXT-SRV-ATTR:hypervisor_hostname/{print $4}'`
+  local hip=`openstack hypervisor list -c "Hypervisor Hostname" -c "Host IP" | grep "$hhost" | awk '{print $4}'`
+  local lip=`hostname -i`
+  local ssh_cmd=''
+  if [[ "$hip" != "$lip" ]]; then
+    ssh_cmd="ssh ${SSH_USER:-root}@$hip"
+  fi
+
+  local if_name=`$ssh_cmd sudo vif --list 2>/dev/null| grep -B 1 $iip | awk '/^vif/{print $NF}'`
+  if [[ -z "$if_name" ]]; then
+    echo "ERROR: there is no tap interface for VM"
+    $ssh_cmd ip link
+    $ssh_cmd vif --list
+    return 1
+  fi
+  local ip=`$ssh_cmd curl -s http://127.0.0.1:8085/Snh_ItfReq?name=$if_name 2>/dev/null | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'`
+  if [[ -z "$ip" ]]; then
+    echo "ERROR: there is no link-local IP for VM"
+    $ssh_cmd curl -s http://127.0.0.1:8085/Snh_ItfReq?name=$if_name | xmllint --format -
+    $ssh_cmd ip route
+    return 1
+  fi
+  $ssh_cmd ping -c 3 $ip
+
+  local ssh_opts="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5 -i ${HOME}/.ssh/id_rsa"
+  echo "INFO: Wait for instance's ssh is ready"
+  local fail=0
+  while ! $ssh_cmd ssh $ssh_opts cirros@$ip whoami 2>/dev/null; do
+    ((++fail))
+    if ((fail > 12)); then
+      echo "ERROR: Instance status wait timeout occured"
+      return 1
+    fi
+    sleep 10
+    echo "attempt $fail of 12"
+  done
+
+  # test for outside world
+  $ssh_cmd ssh $ssh_opts cirros@$ip ping -q -c 1 -W 2 8.8.8.8 2>/dev/null || /bin/true
+  # Check the VM can reach the metadata server
+  $ssh_cmd ssh $ssh_opts cirros@$ip curl -s --connect-timeout 5 http://169.254.169.254/latest/meta-data/local-ipv4 2>/dev/null ; echo ''
+}

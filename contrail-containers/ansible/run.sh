@@ -3,6 +3,7 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
+
 if [[ "$CLEAN_BEFORE" == 'true' || "$CLEAN_BEFORE" == 'clean_and_exit' ]] ; then
   $my_dir/../common/${HOST}/cleanup.sh || /bin/true
   if [[ "$CLEAN_BEFORE" == 'clean_and_exit' ]] ; then
@@ -135,16 +136,15 @@ volumes+=" -v $kolla_dir:/etc/kolla"
 volumes+=" -v $ansible_dir:/etc/ansible"
 docker run -i --entrypoint /bin/bash $volumes --network host centos-soft -c "/root/run-gate.sh"
 
+# TODO: wait till cluster up and initialized
+sleep 300
 
-# Validate cluster
-# TODO: rename run-gate since now check of cluster is here. no. move this code to run-gate or another file.
+
+# Validate cluster's introspection ports
 source "$my_dir/../common/check-functions"
 dest_to_check=$(echo ${SSH_DEST_WORKERS[@]:0:3} | sed 's/ /,/g')
 
-# TODO: wait till cluster up and initialized
-sleep 300
 res=0
-
 dest_to_check=$(echo ${SSH_DEST_WORKERS[@]} | sed 's/ /,/g')
 count=1
 limit=3
@@ -158,7 +158,39 @@ while ! check_introspection "$dest_to_check" ; do
   (( count+=1 ))
   sleep 30
 done
+test $res == '0'
 
+# validate openstack
+source $my_dir/../common/check-functions
+cd $WORKSPACE
+scp ${SSH_DEST_WORKERS[0]}:/etc/kolla/admin-openrc.sh $WORKSPACE/
+virtualenv $WORKSPACE/.venv
+source $WORKSPACE/.venv
+source $WORKSPACE/admin-openrc.sh
+pip install python-openstackclient
+
+image_name=cirros
+if ! output=`openstack image show $image_name 2>/dev/null` ; then
+  rm -f cirros-0.3.4-x86_64-disk.img
+  wget -t 2 -T 60 -q http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+  openstack image create --public --file cirros-0.3.4-x86_64-disk.img $image_name
+fi
+if ! openstack flavor show m1.tiny &>/dev/null ; then
+  openstack flavor create --disk 1 --vcpus 1 --ram 128 m1.tiny >/dev/null
+  if [[ "$USE_DPDK" == "true" ]]; then
+    openstack flavor set --property hw:mem_page_size=any m1.tiny
+  fi
+fi
+
+openstack keypair delete mykey 2>/dev/null || /bin/true
+openstack keypair create --public-key $HOME/.ssh/id_rsa.pub mykey
+openstack network create demo-net
+openstack subnet create --network demo-net --subnet-range 192.168.1.0/24 demo-subnet
+
+check_simple_instance
+deactivate
+
+# save logs and exit
 trap - ERR
 save_logs
 if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
