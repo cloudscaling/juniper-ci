@@ -28,7 +28,7 @@ function save_logs() {
     # then build repo should be added to be copied below
     timeout -s 9 20s $SCP "$my_dir/../__save-docker-logs.sh" ${dest}:save-docker-logs.sh
     if [[ $? == 0 ]] ; then
-      ssh -i $ssh_key_file $SSH_OPTS ${dest} "./save-docker-logs.sh"
+      ssh -i $ssh_key_file $SSH_OPTS ${dest} "CNT_NAME_PATTERN='1-' ./save-docker-logs.sh"
     fi
   done
 
