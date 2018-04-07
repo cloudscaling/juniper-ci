@@ -40,23 +40,15 @@ function save_logs() {
   for dest in ${SSH_DEST_WORKERS[@]} ; do
     if timeout -s 9 30s ssh -i $ssh_key_file $SSH_OPTS ${dest} "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
       local lname=$(echo $dest | cut -d '@' -f 2)
-      mkdir -p "$WORKSPACE/logs/$lname"
-      timeout -s 9 10s $SCP ${dest}:logs.tar.gz "$WORKSPACE/logs/${lname}/logs.tar.gz"
-      pushd "$WORKSPACE/logs/$lname"
+      local ldir="$WORKSPACE/logs/$lname"
+      mkdir -p "$ldir"
+      timeout -s 9 10s $SCP ${dest}:logs.tar.gz "$ldir/logs.tar.gz"
+      pushd "$ldir"
       tar -xf logs.tar.gz
       rm logs.tar.gz
       popd
     fi
   done
-
-  # save to workspace
-  if timeout -s 9 30s $SSH_BUILD "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
-    timeout -s 9 10s $SCP $SSH_DEST_BUILD:logs.tar.gz "$WORKSPACE/logs/build_logs.tar.gz"
-    pushd "$WORKSPACE/logs"
-    tar -xf build_logs.tar.gz
-    rm build_logs.tar.gz
-    popd
-  fi
 }
 
 trap catch_errors ERR;
@@ -159,11 +151,12 @@ limit=3
 while ! check_introspection "$dest_to_check" ; do
   echo "INFO: check_introspection ${count}/${limit} failed"
   if (( count == limit )) ; then
+    echo "ERROR: Cloud was not up during timeout"
     res=1
     break
   fi
   (( count+=1 ))
-  sleep 10
+  sleep 30
 done
 
 trap - ERR
@@ -172,4 +165,4 @@ if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
   $my_dir/../common/${HOST}/cleanup.sh
 fi
 
-return $res
+exit $res
