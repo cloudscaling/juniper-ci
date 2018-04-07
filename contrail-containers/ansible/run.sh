@@ -132,13 +132,15 @@ if [[ -z "$image" ]]; then
   docker rm cprep-$JOB_RND
 fi
 
-mkdir -p $WORKSPACE/etc-kolla
-mkdir -p $WORKSPACE/etc-ansible
+kolla_dir="$WORKSPACE/etc-kolla"
+rm -rf $kolla_dir && mkdir -p $kolla_dir
+ansible_dir="$WORKSPACE/etc-ansible"
+rm -rf $ansible_dir && mkdir -p $ansible_dir
 volumes="-v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer"
 volumes+=" -v $HOME/.ssh:/.ssh"
 volumes+=" -v $my_dir/__run-gate.sh:/root/run-gate.sh"
-volumes+=" -v $WORKSPACE/etc-kolla:/etc/kolla"
-volumes+=" -v $WORKSPACE/atc-ansible:/etc/ansible"
+volumes+=" -v $kolla_dir:/etc/kolla"
+volumes+=" -v $ansible_dir:/etc/ansible"
 docker run -i --rm --entrypoint /bin/bash $volumes --network host centos-soft -c "/root/run-gate.sh"
 
 
