@@ -8,7 +8,7 @@ sudo chown -R $USER logs
 mkdir -p logs/contrail
 pushd logs/contrail
 for cnt in `sudo docker ps | grep contrail | grep -v pause | awk '{print $1}'` ; do
-  cnt_name=`sudo docker inspect $cnt | python -c "import json, sys; data=json.load(sys.stdin); print data[0]['Name']" | cut -d '_' -f $CNT_NAME_PATTERN`
+  cnt_name=`sudo docker inspect $cnt | python -c "import json, sys; data=json.load(sys.stdin); print data[0]['Name']" | cut -d '_' -f $CNT_NAME_PATTERN | sed "s|/||g"`
   echo "Collecting files from $cnt_name"
   mkdir -p "$cnt_name"
   sudo docker cp $cnt:/var/log/contrail $cnt_name/
@@ -20,7 +20,7 @@ for cnt in `sudo docker ps | grep contrail | grep -v pause | awk '{print $1}'` ;
   mv $cnt_name/contrail $cnt_name/etc
 done
 for cnt in `sudo docker ps -a | grep contrail | grep -v pause | awk '{print $1}'` ; do
-  cnt_name=`sudo docker inspect $cnt | python -c "import json, sys; data=json.load(sys.stdin); print data[0]['Name']" | cut -d '_' -f $CNT_NAME_PATTERN`
+  cnt_name=`sudo docker inspect $cnt | python -c "import json, sys; data=json.load(sys.stdin); print data[0]['Name']" | cut -d '_' -f $CNT_NAME_PATTERN | sed "s|/||g"`
   mkdir -p "$cnt_name"
   sudo docker inspect $cnt > $cnt_name/inspect.log
   sudo docker logs $cnt &> $cnt_name/docker.log
