@@ -132,7 +132,14 @@ if [[ -z "$image" ]]; then
   docker rm cprep-$JOB_RND
 fi
 
-docker run -i --rm --entrypoint /bin/bash -v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer -v $HOME/.ssh:/.ssh -v $my_dir/__run-gate.sh:/root/run-gate.sh --network host centos-soft -c "/root/run-gate.sh"
+mkdir -p $WORKSPACE/etc-kolla
+mkdir -p $WORKSPACE/etc-ansible
+volumes="-v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer"
+volumes+=" -v $HOME/.ssh:/.ssh"
+volumes+=" -v $my_dir/__run-gate.sh:/root/run-gate.sh"
+volumes+=" -v $WORKSPACE/etc-kolla:/etc/kolla"
+volumes+=" -v $WORKSPACE/atc-ansible:/etc/ansible"
+docker run -i --rm --entrypoint /bin/bash $volumes --network host centos-soft -c "/root/run-gate.sh"
 
 
 # Validate cluster
@@ -144,12 +151,10 @@ dest_to_check=$(echo ${SSH_DEST_WORKERS[@]:0:3} | sed 's/ /,/g')
 sleep 300
 res=0
 
-
 dest_to_check=$(echo ${SSH_DEST_WORKERS[@]} | sed 's/ /,/g')
-expected_number_of_services=41
 count=1
 limit=3
-while ! check_introspection $expected_number_of_services "$dest_to_check" ; do
+while ! check_introspection "$dest_to_check" ; do
   echo "INFO: check_introspection ${count}/${limit} failed"
   if (( count == limit )) ; then
     res=1
