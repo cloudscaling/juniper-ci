@@ -133,7 +133,7 @@ volumes+=" -v $HOME/.ssh:/.ssh"
 volumes+=" -v $my_dir/__run-gate.sh:/root/run-gate.sh"
 volumes+=" -v $kolla_dir:/etc/kolla"
 volumes+=" -v $ansible_dir:/etc/ansible"
-docker run -i --rm --entrypoint /bin/bash $volumes --network host centos-soft -c "/root/run-gate.sh"
+docker run -i --entrypoint /bin/bash $volumes --network host centos-soft -c "/root/run-gate.sh"
 
 
 # Validate cluster
