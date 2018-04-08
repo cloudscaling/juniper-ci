@@ -20,10 +20,10 @@ done
 EOF
 
 # save contrail logs
-for dest in ${SSH_DEST_WORKERS[@]} ; do
+for dest in ${nodes_ips[@]} ; do
   # TODO: when repo be splitted to containers & build here will be containers repo only,
   # then build repo should be added to be copied below
-  cat <<EOF | timeout -s 9 60s ssh -i $ssh_key_file $SSH_OPTS ${dest}
+  cat <<EOF | timeout -s 9 60s ssh -i $ssh_key_file $SSH_OPTS ${SSH_USER}@${dest}
 mkdir -p ~/logs/k8s
 for i in /var/log/contrail /var/log/containers /etc/cni ; do
   cp -r \$i ~/logs/k8s/ || true

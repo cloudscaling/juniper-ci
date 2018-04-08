@@ -21,12 +21,12 @@ function save_logs() {
   source "$my_dir/../common/${HOST}/ssh-defs"
   set +e
   # save common docker logs
-  for dest in ${SSH_DEST_WORKERS[@]} ; do
+  for dest in $nodes_ips ; do
     # TODO: when repo be splitted to containers & build here will be containers repo only,
     # then build repo should be added to be copied below
-    timeout -s 9 20s $SCP "$my_dir/../__save-docker-logs.sh" ${dest}:save-docker-logs.sh
+    timeout -s 9 20s $SCP "$my_dir/../__save-docker-logs.sh" ${SSH_USER}@${dest}:save-docker-logs.sh
     if [[ $? == 0 ]] ; then
-      ssh -i $ssh_key_file $SSH_OPTS ${dest} "CNT_NAME_PATTERN='1-' ./save-docker-logs.sh"
+      $SSH_CMD ${SSH_USER}@${dest} "CNT_NAME_PATTERN='1-' ./save-docker-logs.sh"
     fi
   done
 
@@ -35,8 +35,8 @@ function save_logs() {
   $my_dir/../common/${HOST}/save-logs.sh
 
   # save to workspace
-  for dest in ${SSH_DEST_WORKERS[@]} ; do
-    if timeout -s 9 30s ssh -i $ssh_key_file $SSH_OPTS ${dest} "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
+  for dest in $nodes_ips ; do
+    if timeout -s 9 30s $SSH_CMD ${SSH_USER}@${dest} "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
       local lname=$(echo $dest | cut -d '@' -f 2)
       local ldir="$WORKSPACE/logs/$lname"
       mkdir -p "$ldir"
@@ -65,22 +65,27 @@ function catch_errors() {
 $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
 
-for dest in ${SSH_DEST_WORKERS[@]} ; do
-  $SCP -r "$WORKSPACE/contrail-container-builder" ${dest}:./
+for dest in $nodes_ips ; do
+  $SCP -r "$WORKSPACE/contrail-container-builder" ${SSH_USER}@${dest}:./
   $SCP "$my_dir/../__check_rabbitmq.sh" ${dest}:check_rabbitmq.sh
   $SCP "$my_dir/../__check_introspection.sh" ${dest}:./check_introspection.sh
 done
 
 if [[ "$REGISTRY" == 'build' || -z "$REGISTRY" ]]; then
-  $SCP "$my_dir/../__build-containers.sh" $SSH_DEST_BUILD:build-containers.sh
+  dest_build="${SSH_USER}@$master_ip"
+  $SCP "$my_dir/../__build-containers.sh" $dest_build:build-containers.sh
   set -o pipefail
   ssh_env="CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION"
   ssh_env+=" CONTRAIL_INSTALL_PACKAGES_URL=$CONTRAIL_INSTALL_PACKAGES_URL"
-  $SSH_BUILD "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
+  $SSH_CMD $dest_build "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
   set +o pipefail
+  CONTAINER_REGISTRY="$master_ip:5000"
+  CONTRAIL_VERSION="ocata-$CONTRAIL_VERSION"
+  REGISTRY_INSECURE=1
 elif [[ "$REGISTRY" == 'opencontrailnightly' ]]; then
   CONTAINER_REGISTRY='opencontrailnightly'
   CONTRAIL_VERSION='latest'
+  REGISTRY_INSECURE=1
 else
   echo "ERROR: unsupported REGISTRY = $REGISTRY"
   exit 1
@@ -93,18 +98,14 @@ IP_CONT_01=`echo ${SSH_DEST_WORKERS[0]} | cut -d '@' -f 2`
 IP_CONT_02=`echo ${SSH_DEST_WORKERS[1]} | cut -d '@' -f 2`
 IP_CONT_03=`echo ${SSH_DEST_WORKERS[2]} | cut -d '@' -f 2`
 IP_COMP_01=`echo ${SSH_DEST_WORKERS[3]} | cut -d '@' -f 2`
-CONTRAIL_REGISTRY=$IP_CONT_01
 IP_VIP=${NET_PREFIX}.254
 IP_GW=${NET_PREFIX}.1
 
-cat <<EOF > $WORKSPACE/contrail-ansible-deployer/inventory/hosts
-container_hosts:
-  hosts:
-    $IP_CONT_01:
-    $IP_CONT_02:
-    $IP_CONT_03:
-    $IP_COMP_01:
-EOF
+echo "container_hosts:" > $WORKSPACE/contrail-ansible-deployer/inventory/hosts
+echo "  hosts:" >> $WORKSPACE/contrail-ansible-deployer/inventory/hosts
+for ip in $nodes_ips ; do
+  echo "    ${ip}:" >> $WORKSPACE/contrail-ansible-deployer/inventory/hosts
+done
 
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
 templ=$(cat $my_dir/instances.yaml.tmpl)
@@ -134,10 +135,12 @@ sleep 300
 
 # Validate cluster's introspection ports
 source "$my_dir/../common/check-functions"
-dest_to_check=$(echo ${SSH_DEST_WORKERS[@]:0:3} | sed 's/ /,/g')
-
 res=0
-dest_to_check=$(echo ${SSH_DEST_WORKERS[@]} | sed 's/ /,/g')
+ips=($nodes_ips)
+dest_to_check="${SSH_USER}@${ips[0]}"
+for ip in $ips ; do
+  dest_to_check="$dest_to_check,${SSH_USER}@$ip"
+done
 count=1
 limit=3
 while ! check_introspection "$dest_to_check" ; do
@@ -155,7 +158,7 @@ test $res == '0'
 # validate openstack
 source $my_dir/../common/check-functions
 cd $WORKSPACE
-scp ${SSH_DEST_WORKERS[0]}:/etc/kolla/admin-openrc.sh $WORKSPACE/
+$SCP ${SSH_USER}@$master_ip:/etc/kolla/admin-openrc.sh $WORKSPACE/
 virtualenv $WORKSPACE/.venv
 source $WORKSPACE/.venv/bin/activate
 source $WORKSPACE/admin-openrc.sh

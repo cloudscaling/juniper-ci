@@ -16,4 +16,4 @@ SSH_DEST_WORKERS=()
 for ip in $nodes_ips ; do
   SSH_DEST_WORKERS+=( "$SSH_USER@${ip}" )
 done
-SSH_WORKER="ssh -i $ssh_key_file $SSH_OPTS"
+SSH_CMD="ssh -i $ssh_key_file $SSH_OPTS"

@@ -4,7 +4,7 @@ function check_rabbitmq_cluster() {
   local dest=( $(echo $1 | sed 's/,/ /g') )
   local err=0
   for d in ${dest[@]} ; do
-    if ! $SSH_WORKER $d ./check_rabbitmq.sh ; then
+    if ! $SSH_CMD $d ./check_rabbitmq.sh ; then
       echo ERROR: rabbitmq_cluster_check failed on dest=$d
       (( err+=1 ))
     fi
@@ -17,7 +17,7 @@ function check_introspection() {
   local err=0
   local count=0
   for d in ${dest[@]} ; do
-    local res=$($SSH_WORKER $d ./check_introspection.sh)
+    local res=$($SSH_CMD $d ./check_introspection.sh)
     echo "$res"
     if [[ ! $? -eq 0 ]]  ; then
       echo "ERROR: check_introspection failed on dest=$d"

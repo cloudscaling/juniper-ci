@@ -86,31 +86,35 @@ function define_node() {
 }
 
 # define last octet of MAC address as 0$i or 1$i (assuming that count of machine is not more than 9)
-declare -a NODES
+declare -a NODES NODES_CONT NODES_COMP
 for (( i=0; i<${CONT_NODES}; ++i )); do
   node="${VM_NAME}_cont_$i"
   define_node "$node" ${CONT_NODE_MEM} "0$i"
   start_vm "$node"
   NODES=( ${NODES[@]} "$node" )
+  NODES_CONT=( ${NODES_CONT[@]} "$node" )
 done
 for (( i=0; i<${COMP_NODES}; ++i )); do
   node="${VM_NAME}_comp_$i"
   define_node "$node" ${COMP_NODE_MEM} "1$i"
   start_vm "$node"
   NODES=( ${NODES[@]} "$node" )
+  NODES_COMP=( ${NODES_COMP[@]} "$node" )
 done
 
 # wait machine and get IP via virsh net-dhcp-leases $NET_NAME
 _ips=( $(wait_dhcp $NET_NAME ${#NODES[@]} ) )
 # collect controller ips first and compute ips next
-declare -a ips
+declare -a ips ips_cont ips_comp
 for (( i=0; i<${CONT_NODES}; ++i )); do
   ip=`get_ip_by_mac $NET_NAME $NET_MAC_PREFIX:0$i`
   ips=( ${ips[@]} $ip )
+  ips_cont=( ${ips_cont[@]} $ip )
 done
 for (( i=0; i<${COMP_NODES}; ++i )); do
   ip=`get_ip_by_mac $NET_NAME $NET_MAC_PREFIX:1$i`
   ips=( ${ips[@]} $ip )
+  ips_comp=( ${ips_comp[@]} $ip )
 done
 
 for ip in ${ips[@]} ; do
@@ -183,6 +187,7 @@ EOM
   yum update -y &>>$logs_dir/yum.log
   yum install -y epel-release &>>$logs_dir/yum.log
   yum install -y mc git wget ntp ntpdate iptables iproute libxml2-utils python2.7 lsof &>>$logs_dir/yum.log
+  systemctl disable chronyd.service
   systemctl enable ntpd.service && systemctl start ntpd.service
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
   if [[ -n "$NET_ADDR_VR" ]]; then
@@ -216,10 +221,15 @@ master_ip=${ips[0]}
 # save env file
 cat <<EOF >$ENV_FILE
 SSH_USER=$SSH_USER
-public_ip=$master_ip
 public_ip_build=$master_ip
 public_ip_cloud=$master_ip
+
 ssh_key_file=/home/jenkins/.ssh/id_rsa
+master_ip=$master_ip
 nodes="${NODES[@]}"
 nodes_ips="${ips[@]}"
+nodes_cont="${NODES_CONT[@]}"
+nodes_cont_ips="${ips_cont[@]}"
+nodes_comp="${NODES_COMP[@]}"
+nodes_comp_ips="${ips_comp[@]}"
 EOF
