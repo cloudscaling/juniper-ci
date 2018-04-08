@@ -40,7 +40,7 @@ function save_logs() {
       local lname=$(echo $dest | cut -d '@' -f 2)
       local ldir="$WORKSPACE/logs/$lname"
       mkdir -p "$ldir"
-      timeout -s 9 10s $SCP ${dest}:logs.tar.gz "$ldir/logs.tar.gz"
+      timeout -s 9 10s $SCP $SSH_USER@${dest}:logs.tar.gz "$ldir/logs.tar.gz"
       pushd "$ldir"
       tar -xf logs.tar.gz
       rm logs.tar.gz
@@ -67,17 +67,15 @@ source "$my_dir/../common/${HOST}/ssh-defs"
 
 for dest in $nodes_ips ; do
   $SCP -r "$WORKSPACE/contrail-container-builder" ${SSH_USER}@${dest}:./
-  $SCP "$my_dir/../__check_rabbitmq.sh" ${dest}:check_rabbitmq.sh
-  $SCP "$my_dir/../__check_introspection.sh" ${dest}:./check_introspection.sh
+  $SCP "$my_dir/../__check_introspection.sh" $SSH_USER@${dest}:./check_introspection.sh
 done
 
 if [[ "$REGISTRY" == 'build' || -z "$REGISTRY" ]]; then
-  dest_build="${SSH_USER}@$master_ip"
-  $SCP "$my_dir/../__build-containers.sh" $dest_build:build-containers.sh
+  $SCP "$my_dir/../__build-containers.sh" ${SSH_USER}@$master_ip:build-containers.sh
   set -o pipefail
   ssh_env="CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION"
   ssh_env+=" CONTRAIL_INSTALL_PACKAGES_URL=$CONTRAIL_INSTALL_PACKAGES_URL"
-  $SSH_CMD $dest_build "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
+  $SSH_CMD ${SSH_USER}@$master_ip "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
   set +o pipefail
   CONTAINER_REGISTRY="$master_ip:5000"
   CONTRAIL_VERSION="ocata-$CONTRAIL_VERSION"
@@ -94,18 +92,18 @@ fi
 # deploy cloud
 source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
-IP_CONT_01=`echo ${SSH_DEST_WORKERS[0]} | cut -d '@' -f 2`
-IP_CONT_02=`echo ${SSH_DEST_WORKERS[1]} | cut -d '@' -f 2`
-IP_CONT_03=`echo ${SSH_DEST_WORKERS[2]} | cut -d '@' -f 2`
-IP_COMP_01=`echo ${SSH_DEST_WORKERS[3]} | cut -d '@' -f 2`
-IP_VIP=${NET_PREFIX}.254
-IP_GW=${NET_PREFIX}.1
-
 echo "container_hosts:" > $WORKSPACE/contrail-ansible-deployer/inventory/hosts
 echo "  hosts:" >> $WORKSPACE/contrail-ansible-deployer/inventory/hosts
 for ip in $nodes_ips ; do
   echo "    ${ip}:" >> $WORKSPACE/contrail-ansible-deployer/inventory/hosts
 done
+
+IP_CONT_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
+IP_CONT_02=`echo $nodes_cont_ips | cut -d ' ' -f 2`
+IP_CONT_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
+IP_COMP_01=`echo $nodes_comp_ips | cut -d ' ' -f 1`
+IP_VIP=${NET_PREFIX}.254
+IP_GW=${NET_PREFIX}.1
 
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
 templ=$(cat $my_dir/instances.yaml.tmpl)
