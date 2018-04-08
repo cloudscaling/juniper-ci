@@ -1,4 +1,4 @@
-export JOB_RND=$((RANDOM % 100))
+export JOB_RND=$((RANDOM % 90 + 10))
 
 export NET_PREFIX="10.5.$JOB_RND"
 export NET_ADDR="$NET_PREFIX.0"
