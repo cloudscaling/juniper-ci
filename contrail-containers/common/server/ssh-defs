@@ -3,17 +3,5 @@ ENV_FILE="$WORKSPACE/cloudrc"
 [ -f $ENV_FILE ] && source $ENV_FILE
 
 SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
-
 SCP="scp -i $ssh_key_file $SSH_OPTS"
-
-SSH_DEST="$SSH_USER@$public_ip_cloud"
-SSH="ssh -i $ssh_key_file $SSH_OPTS $SSH_DEST"
-
-SSH_DEST_BUILD="$SSH_USER@$public_ip_build"
-SSH_BUILD="ssh -i $ssh_key_file $SSH_OPTS $SSH_DEST_BUILD"
-
-SSH_DEST_WORKERS=()
-for ip in $nodes_ips ; do
-  SSH_DEST_WORKERS+=( "$SSH_USER@${ip}" )
-done
 SSH_CMD="ssh -i $ssh_key_file $SSH_OPTS"

@@ -5,17 +5,12 @@ my_dir="$(dirname $my_file)"
 
 source "$my_dir/../common/${HOST}/ssh-defs"
 
-dest=( ${SSH_DEST_WORKERS[@]} )
-ips=()
-for d in ${dest[@]} ; do
-  ips+=( $(echo $d | cut -d '@' -f 2))
-done
-export DOCKER_REGISTRY_ADDR=${ips[0]}
-export KUBERNETES_API_SERVER=${ips[0]}
+export DOCKER_REGISTRY_ADDR=${master_ip}
+export KUBERNETES_API_SERVER=${master_ip}
 # here we define controller nodes as a ips[0:2]
-export CONTROLLER_NODES=$(echo ${ips[@]:0:3} | sed 's/ /,/g')
+export CONTROLLER_NODES=$( echo $nodes_cont_ips | sed 's/ /,/g')
 # agent nodes are ips [3:]
-export AGENT_NODES=$(echo ${ips[@]:3} | sed 's/ /,/g')
+export AGENT_NODES=$(echo $nodes_comp_ips | sed 's/ /,/g')
 
 function assert_empty() {
   if [[ -z "${!1}" ]] ; then
@@ -34,7 +29,7 @@ assert_empty AGENT_NODES
 function setup_k8s() {
   local dest=$1
   local token_opts=${2:-''}
-  cat <<EOF | $SSH_CMD $dest
+  cat <<EOF | $SSH_CMD $SSH_USER@$dest
 set -x
 export PATH=\${PATH}:/usr/sbin
 cd ~/contrail-container-builder
@@ -67,14 +62,14 @@ EOF
 
 token=''
 master_dest=''
-for d in ${dest[@]} ; do
-  setup_k8s $d "join-token=$token" develop
+for node_ip in $nodes_ips ; do
+  setup_k8s $node_ip "join-token=$token" develop
   if [[ -z "$master_dest" ]] ; then
     # first is master, so get token
-    master_dest="$d"
+    master_dest="$node_ip"
     for (( i=0; i < 10; ++i )) ; do
       echo "get k8s cluster token ${i}/10"
-      token=`$SSH_CMD $d "sudo kubeadm token list" | tail -n 1 | awk '{print($1)}'`
+      token=`$SSH_CMD $SSH_USER@$node_ip "sudo kubeadm token list" | tail -n 1 | awk '{print($1)}'`
       if [[ -n "$token" ]] ; then
         echo "get k8s cluster token done: $token"
         break
@@ -86,4 +81,4 @@ done
 
 # wait a bit for last node connection establishing
 sleep 30
-$SSH_CMD $master_dest  "set -x; export PATH=\${PATH}:/usr/sbin; cd ~/contrail-container-builder/kubernetes/manifests && ./set-node-labels.sh"
+$SSH_CMD $SSH_USER@$master_dest  "set -x; export PATH=\${PATH}:/usr/sbin; cd ~/contrail-container-builder/kubernetes/manifests && ./set-node-labels.sh"
