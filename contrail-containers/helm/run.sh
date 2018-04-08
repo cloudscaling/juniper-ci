@@ -13,9 +13,8 @@ fi
 rm -rf "$WORKSPACE/logs"
 mkdir -p "$WORKSPACE/logs"
 
-# definition for baremetal deployment
-export JOB_RND=$((RANDOM % 100))
-export NET_ADDR=${NET_ADDR:-"10.3.$JOB_RND.0"}
+# definition for job deployment
+source $my_dir/${HOST}-defs
 
 function save_logs() {
   source "$my_dir/../common/${HOST}/ssh-defs"

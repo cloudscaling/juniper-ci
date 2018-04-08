@@ -23,8 +23,6 @@ export ENV_FILE="$WORKSPACE/cloudrc"
 source "$my_dir/definitions"
 source "$my_dir/${ENVIRONMENT_OS}"
 
-VCPUS=4
-
 if [[ -z "$ENVIRONMENT_OS" ]] ; then
   echo "ENVIRONMENT_OS is expected (e.g. export ENVIRONMENT_OS=centos)"
   exit 1
@@ -53,9 +51,12 @@ BASE_IMAGE_POOL=${BASE_IMAGE_POOL:-'images'}
 
 source "$my_dir/../../../common/virsh/functions"
 
-NODES=( "${VM_NAME}_1" "${VM_NAME}_2" "${VM_NAME}_3" "${VM_NAME}_4" )
-for i in ${NODES[@]} ; do
-  assert_env_exists "$i"
+# check previous env
+for (( i=0; i<${CONT_NODES}; ++i )); do
+  assert_env_exists "${VM_NAME}_cont_$i"
+done
+for (( i=0; i<${COMP_NODES}; ++i )); do
+  assert_env_exists "${VM_NAME}_comp_$i"
 done
 
 # re-create network
@@ -70,41 +71,54 @@ fi
 # create pool
 create_pool $POOL_NAME
 
-# re-create disk
 function define_node() {
   local vm_name=$1
   local mem=$2
+  local mac_octet=$3
   local vol_name="$vm_name.qcow2"
   delete_volume $vol_name $POOL_NAME
   local vol_path=$(create_volume_from $vol_name $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
-  local net="$NET_NAME"
+  local net="$NET_NAME/$NET_MAC_PREFIX:$mac_octet"
   if [[ -n "$NET_ADDR_VR" ]]; then
-    net="$NET_NAME,$NET_NAME_VR"
+    net="$NET_NAME,$NET_NAME_VR/$NET_MAC_VR_PREFIX:$mac_octet"
   fi
   define_machine $vm_name $VCPUS $mem $OS_VARIANT $net $vol_path $DISK_SIZE
 }
 
-# First 3 are controllers,
-# latest is agent
-MEM_MAP=( 16384 16384 16384 6000 )
-CTRL_MEM_LIMIT=10000
-for (( i=0; i < ${#NODES[@]}; ++i )) ; do
-  define_node "${NODES[$i]}" ${MEM_MAP[$i]}
+# define last octet of MAC address as 0$i or 1$i (assuming that count of machine is not more than 9)
+declare -a NODES
+for (( i=0; i<${CONT_NODES}; ++i )); do
+  node="${VM_NAME}_cont_$i"
+  define_node "$node" ${CONT_NODE_MEM} "0$i"
+  start_vm "$node"
+  NODES=( ${NODES[@]} "$node" )
+done
+for (( i=0; i<${COMP_NODES}; ++i )); do
+  node="${VM_NAME}_comp_$i"
+  define_node "$node" ${COMP_NODE_MEM} "1$i"
+  start_vm "$node"
+  NODES=( ${NODES[@]} "$node" )
 done
 
-# start nodes
-for i in ${NODES[@]} ; do
-  start_vm $i
+# wait machine and get IP via virsh net-dhcp-leases $NET_NAME
+_ips=( $(wait_dhcp $NET_NAME ${#NODES[@]} ) )
+# collect controller ips first and compute ips next
+declare -a ips
+for (( i=0; i<${CONT_NODES}; ++i )); do
+  ip=`get_ip_by_mac $NET_NAME $NET_MAC_PREFIX:0$i`
+  ips=( ${ips[@]} $ip )
+done
+for (( i=0; i<${COMP_NODES}; ++i )); do
+  ip=`get_ip_by_mac $NET_NAME $NET_MAC_PREFIX:1$i`
+  ips=( ${ips[@]} $ip )
 done
 
-#wait machine and get IP via virsh net-dhcp-leases $NET_NAME
-ips=( $(wait_dhcp $NET_NAME ${#NODES[@]} ) )
 for ip in ${ips[@]} ; do
   wait_ssh $ip
 done
 
-id_rsa="$(cat ~/.ssh/id_rsa)"
-id_rsa_pub="$(cat ~/.ssh/id_rsa.pub)"
+id_rsa="$(cat $HOME/.ssh/id_rsa)"
+id_rsa_pub="$(cat $HOME/.ssh/id_rsa.pub)"
 # prepare host name
 SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
 index=0
@@ -116,6 +130,7 @@ for ip in ${ips[@]} ; do
     logs_dir="/home/$SSH_USER/logs"
   fi
 
+  # prepare node: set hostname, fill /etc/hosts, configure ssh, configure second iface if needed, install software, reboot
   cat <<EOF | ssh $SSH_OPTS root@${ip}
 set -x
 hname="node-\$(echo $ip | tr '.' '-')"
@@ -152,8 +167,9 @@ fi
 mkdir -p $logs_dir
 if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
   rm -f /etc/sysconfig/network-scripts/ifcfg-eth0
-  mac_if2=\$(ip link show ens4 | awk '/link/{print \$2}')
-  cat <<EOM > /etc/sysconfig/network-scripts/ifcfg-ens4
+  if [[ -n "$NET_ADDR_VR" ]]; then
+    mac_if2=\$(ip link show ens4 | awk '/link/{print \$2}')
+    cat <<EOM > /etc/sysconfig/network-scripts/ifcfg-ens4
 BOOTPROTO=dhcp
 DEVICE=ens4
 HWADDR=\$mac_if2
@@ -162,17 +178,20 @@ TYPE=Ethernet
 USERCTL=no
 DEFROUTE=no
 EOM
-  ifup ens4
+    ifup ens4
+  fi
   yum update -y &>>$logs_dir/yum.log
   yum install -y epel-release &>>$logs_dir/yum.log
   yum install -y mc git wget ntp ntpdate iptables iproute libxml2-utils python2.7 lsof &>>$logs_dir/yum.log
   systemctl enable ntpd.service && systemctl start ntpd.service
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
-  cat <<EOM > /etc/network/interfaces.d/ens4.cfg
+  if [[ -n "$NET_ADDR_VR" ]]; then
+    cat <<EOM > /etc/network/interfaces.d/ens4.cfg
 auto ens4
 iface ens4 inet dhcp
 EOM
-  ifup ens4
+    ifup ens4
+  fi
   apt-get -y update &>>$logs_dir/apt.log
   DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$logs_dir/apt.log
   apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 lsof python-pip linux-image-extra-\$(uname -r) &>>$logs_dir/apt.log
@@ -191,20 +210,7 @@ for ip in ${ips[@]} ; do
   wait_ssh $ip
 done
 
-# sort IPs according to MEM, agent machine has less RAM than CTRL_MEM_LIMIT
-# put agent machines at the end of list
-_ips=( ${ips[@]} )
-ips=()
-for ip in ${_ips[@]} ; do
-  mem=$(ssh $SSH_OPTS root@${ip} free -m | awk '/Mem/ {print $2}')
-  if (( mem < CTRL_MEM_LIMIT )) ; then
-    ips=( ${ips[@]} $ip )
-  else
-    ips=( $ip ${ips[@]} )
-  fi
-done
-
-# first machine is master
+# first machine is master and machine for build containers
 master_ip=${ips[0]}
 
 # save env file

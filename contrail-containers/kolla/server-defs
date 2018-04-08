@@ -1,0 +1,2 @@
+export JOB_RND=$((RANDOM % 100))
+export NET_ADDR=${NET_ADDR:-"10.7.$JOB_RND.0"}

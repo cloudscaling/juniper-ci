@@ -3,6 +3,8 @@
 prefix="$WAY-$ENVIRONMENT_OS-$OPENSTACK_VERSION"
 suffix=${JOB_RND:-0}
 
+export VCPUS=4
+
 export POOL_NAME="$WAY"
 export VM_NAME="$prefix-$suffix"
 export NET_NAME="$prefix-$suffix"

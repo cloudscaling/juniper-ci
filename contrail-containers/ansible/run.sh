@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -14,11 +14,8 @@ fi
 rm -rf "$WORKSPACE/logs"
 mkdir -p "$WORKSPACE/logs"
 
-# definition for baremetal deployment
-export JOB_RND=$((RANDOM % 100))
-export NET_ADDR=${NET_ADDR:-"10.9.$JOB_RND.0"}
-export NET_PREFIX=$(echo $NET_ADDR | cut -d '.' -f 1,2,3)
-export NET_ADDR_VR=${NET_ADDR_VR:-"10.10.$JOB_RND.0"}
+# definition for job deployment
+source $my_dir/${HOST}-defs
 
 function save_logs() {
   source "$my_dir/../common/${HOST}/ssh-defs"
@@ -65,14 +62,10 @@ function catch_errors() {
   exit $exit_code
 }
 
-# Work with docker-compose udner root
-export SSH_USER=root
 $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
 
 for dest in ${SSH_DEST_WORKERS[@]} ; do
-  # TODO: when repo be splitted to containers & build here will be containers repo only,
-  # then build repo should be added to be copied below
   $SCP -r "$WORKSPACE/contrail-container-builder" ${dest}:./
   $SCP "$my_dir/../__check_rabbitmq.sh" ${dest}:check_rabbitmq.sh
   $SCP "$my_dir/../__check_introspection.sh" ${dest}:./check_introspection.sh
@@ -93,6 +86,7 @@ else
   exit 1
 fi
 
+# deploy cloud
 source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
 IP_CONT_01=`echo ${SSH_DEST_WORKERS[0]} | cut -d '@' -f 2`

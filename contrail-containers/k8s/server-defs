@@ -1,0 +1,10 @@
+export JOB_RND=$((RANDOM % 100))
+
+export NET_PREFIX="10.5.$JOB_RND"
+export NET_ADDR="$NET_PREFIX.0"
+export NET_MAC_PREFIX="52:54:10:05:${JOB_RND}"
+
+export CONT_NODES=3
+export CONT_NODE_MEM=16384
+export COMP_NODES=1
+export COMP_NODE_MEM=6144
