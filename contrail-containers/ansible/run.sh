@@ -163,7 +163,7 @@ source $my_dir/../common/check-functions
 cd $WORKSPACE
 scp ${SSH_DEST_WORKERS[0]}:/etc/kolla/admin-openrc.sh $WORKSPACE/
 virtualenv $WORKSPACE/.venv
-source $WORKSPACE/.venv
+source $WORKSPACE/.venv/bin/activate
 source $WORKSPACE/admin-openrc.sh
 pip install python-openstackclient
 
