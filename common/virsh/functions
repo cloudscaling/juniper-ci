@@ -506,5 +506,5 @@ function wait_ssh() {
 function get_ip_by_mac() {
   local net=$1
   local filter=$2
-  virsh net-dhcp-leases k8s-centos-ocata-56 | sed 1,2d | grep "$filter" | awk '{print($5)}' | cut -d '/' -f 1
+  virsh net-dhcp-leases $net | sed 1,2d | grep "$filter" | awk '{print($5)}' | cut -d '/' -f 1
 }

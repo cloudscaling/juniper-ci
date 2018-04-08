@@ -80,7 +80,7 @@ function define_node() {
   local vol_path=$(create_volume_from $vol_name $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
   local net="$NET_NAME/$NET_MAC_PREFIX:$mac_octet"
   if [[ -n "$NET_ADDR_VR" ]]; then
-    net="$NET_NAME,$NET_NAME_VR/$NET_MAC_VR_PREFIX:$mac_octet"
+    net="$net,$NET_NAME_VR/$NET_MAC_VR_PREFIX:$mac_octet"
   fi
   define_machine $vm_name $VCPUS $mem $OS_VARIANT $net $vol_path $DISK_SIZE
 }
