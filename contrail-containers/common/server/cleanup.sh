@@ -33,7 +33,7 @@ function delete_node() {
 # source default values
 source "$my_dir/definitions"
 # check that current JOB_RND equals to existed in the system
-existed_jobs=`virsh net-list | grep $prefix | awk '{print $1}' | cut -d '-' -f 4`
+existed_jobs=`virsh net-list --all | grep $prefix | awk '{print $1}' | cut -d '-' -f 4 | sort | uniq`
 echo "INFO: Current job: $JOB_RND, Existed jobs to cleanup: $existed_jobs"
 
 for job in $existed_jobs ; do
@@ -41,8 +41,7 @@ for job in $existed_jobs ; do
   export JOB_RND="$job"
   source "$my_dir/definitions"
 
-  NODES=( "${VM_NAME}_1" "${VM_NAME}_2" "${VM_NAME}_3" "${VM_NAME}_4" )
-  for i in ${NODES[@]} ; do
+  for i in `virsh list --all | grep $VM_NAME | awk '{print $2}'` ; do
     delete_node $i
   done
   delete_network_dhcp $NET_NAME
