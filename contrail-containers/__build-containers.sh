@@ -17,7 +17,7 @@ sudo -E ./build.sh || /bin/true
 sudo docker images | grep "$CONTRAIL_VERSION"
 
 # cause we use this machine for cloud after build process then we need to free port 80
-sudo systemctl stop lighttpd.server
-sudo systemctl disable lighttpd.server
+sudo systemctl stop lighttpd.service
+sudo systemctl disable lighttpd.service
 
 echo "INFO: Build finished  $(date)"

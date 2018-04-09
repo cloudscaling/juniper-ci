@@ -137,7 +137,6 @@ global:
     AAA_MODE: $AAA_MODE
     CONTROL_DATA_NET_LIST:
     VROUTER_GATEWAY:
-    BGP_PORT: "1179"
 EOF
 
 helm install --name contrail ${CHD_PATH}/contrail --namespace=contrail --values=/tmp/contrail.yaml
