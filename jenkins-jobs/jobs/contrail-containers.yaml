@@ -96,6 +96,9 @@
       - helm-aws-ubuntu:
           slavenode:
             - master
+      - helm-server-ubuntu:
+          slavenode:
+            - master
       - k8s-server-centos:
           slavenode:
             - slave01

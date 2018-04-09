@@ -19,25 +19,27 @@ source $my_dir/${HOST}-defs
 function save_logs() {
   source "$my_dir/../common/${HOST}/ssh-defs"
   set +e
-  $SCP "$my_dir/../__save-docker-logs.sh" $SSH_DEST:save-docker-logs.sh
-  $SSH "./save-docker-logs.sh"
-
-  if $SSH "sudo tar -czf logs.tgz ./logs" ; then
-    $SCP $SSH_DEST:logs.tgz "$WORKSPACE/logs/logs.tgz"
-    pushd "$WORKSPACE/logs"
-    tar -xf logs.tgz
-    rm logs.tgz
-    popd
-  fi
+  # save common docker logs
+  for dest in $nodes_ips ; do
+    timeout -s 9 20s $SCP "$my_dir/../__save-docker-logs.sh" ${SSH_USER}@${dest}:save-docker-logs.sh
+    if [[ $? == 0 ]] ; then
+      $SSH_CMD ${SSH_USER}@${dest} "./save-docker-logs.sh"
+    fi
+  done
 
   # save to workspace
-  if $SSH_BUILD "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
-    $SCP $SSH_DEST_BUILD:logs.tar.gz "$WORKSPACE/logs/build_logs.tar.gz"
-    pushd "$WORKSPACE/logs"
-    tar -xf build_logs.tar.gz
-    rm build_logs.tar.gz
-    popd
-  fi
+  for dest in $nodes_ips ; do
+    if timeout -s 9 30s $SSH_CMD ${SSH_USER}@${dest} "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
+      local lname=$(echo $dest | cut -d '@' -f 2)
+      local ldir="$WORKSPACE/logs/$lname"
+      mkdir -p "$ldir"
+      timeout -s 9 10s $SCP $SSH_USER@${dest}:logs.tar.gz "$ldir/logs.tar.gz"
+      pushd "$ldir"
+      tar -xf logs.tar.gz
+      rm logs.tar.gz
+      popd
+    fi
+  done
 }
 
 trap catch_errors ERR;
@@ -57,13 +59,13 @@ $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
 
 if [[ "$REGISTRY" == 'build' || -z "$REGISTRY" ]]; then
-  $SCP "$my_dir/../__build-containers.sh" $SSH_DEST_BUILD:build-containers.sh
-  $SCP -r "$WORKSPACE/contrail-container-builder" $SSH_DEST_BUILD:./
+  $SCP "$my_dir/../__build-containers.sh" $SSH_USER@$master_ip:build-containers.sh
+  $SCP -r "$WORKSPACE/contrail-container-builder" $SSH_USER@$master_ip:./
   set -o pipefail
   ssh_env="CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION LINUX_DISTR=$LINUX_DISTR CONTRAIL_INSTALL_PACKAGES_URL=$CONTRAIL_INSTALL_PACKAGES_URL"
-  $SSH_BUILD "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
+  $SSH_CMD $SSH_USER@$master_ip "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
   set +o pipefail
-  CONTAINER_REGISTRY="$public_ip_build:5000"
+  CONTAINER_REGISTRY="$master_ip:5000"
   CONTRAIL_VERSION="ocata-$CONTRAIL_VERSION"
   REGISTRY_INSECURE=1
 elif [[ "$REGISTRY" == 'opencontrailnightly' ]]; then
@@ -76,9 +78,9 @@ else
 fi
 
 # ceph.repo file is needed ONLY fow centos on aws.
-$SCP "$my_dir/__ceph.repo" $SSH_DEST:ceph.repo
-$SCP "$my_dir/__run-gate.sh" $SSH_DEST:run-gate.sh
-timeout -s 9 60m $SSH "CONTAINER_REGISTRY=$CONTAINER_REGISTRY REGISTRY_INSECURE=$REGISTRY_INSECURE CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION LINUX_DISTR=$LINUX_DISTR ./run-gate.sh"
+$SCP "$my_dir/__ceph.repo" $SSH_USER@$master_ip:ceph.repo
+$SCP "$my_dir/__run-gate.sh" $SSH_USER@$master_ip:run-gate.sh
+timeout -s 9 60m $SSH_CMD $SSH_USER@$master_ip "CONTAINER_REGISTRY=$CONTAINER_REGISTRY REGISTRY_INSECURE=$REGISTRY_INSECURE CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION LINUX_DISTR=$LINUX_DISTR ./run-gate.sh"
 
 trap - ERR
 save_logs
