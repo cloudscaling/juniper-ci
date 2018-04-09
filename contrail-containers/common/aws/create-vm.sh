@@ -5,9 +5,6 @@ my_dir="$(dirname $my_file)"
 
 SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
 ENV_FILE="$WORKSPACE/cloudrc"
-VPC_CIDR="192.168.0.0/16"
-VM_CIDR="192.168.130.0/24"
-VM_CIDR_EXT="192.168.131.0/24"
 
 trap 'catch_errors_cvm $LINENO' ERR EXIT
 function catch_errors_cvm() {
@@ -17,6 +14,7 @@ function catch_errors_cvm() {
   exit $exit_code
 }
 
+source "$my_dir/definitions"
 source "$my_dir/${ENVIRONMENT_OS}"
 
 echo "INFO: Image ID: $IMAGE_ID"

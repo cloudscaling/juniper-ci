@@ -80,7 +80,7 @@ else
 fi
 
 $SCP "$my_dir/__run-gate.sh" ${SSH_USER}@$master_ip:run-gate.sh
-timeout -s 9 60m $SSH_CMD "CONTRAIL_VERSION=$CONTRAIL_VERSION LINUX_DISTR=$LINUX_DISTR AGENT_MODE=$AGENT_MODE ./run-gate.sh"
+timeout -s 9 60m $SSH_CMD ${SSH_USER}@$master_ip "CONTRAIL_VERSION=$CONTRAIL_VERSION LINUX_DISTR=$LINUX_DISTR AGENT_MODE=$AGENT_MODE ./run-gate.sh"
 
 trap - ERR
 save_logs
