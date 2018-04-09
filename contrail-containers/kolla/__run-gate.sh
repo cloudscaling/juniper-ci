@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -105,8 +105,6 @@ kolla-ansible deploy -i all-in-one
 docker ps -a
 kolla-ansible post-deploy
 
-set +x
-
 sleep 30
 contrail-status
 
@@ -115,7 +113,9 @@ pip install python-openstackclient
 source /etc/kolla/admin-openrc.sh
 $kolla_path/kolla-ansible/init-runonce
 
-ret=1
+set -x
+
+ret=0
 check_simple_instance || ret=1
 
 trap - ERR EXIT
