@@ -11,23 +11,16 @@ source $ENV_FILE
 
 errors="0"
 
-if [[ -n "$instance_id_cloud" ]] ; then
-  aws ${AWS_FLAGS} ec2 terminate-instances --instance-ids $instance_id_cloud
-  [[ $? == 0 ]] || errors="1"
-  if [[ $? == 0 ]]; then
-    aws ${AWS_FLAGS} ec2 wait instance-terminated --instance-ids $instance_id_cloud
-    echo "INFO: Cloud instance terminated."
+for iid in `grep 'instance_id_' $ENV_FILE | cut -d '=' -f 2` ; do
+  if aws ${AWS_FLAGS} ec2 terminate-instances --instance-ids $iid ; then
+    echo "INFO: instance $iid has been terminated."
+  else
+    errors=1
   fi
-fi
-
-if [[ -n "$instance_id_build" ]] ; then
-  aws ${AWS_FLAGS} ec2 terminate-instances --instance-ids $instance_id_build
-  [[ $? == 0 ]] || errors="1"
-  if [[ $? == 0 ]]; then
-    aws ${AWS_FLAGS} ec2 wait instance-terminated --instance-ids $instance_id_build
-    echo "INFO: Build instance terminated."
-  fi
-fi
+done
+for iid in `grep 'instance_id_' $ENV_FILE | cut -d '=' -f 2` ; do
+  aws ${AWS_FLAGS} ec2 wait instance-terminated --instance-ids $iid
+done
 
 if [[ -f "$WORKSPACE/kp" ]] ; then
   rm "$WORKSPACE/kp"

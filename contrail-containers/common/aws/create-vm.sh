@@ -79,14 +79,9 @@ aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cid
 # docker port
 aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port 5000
 # contrail ports
-aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port 8080
-aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port 8143
-aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port 80
-aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port 6080
-# openstack ports
-#for port in 8774 8776 8788 5000 9696 8080 9292 35357 ; do
-#  aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port $port
-#done
+for port in 8180 8143 80 6080 ; do
+  aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port $port
+done
 
 key_name="testkey-$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 8)"
 echo "key_name=$key_name" >> $ENV_FILE
@@ -99,14 +94,9 @@ chmod 600 kp
 function run_instance() {
   local type=$1
   local env_var_suffix=$2
-  local cloud_vm=$3
 
-  if [[ $cloud_vm == "true" ]]; then
-    # it means that additional disks must be created for VM
-    local bdm='{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}}'
-  else
-    local bdm='{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}}'
-  fi
+  # it means that additional disks must be created for VM
+  local bdm='{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}}'
   local cmd=$(aws ${AWS_FLAGS} ec2 run-instances --image-id $IMAGE_ID --key-name $key_name --instance-type $type --subnet-id $subnet_id --associate-public-ip-address --block-device-mappings "[${bdm}]")
   local instance_id=$(get_value_from_json "echo $cmd" ".Instances[0].InstanceId")
   echo "INFO: $env_var_suffix INSTANCE_ID: $instance_id"
@@ -129,31 +119,30 @@ function run_instance() {
     echo "WARNING: Machine isn't accessible yet"
     sleep 2
   done
-  if [[ $cloud_vm == "true" ]]; then
-    if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
-      # there are some cases when AWS image has strange kernel version and vrouter can't be loaded
-      $ssh "sudo yum -y update"
-      $ssh "sudo reboot" || /bin/true
-      echo "INFO: reboot & waiting for instance SSH"
-      while ! $ssh uname -a 2>/dev/null ; do
-        echo "WARNING: Machine isn't accessible yet"
-        sleep 2
-      done
-    fi
 
-    echo "INFO: Configure additional disk for cloud VM"
-    $ssh "(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | sudo fdisk /dev/xvdf"
-    $ssh "sudo mkfs.ext4 /dev/xvdf1 ; sudo mkdir -p /var/lib/docker ; sudo su -c \"echo '/dev/xvdf1  /var/lib/docker  auto  defaults,auto  0  0' >> /etc/fstab\" ; sudo mount /var/lib/docker"
-
-    echo "INFO: Configure additional interface for cloud VM"
-    eni_id=`aws ${AWS_FLAGS} ec2 create-network-interface --subnet-id $subnet_ext_id --query 'NetworkInterface.NetworkInterfaceId' --output text`
-    eni_attach_id=`aws ${AWS_FLAGS} ec2 attach-network-interface --network-interface-id $eni_id --instance-id $instance_id --device-index 1 --query 'AttachmentId' --output text`
-    aws ${AWS_FLAGS} ec2 modify-network-interface-attribute --network-interface-id $eni_id --attachment AttachmentId=$eni_attach_id,DeleteOnTermination=true
-    echo "INFO: additional interface $eni_id is attached: $eni_attach_id"
-    sleep 20
-    create_iface $IF2 $ssh
-    $ssh "$IFCONFIG_PATH/ifconfig" 2>/dev/null | grep -A 1 "^[a-z].*" | grep -v "\-\-"
+  if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
+    # there are some cases when AWS image has strange kernel version and vrouter can't be loaded
+    $ssh "sudo yum -y update"
+    $ssh "sudo reboot" || /bin/true
+    echo "INFO: reboot & waiting for instance SSH"
+    while ! $ssh uname -a 2>/dev/null ; do
+      echo "WARNING: Machine isn't accessible yet"
+      sleep 2
+    done
   fi
+
+  echo "INFO: Configure additional disk for cloud VM"
+  $ssh "(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | sudo fdisk /dev/xvdf"
+  $ssh "sudo mkfs.ext4 /dev/xvdf1 ; sudo mkdir -p /var/lib/docker ; sudo su -c \"echo '/dev/xvdf1  /var/lib/docker  auto  defaults,auto  0  0' >> /etc/fstab\" ; sudo mount /var/lib/docker"
+
+  echo "INFO: Configure additional interface for cloud VM"
+  eni_id=`aws ${AWS_FLAGS} ec2 create-network-interface --subnet-id $subnet_ext_id --query 'NetworkInterface.NetworkInterfaceId' --output text`
+  eni_attach_id=`aws ${AWS_FLAGS} ec2 attach-network-interface --network-interface-id $eni_id --instance-id $instance_id --device-index 1 --query 'AttachmentId' --output text`
+  aws ${AWS_FLAGS} ec2 modify-network-interface-attribute --network-interface-id $eni_id --attachment AttachmentId=$eni_attach_id,DeleteOnTermination=true
+  echo "INFO: additional interface $eni_id is attached: $eni_attach_id"
+  sleep 20
+  create_iface $IF2 $ssh
+  $ssh "$IFCONFIG_PATH/ifconfig" 2>/dev/null | grep -A 1 "^[a-z].*" | grep -v "\-\-"
 
   echo "INFO: Update packages on machine and install additional packages $(date)"
   if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
@@ -167,11 +156,26 @@ function run_instance() {
   fi
 }
 
-# instance for OpenStack cloud
-run_instance c4.4xlarge cloud true
+for (( i=0; i<${CONT_NODES}; ++i )); do
+  run_instance $CONT_NODE_TYPE cont_$i
+done
+for (( i=0; i<${COMP_NODES}; ++i )); do
+  run_instance $COMP_NODE_TYPE comp_$i
+done
 
-# instance for build
-run_instance m4.xlarge build false
+ips_cont=(`grep public_ip_cont $ENV_FILE | cut -d '=' -f 2`)
+ips_comp=(`grep public_ip_comp $ENV_FILE | cut -d '=' -f 2`)
+ips=( ${ips_cont[@]} ${ips_comp[@]} )
+master_ip=${ips_cont[0]}
+
+cat <<EOF >>$ENV_FILE
+master_ip=$master_ip
+nodes_ips="${ips[@]}"
+nodes_cont_ips="${ips_cont[@]}"
+nodes_comp_ips="${ips_comp[@]}"
+EOF
+
+cat $ENV_FILE
 
 trap - ERR EXIT
 

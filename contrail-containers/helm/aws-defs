@@ -1,0 +1,4 @@
+export CONT_NODES=3
+export CONT_NODE_TYPE=m4.xlarge
+export COMP_NODES=1
+export COMP_NODE_TYPE=c4.xlarge
