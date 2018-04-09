@@ -113,8 +113,6 @@ pip install python-openstackclient
 source /etc/kolla/admin-openrc.sh
 $kolla_path/kolla-ansible/init-runonce
 
-set -x
-
 ret=0
 check_simple_instance || ret=1
 
