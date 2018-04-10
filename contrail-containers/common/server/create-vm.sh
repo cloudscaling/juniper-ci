@@ -124,12 +124,23 @@ for (( i=0; i<${COMP_NODES}; ++i )); do
   ips_comp=( ${ips_comp[@]} $ip )
 done
 
-set -x
+# first machine is master for deploy purposes
+master_ip=${ips[0]}
+# save env file
+cat <<EOF >$ENV_FILE
+SSH_USER=$SSH_USER
+ssh_key_file=/home/jenkins/.ssh/id_rsa
+build_ip=$build_ip
+master_ip=$master_ip
+nodes_ips="${ips[@]}"
+nodes_cont_ips="${ips_cont[@]}"
+nodes_comp_ips="${ips_comp[@]}"
+EOF
+
 if [[ $REGISTRY == 'build' ]]; then
   wait_ssh $build_ip
   logs_dir='/root/logs'
   cat <<EOF | ssh $SSH_OPTS root@${build_ip}
-set -x
 mkdir -p $logs_dir
 if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
   yum install -y epel-release &>>$logs_dir/yum.log
@@ -162,7 +173,6 @@ for ip in ${ips[@]} ; do
 
   # prepare node: set hostname, fill /etc/hosts, configure ssh, configure second iface if needed, install software, reboot
   cat <<EOF | ssh $SSH_OPTS root@${ip}
-set -x
 hname="node-\$(echo $ip | tr '.' '-')"
 echo \$hname > /etc/hostname
 hostname \$hname
@@ -212,7 +222,7 @@ EOM
   fi
   yum update -y &>>$logs_dir/yum.log
   yum install -y epel-release &>>$logs_dir/yum.log
-  yum install -y mc git wget ntp ntpdate iptables iproute libxml2-utils python2.7 lsof &>>$logs_dir/yum.log
+  yum install -y mc git wget ntp ntpdate iptables iproute libxml2-utils python2.7 lsof python-pip python-devel gcc&>>$logs_dir/yum.log
   systemctl disable chronyd.service
   systemctl enable ntpd.service && systemctl start ntpd.service
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
@@ -225,7 +235,7 @@ EOM
   fi
   apt-get -y update &>>$logs_dir/apt.log
   DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$logs_dir/apt.log
-  apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 lsof python-pip linux-image-extra-\$(uname -r) &>>$logs_dir/apt.log
+  apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 lsof python-pip python-dev gcc linux-image-extra-\$(uname -r) &>>$logs_dir/apt.log
   mv /etc/os-release /etc/os-release.original
   cat /etc/os-release.original > /etc/os-release
 fi
@@ -240,18 +250,3 @@ done
 for ip in ${ips[@]} ; do
   wait_ssh $ip
 done
-
-# first machine is master for deploy purposes
-master_ip=${ips[0]}
-
-# save env file
-cat <<EOF >$ENV_FILE
-SSH_USER=$SSH_USER
-ssh_key_file=/home/jenkins/.ssh/id_rsa
-
-build_ip=$build_ip
-master_ip=$master_ip
-nodes_ips="${ips[@]}"
-nodes_cont_ips="${ips_cont[@]}"
-nodes_comp_ips="${ips_comp[@]}"
-EOF
