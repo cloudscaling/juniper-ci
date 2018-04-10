@@ -78,8 +78,29 @@ else
   exit 1
 fi
 
-# ceph.repo file is needed ONLY fow centos on aws.
-$SCP "$my_dir/__ceph.repo" $SSH_USER@$master_ip:ceph.repo
+# clone repos to all nodes
+for ip in $nodes_ips ; do
+    cat <<EOM | $SSH_CMD root@$ip
+mkdir -p /opt
+cd /opt
+# Download openstack-helm code
+git clone https://github.com/Juniper/openstack-helm.git
+pushd openstack-helm
+#git fetch https://review.opencontrail.org/Juniper/openstack-helm refs/changes/52/40952/4 && git checkout FETCH_HEAD
+#git pull --rebase origin master
+popd
+# Download openstack-helm-infra code
+git clone https://github.com/Juniper/openstack-helm-infra.git
+# Download contrail-helm-deployer code
+git clone https://github.com/Juniper/contrail-helm-deployer.git
+pushd contrail-helm-deployer
+#git fetch https://review.opencontrail.org/Juniper/contrail-helm-deployer refs/changes/66/41266/4 && git checkout FETCH_HEAD
+#git pull --rebase origin master
+popd
+EOM
+done
+
+$SCP "$WORKSPACE/cloudrc" $SSH_USER@$master_ip:cloudrc
 $SCP "$my_dir/__run-gate.sh" $SSH_USER@$master_ip:run-gate.sh
 timeout -s 9 60m $SSH_CMD $SSH_USER@$master_ip "CONTAINER_REGISTRY=$CONTAINER_REGISTRY REGISTRY_INSECURE=$REGISTRY_INSECURE CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION LINUX_DISTR=$LINUX_DISTR ./run-gate.sh"
 

@@ -1,5 +1,10 @@
 #!/bin/bash -e
 
+my_file="$(readlink -e "$0")"
+my_dir="$(dirname $my_file)"
+
+source "$my_dir/cloudrc"
+
 AAA_MODE=${AAA_MODE:-cloud-admin}
 tag="$CONTRAIL_VERSION"
 
@@ -28,8 +33,78 @@ echo "INFO: Preparing instances"
 if [ "x$HOST_OS" == "xcentos" ]; then
   # ip is located in /usr/sbin that is not in path...
   export PATH=${PATH}:/usr/sbin
-  sudo cp ./ceph.repo /etc/yum.repos.d/ceph.repo
 fi
+
+export BASE_DIR=/opt
+mkdir -p $BASE_DIR
+export OSH_PATH=${BASE_DIR}/openstack-helm
+export OSH_INFRA_PATH=${BASE_DIR}/openstack-helm-infra
+export CHD_PATH=${BASE_DIR}/contrail-helm-deployer
+
+cat <<EOF > $OSH_INFRA_PATH/tools/gate/devel/multinode-vars.yaml
+version:
+  kubernetes: v1.8.3
+  helm: v2.7.2
+  cni: v0.6.0
+kubernetes:
+  network:
+    default_device: docker0
+  cluster:
+    cni: calico
+    pod_subnet: 192.168.0.0/16
+    domain: cluster.local
+EOF
+if [[ "$REGISTRY_INSECURE" == '1' ]] ; then
+  cat <<EOF >> $OSH_INFRA_PATH/tools/gate/devel/multinode-vars.yaml
+docker:
+  insecure_registries:
+    - "$CONTAINER_REGISTRY"
+EOF
+fi
+
+cd ${OSH_PATH}
+./tools/deployment/developer/common/001-install-packages-opencontrail.sh
+
+cat > $OSH_INFRA_PATH/tools/gate/devel/multinode-inventory.yaml <<EOF
+all:
+  children:
+EOF
+
+ips=($nodes_ips)
+ip="${ips[0]}"
+name=`echo node_$ip | tr '.' '_'`
+cat >> $OSH_INFRA_PATH/tools/gate/devel/multinode-inventory.yaml <<EOF
+    primary:
+      hosts:
+        $name:
+          ansible_port: 22
+          ansible_host: $ip
+          ansible_user: root
+          ansible_ssh_extra_args: -o StrictHostKeyChecking=no
+    nodes:
+      hosts:
+EOF
+for ip in ${ips[@]:1} ; do
+  name=`echo node_$ip | tr '.' '_'`
+  cat >> $OSH_INFRA_PATH/tools/gate/devel/multinode-inventory.yaml <<EOF
+        $name:
+          ansible_port: 22
+          ansible_host: $ip
+          ansible_user: root
+          ansible_ssh_extra_args: -o StrictHostKeyChecking=no
+EOF
+done
+
+set -x
+cd ${OSH_INFRA_PATH}
+make dev-deploy setup-host multinode
+make dev-deploy k8s multinode
+
+nslookup kubernetes.default.svc.cluster.local || /bin/true
+kubectl get nodes -o wide
+
+exit 0
+
 
 extra_neutron_args=''
 if [[ "$AAA_MODE" == 'rbac' ]]; then
@@ -46,28 +121,6 @@ echo "INFO: extra nova args: $OSH_EXTRA_HELM_ARGS_NOVA"
 export OSH_EXTRA_HELM_ARGS_HEAT="--set images.tags.opencontrail_heat_init=$CONTAINER_REGISTRY/contrail-openstack-heat-init:$tag"
 echo "INFO: extra heat args: $OSH_EXTRA_HELM_ARGS_HEAT"
 
-# Download openstack-helm code
-git clone https://github.com/Juniper/openstack-helm.git
-pushd openstack-helm
-#git fetch https://review.opencontrail.org/Juniper/openstack-helm refs/changes/52/40952/4 && git checkout FETCH_HEAD
-#git pull --rebase origin master
-popd
-# Download openstack-helm-infra code
-git clone https://github.com/Juniper/openstack-helm-infra.git
-# Download contrail-helm-deployer code
-git clone https://github.com/Juniper/contrail-helm-deployer.git
-pushd contrail-helm-deployer
-#git fetch https://review.opencontrail.org/Juniper/contrail-helm-deployer refs/changes/66/41266/4 && git checkout FETCH_HEAD
-#git pull --rebase origin master
-popd
-
-export BASE_DIR=${WORKSPACE:-$(pwd)}
-export OSH_PATH=${BASE_DIR}/openstack-helm
-export OSH_INFRA_PATH=${BASE_DIR}/openstack-helm-infra
-export CHD_PATH=${BASE_DIR}/contrail-helm-deployer
-
-cd ${OSH_PATH}
-./tools/deployment/developer/common/001-install-packages-opencontrail.sh
 ./tools/deployment/developer/common/010-deploy-k8s.sh
 
 ./tools/deployment/developer/common/020-setup-client.sh
