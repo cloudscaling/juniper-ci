@@ -494,10 +494,10 @@ function wait_ssh() {
   truncate -s 0 ./tmp_file
   while ! scp $ssh_opts -B ./tmp_file root@${addr}:/tmp/tmp_file ; do
     if (( iter >= max_iter )) ; then
-      echo "Could not connect to undercloud"
+      echo "Could not connect to VM $addr"
       exit 1
     fi
-    echo "Waiting for undercloud..."
+    echo "Waiting for VM $addr..."
     sleep 30
     ((++iter))
   done
