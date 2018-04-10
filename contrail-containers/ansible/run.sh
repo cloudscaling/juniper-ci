@@ -74,11 +74,9 @@ if [[ "$REGISTRY" == 'build' ]]; then
   set +o pipefail
   CONTAINER_REGISTRY="$build_ip:5000"
   CONTRAIL_VERSION="ocata-$CONTRAIL_VERSION"
-  REGISTRY_INSECURE=1
 elif [[ "$REGISTRY" == 'opencontrailnightly' ]]; then
   CONTAINER_REGISTRY='opencontrailnightly'
   CONTRAIL_VERSION='latest'
-  REGISTRY_INSECURE=1
 else
   echo "ERROR: unsupported REGISTRY = $REGISTRY"
   exit 1
@@ -104,6 +102,8 @@ config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
 templ=$(cat $my_dir/instances.yaml.tmpl)
 content=$(eval "echo \"$templ\"")
 echo "$content" > $config
+echo "INFO: cloud config ------------------------- $(date)"
+cat $config
 
 image=`docker images -a -q centos-soft`
 if [[ -z "$image" ]]; then
