@@ -68,6 +68,7 @@ $my_dir/setup-nodes.sh
 
 
 if [[ "$REGISTRY" == 'build' ]]; then
+  $SCP -r "$WORKSPACE/contrail-container-builder" $SSH_USER@$build_ip:./
   $SCP "$my_dir/../__build-containers.sh" ${SSH_USER}@$build_ip:build-containers.sh
   set -o pipefail
   ssh_env="CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION LINUX_DISTR=$LINUX_DISTR"
