@@ -52,6 +52,7 @@ BASE_IMAGE_POOL=${BASE_IMAGE_POOL:-'images'}
 source "$my_dir/../../../common/virsh/functions"
 
 # check previous env
+assert_env_exists "${VM_NAME}_build_$i"
 for (( i=0; i<${CONT_NODES}; ++i )); do
   assert_env_exists "${VM_NAME}_cont_$i"
 done
@@ -85,6 +86,13 @@ function define_node() {
   define_machine $vm_name $VCPUS $mem $OS_VARIANT $net $vol_path $DISK_SIZE
 }
 
+build_vm=0
+if [[ $REGISTRY == 'build' ]]; then
+  build_vm=1
+  node="${VM_NAME}_build"
+  define_node "$node" ${BUILD_NODE_MEM} "ff"
+  start_vm "$node"
+fi
 # define last octet of MAC address as 0$i or 1$i (assuming that count of machine is not more than 9)
 for (( i=0; i<${CONT_NODES}; ++i )); do
   node="${VM_NAME}_cont_$i"
@@ -98,8 +106,11 @@ for (( i=0; i<${COMP_NODES}; ++i )); do
 done
 
 # wait machine and get IP via virsh net-dhcp-leases $NET_NAME
-all_nodes=$((CONT_NODES + COMP_NODES))
-_ips=( $(wait_dhcp $NET_NAME $all_nodes ) )
+all_nodes_count=$((build_vm + CONT_NODES + COMP_NODES))
+_ips=( $(wait_dhcp $NET_NAME $all_nodes_count ) )
+if [[ $REGISTRY == 'build' ]]; then
+  build_ip=`get_ip_by_mac $NET_NAME $NET_MAC_PREFIX:ff`
+fi
 # collect controller ips first and compute ips next
 declare -a ips ips_cont ips_comp
 for (( i=0; i<${CONT_NODES}; ++i )); do
@@ -113,6 +124,9 @@ for (( i=0; i<${COMP_NODES}; ++i )); do
   ips_comp=( ${ips_comp[@]} $ip )
 done
 
+if [[ $REGISTRY == 'build' ]]; then
+  wait_ssh $build_ip
+fi
 for ip in ${ips[@]} ; do
   wait_ssh $ip
 done
@@ -211,7 +225,7 @@ for ip in ${ips[@]} ; do
   wait_ssh $ip
 done
 
-# first machine is master and machine for build containers
+# first machine is master for deploy purposes
 master_ip=${ips[0]}
 
 # save env file
@@ -219,6 +233,7 @@ cat <<EOF >$ENV_FILE
 SSH_USER=$SSH_USER
 ssh_key_file=/home/jenkins/.ssh/id_rsa
 
+build_ip=$build_ip
 master_ip=$master_ip
 nodes_ips="${ips[@]}"
 nodes_cont_ips="${ips_cont[@]}"

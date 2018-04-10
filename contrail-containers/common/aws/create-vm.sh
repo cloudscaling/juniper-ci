@@ -77,7 +77,7 @@ echo "INFO: Group ID: $group_id"
 # ssh port
 aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port 22
 # docker port
-aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port 4990
+aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port 5000
 # contrail ports
 for port in 8180 8143 80 6080 ; do
   aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port $port
@@ -94,6 +94,7 @@ chmod 600 kp
 function run_instance() {
   local type=$1
   local env_var_suffix=$2
+  local cloud_vm=$3
 
   # it means that additional disks must be created for VM
   local bdm='{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}}'
@@ -120,7 +121,7 @@ function run_instance() {
     sleep 2
   done
 
-  if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
+  if [[ "$ENVIRONMENT_OS" == 'centos' && $cloud_vm == 'true' ]]; then
     # there are some cases when AWS image has strange kernel version and vrouter can't be loaded
     $ssh "sudo yum -y update"
     $ssh "sudo reboot" || /bin/true
@@ -134,6 +135,10 @@ function run_instance() {
   echo "INFO: Configure additional disk for cloud VM"
   $ssh "(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | sudo fdisk /dev/xvdf"
   $ssh "sudo mkfs.ext4 /dev/xvdf1 ; sudo mkdir -p /var/lib/docker ; sudo su -c \"echo '/dev/xvdf1  /var/lib/docker  auto  defaults,auto  0  0' >> /etc/fstab\" ; sudo mount /var/lib/docker"
+
+  if [[ "$cloud_vm" != 'true' ]]; then
+    return
+  fi
 
   echo "INFO: Configure additional interface for cloud VM"
   eni_id=`aws ${AWS_FLAGS} ec2 create-network-interface --subnet-id $subnet_ext_id --query 'NetworkInterface.NetworkInterfaceId' --output text`
@@ -156,11 +161,15 @@ function run_instance() {
   fi
 }
 
+if [[ "$REGISTRY" == 'build' ]]; then
+  run_instance $BUILD_NODE_TYPE build 'false'
+  build_ip=`grep public_ip_build $ENV_FILE | cut -d '=' -f 2`
+fi
 for (( i=0; i<${CONT_NODES}; ++i )); do
-  run_instance $CONT_NODE_TYPE cont_$i
+  run_instance $CONT_NODE_TYPE cont_$i 'true'
 done
 for (( i=0; i<${COMP_NODES}; ++i )); do
-  run_instance $COMP_NODE_TYPE comp_$i
+  run_instance $COMP_NODE_TYPE comp_$i 'true'
 done
 
 ips_cont=(`grep public_ip_cont $ENV_FILE | cut -d '=' -f 2`)
@@ -169,6 +178,7 @@ ips=( ${ips_cont[@]} ${ips_comp[@]} )
 master_ip=${ips_cont[0]}
 
 cat <<EOF >>$ENV_FILE
+build_ip=build_ip
 master_ip=$master_ip
 nodes_ips="${ips[@]}"
 nodes_cont_ips="${ips_cont[@]}"

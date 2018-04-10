@@ -8,13 +8,6 @@ export PATH=${PATH}:/usr/sbin
 
 echo "INFO: Run setup-for-build  $(date)"
 
-# redefine registry port to avoid conflicts with Cloud software
-if [[ -n "$REGISTRY_PORT" ]] ; then
-  iface=`ip route show | grep "default via" | awk '{print $5}'`
-  ip=`ip address show dev $iface | head -3 | tail -1 | tr "/" " " | awk '{print $2}'`
-  export CONTRAIL_REGISTRY="$ip:$REGISTRY_PORT"
-fi
-
 cd contrail-container-builder/containers
 
 ./setup-for-build.sh

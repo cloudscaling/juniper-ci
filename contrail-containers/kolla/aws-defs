@@ -1,3 +1,4 @@
+export BUILD_NODE_TYPE=m4.large
 export CONT_NODES=1
 export CONT_NODE_TYPE=c4.4xlarge
 export COMP_NODES=0
