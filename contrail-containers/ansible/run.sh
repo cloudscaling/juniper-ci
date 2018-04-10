@@ -129,7 +129,7 @@ source "$my_dir/../common/check-functions"
 res=0
 ips=($nodes_ips)
 dest_to_check="${SSH_USER}@${ips[0]}"
-for ip in $ips ; do
+for ip in ${ips[@]:1} ; do
   dest_to_check="$dest_to_check,${SSH_USER}@$ip"
 done
 count=1
