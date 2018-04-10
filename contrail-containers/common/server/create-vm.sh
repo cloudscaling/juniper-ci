@@ -124,9 +124,12 @@ for (( i=0; i<${COMP_NODES}; ++i )); do
   ips_comp=( ${ips_comp[@]} $ip )
 done
 
+set -x
 if [[ $REGISTRY == 'build' ]]; then
   wait_ssh $build_ip
+  logs_dir='/root/logs'
   cat <<EOF | ssh $SSH_OPTS root@${build_ip}
+set -x
 mkdir -p $logs_dir
 if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
   yum install -y epel-release &>>$logs_dir/yum.log
@@ -159,6 +162,7 @@ for ip in ${ips[@]} ; do
 
   # prepare node: set hostname, fill /etc/hosts, configure ssh, configure second iface if needed, install software, reboot
   cat <<EOF | ssh $SSH_OPTS root@${ip}
+set -x
 hname="node-\$(echo $ip | tr '.' '-')"
 echo \$hname > /etc/hostname
 hostname \$hname
