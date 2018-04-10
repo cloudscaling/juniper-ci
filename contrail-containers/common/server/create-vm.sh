@@ -126,7 +126,7 @@ done
 
 if [[ $REGISTRY == 'build' ]]; then
   wait_ssh $build_ip
-  cat <<EOF | ssh $SSH_OPTS root@${ip}
+  cat <<EOF | ssh $SSH_OPTS root@${build_ip}
 mkdir -p $logs_dir
 if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
   yum install -y epel-release &>>$logs_dir/yum.log
