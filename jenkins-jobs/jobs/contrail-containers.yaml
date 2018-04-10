@@ -98,7 +98,7 @@
             - master
       - helm-server-ubuntu:
           slavenode:
-            - master
+            - slave01
       - k8s-server-centos:
           slavenode:
             - slave01
