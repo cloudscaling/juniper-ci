@@ -126,7 +126,20 @@ done
 
 if [[ $REGISTRY == 'build' ]]; then
   wait_ssh $build_ip
+  cat <<EOF | ssh $SSH_OPTS root@${ip}
+mkdir -p $logs_dir
+if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
+  yum install -y epel-release &>>$logs_dir/yum.log
+  yum install -y mc git wget iptables iproute libxml2-utils &>>$logs_dir/yum.log
+elif [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
+  apt-get -y update &>>$logs_dir/apt.log
+  apt-get install -y --no-install-recommends mc git wget libxml2-utils &>>$logs_dir/apt.log
+  mv /etc/os-release /etc/os-release.original
+  cat /etc/os-release.original > /etc/os-release
 fi
+EOF
+fi
+
 for ip in ${ips[@]} ; do
   wait_ssh $ip
 done
@@ -146,7 +159,6 @@ for ip in ${ips[@]} ; do
 
   # prepare node: set hostname, fill /etc/hosts, configure ssh, configure second iface if needed, install software, reboot
   cat <<EOF | ssh $SSH_OPTS root@${ip}
-set -x
 hname="node-\$(echo $ip | tr '.' '-')"
 echo \$hname > /etc/hostname
 hostname \$hname
@@ -210,10 +222,10 @@ EOM
   apt-get -y update &>>$logs_dir/apt.log
   DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$logs_dir/apt.log
   apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 lsof python-pip linux-image-extra-\$(uname -r) &>>$logs_dir/apt.log
-  pip install pip --upgrade &>>$logs_dir/apt.log
   mv /etc/os-release /etc/os-release.original
   cat /etc/os-release.original > /etc/os-release
 fi
+pip install pip --upgrade &>>$logs_dir/pip.log
 EOF
 
   # reboot node
