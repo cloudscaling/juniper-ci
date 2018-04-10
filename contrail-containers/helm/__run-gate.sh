@@ -103,9 +103,18 @@ make dev-deploy k8s multinode
 nslookup kubernetes.default.svc.cluster.local || /bin/true
 kubectl get nodes -o wide
 
-exit 0
+for ip in $nodes_cont_ip ; do
+  name=`echo node_$ip.localdomain | tr '.' '_'`
+  kubectl label node $name --overwrite openstack-compute-node=disable
+  kubectl label node $name opencontrail.org/controller=enabled
+done
+for ip in $nodes_comp_ip ; do
+  name=`echo node_$ip.localdomain | tr '.' '_'`
+  kubectl label node $name --overwrite openstack-control-plane=disable
+  kubectl label node $name opencontrail.org/vrouter-kernel=enabled
+done
 
-
+cd ${OSH_PATH}
 extra_neutron_args=''
 if [[ "$AAA_MODE" == 'rbac' ]]; then
   extra_neutron_args="--values ./tools/overrides/backends/opencontrail/neutron-rbac.yaml"
@@ -121,35 +130,26 @@ echo "INFO: extra nova args: $OSH_EXTRA_HELM_ARGS_NOVA"
 export OSH_EXTRA_HELM_ARGS_HEAT="--set images.tags.opencontrail_heat_init=$CONTAINER_REGISTRY/contrail-openstack-heat-init:$tag"
 echo "INFO: extra heat args: $OSH_EXTRA_HELM_ARGS_HEAT"
 
-./tools/deployment/developer/common/010-deploy-k8s.sh
+./tools/deployment/multinode/010-setup-client.sh
+./tools/deployment/multinode/021-ingress-opencontrail.sh
+./tools/deployment/multinode/030-ceph.sh
+./tools/deployment/multinode/040-ceph-ns-activate.sh
+./tools/deployment/multinode/050-mariadb.sh
+./tools/deployment/multinode/060-rabbitmq.sh
+./tools/deployment/multinode/070-memcached.sh
+./tools/deployment/multinode/080-keystone.sh
+./tools/deployment/multinode/090-ceph-radosgateway.sh
+./tools/deployment/multinode/100-glance.sh
+./tools/deployment/multinode/110-cinder.sh
+./tools/deployment/multinode/131-libvirt-opencontrail.sh
+./tools/deployment/multinode/141-compute-kit-opencontrail.sh
 
-./tools/deployment/developer/common/020-setup-client.sh
-
-./tools/deployment/developer/nfs/030-ingress.sh
-./tools/deployment/developer/nfs/040-nfs-provisioner.sh
-./tools/deployment/developer/nfs/050-mariadb.sh
-./tools/deployment/developer/nfs/060-rabbitmq.sh
-./tools/deployment/developer/nfs/070-memcached.sh
-./tools/deployment/developer/nfs/080-keystone.sh
-./tools/deployment/developer/nfs/100-horizon.sh
-./tools/deployment/developer/nfs/120-glance.sh
-./tools/deployment/developer/nfs/151-libvirt-opencontrail.sh
-./tools/deployment/developer/nfs/161-compute-kit-opencontrail.sh
+kubectl replace -f ${CHD_PATH}/rbac/cluster-admin.yaml
 
 cd $CHD_PATH
 make
 
-# Set the IP of your CONTROL_NODES (specify your control data ip, if you have one)
-export CONTROL_NODE=$(hostname -i)
-# set the control data network cidr list separated by comma and set the respective gateway
-#export CONTROL_DATA_NET_LIST=10.87.65.128/25
-#export VROUTER_GATEWAY=10.87.65.129
-
-kubectl label node opencontrail.org/controller=enabled --all
-kubectl label node opencontrail.org/vrouter-kernel=enabled --all
-
-kubectl replace -f ${CHD_PATH}/rbac/cluster-admin.yaml
-
+controller_nodes=`echo $nodes_cont_ip | tr ' ' ','`
 tee /tmp/contrail.yaml << EOF
 global:
   images:
@@ -184,7 +184,7 @@ global:
       node_init: "$CONTAINER_REGISTRY/contrail-node-init:$tag"
       dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
   contrail_env:
-    CONTROLLER_NODES: ${CONTROL_NODE}
+    CONTROLLER_NODES: $controller_nodes
     LOG_LEVEL: SYS_DEBUG
     CLOUD_ORCHESTRATOR: openstack
     AAA_MODE: $AAA_MODE

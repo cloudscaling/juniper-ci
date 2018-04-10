@@ -240,6 +240,7 @@ EOM
   cat /etc/os-release.original > /etc/os-release
 fi
 pip install pip --upgrade &>>$logs_dir/pip.log
+pip install setuptools &>>$logs_dir/pip.log
 EOF
 
   # reboot node
