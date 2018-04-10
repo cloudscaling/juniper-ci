@@ -178,7 +178,7 @@ ips=( ${ips_cont[@]} ${ips_comp[@]} )
 master_ip=${ips_cont[0]}
 
 cat <<EOF >>$ENV_FILE
-build_ip=build_ip
+build_ip=$build_ip
 master_ip=$master_ip
 nodes_ips="${ips[@]}"
 nodes_cont_ips="${ips_cont[@]}"

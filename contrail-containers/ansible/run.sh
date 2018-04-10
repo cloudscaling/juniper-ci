@@ -64,12 +64,8 @@ function catch_errors() {
 $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
 
-for dest in $nodes_ips ; do
-  $SCP -r "$WORKSPACE/contrail-container-builder" ${SSH_USER}@${dest}:./
-  $SCP "$my_dir/../__check_introspection.sh" $SSH_USER@${dest}:./check_introspection.sh
-done
-
 if [[ "$REGISTRY" == 'build' ]]; then
+  $SCP -r "$WORKSPACE/contrail-container-builder" ${SSH_USER}@$build_ip:./
   $SCP "$my_dir/../__build-containers.sh" ${SSH_USER}@$build_ip:build-containers.sh
   set -o pipefail
   ssh_env="CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION"
@@ -125,8 +121,10 @@ docker run -i --rm --entrypoint /bin/bash $volumes --network host centos-soft -c
 # TODO: wait till cluster up and initialized
 sleep 300
 
-
 # Validate cluster's introspection ports
+for dest in $nodes_ips ; do
+  $SCP "$my_dir/../__check_introspection.sh" $SSH_USER@${dest}:./check_introspection.sh
+done
 source "$my_dir/../common/check-functions"
 res=0
 ips=($nodes_ips)
