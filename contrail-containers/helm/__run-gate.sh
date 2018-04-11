@@ -102,13 +102,14 @@ make dev-deploy k8s multinode
 nslookup kubernetes.default.svc.cluster.local || /bin/true
 kubectl get nodes -o wide
 
-for ip in $nodes_cont_ip ; do
-  name=`echo node_$ip.localdomain | tr '.' '_'`
+# names are assigned by kubernetes. use the same algorithm to generate name.
+for ip in $nodes_cont_ips ; do
+  name="node-$(echo $ip | tr '.' '-').localdomain"
   kubectl label node $name --overwrite openstack-compute-node=disable
   kubectl label node $name opencontrail.org/controller=enabled
 done
-for ip in $nodes_comp_ip ; do
-  name=`echo node_$ip.localdomain | tr '.' '_'`
+for ip in $nodes_comp_ips ; do
+  name="node-$(echo $ip | tr '.' '-').localdomain"
   kubectl label node $name --overwrite openstack-control-plane=disable
   kubectl label node $name opencontrail.org/vrouter-kernel=enabled
 done
