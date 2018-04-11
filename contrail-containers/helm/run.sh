@@ -80,24 +80,21 @@ fi
 
 # clone repos to all nodes
 for ip in $nodes_ips ; do
-    cat <<EOM | $SSH_CMD $SSH_USER@$ip
+  cat <<EOM | $SSH_CMD $SSH_USER@$ip
 sudo mkdir -p /opt
-sudo chown $USER /opt
+sudo chown \$USER /opt
 cd /opt
-# Download openstack-helm code
-git clone https://github.com/Juniper/openstack-helm.git
-pushd openstack-helm
-#git fetch https://review.opencontrail.org/Juniper/openstack-helm refs/changes/52/40952/4 && git checkout FETCH_HEAD
-#git pull --rebase origin master
-popd
-# Download openstack-helm-infra code
-git clone https://github.com/Juniper/openstack-helm-infra.git
-# Download contrail-helm-deployer code
-git clone https://github.com/Juniper/contrail-helm-deployer.git
-pushd contrail-helm-deployer
-#git fetch https://review.opencontrail.org/Juniper/contrail-helm-deployer refs/changes/66/41266/4 && git checkout FETCH_HEAD
-#git pull --rebase origin master
-popd
+for repo in 'openstack-helm' 'openstack-helm-infra' 'contrail-helm-deployer' ; do
+  git clone https://github.com/Juniper/\$repo.git
+  if echo "$PATCHSET_LIST" | grep -q "\$repo" ; then
+    patchset=`echo "$PATCHSET_LIST" | grep "\$repo"`
+    pushd \$repo
+    echo "INFO: for \$repo run '\$patchset'"
+    \$patchset
+    git pull --rebase origin master
+    popd
+  fi
+done
 EOM
 done
 

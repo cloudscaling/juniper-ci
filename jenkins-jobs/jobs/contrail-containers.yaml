@@ -40,6 +40,9 @@
       - string:
           name: CAD_PATCHSET
           description: "Additional command to fetch patchset for contrail-ansible-deployer. Ex: same as previous."
+      - text:
+          name: PATCHSET_LIST
+          description: "List of additional commands to fetch changes. Job will grep only required repo-s from list."
       - node:
           name: SLAVE_NAME
           description: "Select slave: one for specific node or multiple for any node."
