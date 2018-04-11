@@ -86,8 +86,8 @@ sudo chown \$USER /opt
 cd /opt
 for repo in 'openstack-helm' 'openstack-helm-infra' 'contrail-helm-deployer' ; do
   git clone https://github.com/Juniper/\$repo.git
-  if echo "$PATCHSET_LIST" | grep -q "\$repo" ; then
-    patchset=`echo "$PATCHSET_LIST" | grep "\$repo"`
+  if echo "$PATCHSET_LIST" | grep -q "/\$repo " ; then
+    patchset=`echo "$PATCHSET_LIST" | grep "/\$repo "`
     pushd \$repo
     echo "INFO: for \$repo run '\$patchset'"
     \$patchset
