@@ -111,7 +111,11 @@ done
 for ip in $nodes_comp_ips ; do
   name="node-$(echo $ip | tr '.' '-').localdomain"
   kubectl label node $name --overwrite openstack-control-plane=disable
-  kubectl label node $name opencontrail.org/vrouter-kernel=enabled
+  if [[ "$AGENT_MODE" == "dpdk" ]]; then
+    kubectl label node $name opencontrail.org/vrouter-dpdk=enabled
+  else
+    kubectl label node $name opencontrail.org/vrouter-kernel=enabled
+  fi
 done
 
 cd ${OSH_PATH}
