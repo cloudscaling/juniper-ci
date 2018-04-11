@@ -81,7 +81,8 @@ fi
 # clone repos to all nodes
 for ip in $nodes_ips ; do
     cat <<EOM | $SSH_CMD $SSH_USER@$ip
-mkdir -p /opt
+sudo mkdir -p /opt
+sudo chown $USER /opt
 cd /opt
 # Download openstack-helm code
 git clone https://github.com/Juniper/openstack-helm.git
