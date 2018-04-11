@@ -142,14 +142,11 @@ echo "INFO: extra heat args: $OSH_EXTRA_HELM_ARGS_HEAT"
 ./tools/deployment/multinode/100-glance.sh
 ./tools/deployment/multinode/110-cinder.sh
 ./tools/deployment/multinode/131-libvirt-opencontrail.sh
-./tools/deployment/multinode/141-compute-kit-opencontrail.sh
-
-kubectl replace -f ${CHD_PATH}/rbac/cluster-admin.yaml
 
 cd $CHD_PATH
 make
 
-controller_nodes=`echo $nodes_cont_ip | tr ' ' ','`
+controller_nodes=`echo $nodes_cont_ips | tr ' ' ','`
 tee /tmp/contrail.yaml << EOF
 global:
   images:
@@ -196,6 +193,9 @@ helm install --name contrail ${CHD_PATH}/contrail --namespace=contrail --values=
 ${OSH_PATH}/tools/deployment/common/wait-for-pods.sh contrail
 
 cd ${OSH_PATH}
+
+./tools/deployment/multinode/141-compute-kit-opencontrail.sh
+kubectl replace -f ${CHD_PATH}/rbac/cluster-admin.yaml
 
 # workaround steps. remove later.
 make build-helm-toolkit
