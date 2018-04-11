@@ -80,7 +80,7 @@ fi
 
 # clone repos to all nodes
 for ip in $nodes_ips ; do
-    cat <<EOM | $SSH_CMD root@$ip
+    cat <<EOM | $SSH_CMD $SSH_USER@$ip
 mkdir -p /opt
 cd /opt
 # Download openstack-helm code
