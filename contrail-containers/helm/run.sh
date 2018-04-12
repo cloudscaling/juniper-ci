@@ -80,6 +80,10 @@ fi
 
 # clone repos to all nodes
 for ip in $nodes_ips ; do
+  echo "INFO: some debug info about node $i"
+  $SSH_CMD $SSH_USER@$ip "hostname -i ; cat /etc/hosts"
+
+  echo "INFO: clone helm repos to node $ip"
   $SSH_CMD $SSH_USER@$ip "sudo mkdir -p /opt && sudo chown $SSH_USER /opt"
   for repo in 'openstack-helm' 'openstack-helm-infra' 'contrail-helm-deployer' ; do
     $SSH_CMD $SSH_USER@$ip "git clone https://github.com/Juniper/${repo}.git /opt/$repo"
