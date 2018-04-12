@@ -48,6 +48,7 @@ version:
   cni: v0.6.0
 kubernetes:
   network:
+    default_device: ens3
   cluster:
     cni: calico
     pod_subnet: 192.168.0.0/16
