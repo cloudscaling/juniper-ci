@@ -3,6 +3,7 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
+mkdir -p $my_dir/logs
 source "$my_dir/cloudrc"
 
 AAA_MODE=${AAA_MODE:-cloud-admin}
@@ -213,13 +214,14 @@ make build-heat
 sleep 60
 sudo contrail-status
 
+sudo apt-get install -fy virtualenv &>> $my_dir/logs/apt.log
 export OS_CLOUD=openstack_helm
 
 cd $my_dir
 source $my_dir/check-functions
 virtualenv $WORKSPACE/.venv
 source $WORKSPACE/.venv/bin/activate
-pip install python-openstackclient
+pip install python-openstackclient &>> $my_dir/logs/pip.log || /bin/true
 
 check_simple_instance
 deactivate
