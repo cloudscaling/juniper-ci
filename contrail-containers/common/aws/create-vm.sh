@@ -39,6 +39,7 @@ cmd="aws ${AWS_FLAGS} ec2 create-vpc --cidr-block $VPC_CIDR"
 vpc_id=$(get_value_from_json "$cmd" ".Vpc.VpcId")
 echo "INFO: VPC_ID: $vpc_id"
 echo "vpc_id=$vpc_id" >> $ENV_FILE
+sleep 10
 aws ${AWS_FLAGS} ec2 wait vpc-available --vpc-id $vpc_id
 
 aws ${AWS_FLAGS} ec2 modify-vpc-attribute --vpc-id $vpc_id --enable-dns-hostnames
