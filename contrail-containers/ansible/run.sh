@@ -155,24 +155,6 @@ source $WORKSPACE/.venv/bin/activate
 source $WORKSPACE/admin-openrc.sh
 pip install python-openstackclient
 
-image_name=cirros
-if ! output=`openstack image show $image_name 2>/dev/null` ; then
-  rm -f cirros-0.3.4-x86_64-disk.img
-  wget -t 2 -T 60 -q http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
-  openstack image create --public --file cirros-0.3.4-x86_64-disk.img $image_name
-fi
-if ! openstack flavor show m1.tiny &>/dev/null ; then
-  openstack flavor create --disk 1 --vcpus 1 --ram 128 m1.tiny >/dev/null
-  if [[ "$USE_DPDK" == "true" ]]; then
-    openstack flavor set --property hw:mem_page_size=any m1.tiny
-  fi
-fi
-
-openstack keypair delete mykey 2>/dev/null || /bin/true
-openstack keypair create --public-key $HOME/.ssh/id_rsa.pub mykey
-openstack network create demo-net
-openstack subnet create --network demo-net --subnet-range 192.168.1.0/24 demo-subnet
-
 check_simple_instance
 deactivate
 
