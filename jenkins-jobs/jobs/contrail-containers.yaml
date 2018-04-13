@@ -34,6 +34,11 @@
           choices:
             - kmod
             - dpdk
+      - choice:
+          name: TLS
+          choices:
+            - disabled
+            - contrail
       - string:
           name: CCB_PATCHSET
           description: "Additional command to fetch patchset for contrail-container-builer repo."
@@ -85,6 +90,15 @@
           if [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
             export ENVIRONMENT_OS_VERSION='xenial'
           fi
+          # process TLS here to avoid duplication between targets
+          case "$TLS" in
+            "contrail" )
+              export SSL_ENABLE=true
+              ;;
+            * )
+              export SSL_ENABLE=false
+              ;;
+          esac
           env|sort
           ./juniper-ci/contrail-containers/$WAY/run.sh
     publishers:

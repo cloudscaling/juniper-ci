@@ -193,6 +193,7 @@ global:
     AAA_MODE: $AAA_MODE
     CONTROL_DATA_NET_LIST:
     VROUTER_GATEWAY:
+    SSL_ENABLE: $SSL_ENABLE
 EOF
 
 helm install --name contrail ${CHD_PATH}/contrail --namespace=contrail --values=/tmp/contrail.yaml

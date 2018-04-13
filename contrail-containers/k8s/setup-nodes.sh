@@ -29,6 +29,10 @@ assert_empty AGENT_NODES
 function setup_k8s() {
   local dest=$1
   local token_opts=${2:-''}
+  local ssl_opts=''
+  if [[ -n "${SSL_ENABLE}" ]] ; then
+    ssl_opts="SSL_ENABLE=$SSL_ENABLE"
+  fi
   cat <<EOF | $SSH_CMD $SSH_USER@$dest
 set -x
 export PATH=\${PATH}:/usr/sbin
@@ -45,6 +49,7 @@ ZOOKEEPER_PORT=2181
 ZOOKEEPER_ANALYTICS_PORT=2181
 AGENT_MODE=$AGENT_MODE
 PHYSICAL_INTERFACE=\$(ip route get 1 | grep -o 'dev.*' | awk '{print(\$2)}')
+$ssl_opts
 EOM
 cat common.env
 kubernetes/setup-k8s.sh $token_opts
