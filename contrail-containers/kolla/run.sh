@@ -81,7 +81,9 @@ fi
 $SCP "$my_dir/__run-gate.sh" $SSH_USER@$master_ip:run-gate.sh
 $SCP "$my_dir/__globals.yml" $SSH_USER@$master_ip:globals.yml
 $SCP "$my_dir/../common/check-functions" $SSH_USER@$master_ip:check-functions
-timeout -s 9 60m $SSH_CMD $SSH_USER@$master_ip "sudo CONTAINER_REGISTRY=$CONTAINER_REGISTRY REGISTRY_INSECURE=$REGISTRY_INSECURE CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION ./run-gate.sh"
+ssh_env="CONTAINER_REGISTRY=$CONTAINER_REGISTRY REGISTRY_INSECURE=$REGISTRY_INSECURE CONTRAIL_VERSION=$CONTRAIL_VERSION"
+ssh_env+=" SSL_ENABLE=$SSL_ENABLE  OPENSTACK_VERSION=$OPENSTACK_VERSION"
+timeout -s 9 60m $SSH_CMD $SSH_USER@$master_ip "sudo $ssh_env ./run-gate.sh"
 
 trap - ERR
 save_logs
