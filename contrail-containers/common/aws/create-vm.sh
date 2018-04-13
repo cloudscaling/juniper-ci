@@ -120,6 +120,7 @@ function run_instance() {
     echo "WARNING: Machine isn't accessible yet"
     sleep 2
   done
+  scp -i $WORKSPACE/kp $SSH_OPTS $WORKSPACE/kp $SSH_USER@$public_ip:kp
 
   if [[ "$ENVIRONMENT_OS" == 'centos' && $cloud_vm == 'true' ]]; then
     # there are some cases when AWS image has strange kernel version and vrouter can't be loaded

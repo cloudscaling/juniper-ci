@@ -91,9 +91,15 @@ for ip in ${ips[@]:1} ; do
         $name:
           ansible_port: 22
           ansible_host: $ip
-          ansible_user: root
+          ansible_user: $SSH_USER
           ansible_ssh_extra_args: -o StrictHostKeyChecking=no
 EOF
+  key_file="$my_dir/kp"
+  if [ -f $key_file ]; then
+  cat >> $OSH_INFRA_PATH/tools/gate/devel/multinode-inventory.yaml <<EOF
+          ansible_ssh_private_key_file: $key_file
+EOF
+  fi
 done
 
 set -x
