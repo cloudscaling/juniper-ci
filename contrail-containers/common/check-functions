@@ -77,7 +77,7 @@ function check_simple_instance() {
   if [[ -z "$if_name" ]]; then
     # helm doesn't have vif on host yet
     agent_cid=`$ssh_cmd sudo docker ps 2>/dev/null | grep "/contrail-vrouter-agent@" | awk '{print $1}'`
-    if_name=`$ssh_cmd sudo docker -i exec $agent_cid vif --list 2>/dev/null | grep -B 1 $iip | awk '/^vif/{print $NF}'`
+    if_name=`$ssh_cmd sudo docker exec -i $agent_cid vif --list 2>/dev/null | grep -B 1 $iip | awk '/^vif/{print $NF}'`
     if [[ -z "$if_name" ]]; then
       echo "ERROR: tap interface for VM couldn't be found"
       $ssh_cmd ip link

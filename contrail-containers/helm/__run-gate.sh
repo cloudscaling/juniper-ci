@@ -219,8 +219,8 @@ export OS_CLOUD=openstack_helm
 
 cd $my_dir
 source $my_dir/check-functions
-virtualenv $WORKSPACE/.venv
-source $WORKSPACE/.venv/bin/activate
+virtualenv .venv
+source .venv/bin/activate
 pip install python-openstackclient &>> $my_dir/logs/pip.log || /bin/true
 
 check_simple_instance
