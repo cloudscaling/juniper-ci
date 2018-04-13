@@ -95,6 +95,7 @@ for ip in $nodes_ips ; do
 done
 
 $SCP "$WORKSPACE/cloudrc" $SSH_USER@$master_ip:cloudrc
+$SCP "$my_dir/../common/check-functions" $SSH_USER@$master_ip:check-functions
 $SCP "$my_dir/__run-gate.sh" $SSH_USER@$master_ip:run-gate.sh
 ssh_env="CONTAINER_REGISTRY=$CONTAINER_REGISTRY REGISTRY_INSECURE=$REGISTRY_INSECURE"
 ssh_env+=" CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION LINUX_DISTR=$LINUX_DISTR"

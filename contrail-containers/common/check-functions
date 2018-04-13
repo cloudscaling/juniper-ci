@@ -27,14 +27,46 @@ function check_introspection() {
   return $err
 }
 
+image_name=cirros
+function create_image() {
+  if ! output=`openstack image show $image_name 2>/dev/null` ; then
+    rm -f cirros-0.3.4-x86_64-disk.img
+    wget -t 2 -T 60 -q http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+    openstack image create --public --file cirros-0.3.4-x86_64-disk.img $image_name
+  fi
+}
+
 function check_simple_instance() {
+  create_image
+
+  if ! openstack flavor show m1.ms &>/dev/null ; then
+    openstack flavor create --disk 1 --vcpus 1 --ram 128 m1.ms >/dev/null
+  fi
+  if [[ "$USE_DPDK" == "true" ]]; then
+    openstack flavor set --property hw:mem_page_size=any m1.ms
+  fi
+
+  openstack keypair delete my_ms_key 2>/dev/null || /bin/true
+  openstack keypair create --public-key $HOME/.ssh/id_rsa.pub my_ms_key
+
+  if ! openstack network show demo-net 2>/dev/null ; then
+    openstack network create demo-net
+  fi
+  if ! openstack subnet list --network demo-net | grep -q demo-subnet ; then
+    openstack subnet create --network demo-net --subnet-range 192.168.1.0/24 demo-subnet
+  fi
+
   local net_id=`openstack network show demo-net -f value -c id`
-  openstack server create --image cirros --flavor m1.tiny --key-name mykey --nic net-id=$net_id demo1
+  openstack server create --image cirros --flavor m1.ms --key-name my_ms_key --nic net-id=$net_id demo1
   sleep 20
   openstack server show demo1
   local iip=`openstack server show demo1 | awk '/addresses/{print $4}' | cut -d '=' -f 2`
   local hhost=`openstack server show demo1 | awk '/OS-EXT-SRV-ATTR:hypervisor_hostname/{print $4}'`
   local hip=`openstack hypervisor list -c "Hypervisor Hostname" -c "Host IP" | grep "$hhost" | awk '{print $4}'`
+  if [[ "$hip" == 'None' ]]; then
+    # helm case
+    hip=`getent hosts $hhost | awk '{print $1}'`
+  fi
   local lip=`hostname -i`
   local ssh_cmd=''
   if [[ "$hip" != "$lip" ]]; then

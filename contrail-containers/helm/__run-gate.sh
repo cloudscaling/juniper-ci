@@ -212,6 +212,15 @@ make build-heat
 sleep 60
 sudo contrail-status
 
-./tools/deployment/developer/nfs/901-use-it-opencontrail.sh
+export OS_CLOUD=openstack_helm
+
+cd $my_dir
+source $my_dir/check-functions
+virtualenv $WORKSPACE/.venv
+source $WORKSPACE/.venv/bin/activate
+pip install python-openstackclient
+
+check_simple_instance
+deactivate
 
 exit $err
