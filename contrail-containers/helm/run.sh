@@ -99,7 +99,7 @@ $SCP "$my_dir/../common/check-functions" $SSH_USER@$master_ip:check-functions
 $SCP "$my_dir/__run-gate.sh" $SSH_USER@$master_ip:run-gate.sh
 ssh_env="CONTAINER_REGISTRY=$CONTAINER_REGISTRY REGISTRY_INSECURE=$REGISTRY_INSECURE"
 ssh_env+=" CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION LINUX_DISTR=$LINUX_DISTR"
-ssh_env+=" AGENT_MODE=$AGENT_MODE"
+ssh_env+=" AGENT_MODE=$AGENT_MODE SSL_ENABLE=$SSL_ENABLE"
 timeout -s 9 120m $SSH_CMD $SSH_USER@$master_ip "$ssh_env ./run-gate.sh"
 
 trap - ERR
