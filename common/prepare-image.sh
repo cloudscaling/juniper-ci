@@ -48,7 +48,7 @@ echo 'datasource_list: [ None ]' > etc/cloud/cloud.cfg.d/90_dslist.cfg
 # enable root login
 sed -i -e 's/^disable_root.*$/disable_root: 0/' etc/cloud/cloud.cfg
 # set root password: 123
-sed -i -e 's/^root:\*:/root:$1$PU257S1Q$hdOk0pm6Yu7URJRNLQa7e1:/' etc/shadow
+sed -i -e 's/^root:[!\*]*:/root:$1$PU257S1Q$hdOk0pm6Yu7URJRNLQa7e1:/' etc/shadow
 # add ssh keys for root account
 mkdir -p root/.ssh
 cat $SSH_KEY > root/.ssh/authorized_keys
