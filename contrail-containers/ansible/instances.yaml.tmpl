@@ -45,9 +45,11 @@ instances:
          openstack_compute: null
          vrouter: null
 
-contrail_configuration:
+global_configuration:
  REGISTRY_PRIVATE_INSECURE: True
  CONTAINER_REGISTRY: ${CONTAINER_REGISTRY}
+
+contrail_configuration:
  CONTRAIL_VERSION: ${CONTRAIL_VERSION}
  CLOUD_ORCHESTRATOR: openstack
  METADATA_PROXY_SECRET: c0ntrail123
