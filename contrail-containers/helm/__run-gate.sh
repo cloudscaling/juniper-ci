@@ -93,7 +93,7 @@ cat >> $OSH_INFRA_PATH/tools/gate/devel/multinode-inventory.yaml <<EOF
         $name:
           ansible_port: 22
           ansible_host: $ip
-          ansible_user: root
+          ansible_user: $SSH_USER
           ansible_ssh_extra_args: -o StrictHostKeyChecking=no
 EOF
 if [ -f $key_file ]; then
