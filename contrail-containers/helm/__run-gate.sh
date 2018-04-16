@@ -63,6 +63,18 @@ docker:
 EOF
 fi
 
+if [[ "${SSL_ENABLE,,}" == 'true' ]] ; then
+  cat <<EOF >> $OSH_INFRA_PATH/tools/gate/devel/multinode-vars.yaml
+tls_config:
+  generate: true
+  organization: Contrail
+  cert_file: "/etc/contrail/ssl/certs/server.pem"
+  key_file: "/etc/contrail/ssl/private/server-privkey.pem"
+  ca_file: "/etc/contrail/ssl/certs/ca-cert.pem"
+EOF
+fi
+
+
 cd ${OSH_PATH}
 ./tools/deployment/developer/common/001-install-packages-opencontrail.sh
 
