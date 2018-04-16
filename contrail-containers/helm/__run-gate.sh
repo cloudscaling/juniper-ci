@@ -3,6 +3,7 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
+mkdir -p $my_dir/logs
 source "$my_dir/cloudrc"
 
 AAA_MODE=${AAA_MODE:-cloud-admin}
@@ -90,9 +91,15 @@ for ip in ${ips[@]:1} ; do
         $name:
           ansible_port: 22
           ansible_host: $ip
-          ansible_user: root
+          ansible_user: $SSH_USER
           ansible_ssh_extra_args: -o StrictHostKeyChecking=no
 EOF
+  key_file="$my_dir/kp"
+  if [ -f $key_file ]; then
+  cat >> $OSH_INFRA_PATH/tools/gate/devel/multinode-inventory.yaml <<EOF
+          ansible_ssh_private_key_file: $key_file
+EOF
+  fi
 done
 
 set -x
@@ -213,13 +220,14 @@ make build-heat
 sleep 60
 sudo contrail-status
 
+sudo apt-get install -fy virtualenv &>> $my_dir/logs/apt.log
 export OS_CLOUD=openstack_helm
 
 cd $my_dir
 source $my_dir/check-functions
-virtualenv $WORKSPACE/.venv
-source $WORKSPACE/.venv/bin/activate
-pip install python-openstackclient
+virtualenv .venv
+source .venv/bin/activate
+pip install python-openstackclient &>> $my_dir/logs/pip.log || /bin/true
 
 check_simple_instance
 deactivate

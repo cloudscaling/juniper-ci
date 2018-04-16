@@ -66,7 +66,7 @@ for dest in $nodes_ips ; do
 done
 $my_dir/setup-nodes.sh
 
-
+run_env=''
 if [[ "$REGISTRY" == 'build' ]]; then
   $SCP -r "$WORKSPACE/contrail-container-builder" $SSH_USER@$build_ip:./
   $SCP "$my_dir/../__build-containers.sh" ${SSH_USER}@$build_ip:build-containers.sh
@@ -75,14 +75,16 @@ if [[ "$REGISTRY" == 'build' ]]; then
   ssh_env+=" CONTRAIL_INSTALL_PACKAGES_URL=$CONTRAIL_INSTALL_PACKAGES_URL"
   $SSH_CMD ${SSH_USER}@$build_ip "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
   set +o pipefail
-  CONTAINER_REGISTRY="$build_ip:5000"
+  run_env="CONTRAIL_REGISTRY=$build_ip:5000 CONTRAIL_VERSION=$CONTRAIL_VERSION REGISTRY_INSECURE=1"
+elif [[ "$REGISTRY" == 'opencontrailnightly' ]]; then
+  run_env="CONTRAIL_REGISTRY=opencontrailnightly CONTRAIL_CONTAINER_TAG=latest REGISTRY_INSECURE=0"
 else
   echo "ERROR: unsupported REGISTRY = $REGISTRY"
   exit 1
 fi
 
 $SCP "$my_dir/__run-gate.sh" ${SSH_USER}@$master_ip:run-gate.sh
-timeout -s 9 60m $SSH_CMD ${SSH_USER}@$master_ip "CONTRAIL_VERSION=$CONTRAIL_VERSION CONTRAIL_REGISTRY=$CONTAINER_REGISTRY LINUX_DISTR=$LINUX_DISTR AGENT_MODE=$AGENT_MODE ./run-gate.sh"
+timeout -s 9 60m $SSH_CMD ${SSH_USER}@$master_ip "$run_env LINUX_DISTR=$LINUX_DISTR AGENT_MODE=$AGENT_MODE ./run-gate.sh"
 
 trap - ERR
 save_logs

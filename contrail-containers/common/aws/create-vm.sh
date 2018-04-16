@@ -39,6 +39,7 @@ cmd="aws ${AWS_FLAGS} ec2 create-vpc --cidr-block $VPC_CIDR"
 vpc_id=$(get_value_from_json "$cmd" ".Vpc.VpcId")
 echo "INFO: VPC_ID: $vpc_id"
 echo "vpc_id=$vpc_id" >> $ENV_FILE
+sleep 10
 aws ${AWS_FLAGS} ec2 wait vpc-available --vpc-id $vpc_id
 
 aws ${AWS_FLAGS} ec2 modify-vpc-attribute --vpc-id $vpc_id --enable-dns-hostnames
@@ -120,6 +121,15 @@ function run_instance() {
     echo "WARNING: Machine isn't accessible yet"
     sleep 2
   done
+  scp -i $WORKSPACE/kp $SSH_OPTS $WORKSPACE/kp $SSH_USER@$public_ip:kp
+
+  if [[ "$cloud_vm" == 'true' ]]; then
+    echo "INFO: Configure additional interface for cloud VM"
+    eni_id=`aws ${AWS_FLAGS} ec2 create-network-interface --subnet-id $subnet_ext_id --query 'NetworkInterface.NetworkInterfaceId' --output text`
+    eni_attach_id=`aws ${AWS_FLAGS} ec2 attach-network-interface --network-interface-id $eni_id --instance-id $instance_id --device-index 1 --query 'AttachmentId' --output text`
+    aws ${AWS_FLAGS} ec2 modify-network-interface-attribute --network-interface-id $eni_id --attachment AttachmentId=$eni_attach_id,DeleteOnTermination=true
+    echo "INFO: additional interface $eni_id is attached: $eni_attach_id"
+  fi
 
   if [[ "$ENVIRONMENT_OS" == 'centos' && $cloud_vm == 'true' ]]; then
     # there are some cases when AWS image has strange kernel version and vrouter can't be loaded
@@ -140,11 +150,6 @@ function run_instance() {
     return
   fi
 
-  echo "INFO: Configure additional interface for cloud VM"
-  eni_id=`aws ${AWS_FLAGS} ec2 create-network-interface --subnet-id $subnet_ext_id --query 'NetworkInterface.NetworkInterfaceId' --output text`
-  eni_attach_id=`aws ${AWS_FLAGS} ec2 attach-network-interface --network-interface-id $eni_id --instance-id $instance_id --device-index 1 --query 'AttachmentId' --output text`
-  aws ${AWS_FLAGS} ec2 modify-network-interface-attribute --network-interface-id $eni_id --attachment AttachmentId=$eni_attach_id,DeleteOnTermination=true
-  echo "INFO: additional interface $eni_id is attached: $eni_attach_id"
   sleep 20
   create_iface $IF2 $ssh
   $ssh "$IFCONFIG_PATH/ifconfig" 2>/dev/null | grep -A 1 "^[a-z].*" | grep -v "\-\-"
