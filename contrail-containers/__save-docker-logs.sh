@@ -2,6 +2,16 @@
 
 CNT_NAME_PATTERN=${CNT_NAME_PATTERN:-'2,3'}
 
+SSL_ENABLE=${SSL_ENABLE:-'false'}
+SERVER_CERTFILE=${SERVER_CERTFILE:-'/etc/contrail/ssl/certs/server.pem'}
+SERVER_KEYFILE=${SERVER_KEYFILE:-'/etc/contrail/ssl/private/server-privkey.pem'}
+
+proto='http'
+if [[ "${SSL_ENABLE,,}" == 'true' ]] ; then
+  proto='https'
+  ssl_opts="-k --key ${SERVER_KEYFILE} --cert ${SERVER_CERTFILE}"
+fi
+
 # save contrail files
 mkdir -p logs
 sudo chown -R $USER logs
@@ -31,9 +41,9 @@ popd
 
 function save_introspect_info() {
   echo "INFO: saving introspect output for $1"
-  timeout -s 9 30 curl -s http://localhost:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - | grep -P "state|<type|<status" > logs/contrail/$1-introspect.log
+  timeout -s 9 30 curl $ssl_opts -s ${proto}://localhost:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - | grep -P "state|<type|<status" > logs/contrail/$1-introspect.log
   echo '' >> logs/contrail/$1-introspect.log
-  timeout -s 9 30 curl -s http://localhost:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - >> logs/contrail/$1-introspect.log
+  timeout -s 9 30 curl $ssl_opts -s ${proto}://localhost:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - >> logs/contrail/$1-introspect.log
 }
 
 save_introspect_info HttpPortConfigNodemgr 8100

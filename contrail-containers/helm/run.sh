@@ -19,11 +19,15 @@ source $my_dir/${HOST}-defs
 function save_logs() {
   source "$my_dir/../common/${HOST}/ssh-defs"
   set +e
+  local ssl_opts=''
+  if [[ -n "$SSL_ENABLE" ]] ; then
+    ssl_opts="SSL_ENABLE=$SSL_ENABLE"
+  fi
   # save common docker logs
   for dest in $nodes_ips ; do
     timeout -s 9 20s $SCP "$my_dir/../__save-docker-logs.sh" ${SSH_USER}@${dest}:save-docker-logs.sh
     if [[ $? == 0 ]] ; then
-      $SSH_CMD ${SSH_USER}@${dest} "./save-docker-logs.sh"
+      $SSH_CMD ${SSH_USER}@${dest} "$ssl_opts ./save-docker-logs.sh"
     fi
   done
 

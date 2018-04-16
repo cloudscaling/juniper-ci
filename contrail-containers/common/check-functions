@@ -16,8 +16,12 @@ function check_introspection() {
   local dest=( $(echo $1 | sed 's/,/ /g') )
   local err=0
   local count=0
+  local ssl_opts=''
+  if [[ -n "$SSL_ENABLE" ]] ; then
+    ssl_opts="SSL_ENABLE=$SSL_ENABLE"
+  fi
   for d in ${dest[@]} ; do
-    local res=$($SSH_CMD $d ./check_introspection.sh)
+    local res=$($SSH_CMD $d $ssl_opts ./check_introspection.sh)
     echo "$res"
     if [[ ! $? -eq 0 ]]  ; then
       echo "ERROR: check_introspection failed on dest=$d"

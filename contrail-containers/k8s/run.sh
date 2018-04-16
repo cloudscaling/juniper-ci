@@ -19,12 +19,16 @@ source $my_dir/${HOST}-defs
 function save_logs() {
   source "$my_dir/../common/${HOST}/ssh-defs"
   set +e
+  local ssl_opts=''
+  if [[ -n "$SSL_ENABLE" ]] ; then
+    ssl_opts="SSL_ENABLE=$SSL_ENABLE"
+  fi
   # save common docker logs
   for dest in $nodes_ips ; do
     # TODO: when repo be splitted to containers & build here will be containers repo only,
     # then build repo should be added to be copied below
     $SCP "$my_dir/../__save-docker-logs.sh" $SSH_USER@${dest}:save-docker-logs.sh
-    $SSH_CMD $SSH_USER@${dest} "./save-docker-logs.sh"
+    $SSH_CMD $SSH_USER@${dest} "$ssl_opts ./save-docker-logs.sh"
   done
 
   # save env host specific logs
