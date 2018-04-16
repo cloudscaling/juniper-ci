@@ -71,6 +71,7 @@ all:
   children:
 EOF
 
+key_file="$my_dir/kp"
 ips=($nodes_ips)
 ip="${ips[0]}"
 name=`echo node_$ip | tr '.' '_'`
@@ -82,6 +83,13 @@ cat >> $OSH_INFRA_PATH/tools/gate/devel/multinode-inventory.yaml <<EOF
           ansible_host: $ip
           ansible_user: root
           ansible_ssh_extra_args: -o StrictHostKeyChecking=no
+EOF
+if [ -f $key_file ]; then
+cat >> $OSH_INFRA_PATH/tools/gate/devel/multinode-inventory.yaml <<EOF
+          ansible_ssh_private_key_file: $key_file
+EOF
+fi
+cat >> $OSH_INFRA_PATH/tools/gate/devel/multinode-inventory.yaml <<EOF
     nodes:
       hosts:
 EOF
@@ -94,7 +102,6 @@ for ip in ${ips[@]:1} ; do
           ansible_user: $SSH_USER
           ansible_ssh_extra_args: -o StrictHostKeyChecking=no
 EOF
-  key_file="$my_dir/kp"
   if [ -f $key_file ]; then
   cat >> $OSH_INFRA_PATH/tools/gate/devel/multinode-inventory.yaml <<EOF
           ansible_ssh_private_key_file: $key_file
