@@ -7,38 +7,40 @@ if [[ -z "$WORKSPACE" ]] ; then
   echo "WORKSPACE variable is expected"
   exit -1
 fi
-
 if [[ -z "$WAY" ]] ; then
   echo "WAY variable is expected: helm/k8s/kolla"
   exit -1
 fi
-
 if [[ -z "$NET_ADDR" ]] ; then
   echo "NET_ADDR variable is expected: e.g. 192.168.222.0"
   exit -1
 fi
-
-export ENV_FILE="$WORKSPACE/cloudrc"
-
-source "$my_dir/definitions"
-source "$my_dir/${ENVIRONMENT_OS}"
-
 if [[ -z "$ENVIRONMENT_OS" ]] ; then
   echo "ENVIRONMENT_OS is expected (e.g. export ENVIRONMENT_OS=centos)"
   exit 1
 fi
-
 if [[ -z "$OPENSTACK_VERSION" ]] ; then
   echo "OPENSTACK_VERSION is expected (e.g. export OPENSTACK_VERSION=ocata)"
   exit 1
 fi
-
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   if [[ -z "$RHEL_ACCOUNT_FILE" ]] ; then
     echo "ERROR: for rhel environemnt the environment variable RHEL_ACCOUNT_FILE is required"
     exit 1
   fi
 fi
+
+export ENV_FILE="$WORKSPACE/cloudrc"
+source "$my_dir/definitions"
+source "$my_dir/${ENVIRONMENT_OS}"
+
+trap 'catch_errors_cvmb $LINENO' ERR
+function catch_errors_cvmb() {
+  local exit_code=$?
+  echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
+  trap - ERR
+  exit $exit_code
+}
 
 # base image for VMs
 if [[ -n "$ENVIRONMENT_OS_VERSION" ]] ; then
@@ -252,3 +254,5 @@ done
 for ip in ${ips[@]} ; do
   wait_ssh $ip
 done
+
+trap - ERR
