@@ -220,6 +220,7 @@ global:
     CONTROL_DATA_NET_LIST:
     VROUTER_GATEWAY:
     SSL_ENABLE: $SSL_ENABLE
+    JVM_EXTRA_OPTS: "-Xms1g -Xmx2g"
 EOF
 
 helm install --name contrail ${CHD_PATH}/contrail --namespace=contrail --values=/tmp/contrail.yaml
