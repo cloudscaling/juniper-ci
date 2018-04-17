@@ -112,7 +112,7 @@ cat $config
 image=`docker images -a -q centos-soft`
 if [[ -z "$image" ]]; then
   docker pull centos
-  docker run -i --name cprep-$JOB_RND --entrypoint /bin/bash centos -c "yum install -y epel-release && yum install -y ansible python-ipaddress git python-pip sudo vim gcc python-devel && pip install pip --upgrade && pip install pycrypto oslo_utils oslo_config jinja2"
+  docker run -i --name cprep-$JOB_RND --entrypoint /bin/bash centos -c "yum install -y epel-release && yum install -y ansible python-ipaddress git python-pip sudo vim gcc python-devel && pip install pip --upgrade && hash -r && pip install pycrypto oslo_utils oslo_config jinja2"
   docker commit cprep-$JOB_RND centos-soft
   docker rm cprep-$JOB_RND
 fi
