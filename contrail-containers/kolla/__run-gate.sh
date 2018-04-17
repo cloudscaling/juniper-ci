@@ -66,6 +66,7 @@ echo "INFO: Preparing instances"
 if [ "x$HOST_OS" == "xubuntu" ]; then
   apt-get install -y --no-install-recommends python-pip
   pip install -U pip setuptools
+  hash -r
   apt-get install -y python-dev libffi-dev gcc libssl-dev python-selinux
   pip install -U ansible
 elif [ "x$HOST_OS" == "xcentos" ]; then
@@ -74,6 +75,7 @@ elif [ "x$HOST_OS" == "xcentos" ]; then
 
   yum install -y python-pip
   pip install -U pip
+  hash -r
   yum install -y python-devel libffi-devel gcc openssl-devel libselinux-python
   yum install -y ansible
 fi
