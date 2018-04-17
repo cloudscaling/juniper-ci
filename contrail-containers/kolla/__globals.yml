@@ -62,6 +62,8 @@ opencontrail_tag: "{{contrail_tag}}"
 opencontrail_base_distro: "centos7"
 opencontrail_docker_registry: "{{contrail_docker_registry}}"
 opencontrail_ssl: "{{opencontrail_ssl}}"
+opencontrail_env:
+  JVM_EXTRA_OPTS: "-Xms1g -Xmx2g"
 # while opencontrail is not a role in ansible and we didn't patch group_vars/all.yml we set fake IP here
 enable_openvswitch: "no"
 enable_neutron_bgp_dragent: "no"
