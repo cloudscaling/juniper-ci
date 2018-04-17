@@ -52,6 +52,9 @@ function save_logs() {
   done
 }
 
+$my_dir/../common/${HOST}/create-vm.sh
+source "$my_dir/../common/${HOST}/ssh-defs"
+
 trap catch_errors ERR;
 function catch_errors() {
   local exit_code=$?
@@ -64,9 +67,6 @@ function catch_errors() {
 
   exit $exit_code
 }
-
-$my_dir/../common/${HOST}/create-vm.sh
-source "$my_dir/../common/${HOST}/ssh-defs"
 
 if [[ "$REGISTRY" == 'build' ]]; then
   $SCP -r "$WORKSPACE/contrail-container-builder" ${SSH_USER}@$build_ip:./
