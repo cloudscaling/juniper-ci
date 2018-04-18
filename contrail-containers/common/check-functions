@@ -21,11 +21,9 @@ function check_introspection() {
     ssl_opts="SSL_ENABLE=$SSL_ENABLE"
   fi
   for d in ${dest[@]} ; do
-    local res=$($SSH_CMD $d $ssl_opts ./check_introspection.sh)
-    echo "$res"
-    if [[ ! $? -eq 0 ]]  ; then
+    if ! $SSH_CMD $d $ssl_opts ./check_introspection.sh ; then
       echo "ERROR: check_introspection failed on dest=$d"
-      (( err+=1 ))
+      err=1
     fi
   done
   return $err

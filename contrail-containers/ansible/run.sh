@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -55,10 +55,10 @@ function save_logs() {
 $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
 
-trap catch_errors ERR;
+trap 'catch_errors $LINENO' ERR
 function catch_errors() {
   local exit_code=$?
-  echo "Errors!" $exit_code $@
+  echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
 
   save_logs
   if [[ "$CLEAN_ENV" == 'always' ]] ; then
@@ -124,6 +124,9 @@ docker run -i --rm --entrypoint /bin/bash $volumes --network host centos-soft -c
 
 # TODO: wait till cluster up and initialized
 sleep 300
+
+set -x
+trap 'catch_errors $LINENO' ERR
 
 # Validate cluster's introspection ports
 for dest in $nodes_ips ; do
