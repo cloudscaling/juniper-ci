@@ -221,6 +221,7 @@ global:
     VROUTER_GATEWAY:
     SSL_ENABLE: $SSL_ENABLE
     JVM_EXTRA_OPTS: "-Xms1g -Xmx2g"
+    BGP_PORT: "1179"
 EOF
 
 helm install --name contrail ${CHD_PATH}/contrail --namespace=contrail --values=/tmp/contrail.yaml
