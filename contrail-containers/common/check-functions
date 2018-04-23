@@ -87,7 +87,18 @@ function check_simple_instance() {
       return 1
     fi
   fi
-  local ip=`$ssh_cmd curl -s http://127.0.0.1:8085/Snh_ItfReq?name=$if_name 2>/dev/null | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'`
+
+  local curl_proto='http'
+  local curl_ssl_opts=''
+  if [[ -n "$SSL_ENABLE" ]] ; then
+    local key=${SERVER_KEYFILE:-'/etc/contrail/ssl/private/server-privkey.pem'}
+    local cert=${SERVER_CERTFILE:-'/etc/contrail/ssl/certs/server.pem'}
+    local ca_cert=${SERVER_CA_CERTFILE:-'/etc/contrail/ssl/certs/ca-cert.pem'}
+    curl_ssl_opts="--key $key --cert $cert --cacert $ca_cert"
+    curl_proto='https'
+  fi
+
+  local ip=`$ssh_cmd curl $curl_ssl_opts -s ${curl_proto}://127.0.0.1:8085/Snh_ItfReq?name=$if_name 2>/dev/null | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'`
   if [[ -z "$ip" ]]; then
     echo "ERROR: there is no link-local IP for VM"
     $ssh_cmd curl -s http://127.0.0.1:8085/Snh_ItfReq?name=$if_name | xmllint --format -
@@ -112,5 +123,11 @@ function check_simple_instance() {
   # test for outside world
   $ssh_cmd ssh $ssh_opts cirros@$ip ping -q -c 1 -W 2 8.8.8.8 2>/dev/null || /bin/true
   # Check the VM can reach the metadata server
-  $ssh_cmd ssh $ssh_opts cirros@$ip curl -s --connect-timeout 5 http://169.254.169.254/latest/meta-data/local-ipv4 2>/dev/null ; echo ''
+  local curl_proto='http'
+  local curl_ssl_opts=''
+  if [[ "${METADATA_SSL_ENABLE,,}" == 'true' ]] ; then
+    curl_proto='https'
+    curl_ssl_opts='-k'
+  fi
+  $ssh_cmd ssh $ssh_opts cirros@$ip curl $curl_ssl_opts -s --connect-timeout 5 ${curl_proto}://169.254.169.254/latest/meta-data/local-ipv4 2>/dev/null ; echo ''
 }
