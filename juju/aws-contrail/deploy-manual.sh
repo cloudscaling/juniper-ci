@@ -129,7 +129,7 @@ if [ "$USE_EXTERNAL_RABBITMQ" == 'true' ]; then
 fi
 juju-deploy $PLACE/contrail-analyticsdb contrail4-analyticsdb --to $m6
 juju-set contrail4-analyticsdb "log-level=SYS_DEBUG"
-juju-deploy $PLACE/contrail4-analytics --to $m6
+juju-deploy $PLACE/contrail-analytics contrail4-analytics --to $m6
 juju-set contrail4-analytics "log-level=SYS_DEBUG"
 juju-expose contrail4-analytics
 
