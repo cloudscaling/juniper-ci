@@ -119,60 +119,60 @@ juju-set nova-cloud-controller "network-manager=Neutron"
 juju-expose neutron-api
 
 # Contrail
-juju-deploy $PLACE/contrail-keystone-auth --to $m6
+juju-deploy $PLACE/contrail-keystone-auth contrail4-keystone-auth --to $m6
 
-juju-deploy $PLACE/contrail-controller --to $m6
-juju-expose contrail-controller
-juju-set contrail-controller auth-mode=$AAA_MODE "log-level=SYS_DEBUG"
+juju-deploy $PLACE/contrail-controller contrail4-controller --to $m6
+juju-expose contrail4-controller
+juju-set contrail4-controller auth-mode=$AAA_MODE "log-level=SYS_DEBUG"
 if [ "$USE_EXTERNAL_RABBITMQ" == 'true' ]; then
-  juju-set contrail-controller "use-external-rabbitmq=true"
+  juju-set contrail4-controller "use-external-rabbitmq=true"
 fi
-juju-deploy $PLACE/contrail-analyticsdb --to $m6
-juju-set contrail-analyticsdb "log-level=SYS_DEBUG"
-juju-deploy $PLACE/contrail-analytics --to $m6
-juju-set contrail-analytics "log-level=SYS_DEBUG"
-juju-expose contrail-analytics
+juju-deploy $PLACE/contrail-analyticsdb contrail4-analyticsdb --to $m6
+juju-set contrail4-analyticsdb "log-level=SYS_DEBUG"
+juju-deploy $PLACE/contrail4-analytics --to $m6
+juju-set contrail4-analytics "log-level=SYS_DEBUG"
+juju-expose contrail4-analytics
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
-  juju-add-unit contrail-controller --to $m7
-  juju-add-unit contrail-controller --to $m8
-  juju-add-unit contrail-analytics --to $m7
-  juju-add-unit contrail-analytics --to $m8
-  juju-add-unit contrail-analyticsdb --to $m7
-  juju-add-unit contrail-analyticsdb --to $m8
+  juju-add-unit contrail4-controller --to $m7
+  juju-add-unit contrail4-controller --to $m8
+  juju-add-unit contrail4-analytics --to $m7
+  juju-add-unit contrail4-analytics --to $m8
+  juju-add-unit contrail4-analyticsdb --to $m7
+  juju-add-unit contrail4-analyticsdb --to $m8
 fi
 
 cp "$my_dir/../common/repo_config.yaml.tmpl" "repo_config_co.yaml"
-sed -i -e "s|{{charm_name}}|contrail-openstack|m" "repo_config_co.yaml"
+sed -i -e "s|{{charm_name}}|contrail4-openstack|m" "repo_config_co.yaml"
 sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_co.yaml"
 sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_co.yaml"
 sed -i -e "s|{{series}}|$SERIES|m" "repo_config_co.yaml"
 sed -i "s/\r/\n/g" "repo_config_co.yaml"
-juju-deploy $PLACE/contrail-openstack --config repo_config_co.yaml
+juju-deploy $PLACE/contrail-openstack contrail4-openstack --config repo_config_co.yaml
 
 cp "$my_dir/../common/repo_config.yaml.tmpl" "repo_config_cv.yaml"
-sed -i -e "s|{{charm_name}}|contrail-agent|m" "repo_config_cv.yaml"
+sed -i -e "s|{{charm_name}}|contrail4-agent|m" "repo_config_cv.yaml"
 sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_cv.yaml"
 sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_cv.yaml"
 sed -i -e "s|{{series}}|$SERIES|m" "repo_config_cv.yaml"
 sed -i "s/\r/\n/g" "repo_config_cv.yaml"
-juju-deploy $PLACE/contrail-agent --config repo_config_cv.yaml
-juju-set contrail-agent "log-level=SYS_DEBUG"
+juju-deploy $PLACE/contrail-agent contrail4-agent --config repo_config_cv.yaml
+juju-set contrail4-agent "log-level=SYS_DEBUG"
 
 if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
-  juju-set contrail-controller control-network=$subnet_cidr
-  juju-set contrail-analyticsdb control-network=$subnet_cidr
-  juju-set contrail-analytics control-network=$subnet_cidr
+  juju-set contrail4-controller control-network=$subnet_cidr
+  juju-set contrail4-analyticsdb control-network=$subnet_cidr
+  juju-set contrail4-analytics control-network=$subnet_cidr
 fi
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-deploy cs:$SERIES/haproxy --to $m0
   juju-expose haproxy
-  juju-add-relation "contrail-analytics" "haproxy"
-  juju-add-relation "contrail-controller:http-services" "haproxy"
-  juju-add-relation "contrail-controller:https-services" "haproxy"
+  juju-add-relation "contrail4-analytics" "haproxy"
+  juju-add-relation "contrail4-controller:http-services" "haproxy"
+  juju-add-relation "contrail4-controller:https-services" "haproxy"
   ip=`get-machine-ip-by-number $m0`
-  juju-set contrail-controller vip=$ip
+  juju-set contrail4-controller vip=$ip
 fi
 
 echo "INFO: Update endpoints $(date)"
@@ -180,12 +180,12 @@ hack_openstack
 echo "INFO: Apply SSL flag if set $(date)"
 apply_ssl
 
-echo "INFO: Attach contrail-controller container $(date)"
-juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
-echo "INFO: Attach contrail-analyticsdb container $(date)"
-juju-attach contrail-analyticsdb contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
-echo "INFO: Attach contrail-analytics container $(date)"
-juju-attach contrail-analytics contrail-analytics="$HOME/docker/$image_analytics"
+echo "INFO: Attach contrail4-controller container $(date)"
+juju-attach contrail4-controller contrail-controller="$HOME/docker/$image_controller"
+echo "INFO: Attach contrail4-analyticsdb container $(date)"
+juju-attach contrail4-analyticsdb contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
+echo "INFO: Attach contrail4-analytics container $(date)"
+juju-attach contrail4-analytics contrail-analytics="$HOME/docker/$image_analytics"
 
 echo "INFO: Add relations $(date)"
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
@@ -206,24 +206,24 @@ juju-add-relation "neutron-api:neutron-api" "nova-cloud-controller:neutron-api"
 juju-add-relation "neutron-api:identity-service" "keystone:identity-service"
 juju-add-relation "neutron-api:amqp" "rabbitmq-server:amqp"
 
-juju-add-relation "contrail-controller" "ntp"
+juju-add-relation "contrail4-controller" "ntp"
 juju-add-relation "nova-compute:juju-info" "ntp:juju-info"
 
-juju-add-relation "contrail-controller" "contrail-keystone-auth"
-juju-add-relation "contrail-keystone-auth" "keystone"
-juju-add-relation "contrail-controller" "contrail-analytics"
-juju-add-relation "contrail-controller" "contrail-analyticsdb"
-juju-add-relation "contrail-analytics" "contrail-analyticsdb"
+juju-add-relation "contrail4-controller" "contrail4-keystone-auth"
+juju-add-relation "contrail4-keystone-auth" "keystone"
+juju-add-relation "contrail4-controller" "contrail4-analytics"
+juju-add-relation "contrail4-controller" "contrail4-analyticsdb"
+juju-add-relation "contrail4-analytics" "contrail4-analyticsdb"
 
-juju-add-relation "contrail-openstack" "neutron-api"
-juju-add-relation "contrail-openstack" "nova-compute"
-juju-add-relation "contrail-openstack" "contrail-controller"
+juju-add-relation "contrail4-openstack" "neutron-api"
+juju-add-relation "contrail4-openstack" "nova-compute"
+juju-add-relation "contrail4-openstack" "contrail4-controller"
 
-juju-add-relation "contrail-agent:juju-info" "nova-compute:juju-info"
-juju-add-relation "contrail-agent" "contrail-controller"
+juju-add-relation "contrail4-agent:juju-info" "nova-compute:juju-info"
+juju-add-relation "contrail4-agent" "contrail4-controller"
 
 if [ "$USE_EXTERNAL_RABBITMQ" == 'true' ]; then
-  juju-add-relation "contrail-controller" "rabbitmq-server:amqp"
+  juju-add-relation "contrail4-controller" "rabbitmq-server:amqp"
 fi
 
 post_deploy
