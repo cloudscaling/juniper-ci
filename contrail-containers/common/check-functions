@@ -90,7 +90,7 @@ function check_simple_instance() {
 
   local curl_proto='http'
   local curl_ssl_opts=''
-  if [[ -n "$SSL_ENABLE" ]] ; then
+  if [[ "${SSL_ENABLE,,}" == 'true' ]] ; then
     local key=${SERVER_KEYFILE:-'/etc/contrail/ssl/private/server-privkey.pem'}
     local cert=${SERVER_CERTFILE:-'/etc/contrail/ssl/certs/server.pem'}
     local ca_cert=${SERVER_CA_CERTFILE:-'/etc/contrail/ssl/certs/ca-cert.pem'}
