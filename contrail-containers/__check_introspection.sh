@@ -3,12 +3,14 @@
 SSL_ENABLE=${SSL_ENABLE:-'false'}
 SERVER_CERTFILE=${SERVER_CERTFILE:-'/etc/contrail/ssl/certs/server.pem'}
 SERVER_KEYFILE=${SERVER_KEYFILE:-'/etc/contrail/ssl/private/server-privkey.pem'}
+SERVER_CA_CERTFILE=${SERVER_CA_CERTFILE:-'/etc/contrail/ssl/certs/ca-cert.pem'}
 
 proto='http'
 if [[ "${SSL_ENABLE,,}" == 'true' ]] ; then
   proto='https'
-  ssl_opts="-k --key ${SERVER_KEYFILE} --cert ${SERVER_CERTFILE}"
+  ssl_opts="--key ${SERVER_KEYFILE} --cert ${SERVER_CERTFILE} --cacert ${SERVER_CA_CERTFILE}"
 fi
+curl_ip=$(hostname -i)
 
 declare -A port_map
 port_map['agent-vrouter']=8085
@@ -41,9 +43,9 @@ function get_introspect_state() {
     return
   fi
 
-  local raw_res=$(timeout -s 9 30 curl ${ssl_opts} -s ${proto}://localhost:${port}/Snh_SandeshUVECacheReq?x=NodeStatus 2>&1)
+  local raw_res=$(timeout -s 9 30 curl ${ssl_opts} -s ${proto}://${curl_ip}:${port}/Snh_SandeshUVECacheReq?x=NodeStatus 2>&1)
   if [[ ! $? -eq 0 ]] ; then
-    echo "ERROR: failed to request  state"
+    echo "ERROR: failed to request  state, raw output:"
     echo "$raw_res"
     return -1
   fi

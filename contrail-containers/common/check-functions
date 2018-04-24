@@ -94,7 +94,7 @@ function check_simple_instance() {
     local key=${SERVER_KEYFILE:-'/etc/contrail/ssl/private/server-privkey.pem'}
     local cert=${SERVER_CERTFILE:-'/etc/contrail/ssl/certs/server.pem'}
     local ca_cert=${SERVER_CA_CERTFILE:-'/etc/contrail/ssl/certs/ca-cert.pem'}
-    curl_ssl_opts="--key $key --cert $cert"
+    curl_ssl_opts="--key $key --cert $cert --cacert $ca_cert"
     curl_proto='https'
   fi
 
