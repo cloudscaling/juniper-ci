@@ -67,6 +67,7 @@ contrail_configuration:
  DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
  SSL_ENABLE: ${SSL_ENABLE}
  JVM_EXTRA_OPTS: "-Xms1g -Xmx2g"
+ METADATA_SSL_ENABLE: true
 
 kolla_config:
  kolla_globals:
@@ -78,6 +79,7 @@ kolla_config:
    docker_namespace: kolla
    enable_ironic: "no"
    enable_swift: "no"
+   tls_bind_info_internal: "yes"
  kolla_passwords:
    metadata_secret: c0ntrail123
    keystone_admin_password: password
