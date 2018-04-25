@@ -118,14 +118,16 @@ if [[ -z "$image" ]]; then
 fi
 
 # clone contrail-kolla-ansible by this script to be able to apply patchset
+set -x
 rm -rf $WORKSPACE/contrail-kolla-ansible
 git clone -b contrail/ocata https://github.com/Juniper/contrail-kolla-ansible.git $WORKSPACE/contrail-kolla-ansible
 if echo "$PATCHSET_LIST" | grep -q "/contrail-kolla-ansible " ; then
   patchset=`echo "$PATCHSET_LIST" | grep "/contrail-kolla-ansible "`
   pushd $WORKSPACE/contrail-kolla-ansible
-  $patchset
+  /bin/bash -c "$patchset"
   popd
 fi
+set +x
 
 volumes="-v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer"
 volumes="-v $WORKSPACE/contrail-kolla-ansible:/root/contrail-kolla-ansible"
