@@ -120,10 +120,9 @@ fi
 # clone contrail-kolla-ansible by this script to be able to apply patchset
 git clone -b contrail/ocata https://github.com/Juniper/contrail-kolla-ansible.git $WORKSPACE/contrail-kolla-ansible
 if echo "$PATCHSET_LIST" | grep -q "/contrail-kolla-ansible " ; then
-  patchset=`echo "$PATCHSET_LIST" | grep "/${repo} "`
+  patchset=`echo "$PATCHSET_LIST" | grep "/contrail-kolla-ansible "`
   pushd $WORKSPACE/contrail-kolla-ansible
   $patchset
-  git pull --rebase origin master
   popd
 fi
 
