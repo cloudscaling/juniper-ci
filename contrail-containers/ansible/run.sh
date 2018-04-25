@@ -117,7 +117,18 @@ if [[ -z "$image" ]]; then
   docker rm cprep-$JOB_RND
 fi
 
+# clone contrail-kolla-ansible by this script to be able to apply patchset
+git clone -b contrail/ocata https://github.com/Juniper/contrail-kolla-ansible.git $WORKSPACE/contrail-kolla-ansible
+if echo "$PATCHSET_LIST" | grep -q "/contrail-kolla-ansible " ; then
+  patchset=`echo "$PATCHSET_LIST" | grep "/${repo} "`
+  pushd $WORKSPACE/contrail-kolla-ansible
+  $patchset
+  git pull --rebase origin master
+  popd
+fi
+
 volumes="-v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer"
+volumes="-v $WORKSPACE/contrail-kolla-ansible:/root/contrail-kolla-ansible"
 volumes+=" -v $HOME/.ssh:/.ssh"
 volumes+=" -v $my_dir/__run-gate.sh:/root/run-gate.sh"
 docker run -i --rm --entrypoint /bin/bash $volumes --network host centos-soft -c "/root/run-gate.sh"
