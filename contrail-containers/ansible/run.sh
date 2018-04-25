@@ -117,24 +117,15 @@ if [[ -z "$image" ]]; then
   docker rm cprep-$JOB_RND
 fi
 
-# clone contrail-kolla-ansible by this script to be able to apply patchset
-set -x
-rm -rf $WORKSPACE/contrail-kolla-ansible
-git clone -b contrail/ocata https://github.com/Juniper/contrail-kolla-ansible.git $WORKSPACE/contrail-kolla-ansible
 if echo "$PATCHSET_LIST" | grep -q "/contrail-kolla-ansible " ; then
   patchset=`echo "$PATCHSET_LIST" | grep "/contrail-kolla-ansible "`
-  pushd $WORKSPACE/contrail-kolla-ansible
-  /bin/bash -c "$patchset"
-  popd
 fi
-set +x
 
 volumes="-v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer"
-volumes+=" -v $WORKSPACE/contrail-kolla-ansible:/root/contrail-kolla-ansible"
 volumes+=" -v $HOME/.ssh:/.ssh"
 volumes+=" -v $WORKSPACE/logs:/root/logs"
 volumes+=" -v $my_dir/__run-gate.sh:/root/run-gate.sh"
-docker run -i --rm --entrypoint /bin/bash $volumes --network host centos-soft -c "/root/run-gate.sh"
+docker run -i --rm --entrypoint /bin/bash $volumes --network host -e KOLLA_PATCHSET_CMD="$patchset" centos-soft -c "/root/run-gate.sh"
 
 # TODO: wait till cluster up and initialized
 sleep 300
