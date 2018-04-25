@@ -130,7 +130,7 @@ fi
 set +x
 
 volumes="-v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer"
-volumes="-v $WORKSPACE/contrail-kolla-ansible:/root/contrail-kolla-ansible"
+volumes+=" -v $WORKSPACE/contrail-kolla-ansible:/root/contrail-kolla-ansible"
 volumes+=" -v $HOME/.ssh:/.ssh"
 volumes+=" -v $my_dir/__run-gate.sh:/root/run-gate.sh"
 docker run -i --rm --entrypoint /bin/bash $volumes --network host centos-soft -c "/root/run-gate.sh"
