@@ -12,7 +12,7 @@
     builders:
       - shell: |
           #!/bin/bash -e
-          ./juniper-ci/devstack/run.sh devstack-{project}  {concurrency}
+          ./juniper-ci/devstack/run.sh devstack-{project} {tests} {concurrency}
     publishers:
       - junit:
           results: test_result.xml
