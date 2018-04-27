@@ -149,6 +149,7 @@ sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_co.yaml"
 sed -i -e "s|{{series}}|$SERIES|m" "repo_config_co.yaml"
 sed -i "s/\r/\n/g" "repo_config_co.yaml"
 juju-deploy $PLACE/contrail-openstack contrail4-openstack --config repo_config_co.yaml
+juju-set contrail4-openstack "use-internal-endpoints=True"
 
 cp "$my_dir/../common/repo_config.yaml.tmpl" "repo_config_cv.yaml"
 sed -i -e "s|{{charm_name}}|contrail4-agent|m" "repo_config_cv.yaml"
