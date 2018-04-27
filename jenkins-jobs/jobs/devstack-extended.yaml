@@ -12,7 +12,7 @@
     builders:
       - shell: |
           #!/bin/bash -e
-          ./juniper-ci/devstack/run.sh devstack-{project} {project}api.tests.functional {concurrency}
+          ./juniper-ci/devstack/run.sh devstack-{project}  {concurrency}
     publishers:
       - junit:
           results: test_result.xml
@@ -23,5 +23,16 @@
     - ec2:
        concurrency: 2
        time: "0 5 * * 1"
+       tests: ec2api_tempest_plugin
    jobs:
     - 'devstack-{project}'
+
+#- project:
+#   name: devstack-extended
+#   project:
+#    - gce:
+#       concurrency: 1
+#       time: "0 3 * * 1"
+#       tests: gceapi.tests.functional
+#   jobs:
+#    - 'devstack-{project}'

@@ -58,4 +58,3 @@ SKIP_EXERCISES=boot_from_volume,bundle,client-env,euca
 ROOTSLEEP=0
 NOVNC_FROM_PACKAGE=True
 UNDO_REQUIREMENTS=False
-
