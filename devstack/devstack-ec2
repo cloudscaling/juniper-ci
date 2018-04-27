@@ -1,3 +1,4 @@
+INSTALL_TEMPEST=False
 ENABLED_SERVICES=key,n-api,n-crt,n-obj,n-cond,n-cpu,n-sch,mysql,rabbit,dstat,cinder,c-api,c-vol,c-sch,c-bak,g-api,g-reg,placement-api
 ENABLED_SERVICES+=,tempest
 ENABLED_SERVICES+=,horizon
@@ -10,6 +11,7 @@ ENABLED_SERVICES+=,s-proxy,s-object,s-container,s-account,swift3
 
 enable_plugin ec2-api https://github.com/openstack/ec2-api
 enable_plugin neutron-tempest-plugin https://github.com/openstack/neutron-tempest-plugin
+TEMPEST_PLUGINS='/opt/stack/new/ec2api-tempest-plugin'
 
 OPENSTACK_PASSWORD=password
 DATABASE_PASSWORD=password
