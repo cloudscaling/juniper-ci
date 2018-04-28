@@ -163,6 +163,11 @@ if [[ "$DPDK" == 'true' ]] ; then
   update_contrail_repo='yes'
 fi
 
+# WORKAROUND to bug #1767456
+# TODO: remove net-snmp after fix bug #1767456
+  cp /root/contrail_packages/net_snmp/* /var/www/html/contrail/
+  update_contrail_repo='yes'
+
 if [[ "$update_contrail_repo" != 'no' ]] ; then
   createrepo --update -v /var/www/html/contrail
 fi
