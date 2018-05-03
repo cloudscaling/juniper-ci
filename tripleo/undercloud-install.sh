@@ -55,11 +55,6 @@ if [ -f $IMAGES ] ; then
   else
     scp $ssh_opts -B $IMAGES ${ssh_addr}:/tmp/images.tar
   fi
-else
-  if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-    echo "ERROR: image building is not supported for rhel env"
-    exit 1
-  fi
 fi
 
 for fff in __undercloud-install-1-as-root.sh __undercloud-install-2-as-stack-user.sh ; do

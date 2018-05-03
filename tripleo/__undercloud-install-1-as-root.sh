@@ -30,9 +30,10 @@ if [[ "$ENVIRONMENT_OS" == 'centos' ]] ; then
   yum install -y epel-release
 fi
 
-# install ntpd - it is needed for correct work of OS services
+# install utils & ntpd - it is needed for correct work of OS services
 # (particulary neutron services may not work properly)
-yum install -y ntp wget
+yum install -y  ntp wget yum-utils screen mc deltarpm createrepo bind-utils sshpass \
+                gcc make python-devel yum-plugin-priorities sshpass
 chkconfig ntpd on
 service ntpd start
 
@@ -55,6 +56,8 @@ chown stack:stack /home/stack/.ssh/id_rsa
 chown stack:stack /home/stack/.ssh/id_rsa.pub
 chmod 600 /home/stack/.ssh/id_rsa
 chmod 644 /home/stack/.ssh/id_rsa.pub
+[ -f /root/rhel-reg-data ] && cp -f /root/rhel-reg-data /home/stack/rhel-reg-data && chown stack:stack /home/stack/rhel-reg-data
+
 # ssh config to do not check host keys and avoid garbadge in known hosts files
 cat <<EOF >/home/stack/.ssh/config
 Host *
@@ -64,24 +67,29 @@ EOF
 chown stack:stack /home/stack/.ssh/config
 chmod 644 /home/stack/.ssh/config
 
-# install useful utils
-yum install -y yum-utils screen mc deltarpm createrepo bind-utils sshpass
 # add OpenStack repositories for centos, for rhel it is added in images
-if [[ "$ENVIRONMENT_OS" != 'rhel' ]] ; then
-  curl -L -o /etc/yum.repos.d/delorean-$OPENSTACK_VERSION.repo https://trunk.rdoproject.org/centos7-$OPENSTACK_VERSION/current/delorean.repo
-  curl -L -o /etc/yum.repos.d/delorean-deps-$OPENSTACK_VERSION.repo http://trunk.rdoproject.org/centos7-$OPENSTACK_VERSION/delorean-deps.repo
-else
-  # osp10 has no preinstalled openstack-utils
+# ==== TODO: OSP13: remove it after OSP13 release ====
+if [[ "$ENVIRONMENT_OS" != 'rhel' || "$OPENSTACK_VERSION" == 'queens' ]] ; then
   # libguestfs-tools - is for virt-customize tool for overcloud image customization - enabling repos
-  yum install -y openstack-utils libguestfs-tools
+  yum install -y libguestfs-tools
   # install pip for future run of OS checks
   curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
   python get-pip.py
   pip install -q virtualenv
+
+  if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+    yum-config-manager --enable rhelosp-rhel-7-server-opt
+  fi
+  tripeo_repos=`python -c 'import requests;r = requests.get("https://trunk.rdoproject.org/centos7-queens/current"); print r.text ' | grep python2-tripleo-repos | awk -F"href=\"" '{print $2}' | awk -F"\"" '{print $1}'`
+  yum install -y https://trunk.rdoproject.org/centos7-queens/current/${tripeo_repos}
+  tripleo-repos -b $OPENSTACK_VERSION current
 fi
+# ==== TODO: OSP13: remove it after OSP13 release ====
+
 
 # install tripleo clients
-yum -y install gcc make python-devel yum-plugin-priorities python-tripleoclient python-rdomanager-oscplugin sshpass openstack-utils
+#   osp10 has no preinstalled openstack-utils
+yum -y install python-tripleoclient python-rdomanager-oscplugin  openstack-utils
 
 if [[ "$OPENSTACK_VERSION" == 'ocata' && "$ENVIRONMENT_OS" == 'centos' ]] ; then
   yum update -y
@@ -149,10 +157,20 @@ done
 update_contrail_repo='no'
 
 # hack: centos images don have openstack-utilities packages
-if [[ "$ENVIRONMENT_OS" == 'centos' ]] ; then
-  curl -o /var/www/html/contrail/openstack-utils-2017.1-1.el7.noarch.rpm http://mirror.comnet.uz/centos/7/cloud/x86_64/openstack-newton/common/openstack-utils-2017.1-1.el7.noarch.rpm
+# ==== TODO: OSP13: remove part of if about OSP13 ====
+if [[ "$ENVIRONMENT_OS" == 'centos' || "$OPENSTACK_VERSION" == 'queens' ]] ; then
+  case $OPENSTACK_VERSION in
+    liberty|mitaka|newton|ocata|pike)
+      os_utils_url="http://mirror.comnet.uz/centos/7/cloud/x86_64/openstack-${OPENSTACK_VERSION}/common/openstack-utils-2017.1-1.el7.noarch.rpm"
+      ;;
+    *)
+      os_utils_url="http://mirror.comnet.uz/centos/7/cloud/x86_64/openstack-${OPENSTACK_VERSION}/openstack-utils-2017.1-1.el7.noarch.rpm"
+      ;;
+  esac
+  curl -o /var/www/html/contrail/openstack-utils-2017.1-1.el7.noarch.rpm $os_utils_url
   update_contrail_repo='yes'
 fi
+# =====================================================
 
 # TODO: contrail-vrouter-dpdk depends on liburcu2
 #       temprorary add this package into contrail repo.

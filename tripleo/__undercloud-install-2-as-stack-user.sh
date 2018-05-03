@@ -50,20 +50,15 @@ openstack undercloud install
 
 # function to build images if needed
 function create_images() {
-  if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-    echo "Image creation works for ContOS based only for now"
-    exit 1
-  fi
-
   mkdir -p images
-  cd images
+  pushd images
 
   # next line is needed only if undercloud's OS is deifferent
   #export NODE_DIST=centos7
   export STABLE_RELEASE="$OPENSTACK_VERSION"
-  export USE_DELOREAN_TRUNK=1
-  export DELOREAN_REPO_FILE="delorean.repo"
-  export DELOREAN_TRUNK_REPO="http://trunk.rdoproject.org/centos7-$OPENSTACK_VERSION/current/"
+  # export USE_DELOREAN_TRUNK=1
+  # export DELOREAN_REPO_FILE="delorean.repo"
+  # export DELOREAN_TRUNK_REPO="http://trunk.rdoproject.org/centos7-$OPENSTACK_VERSION/current/"
   export DIB_YUM_REPO_CONF=/etc/yum.repos.d/delorean*
 
   # package redhat-lsb-core is absent due to some bug in newton image
@@ -74,9 +69,17 @@ function create_images() {
   #export DELOREAN_TRUNK_REPO="http://buildlogs.centos.org/centos/7/cloud/x86_64/rdo-trunk-master-tripleo/"
   #export DIB_INSTALLTYPE_puppet_modules=source
 
-  openstack overcloud image build --all
-
-  cd ..
+  local config_opts=''
+  if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+    export OS_YAML="/usr/share/openstack-tripleo-common/image-yaml/overcloud-images-rhel7.yaml"
+    # export DIB_LOCAL_IMAGE=rhel-server-7.4-x86_64-kvm.qcow2
+    set +x
+    source ~/rhel-reg-data
+    set -x
+    config_opts="--config-file /usr/share/openstack-tripleo-common/image-yaml/overcloud-images.yaml --config-file $OS_YAML"
+  fi
+  openstack overcloud image build --all $config_opts
+  popd
 }
 
 cd ~

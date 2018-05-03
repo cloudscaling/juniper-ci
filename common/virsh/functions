@@ -299,7 +299,9 @@ function delete_volume() {
 }
 
 function rhel_get_repos_for_os() {
-  local common_repos="rhel-7-server-rpms rhel-7-server-extras-rpms rhel-7-server-rh-common-rpms rhel-ha-for-rhel-7-server-rpms"
+  local common_repos="rhel-7-server-rpms rhel-7-server-extras-rpms"
+  common_repos+=" rhel-7-server-rh-common-rpms rhel-ha-for-rhel-7-server-rpms"
+  common_repos+=" rhel-7-server-optional-rpms"
   if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
     common_repos+=" rhel-7-server-cert-rpms"
   fi
@@ -314,10 +316,21 @@ function rhel_get_repos_for_os() {
     pike)
       enable_repo='12'
       ;;
+    queens)
+      enable_repo='13'
+      ;;
     *)
       echo "ERROR: unsupported OS $OPENSTACK_VERSION"
       exit 1
   esac
+  # ==== TODO: OSP13: begin ====
+  echo "WARNING: TODO: remove this check and enable queens for rhel as it be released"
+  if [[ "$enable_repo" == '13' ]] ; then
+    echo $common_repos
+    return
+  fi
+  echo "WARNING: TODO: end"
+  # ==== TODO: OSP13: end ======
   common_repos+=" rhel-7-server-openstack-${enable_repo}-rpms"
   common_repos+=" rhel-7-server-openstack-${enable_repo}-devtools-rpms"
   echo $common_repos
@@ -382,6 +395,23 @@ function _rhel_repos() {
   return $ret
 }
 
+function _rhel_prepare_reg_file() {
+  # ==== TODO: OSP13: begin ====
+  local image_file=$1
+  if [[ "$OPENSTACK_VERSION" == 'queens' ]] ; then
+    local reg_file_content="export REG_METHOD=portal\n"
+    reg_file_content+="export REG_USER=${RHEL_USER}\n"
+    reg_file_content+="export REG_PASSWORD=${RHEL_PASSWORD}\n"
+    [ -n "$RHEL_POOL_ID" ] && reg_file_content+="export REG_POOL_ID=${RHEL_POOL_ID}\n"
+    [ -n "$RHEL_ORG" ] && reg_file_content+="export REG_ORG=${RHEL_ORG}\n"
+    [ -n "$RHEL_ACTIVATION_KEY" ] && reg_file_content+="export REG_ACTIVATION_KEY=${RHEL_ACTIVATION_KEY}\n"
+    reg_file_content+="export REG_REPOS='rhel-7-server-rpms rhel-7-server-extras-rpms rhel-ha-for-rhel-7-server-rpms rhel-7-server-optional-rpms'"
+
+    virt-customize -a $image_file --run-command "echo -e '$reg_file_content' > /root/rhel-reg-data"
+  fi
+  # ==== TODO: OSP13: end ====
+}
+
 function rhel_register_system_and_customize() {
   local image_file=$1
   local image_type=$2
@@ -391,6 +421,7 @@ function rhel_register_system_and_customize() {
   . $RHEL_ACCOUNT_FILE
   _rhel_register $image_file
   _rhel_attach $image_file
+  _rhel_prepare_reg_file $image_file
   #eval "$old_opt"
   set -x
   _rhel_repos $image_file
