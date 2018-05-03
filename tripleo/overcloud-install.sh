@@ -252,29 +252,23 @@ openstack baremetal introspection bulk start
 # this is a recommended command to check and wait end of introspection. but previous command can wait itself.
 #sudo journalctl -l -u openstack-ironic-discoverd -u openstack-ironic-discoverd-dnsmasq -u openstack-ironic-conductor -f
 
-# prepare Contrail puppet modules via uploading artifacts to swift
-git_branch_tht="stable/${OPENSTACK_VERSION}"
-git_branch_ctp="stable/${OPENSTACK_VERSION}"
-if [[ "$CONTRAIL_VERSION" =~ 4.1 ]] ; then
-  git_branch_pc="R4.1"
-else
-  git_branch_pc="R4.0"
-fi
-
-# TODO: replace personal repo with Juniper. or make switch with available repos.
-if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
-  git_repo_ctp="cloudscaling"
-  git_repo_pc="cloudscaling"
-else
-  git_repo_ctp="Juniper"
-  git_repo_pc="Juniper"
-fi
-# patch for nova with DPDK is still in private repo
-#git_repo_pc="alexey-mr"
+# For queens there is no needs to use puppets
 artifact_opts=""
-# temporary change for using Juniper repo
-# TODO: replace build with new
-#if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
+if [[ "$OPENSTACK_VERSION" == 'queens' ]] ; then
+  # prepare Contrail puppet modules via uploading artifacts to swift
+  git_branch_ctp="stable/${OPENSTACK_VERSION}"
+  if [[ "$CONTRAIL_VERSION" =~ 4.1 ]] ; then
+    git_branch_pc="R4.1"
+  else
+    git_branch_pc="R4.0"
+  fi
+  if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
+    git_repo_ctp="cloudscaling"
+    git_repo_pc="cloudscaling"
+  else
+    git_repo_ctp="Juniper"
+    git_repo_pc="Juniper"
+  fi
   rm -rf usr/share/openstack-puppet/modules
   mkdir -p usr/share/openstack-puppet/modules
   git clone https://github.com/${git_repo_ctp}/contrail-tripleo-puppet -b $git_branch_ctp usr/share/openstack-puppet/modules/tripleo
@@ -282,13 +276,13 @@ artifact_opts=""
   tar czvf puppet-modules.tgz usr/
   upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
   artifact_opts="-e .tripleo/environments/deployment-artifacts.yaml"
-#fi
+fi
 
 # prepare tripleo heat templates
+git_branch_tht="stable/${OPENSTACK_VERSION}"
+git_repo_ctht="juniper"
 if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
   git_repo_ctht="cloudscaling"
-else
-  git_repo_ctht="juniper"
 fi
 rm -rf ~/tripleo-heat-templates
 cp -r /usr/share/openstack-tripleo-heat-templates/ ~/tripleo-heat-templates
