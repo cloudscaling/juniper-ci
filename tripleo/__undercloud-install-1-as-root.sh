@@ -142,50 +142,59 @@ openstack-service restart ironic
 openstack-service restart nova
 
 
-# prepare contrail packages
-for i in `ls /root/contrail_packages/*.rpm` ; do
-  rpm -ivh ${i}
-done
-mkdir -p /var/www/html/contrail
-tar -xvf /opt/contrail/contrail_packages/contrail_rpms.tgz -C /var/www/html/contrail
+if [[ "$OPENSTACK_VERSION" != 'queens' ]] ; then
+  # Before queens there is RPM based deployement,
+  # so prepare RPM repo for contrail
 
-# prepare docker images
-for i in `ls /root/contrail_packages/*.tgz` ; do
-  tar -xvf ${i} -C /var/www/html/contrail
-done
+  # prepare contrail packages
+  for i in `ls /root/contrail_packages/*.rpm` ; do
+    rpm -ivh ${i}
+  done
+  mkdir -p /var/www/html/contrail
+  tar -xvf /opt/contrail/contrail_packages/contrail_rpms.tgz -C /var/www/html/contrail
 
-update_contrail_repo='no'
+  # prepare docker images
+  for i in `ls /root/contrail_packages/*.tgz` ; do
+    tar -xvf ${i} -C /var/www/html/contrail
+  done
 
-# hack: centos images don have openstack-utilities packages
-# ==== TODO: OSP13: remove part of if about OSP13 ====
-if [[ "$ENVIRONMENT_OS" == 'centos' || "$OPENSTACK_VERSION" == 'queens' ]] ; then
-  case $OPENSTACK_VERSION in
-    liberty|mitaka|newton|ocata|pike)
-      os_utils_url="http://mirror.comnet.uz/centos/7/cloud/x86_64/openstack-${OPENSTACK_VERSION}/common/openstack-utils-2017.1-1.el7.noarch.rpm"
-      ;;
-    *)
-      os_utils_url="http://mirror.comnet.uz/centos/7/cloud/x86_64/openstack-${OPENSTACK_VERSION}/openstack-utils-2017.1-1.el7.noarch.rpm"
-      ;;
-  esac
-  curl -o /var/www/html/contrail/openstack-utils-2017.1-1.el7.noarch.rpm $os_utils_url
-  update_contrail_repo='yes'
-fi
-# =====================================================
+  update_contrail_repo='no'
 
-# TODO: contrail-vrouter-dpdk depends on liburcu2
-#       temprorary add this package into contrail repo.
-#       It should be fixed by addind the package either into contrail distribution
-#       or into RedHat repo or by enabling additional repo.
-if [[ "$DPDK" == 'true' ]] ; then
-  curl -o /var/www/html/contrail/liburcu2-0.8.6-21.1.x86_64.rpm  http://ftp5.gwdg.de/pub/opensuse/repositories/devel:/tools:/lttng/RedHat_RHEL-5/x86_64/liburcu2-0.8.6-21.1.x86_64.rpm
-  update_contrail_repo='yes'
-fi
+  # hack: centos images don have openstack-utilities packages
+  if [[ "$ENVIRONMENT_OS" == 'centos' ]] ; then
+    case $OPENSTACK_VERSION in
+      liberty|mitaka|newton|ocata|pike)
+        os_utils_url="http://mirror.comnet.uz/centos/7/cloud/x86_64/openstack-${OPENSTACK_VERSION}/common/openstack-utils-2017.1-1.el7.noarch.rpm"
+        ;;
+      *)
+        os_utils_url="http://mirror.comnet.uz/centos/7/cloud/x86_64/openstack-${OPENSTACK_VERSION}/openstack-utils-2017.1-1.el7.noarch.rpm"
+        ;;
+    esac
+    curl -o /var/www/html/contrail/openstack-utils-2017.1-1.el7.noarch.rpm $os_utils_url
+    update_contrail_repo='yes'
+  fi
 
-# WORKAROUND to bug #1767456
-# TODO: remove net-snmp after fix bug #1767456
-  cp /root/contrail_packages/net_snmp/* /var/www/html/contrail/
-  update_contrail_repo='yes'
+  # TODO: contrail-vrouter-dpdk depends on liburcu2
+  #       temprorary add this package into contrail repo.
+  #       It should be fixed by addind the package either into contrail distribution
+  #       or into RedHat repo or by enabling additional repo.
+  if [[ "$DPDK" == 'true' ]] ; then
+    curl -o /var/www/html/contrail/liburcu2-0.8.6-21.1.x86_64.rpm  http://ftp5.gwdg.de/pub/opensuse/repositories/devel:/tools:/lttng/RedHat_RHEL-5/x86_64/liburcu2-0.8.6-21.1.x86_64.rpm
+    update_contrail_repo='yes'
+  fi
 
-if [[ "$update_contrail_repo" != 'no' ]] ; then
-  createrepo --update -v /var/www/html/contrail
+  # WORKAROUND to bug #1767456
+  # TODO: remove net-snmp after fix bug #1767456
+    cp /root/contrail_packages/net_snmp/* /var/www/html/contrail/
+    update_contrail_repo='yes'
+
+  if [[ "$update_contrail_repo" != 'no' ]] ; then
+    createrepo --update -v /var/www/html/contrail
+  fi
+else
+
+  # Starting from queens there is container based deployement
+  usermod -aG docker stack
+
+
 fi

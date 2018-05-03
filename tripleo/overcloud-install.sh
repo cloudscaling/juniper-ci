@@ -13,6 +13,11 @@ if [[ -z "$OPENSTACK_VERSION" ]] ; then
   exit 1
 fi
 
+# TODO: export to job settings
+CONTRAIL_REGISTRY=${CONTRAIL_REGISTRY:-'opencontrailnightly'}
+CONTRAIL_TAG=${CONTRAIL_TAG:-'latest'}
+# --
+
 if [[ -z "$DPDK" ]] ; then
   echo "DPDK is expected (e.g. export DPDK=true/false)"
   exit 1
@@ -807,6 +812,35 @@ EOF
 
 fi
 
+docker_opts=''
+if [[ "$OPENSTACK_VERSION" == 'queens' ]] ; then
+
+  sed -i "s/ContrailRegistry:.*/ContrailRegistry: $CONTRAIL_REGISTRY/g" $contrail_services_file
+  sed -i "s/ContrailImageTag:.*/ContrailImageTag: $CONTRAIL_TAG/g" $contrail_services_file
+
+  #  stable
+  tripleo_tag=current-tripleo-rdo
+  # testing
+  # tripleo_tag=tripleo-ci-testing
+
+  # Get and upload the containers
+  deploy_tag=`openstack overcloud container image tag discover \
+        --image trunk.registry.rdoproject.org/master/centos-binary-base:${tripleo_tag} \
+        --tag-from-label rdo_version`
+
+  openstack overcloud container image prepare \
+    --namespace trunk.registry.rdoproject.org/master \
+    --tag ${deploy_tag} \
+    --push-destination ${prov_ip}:8787 \
+    --output-env-file ~/docker_registry.yaml \
+    --output-images-file ~/overcloud_containers.yaml
+
+  openstack overcloud container image upload --config-file ~/overcloud_containers.yaml
+
+  docker_opt="-e ~/docker_registry.yaml"
+  docker_opt+=" -e tripleo-heat-templates/environments/docker.yaml"
+fi
+
 if [[ "$DEPLOY" != '1' ]] ; then
   # deploy overcloud. if you do it manually then I recommend to do it in screen.
   echo "openstack overcloud deploy --templates tripleo-heat-templates/ \
@@ -816,7 +850,7 @@ if [[ "$DEPLOY" != '1' ]] ; then
       -e $contrail_net_file \
       -e $contrail_vip_env \
       -e $misc_opts \
-      $ssl_opts $multi_nic_opts $ha_opts $sriov_opts"
+      $ssl_opts $multi_nic_opts $ha_opts $sriov_opts $docker_opt"
   echo "Add '-e templates/firstboot/firstboot.yaml' if you use swap"
   exit
 fi
@@ -831,7 +865,7 @@ openstack overcloud deploy --templates tripleo-heat-templates/ \
   -e $contrail_net_file \
   -e $contrail_vip_env \
   -e $misc_opts \
-  $ssl_opts $multi_nic_opts $ha_opts $sriov_opts
+  $ssl_opts $multi_nic_opts $ha_opts $sriov_opts $docker_opt
 
 errors=$?
 
