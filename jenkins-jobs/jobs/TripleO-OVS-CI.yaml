@@ -43,9 +43,11 @@
           name: OPENSTACK_VERSION
           description: "Version of OpenStack"
           choices:
+            - 'queens'
+            - 'pike'
             - 'ocata'
-            # - 'newton'
-            # - 'mitaka'
+            - 'newton'
+            - 'mitaka'
       - choice:
           name: CONTROLLER_COUNT
           description: "Count of OS controllers to deploy"

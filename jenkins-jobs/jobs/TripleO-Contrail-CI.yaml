@@ -52,6 +52,8 @@
             - 'ocata'
             - 'newton'
             - 'mitaka'
+            - 'pike'
+            - 'queens'
       - choice:
           name: CONTRAIL_VERSION
           description: "Version of Contrail"
@@ -59,6 +61,7 @@
             - '4.1'
             - '4.0'
             - '3.2'
+            - '5.0'
       - choice:
           name: CONTRAIL_SERIES
           description: "Series of Contrail builds (cb, release, ...)"
