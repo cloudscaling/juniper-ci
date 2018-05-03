@@ -324,12 +324,10 @@ function rhel_get_repos_for_os() {
       exit 1
   esac
   # ==== TODO: OSP13: begin ====
-  echo "WARNING: TODO: remove this check and enable queens for rhel as it be released"
   if [[ "$enable_repo" == '13' ]] ; then
     echo $common_repos
     return
   fi
-  echo "WARNING: TODO: end"
   # ==== TODO: OSP13: end ======
   common_repos+=" rhel-7-server-openstack-${enable_repo}-rpms"
   common_repos+=" rhel-7-server-openstack-${enable_repo}-devtools-rpms"
