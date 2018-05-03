@@ -43,6 +43,7 @@ dhcp_end = $prov_ip.149
 network_cidr = $prov_ip.0/24
 network_gateway = $prov_ip.2
 discovery_iprange = $prov_ip.150,$prov_ip.170
+inspection_iprange = $prov_ip.150,$prov_ip.170
 EOF
 
 # install undercloud
@@ -73,6 +74,7 @@ function create_images() {
   if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
     export OS_YAML="/usr/share/openstack-tripleo-common/image-yaml/overcloud-images-rhel7.yaml"
     # export DIB_LOCAL_IMAGE=rhel-server-7.4-x86_64-kvm.qcow2
+    export REG_REPOS='rhel-7-server-rpms rhel-7-server-extras-rpms rhel-ha-for-rhel-7-server-rpms rhel-7-server-optional-rpms'
     set +x
     source ~/rhel-reg-data
     set -x

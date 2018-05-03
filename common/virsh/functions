@@ -403,8 +403,6 @@ function _rhel_prepare_reg_file() {
     [ -n "$RHEL_POOL_ID" ] && reg_file_content+="export REG_POOL_ID=${RHEL_POOL_ID}\n"
     [ -n "$RHEL_ORG" ] && reg_file_content+="export REG_ORG=${RHEL_ORG}\n"
     [ -n "$RHEL_ACTIVATION_KEY" ] && reg_file_content+="export REG_ACTIVATION_KEY=${RHEL_ACTIVATION_KEY}\n"
-    reg_file_content+="export REG_REPOS='rhel-7-server-rpms rhel-7-server-extras-rpms rhel-ha-for-rhel-7-server-rpms rhel-7-server-optional-rpms'"
-
     virt-customize -a $image_file --run-command "echo -e '$reg_file_content' > /root/rhel-reg-data"
   fi
   # ==== TODO: OSP13: end ====
