@@ -125,9 +125,6 @@ docker run -i --rm --entrypoint /bin/bash $volumes --network host -e KOLLA_PATCH
 # TODO: wait till cluster up and initialized
 sleep 300
 
-set -x
-trap 'catch_errors $LINENO' ERR
-
 # Validate cluster's introspection ports
 for dest in $nodes_ips ; do
   $SCP "$my_dir/../__check_introspection.sh" $SSH_USER@${dest}:./check_introspection.sh
@@ -160,9 +157,9 @@ $SCP ${SSH_USER}@$master_ip:/etc/kolla/admin-openrc.sh $WORKSPACE/
 virtualenv $WORKSPACE/.venv
 source $WORKSPACE/.venv/bin/activate
 source $WORKSPACE/admin-openrc.sh
-pip install python-openstackclient
+pip install python-openstackclient || res=1
 
-check_simple_instance
+check_simple_instance || res=1
 deactivate
 
 # save logs and exit
