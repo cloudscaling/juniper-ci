@@ -89,12 +89,6 @@ fi
 # deploy cloud
 source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
-echo "container_hosts:" > $WORKSPACE/contrail-ansible-deployer/inventory/hosts
-echo "  hosts:" >> $WORKSPACE/contrail-ansible-deployer/inventory/hosts
-for ip in $nodes_ips ; do
-  echo "    ${ip}:" >> $WORKSPACE/contrail-ansible-deployer/inventory/hosts
-done
-
 IP_CONT_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
 IP_CONT_02=`echo $nodes_cont_ips | cut -d ' ' -f 2`
 IP_CONT_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
