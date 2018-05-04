@@ -115,9 +115,10 @@ if echo "$PATCHSET_LIST" | grep -q "/contrail-kolla-ansible " ; then
   patchset=`echo "$PATCHSET_LIST" | grep "/contrail-kolla-ansible "`
 fi
 
+mkdir -p $WORKSPACE/logs/deployer
 volumes="-v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer"
 volumes+=" -v $HOME/.ssh:/.ssh"
-volumes+=" -v $WORKSPACE/logs:/root/logs"
+volumes+=" -v $WORKSPACE/logs/deployer:/root/logs"
 volumes+=" -v $my_dir/__run-gate.sh:/root/run-gate.sh"
 docker run -i --rm --entrypoint /bin/bash $volumes --network host -e KOLLA_PATCHSET_CMD="$patchset" centos-soft -c "/root/run-gate.sh"
 
