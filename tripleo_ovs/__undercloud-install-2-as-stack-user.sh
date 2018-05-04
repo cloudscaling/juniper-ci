@@ -86,7 +86,7 @@ function create_images() {
   #export DELOREAN_TRUNK_REPO="http://buildlogs.centos.org/centos/7/cloud/x86_64/rdo-trunk-master-tripleo/"
   #export DIB_INSTALLTYPE_puppet_modules=source
 
-  openstack overcloud image build --all
+  openstack overcloud image build
 
   cd ..
 }

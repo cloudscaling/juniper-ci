@@ -75,12 +75,15 @@ function create_images() {
     export OS_YAML="/usr/share/openstack-tripleo-common/image-yaml/overcloud-images-rhel7.yaml"
     # export DIB_LOCAL_IMAGE=rhel-server-7.4-x86_64-kvm.qcow2
     export REG_REPOS='rhel-7-server-rpms rhel-7-server-extras-rpms rhel-ha-for-rhel-7-server-rpms rhel-7-server-optional-rpms'
+    if [ -f /home/stack/overcloud-base-image.qcow2 ] ; then
+      export DIB_LOCAL_IMAGE='/home/stack/overcloud-base-image.qcow2'
+    fi
     set +x
     source ~/rhel-reg-data
     set -x
     config_opts="--config-file /usr/share/openstack-tripleo-common/image-yaml/overcloud-images.yaml --config-file $OS_YAML"
   fi
-  openstack overcloud image build --all $config_opts
+  openstack overcloud image build $config_opts
   popd
 }
 

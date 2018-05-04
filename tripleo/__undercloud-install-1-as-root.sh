@@ -56,7 +56,10 @@ chown stack:stack /home/stack/.ssh/id_rsa
 chown stack:stack /home/stack/.ssh/id_rsa.pub
 chmod 600 /home/stack/.ssh/id_rsa
 chmod 644 /home/stack/.ssh/id_rsa.pub
-[ -f /root/rhel-reg-data ] && cp -f /root/rhel-reg-data /home/stack/rhel-reg-data && chown stack:stack /home/stack/rhel-reg-data
+rhel_reg_data='/root/rhel-reg-data'
+[ -f $rhel_reg_data ] && chown stack:stack $rhel_reg_data && mv $rhel_reg_data /home/stack/
+base_img='/root/overcloud-base-image.qcow2'
+[ -f $base_img ] && chown stack:stack $base_img && mv $base_img /home/stack/
 
 # ssh config to do not check host keys and avoid garbadge in known hosts files
 cat <<EOF >/home/stack/.ssh/config
