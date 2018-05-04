@@ -159,7 +159,7 @@ function run_instance() {
     $ssh "sudo yum install -y epel-release" &>>yum.log
     $ssh "sudo yum install -y mc git wget ntp ntpdate iptables iproute libxml2-utils python2.7" &>>yum.log
     $ssh "sudo systemctl disable chronyd.service && sudo systemctl enable ntpd.service && sudo systemctl start ntpd.service"
-    $ssh "sudo yum remove -y python-requests" &>>yum.log
+    $ssh "sudo yum remove -y python-requests PyYAML" &>>yum.log
   elif [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
     $ssh "sudo apt-get -y update" &>>$HOME/apt.log
     $ssh 'DEBIAN_FRONTEND=noninteractive sudo -E apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade' &>>$HOME/apt.log
