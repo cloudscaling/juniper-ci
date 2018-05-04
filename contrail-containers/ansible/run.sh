@@ -89,12 +89,6 @@ fi
 # deploy cloud
 source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
-echo "container_hosts:" > $WORKSPACE/contrail-ansible-deployer/inventory/hosts
-echo "  hosts:" >> $WORKSPACE/contrail-ansible-deployer/inventory/hosts
-for ip in $nodes_ips ; do
-  echo "    ${ip}:" >> $WORKSPACE/contrail-ansible-deployer/inventory/hosts
-done
-
 IP_CONT_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
 IP_CONT_02=`echo $nodes_cont_ips | cut -d ' ' -f 2`
 IP_CONT_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
@@ -121,17 +115,15 @@ if echo "$PATCHSET_LIST" | grep -q "/contrail-kolla-ansible " ; then
   patchset=`echo "$PATCHSET_LIST" | grep "/contrail-kolla-ansible "`
 fi
 
+mkdir -p $WORKSPACE/logs/deployer
 volumes="-v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer"
 volumes+=" -v $HOME/.ssh:/.ssh"
-volumes+=" -v $WORKSPACE/logs:/root/logs"
+volumes+=" -v $WORKSPACE/logs/deployer:/root/logs"
 volumes+=" -v $my_dir/__run-gate.sh:/root/run-gate.sh"
 docker run -i --rm --entrypoint /bin/bash $volumes --network host -e KOLLA_PATCHSET_CMD="$patchset" centos-soft -c "/root/run-gate.sh"
 
 # TODO: wait till cluster up and initialized
 sleep 300
-
-set -x
-trap 'catch_errors $LINENO' ERR
 
 # Validate cluster's introspection ports
 for dest in $nodes_ips ; do
@@ -165,9 +157,9 @@ $SCP ${SSH_USER}@$master_ip:/etc/kolla/admin-openrc.sh $WORKSPACE/
 virtualenv $WORKSPACE/.venv
 source $WORKSPACE/.venv/bin/activate
 source $WORKSPACE/admin-openrc.sh
-pip install python-openstackclient
+pip install python-openstackclient || res=1
 
-check_simple_instance
+check_simple_instance || res=1
 deactivate
 
 # save logs and exit
