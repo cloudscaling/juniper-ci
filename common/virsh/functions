@@ -545,7 +545,7 @@ function get_ip_by_mac() {
 }
 
 function delete_vbmc() {
-  local domain=$2
+  local domain=$1
   vbmc stop $domain || true
   vbmc delete $domain || true
 }
