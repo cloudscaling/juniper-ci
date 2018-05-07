@@ -43,6 +43,11 @@ else
   fi
 fi
 
+# VBMC base port for IPMI management
+(( VBMC_PORT_BASE_DEFAULT=16000 + NUM*100))
+VBMC_PORT_BASE=${VBMC_PORT_BASE:-${VBMC_PORT_BASE_DEFAULT}}
+
+
 if [[ "$DPDK" == 'true' ]] ; then
   compute_machine_name='compdpdk'
 elif [[ "$TSN" == 'true' ]] ; then
@@ -129,12 +134,16 @@ function define_overcloud_vms() {
   local name=$1
   local count=$2
   local mem=$3
+  local vbmc_port=$4
   local number_re='^[0-9]+$'
   if [[ $count =~ $number_re ]] ; then
     for (( i=1 ; i<=count; i++ )) ; do
       local vol_name="overcloud-$NUM-${name}-$i"
       create_root_volume $vol_name
-      define_machine "rd-$vol_name" 2 $mem rhel7 $prov_net "${pool_path}/${vol_name}.qcow2"
+      local vm_name="rd-$vol_name"
+      define_machine $vm_name 2 $mem rhel7 $prov_net "${pool_path}/${vol_name}.qcow2"
+      start_vbmc $vbmc_port $vm_name
+      (( vbmc_port+=1 ))
     done
   else
     echo Skip VM $name creation, count=$count
@@ -142,12 +151,19 @@ function define_overcloud_vms() {
 }
 
 # just define overcloud machines
+vbmc_port=$VBMC_PORT_BASE
 define_overcloud_vms 'cont' $CONTROLLER_COUNT 8192
+(( vbmc_port+=CONTROLLER_COUNT ))
 define_overcloud_vms $compute_machine_name $COMPUTE_COUNT 4096 'true'
+(( vbmc_port+=COMPUTE_COUNT ))
 define_overcloud_vms 'stor' $STORAGE_COUNT 4096 'true'
+(( vbmc_port+=STORAGE_COUNT ))
 define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT 8192
+(( vbmc_port+=CONTRAIL_CONTROLLER_COUNT ))
 define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT 4096
+(( vbmc_port+=CONTRAIL_ANALYTICS_COUNT ))
 define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT 8192
+(( vbmc_port+=CONTRAIL_ANALYTICSDB_COUNT ))
 
 # copy image for undercloud and resize them
 cp -p $BASE_IMAGE $pool_path/undercloud-$NUM.qcow2

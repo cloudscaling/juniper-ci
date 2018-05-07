@@ -18,6 +18,9 @@ CONTRAIL_REGISTRY=${CONTRAIL_REGISTRY:-'opencontrailnightly'}
 CONTRAIL_TAG=${CONTRAIL_TAG:-'latest'}
 # --
 
+(( VBMC_PORT_BASE_DEFAULT=16230 + NUM*100))
+VBMC_PORT_BASE=${VBMC_PORT_BASE:-${VBMC_PORT_BASE_DEFAULT}}
+
 if [[ -z "$DPDK" ]] ; then
   echo "DPDK is expected (e.g. export DPDK=true/false)"
   exit 1
@@ -53,11 +56,11 @@ if [[ -z "$NUM" ]] ; then
 fi
 
 CLOUD_DOMAIN_NAME=${CLOUD_DOMAIN_NAME:-'localdomain'}
-SSH_VIRT_TYPE=${VIRT_TYPE:-'virsh'}
 BASE_ADDR=${BASE_ADDR:-172}
 MEMORY=${MEMORY:-1000}
 SWAP=${SWAP:-0}
 SSH_USER=${SSH_USER:-'stack'}
+SSH_PASSWORD=${SSH_PASSWORD:-'qwe123QWE'}
 CPU_COUNT=${CPU_COUNT:-2}
 DISK_SIZE=${DISK_SIZE:-29}
 
@@ -88,20 +91,14 @@ fixed_controller_ip="${fixed_ip_base}.211"
 
 ((addr=BASE_ADDR+NUM*10))
 virt_host_ip="192.168.${addr}.1"
-if [[ "$SSH_VIRT_TYPE" != 'vbox' ]] ; then
-  virsh_opts="-c qemu+ssh://${SSH_USER}@${virt_host_ip}/system"
-  list_vm_cmd="virsh $virsh_opts list --all"
-else
-  ssh_opts="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-  ssh_addr="${SSH_USER}@${virt_host_ip}"
-  list_vm_cmd="ssh $ssh_opts $ssh_addr /usr/bin/VBoxManage list vms"
-fi
+pm_type="pxe_ipmitool"
+export LIBVIRT_DEFAULT_URI="qemu+ssh://${SSH_USER}@${virt_host_ip}/system"
 
-CONT_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-cont- | wc -l)
-COMP_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-$compute_machine_name- | wc -l)
-CONTRAIL_CONTROLLER_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-ctrlcont- | wc -l)
-ANALYTICS_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-ctrlanalytics- | wc -l)
-ANALYTICSDB_COUNT=$($list_vm_cmd | grep rd-overcloud-$NUM-ctrlanalyticsdb- | wc -l)
+CONT_COUNT=$(virsh list --all | grep rd-overcloud-$NUM-cont- | wc -l)
+COMP_COUNT=$(virsh list --all | grep rd-overcloud-$NUM-$compute_machine_name- | wc -l)
+CONTRAIL_CONTROLLER_COUNT=$(virsh list --all | grep rd-overcloud-$NUM-ctrlcont- | wc -l)
+ANALYTICS_COUNT=$(virsh list --all | grep rd-overcloud-$NUM-ctrlanalytics- | wc -l)
+ANALYTICSDB_COUNT=$(virsh list --all | grep rd-overcloud-$NUM-ctrlanalyticsdb- | wc -l)
 ((OCM_COUNT=CONT_COUNT+COMP_COUNT+CONTRAIL_CONTROLLER_COUNT+ANALYTICS_COUNT+ANALYTICSDB_COUNT))
 
 if [[ "$DPDK" == 'true' ]] ; then
@@ -124,11 +121,7 @@ function get_macs() {
   local count=$2
   truncate -s 0 /tmp/nodes-$type.txt
   for (( i=1; i<=count; i++ )) ; do
-    if [[ "$SSH_VIRT_TYPE" != 'vbox' ]] ; then
-      virsh $virsh_opts domiflist rd-overcloud-$NUM-$type-$i | awk '$3 ~ "prov" {print $5};'
-    else
-      ssh $ssh_opts $ssh_addr /usr/bin/VBoxManage showvminfo rd-overcloud-$NUM-$type-$i | awk '/NIC 1/ {print $4}' | cut -d ',' -f 1 | sed 's/\(..\)/\1:/g' | sed 's/:$//'
-    fi
+    virsh $virsh_opts domiflist rd-overcloud-$NUM-$type-$i | awk '$3 ~ "prov" {print $5};'
   done > /tmp/nodes-$type.txt
   echo "macs for '$type':"
   cat /tmp/nodes-$type.txt
@@ -140,19 +133,17 @@ get_macs ctrlcont $CONTRAIL_CONTROLLER_COUNT
 get_macs ctrlanalytics $ANALYTICS_COUNT
 get_macs ctrlanalyticsdb $ANALYTICSDB_COUNT
 
-id_rsa=$(awk 1 ORS='\\n' ~/.ssh/id_rsa)
-
 function define_machine() {
   local caps=$1
   local mac=$2
+  local pm_port=$3
   cat << EOF >> ~/instackenv.json
     {
+      "pm_type": "$pm_type",
       "pm_addr": "$virt_host_ip",
+      "pm_port": "$pm_port",
       "pm_user": "$SSH_USER",
-      "pm_password": "$id_rsa",
-      "pm_type": "pxe_ssh",
-      "ssh_virt_type": "$SSH_VIRT_TYPE",
-      "vbox_use_headless": "True",
+      "pm_password": "$SSH_PASSWORD",
       "mac": [
         "$mac"
       ],
@@ -169,28 +160,34 @@ function define_vms() {
   local name=$1
   local count=$2
   local caps=$3
+  local pm_port=$4
   local mac=''
   for (( i=1; i<=count; i++ )) ; do
     mac=$(sed -n ${i}p /tmp/nodes-${name}.txt)
-    define_machine $caps $mac
+    define_machine $caps $mac $pm_port
+    (( pm_port+= 1 ))
   done
 }
 
 # create overcloud machines definition
 cat << EOF > ~/instackenv.json
 {
-  "ssh-user": "$SSH_USER",
-  "ssh-key": "$id_rsa",
-  "host-ip": "$virt_host_ip",
   "power_manager": "nova.virt.baremetal.virtual_power_driver.VirtualPowerManager",
   "arch": "x86_64",
   "nodes": [
 EOF
-define_vms 'cont' $CONT_COUNT 'profile:controller,boot_option:local'
-define_vms $compute_machine_name $COMP_COUNT "profile:$compute_flavor_name,boot_option:local"
-define_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT 'profile:contrail-controller,boot_option:local'
-define_vms 'ctrlanalytics' $ANALYTICS_COUNT 'profile:contrail-analytics,boot_option:local'
-define_vms 'ctrlanalyticsdb' $ANALYTICSDB_COUNT 'profile:contrail-analyticsdb,boot_option:local'
+
+vbmc_port=${VBMC_PORT_BASE}
+define_vms 'cont' $CONT_COUNT 'profile:controller,boot_option:local' $vbmc_port
+(( vbmc_port+=CONT_COUNT ))
+define_vms $compute_machine_name $COMP_COUNT "profile:$compute_flavor_name,boot_option:local" $vbmc_port
+(( vbmc_port+=COMP_COUNT ))
+define_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT 'profile:contrail-controller,boot_option:local' $vbmc_port
+(( vbmc_port+=CONTRAIL_CONTROLLER_COUNT ))
+define_vms 'ctrlanalytics' $ANALYTICS_COUNT 'profile:contrail-analytics,boot_option:local' $vbmc_port
+(( vbmc_port+=ANALYTICS_COUNT ))
+define_vms 'ctrlanalyticsdb' $ANALYTICSDB_COUNT 'profile:contrail-analyticsdb,boot_option:local' $vbmc_port
+(( vbmc_port+=ANALYTICSDB_COUNT ))
 # remove last comma
 head -n -1 ~/instackenv.json > ~/instackenv.json.tmp
 mv ~/instackenv.json.tmp ~/instackenv.json
@@ -242,7 +239,11 @@ create_flavor 'contrail-analytics-database' $ANALYTICSDB_COUNT 'contrail-analyti
 openstack flavor list --long
 
 # import overcloud configuration
-openstack baremetal import --json ~/instackenv.json
+if [[ "$OPENSTACK_VERSION" != 'queens' ]] ; then
+  openstack baremetal import --json ~/instackenv.json
+else
+  openstack overcloud node import ~/instackenv.json
+fi
 openstack baremetal list
 # and configure overcloud
 openstack baremetal configure boot

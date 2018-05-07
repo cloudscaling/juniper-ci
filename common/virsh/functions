@@ -285,6 +285,7 @@ function delete_domains() {
   local domname=${1:-rd-overcloud-${NUM}-}
   for name in `virsh list --all | grep "$domname" | awk '{print $2}'` ; do
     delete_domain $name
+    delete_vbmc $name
   done
 
   delete_domain rd-undercloud-$NUM
@@ -541,4 +542,19 @@ function get_ip_by_mac() {
   local net=$1
   local filter=$2
   virsh net-dhcp-leases $net | sed 1,2d | grep "$filter" | awk '{print($5)}' | cut -d '/' -f 1
+}
+
+function delete_vbmc() {
+  local domain=$2
+  vbmc stop $domain || true
+  vbmc delete $domain || true
+}
+
+function start_vbmc() {
+  local port=$1
+  local domain=$2
+  vbmc add --port $port --address $virt_host_ip \
+            --username $SSH_USER --password $SSH_PASSWORD \
+            $domain
+  vbmc start $domain
 }
