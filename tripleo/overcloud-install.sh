@@ -18,7 +18,7 @@ CONTRAIL_REGISTRY=${CONTRAIL_REGISTRY:-'opencontrailnightly'}
 CONTRAIL_TAG=${CONTRAIL_TAG:-'latest'}
 # --
 
-(( VBMC_PORT_BASE_DEFAULT=16230 + NUM*100))
+(( VBMC_PORT_BASE_DEFAULT=16000 + NUM*100))
 VBMC_PORT_BASE=${VBMC_PORT_BASE:-${VBMC_PORT_BASE_DEFAULT}}
 
 if [[ -z "$DPDK" ]] ; then
@@ -243,15 +243,15 @@ openstack flavor list --long
 # import overcloud configuration
 if [[ "$OPENSTACK_VERSION" != 'queens' ]] ; then
   openstack baremetal import --json ~/instackenv.json
+  openstack baremetal list
+  openstack baremetal configure boot
+  openstack baremetal introspection bulk start
 else
   openstack overcloud node import ~/instackenv.json
+  openstack baremetal node list
+  openstack overcloud node introspect --all-manageable --provide
 fi
-openstack baremetal list
-# and configure overcloud
-openstack baremetal configure boot
 
-# do introspection - ironic will collect some hardware information from overcloud machines
-openstack baremetal introspection bulk start
 # this is a recommended command to check and wait end of introspection. but previous command can wait itself.
 #sudo journalctl -l -u openstack-ironic-discoverd -u openstack-ironic-discoverd-dnsmasq -u openstack-ironic-conductor -f
 
