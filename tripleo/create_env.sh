@@ -115,6 +115,14 @@ prov_net=`get_network_name provisioning`
 #dpdk_net=`get_network_name dpdk`
 #create_network tsn
 #tsn_net=`get_network_name tsn`
+# define MAC's
+mgmt_ip=$(get_network_ip "management")
+mgmt_mac="00:16:00:00:0$NUM:02"
+mgmt_mac_cert="00:16:00:01:0$NUM:02"
+
+prov_ip=$(get_network_ip "provisioning")
+prov_mac="00:16:00:00:0$NUM:06"
+prov_mac_cert="00:16:00:01:0$NUM:06"
 
 # create pool
 create_pool $poolname
@@ -142,7 +150,7 @@ function define_overcloud_vms() {
       create_root_volume $vol_name
       local vm_name="rd-$vol_name"
       define_machine $vm_name 2 $mem rhel7 $prov_net "${pool_path}/${vol_name}.qcow2"
-      start_vbmc $vbmc_port $vm_name
+      start_vbmc $vbmc_port $vm_name ${mgmt_ip}.1 stack qwe123QWE
       (( vbmc_port+=1 ))
     done
   else
@@ -174,15 +182,6 @@ if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
     cp $pool_path/undercloud-$NUM.qcow2 $pool_path/undercloud-$NUM-cert-test.qcow2
   fi
 fi
-
-# define MAC's
-mgmt_ip=$(get_network_ip "management")
-mgmt_mac="00:16:00:00:0$NUM:02"
-mgmt_mac_cert="00:16:00:01:0$NUM:02"
-
-prov_ip=$(get_network_ip "provisioning")
-prov_mac="00:16:00:00:0$NUM:06"
-prov_mac_cert="00:16:00:01:0$NUM:06"
 
 # generate password/key for undercloud's root
 rm -f "$ssh_key_dir/kp-$NUM" "$ssh_key_dir/kp-$NUM.pub"

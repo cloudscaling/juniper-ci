@@ -553,8 +553,11 @@ function delete_vbmc() {
 function start_vbmc() {
   local port=$1
   local domain=$2
-  vbmc add --port $port --address $virt_host_ip \
-            --username $SSH_USER --password $SSH_PASSWORD \
+  local ipmi_address=$3
+  local ipmi_user=$4
+  local ipmi_password=$5
+  vbmc add --port $port --address $ipmi_address \
+            --username $ipmi_user --password $ipmi_password \
             $domain
   vbmc start $domain
 }

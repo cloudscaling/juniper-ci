@@ -60,9 +60,11 @@ BASE_ADDR=${BASE_ADDR:-172}
 MEMORY=${MEMORY:-1000}
 SWAP=${SWAP:-0}
 SSH_USER=${SSH_USER:-'stack'}
-SSH_PASSWORD=${SSH_PASSWORD:-'qwe123QWE'}
 CPU_COUNT=${CPU_COUNT:-2}
 DISK_SIZE=${DISK_SIZE:-29}
+
+IPMI_USER=${IPMI_USER:-'stack'}
+IPMI_PASSWORD=${IPMI_PASSWORD:-'qwe123QWE'}
 
 if [[ "$DPDK" == 'true' ]] ; then
   compute_machine_name='compdpdk'
@@ -142,8 +144,8 @@ function define_machine() {
       "pm_type": "$pm_type",
       "pm_addr": "$virt_host_ip",
       "pm_port": "$pm_port",
-      "pm_user": "$SSH_USER",
-      "pm_password": "$SSH_PASSWORD",
+      "pm_user": "$IPMI_USER",
+      "pm_password": "$IPMI_PASSWORD",
       "mac": [
         "$mac"
       ],
