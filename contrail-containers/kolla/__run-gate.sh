@@ -68,7 +68,6 @@ if [ "x$HOST_OS" == "xubuntu" ]; then
   pip install -U pip setuptools
   hash -r
   apt-get install -y python-dev libffi-dev gcc libssl-dev python-selinux
-  pip install -U ansible
 elif [ "x$HOST_OS" == "xcentos" ]; then
   # ip is located in /usr/sbin that is not in path...
   export PATH=${PATH}:/usr/sbin
@@ -77,8 +76,8 @@ elif [ "x$HOST_OS" == "xcentos" ]; then
   pip install -U pip
   hash -r
   yum install -y python-devel libffi-devel gcc openssl-devel libselinux-python
-  yum install -y ansible
 fi
+pip install -U "ansible<2.5.0"
 
 # TODO: switch to openstack's repo when work is done
 #pip install kolla-ansible

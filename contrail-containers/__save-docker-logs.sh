@@ -37,7 +37,7 @@ for cnt in `sudo docker ps -a | grep contrail | grep -v pause | awk '{print $1}'
 done
 popd
 
-/usr/bin/contrail-status |& tee logs/contrail/contrail-status.log
+sudo /usr/bin/contrail-status |& tee logs/contrail/contrail-status.log
 
 function save_introspect_info() {
   echo "INFO: saving introspect output for $1"
