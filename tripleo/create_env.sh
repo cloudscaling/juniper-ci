@@ -160,17 +160,17 @@ function define_overcloud_vms() {
 
 # just define overcloud machines
 vbmc_port=$VBMC_PORT_BASE
-define_overcloud_vms 'cont' $CONTROLLER_COUNT 8192
+define_overcloud_vms 'cont' $CONTROLLER_COUNT 8192 $vbmc_port
 (( vbmc_port+=CONTROLLER_COUNT ))
-define_overcloud_vms $compute_machine_name $COMPUTE_COUNT 4096 'true'
+define_overcloud_vms $compute_machine_name $COMPUTE_COUNT 4096 $vbmc_port
 (( vbmc_port+=COMPUTE_COUNT ))
-define_overcloud_vms 'stor' $STORAGE_COUNT 4096 'true'
+define_overcloud_vms 'stor' $STORAGE_COUNT 4096 $vbmc_port
 (( vbmc_port+=STORAGE_COUNT ))
-define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT 8192
+define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT 8192 $vbmc_port
 (( vbmc_port+=CONTRAIL_CONTROLLER_COUNT ))
-define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT 4096
+define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT 4096 $vbmc_port
 (( vbmc_port+=CONTRAIL_ANALYTICS_COUNT ))
-define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT 8192
+define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT 8192 $vbmc_port
 (( vbmc_port+=CONTRAIL_ANALYTICSDB_COUNT ))
 
 # copy image for undercloud and resize them
