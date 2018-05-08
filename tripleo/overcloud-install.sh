@@ -257,7 +257,7 @@ fi
 
 # For queens there is no needs to use puppets
 artifact_opts=""
-if [[ "$OPENSTACK_VERSION" == 'queens' ]] ; then
+if [[ "$OPENSTACK_VERSION" == 'ocata' || "$OPENSTACK_VERSION" == 'newton' || "$OPENSTACK_VERSION" == 'pike' ]] ; then
   # prepare Contrail puppet modules via uploading artifacts to swift
   git_branch_ctp="stable/${OPENSTACK_VERSION}"
   if [[ "$CONTRAIL_VERSION" =~ 4.1 ]] ; then
