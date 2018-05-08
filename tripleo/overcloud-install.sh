@@ -825,19 +825,10 @@ if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
   sed -i "s/ContrailRegistry:.*/ContrailRegistry: $CONTRAIL_REGISTRY/g" $contrail_services_file
   sed -i "s/ContrailImageTag:.*/ContrailImageTag: $CONTRAIL_TAG/g" $contrail_services_file
 
-  #  stable
-  tripleo_tag=current-tripleo-rdo
-  # testing
-  # tripleo_tag=tripleo-ci-testing
-
-  # Get and upload the containers
-  deploy_tag=`openstack overcloud container image tag discover \
-        --image trunk.registry.rdoproject.org/master/centos-binary-base:${tripleo_tag} \
-        --tag-from-label rdo_version`
-
   openstack overcloud container image prepare \
-    --namespace trunk.registry.rdoproject.org/master \
-    --tag ${deploy_tag} \
+    --namespace docker.io/tripleo${OPENSTACK_VERSION} \
+    --tag current-tripleo-rdo \
+    --tag-from-label rdo_version \
     --push-destination ${prov_ip}:8787 \
     --output-env-file ~/docker_registry.yaml \
     --output-images-file ~/overcloud_containers.yaml
