@@ -835,8 +835,8 @@ if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
 
   openstack overcloud container image upload --config-file ~/overcloud_containers.yaml
 
-  docker_opt="-e ~/docker_registry.yaml"
-  docker_opt+=" -e tripleo-heat-templates/environments/docker.yaml"
+  docker_opt=' -e docker_registry.yaml'
+  docker_opt+=' -e tripleo-heat-templates/environments/docker.yaml'
 fi
 
 if [[ "$DEPLOY" != '1' ]] ; then
@@ -848,7 +848,11 @@ if [[ "$DEPLOY" != '1' ]] ; then
       -e $contrail_net_file \
       -e $contrail_vip_env \
       -e $misc_opts \
-      $ssl_opts $multi_nic_opts $ha_opts $sriov_opts $docker_opt"
+      $ssl_opts \
+      $multi_nic_opts \
+      $ha_opts \
+      $sriov_opts \
+      $docker_opt"
   echo "Add '-e templates/firstboot/firstboot.yaml' if you use swap"
   exit
 fi
@@ -863,7 +867,11 @@ openstack overcloud deploy --templates tripleo-heat-templates/ \
   -e $contrail_net_file \
   -e $contrail_vip_env \
   -e $misc_opts \
-  $ssl_opts $multi_nic_opts $ha_opts $sriov_opts $docker_opt
+  "$ssl_opts" \
+  "$multi_nic_opts" \
+  "$ha_opts" \
+  "$sriov_opts" \
+  "$docker_opt"
 
 errors=$?
 
