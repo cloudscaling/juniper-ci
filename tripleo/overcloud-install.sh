@@ -240,8 +240,12 @@ create_flavor 'contrail-analytics-database' $ANALYTICSDB_COUNT 'contrail-analyti
 
 openstack flavor list --long
 
+# cleanup old nodes
+for i in $(openstack baremetal node list -f value -c UUID) ; do
+  openstack baremetal node delete $i || true
+done
 # import overcloud configuration
-if [[ "$OPENSTACK_VERSION" != 'queens' ]] ; then
+if [[ 'newton|ocata' =~ $OPENSTACK_VERSION ]] ; then
   openstack baremetal import --json ~/instackenv.json
   openstack baremetal list
   openstack baremetal configure boot
@@ -257,7 +261,7 @@ fi
 
 # For queens there is no needs to use puppets
 artifact_opts=""
-if [[ "$OPENSTACK_VERSION" == 'ocata' || "$OPENSTACK_VERSION" == 'newton' || "$OPENSTACK_VERSION" == 'pike' ]] ; then
+if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
   # prepare Contrail puppet modules via uploading artifacts to swift
   git_branch_ctp="stable/${OPENSTACK_VERSION}"
   if [[ "$CONTRAIL_VERSION" =~ 4.1 ]] ; then
@@ -298,11 +302,17 @@ else
   cp -r ~/contrail-tripleo-heat-templates/* ~/tripleo-heat-templates
 fi
 
-if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
-  role_file='tripleo-heat-templates/environments/contrail/roles_data.yaml'
-else
-  role_file='tripleo-heat-templates/environments/contrail/roles_data_contrail.yaml'
-fi
+case "$OPENSTACK_VERSION" in
+  newton)
+    role_file='tripleo-heat-templates/environments/contrail/roles_data.yaml'
+    ;;
+  ocata|pike)
+    role_file='tripleo-heat-templates/environments/contrail/roles_data_contrail.yaml'
+    ;;
+  *)
+    role_file='tripleo-heat-templates/roles_data_contrail_aio.yaml'
+    ;;
+esac
 
 # disable ceilometer
 # there is the bug with 'ceilometer-upgrade --skipt-metering-database'
@@ -810,7 +820,7 @@ EOF
 fi
 
 docker_opts=''
-if [[ "$OPENSTACK_VERSION" == 'queens' ]] ; then
+if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
 
   sed -i "s/ContrailRegistry:.*/ContrailRegistry: $CONTRAIL_REGISTRY/g" $contrail_services_file
   sed -i "s/ContrailImageTag:.*/ContrailImageTag: $CONTRAIL_TAG/g" $contrail_services_file
