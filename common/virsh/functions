@@ -437,11 +437,11 @@ function rhel_register_system_and_customize() {
       --run-command 'yum remove -y cloud-init'
 
     # ==== TODO: OSP13: begin ====
+    local env_os_ver=$(echo ${ENVIRONMENT_OS_VERSION:-'7_5'} | tr '_' '.')
     virt-customize -a $image_file \
-      --copy-in /home/root/images/rhel-server-7.4-x86_64-kvm.qcow2:/root \
-      --move /root/rhel-server-7.4-x86_64-kvm.qcow2:/root/overcloud-base-image.qcow2
+      --copy-in /home/root/images/rhel-server-${env_os_ver}-x86_64-kvm.qcow2:/root \
+      --move /root/rhel-server-${env_os_ver}-x86_64-kvm.qcow2:/root/overcloud-base-image.qcow2
     # ==== TODO: OSP13: end ====
-
   fi
 }
 
