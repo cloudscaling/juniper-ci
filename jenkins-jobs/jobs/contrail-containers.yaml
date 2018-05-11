@@ -137,6 +137,10 @@
           slavenode:
             - slave01
             - slave04
+      - ak8s-server-ubuntu:
+          slavenode:
+            - slave01
+            - slave04
       - kolla-aws-centos:
           slavenode:
             - master
