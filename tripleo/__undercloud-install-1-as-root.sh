@@ -144,23 +144,33 @@ openstack-service restart neutron
 openstack-service restart ironic
 openstack-service restart nova
 
-
-if [[ "$OPENSTACK_VERSION" != 'queens' ]] ; then
+if [[ 'newton|ocata' =~ $OPENSTACK_VERSION  ]] ; then
   # Before queens there is RPM based deployement,
   # so prepare RPM repo for contrail
+  repo_dir='/var/www/html/contrail'
+else
+  repo_dir="/var/www/html/${CONTRAIL_VERSION}-${OPENSTACK_VERSION}"
+fi
 
-  # prepare contrail packages
-  for i in `ls /root/contrail_packages/*.rpm` ; do
+mkdir -p $repo_dir
+
+# prepare contrail packages
+rpms=`ls /root/contrail_packages/*.rpm`
+if [[ -n "$rpms" ]] ; then
+  for i in $rpms ; do
     rpm -ivh ${i}
   done
-  mkdir -p /var/www/html/contrail
-  tar -xvf /opt/contrail/contrail_packages/contrail_rpms.tgz -C /var/www/html/contrail
+  tar -xvf /opt/contrail/contrail_packages/contrail_rpms.tgz -C $repo_dir
+fi
 
-  # prepare docker images
-  for i in `ls /root/contrail_packages/*.tgz` ; do
-    tar -xvf ${i} -C /var/www/html/contrail
+tgzs=`ls /root/contrail_packages/*.tgz`
+if [[ -n "$tgzs" ]] ; then
+  for i in $tgzs ; do
+    tar -xvzf $i -C $repo_dir
   done
+fi
 
+if [[ 'newton|ocata' =~ $OPENSTACK_VERSION  ]] ; then
   update_contrail_repo='no'
 
   # hack: centos images don have openstack-utilities packages
@@ -188,16 +198,18 @@ if [[ "$OPENSTACK_VERSION" != 'queens' ]] ; then
 
   # WORKAROUND to bug #1767456
   # TODO: remove net-snmp after fix bug #1767456
-    cp /root/contrail_packages/net_snmp/* /var/www/html/contrail/
+    cp /root/contrail_packages/net_snmp/* ${repo_dir}
     update_contrail_repo='yes'
 
   if [[ "$update_contrail_repo" != 'no' ]] ; then
-    createrepo --update -v /var/www/html/contrail
+    createrepo --update -v $repo_dir
   fi
 else
-
   # Starting from queens there is container based deployement
   usermod -aG docker stack
-
-
+  pushd $repo_dir
+  rm -rf repodata
+  createrepo . || echo "WARNING: failed to create repo, containers build may fail."
+  popd
 fi
+

@@ -14,8 +14,8 @@ if [[ -z "$OPENSTACK_VERSION" ]] ; then
 fi
 
 # TODO: export to job settings
-CONTRAIL_REGISTRY=${CONTRAIL_REGISTRY:-'opencontrailnightly'}
-CONTRAIL_TAG=${CONTRAIL_TAG:-'latest'}
+export CONTRAIL_REGISTRY=${CONTRAIL_REGISTRY:-'opencontrailnightly'}
+export CONTRAIL_TAG=${CONTRAIL_TAG:-'latest'}
 # --
 
 (( VBMC_PORT_BASE_DEFAULT=16000 + NUM*100))
@@ -283,6 +283,17 @@ if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
   tar czvf puppet-modules.tgz usr/
   upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
   artifact_opts="-e .tripleo/environments/deployment-artifacts.yaml"
+else
+  if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
+    git clone https://github.com/juniper/contrail-container-builder
+    export _CONTRAIL_REGISTRY_IP=$prov_ip
+    export CONTRAIL_REGISTRY="${prov_ip}:8787"
+    export CONTRAIL_TAG="${CONTRAIL_VERSION}-${OPENSTACK_VERSION}"
+    export LINUX_DISTR=${ENVIRONMENT_OS:-'rhel'}
+    pushd contrail-container-builder/containers
+    ./build.sh
+    popd
+  fi
 fi
 
 # prepare tripleo heat templates
