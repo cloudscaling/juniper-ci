@@ -149,13 +149,15 @@ if [[ 'newton|ocata' =~ $OPENSTACK_VERSION  ]] ; then
   # so prepare RPM repo for contrail
   repo_dir='/var/www/html/contrail'
 else
+  default_contrail_ver=$(ls -1 /root/contrail_packages | grep -o '\([0-9]\+\.\{0,1\}\)\{1,5\}-[0-9]\+' | sort -nr  | head -n 1)
+  CONTRAIL_VERSION=${CONTRAIL_VERSION:-${default_contrail_ver}}
   repo_dir="/var/www/html/${CONTRAIL_VERSION}-${OPENSTACK_VERSION}"
 fi
 
 mkdir -p $repo_dir
 
 # prepare contrail packages
-rpms=`ls /root/contrail_packages/*.rpm`
+rpms=`ls /root/contrail_packages/ | grep "*.rpm"`
 if [[ -n "$rpms" ]] ; then
   for i in $rpms ; do
     rpm -ivh ${i}
@@ -163,7 +165,7 @@ if [[ -n "$rpms" ]] ; then
   tar -xvf /opt/contrail/contrail_packages/contrail_rpms.tgz -C $repo_dir
 fi
 
-tgzs=`ls /root/contrail_packages/*.tgz`
+tgzs=`ls /root/contrail_packages/ | grep "*.tgz"`
 if [[ -n "$tgzs" ]] ; then
   for i in $tgzs ; do
     tar -xvzf $i -C $repo_dir

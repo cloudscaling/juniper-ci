@@ -286,6 +286,8 @@ if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
 else
   if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
     git clone https://github.com/juniper/contrail-container-builder
+    _old_cv=$CONTRAIL_VERSION
+    export CONTRAIL_VERSION=$(ls -1 /var/www/html | grep -o '\([0-9]\+\.\{0,1\}\)\{1,5\}-[0-9]\+' | sort -nr  | head -n 1)
     export _CONTRAIL_REGISTRY_IP=$prov_ip
     export CONTRAIL_REGISTRY="${prov_ip}:8787"
     export CONTRAIL_TAG="${CONTRAIL_VERSION}-${OPENSTACK_VERSION}"
@@ -293,6 +295,7 @@ else
     pushd contrail-container-builder/containers
     ./build.sh
     popd
+    CONTRAIL_VERSION=$_old_cv
   fi
 fi
 
