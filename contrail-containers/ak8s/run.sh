@@ -145,6 +145,21 @@ while ! check_introspection "$dest_to_check" ; do
 done
 test $res == '0'
 
+# ssh root@${ips[0]}
+# wget -nv https://storage.googleapis.com/kubernetes-helm/helm-v2.9.0-linux-amd64.tar.gz
+# tar -xvf helm-v2.9.0-linux-amd64.tar.gz
+# mv linux-amd64/helm /usr/bin/
+# helm init
+# kubectl -n kube-system patch deployment tiller-deploy -p '{"spec": {"template": {"spec": {"automountServiceAccountToken": true}}}}'
+# helm version
+# kubectl get pods --all-namespaces
+# helm repo update
+# ? helm repo add nfs-provisioner https://raw.githubusercontent.com/IlyaSemenov/nfs-provisioner-chart/master/repo
+# ? helm install --name nfs-provisioner --namespace nfs-provisioner nfs-provisioner/nfs-provisioner && sleep 5
+# ? kubectl patch storageclass local-nfs -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+# helm install --name wordpress stable/wordpress
+
+
 # save logs and exit
 trap - ERR
 save_logs
