@@ -63,6 +63,7 @@
             - '4.0'
             - '3.2'
             - '5.0'
+            - '5.1'
       - choice:
           name: CONTRAIL_SERIES
           description: "Series of Contrail builds (cb, release, ...)"
