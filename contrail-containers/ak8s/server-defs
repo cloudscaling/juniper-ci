@@ -1,0 +1,15 @@
+export JOB_RND=$((RANDOM % 90 + 10))
+
+export NET_PREFIX="10.11.$JOB_RND"
+export NET_ADDR="$NET_PREFIX.0"
+export NET_MAC_PREFIX="52:54:10:11:${JOB_RND}"
+export NET_ADDR_VR="10.12.$JOB_RND.0"
+export NET_MAC_VR_PREFIX="52:54:10:12:${JOB_RND}"
+
+# we always need to create machine for containers build if build is required
+export BUILD_NODE_MEM=2048
+
+export CONT_NODES=1
+export CONT_NODE_MEM=16384
+export COMP_NODES=2
+export COMP_NODE_MEM=6144
