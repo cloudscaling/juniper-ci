@@ -157,7 +157,7 @@ fi
 mkdir -p $repo_dir
 
 # prepare contrail packages
-rpms=`ls /root/contrail_packages/ | grep "*.rpm"`
+rpms=`ls /root/contrail_packages/ | grep "\.rpm"` || true
 if [[ -n "$rpms" ]] ; then
   for i in $rpms ; do
     rpm -ivh ${i}
@@ -165,7 +165,7 @@ if [[ -n "$rpms" ]] ; then
   tar -xvf /opt/contrail/contrail_packages/contrail_rpms.tgz -C $repo_dir
 fi
 
-tgzs=`ls /root/contrail_packages/ | grep "*.tgz"`
+tgzs=`ls /root/contrail_packages/ | grep "\.tgz"` || true
 if [[ -n "$tgzs" ]] ; then
   for i in $tgzs ; do
     tar -xvzf $i -C $repo_dir
@@ -208,7 +208,7 @@ if [[ 'newton|ocata' =~ $OPENSTACK_VERSION  ]] ; then
   fi
 else
   # Starting from queens there is container based deployement
-  usermod -aG docker stack
+  usermod -aG docker stack || true
   pushd $repo_dir
   rm -rf repodata
   createrepo . || echo "WARNING: failed to create repo, containers build may fail."
