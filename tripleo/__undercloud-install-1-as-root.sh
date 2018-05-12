@@ -160,7 +160,7 @@ mkdir -p $repo_dir
 rpms=`ls /root/contrail_packages/ | grep "\.rpm"` || true
 if [[ -n "$rpms" ]] ; then
   for i in $rpms ; do
-    rpm -ivh ${i}
+    rpm -ivh /root/contrail_packages/${i}
   done
   tar -xvf /opt/contrail/contrail_packages/contrail_rpms.tgz -C $repo_dir
 fi
@@ -168,7 +168,7 @@ fi
 tgzs=`ls /root/contrail_packages/ | grep "\.tgz"` || true
 if [[ -n "$tgzs" ]] ; then
   for i in $tgzs ; do
-    tar -xvzf $i -C $repo_dir
+    tar -xvzf /root/contrail_packages/${i} -C $repo_dir
   done
 fi
 
