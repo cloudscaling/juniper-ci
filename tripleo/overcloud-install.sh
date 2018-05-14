@@ -292,6 +292,7 @@ else
     export CONTRAIL_REGISTRY="${prov_ip}:8787"
     export CONTRAIL_TAG="${CONTRAIL_VERSION}-${OPENSTACK_VERSION}"
     export LINUX_DISTR=${ENVIRONMENT_OS:-'rhel'}
+    export LINUX_DISTR=${LINUX_DISTR:-'latest'}
     pushd contrail-container-builder/containers
     ./build.sh
     popd
