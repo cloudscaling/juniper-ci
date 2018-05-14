@@ -51,7 +51,6 @@ global_configuration:
 
 contrail_configuration:
  CONTRAIL_VERSION: ${CONTRAIL_VERSION}
- CLOUD_ORCHESTRATOR: openstack
  METADATA_PROXY_SECRET: c0ntrail123
  CONTROLLER_NODES: ${IP_CONT_01},${IP_CONT_02},${IP_CONT_03}
  AUTH_MODE: keystone
@@ -69,7 +68,6 @@ contrail_configuration:
  JVM_EXTRA_OPTS: "-Xms1g -Xmx2g"
  DPDK_UIO_DRIVER:
  LOG_LEVEL: SYS_DEBUG
-# METADATA_SSL_ENABLE: true
 
 kolla_config:
  kolla_globals:
@@ -81,8 +79,6 @@ kolla_config:
    docker_namespace: kolla
    enable_ironic: "no"
    enable_swift: "no"
-#   kolla_enable_tls_internal: "yes"
-#   metadata_ssl_enable: "yes"
  kolla_passwords:
    metadata_secret: c0ntrail123
    keystone_admin_password: password
