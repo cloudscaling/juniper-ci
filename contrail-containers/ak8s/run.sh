@@ -147,6 +147,9 @@ test $res == '0'
 
 function aaa() {
 ssh root@${ips[0]}
+
+#kubectl get pod kube-dns-6f4fd4bdf-5xz7c -n kube-system -o yaml | kubectl replace --force -f -
+
 wget -nv https://storage.googleapis.com/kubernetes-helm/helm-v2.9.0-linux-amd64.tar.gz
 tar -xvf helm-v2.9.0-linux-amd64.tar.gz
 mv linux-amd64/helm /usr/bin/
