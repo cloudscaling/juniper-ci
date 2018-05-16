@@ -114,29 +114,18 @@ if [[ $REGISTRY == 'build' ]]; then
   build_ip=`get_ip_by_mac $NET_NAME $NET_MAC_PREFIX:ff`
 fi
 # collect controller ips first and compute ips next
-declare -a ips ips_cont ips_comp ips2 ips2_cont ips2_comp
+declare -a ips ips_cont ips_comp
 for (( i=0; i<${CONT_NODES}; ++i )); do
   ip=`get_ip_by_mac $NET_NAME $NET_MAC_PREFIX:0$i`
   echo "INFO: controller node #$i, IP $ip (network $NET_NAME)"
   ips=( ${ips[@]} $ip )
   ips_cont=( ${ips_cont[@]} $ip )
-
-  ip=`get_ip_by_mac $NET_NAME_VR $NET_MAC_VR_PREFIX:0$i`
-  echo "INFO: controller node #$i, IP $ip (network $NET_NAME_VR)"
-  ips2=( ${ips2[@]} $ip )
-  ips2_cont=( ${ips2_cont[@]} $ip )
 done
-
 for (( i=0; i<${COMP_NODES}; ++i )); do
   ip=`get_ip_by_mac $NET_NAME $NET_MAC_PREFIX:1$i`
   echo "INFO: compute node #$i, IP $ip (network $NET_NAME)"
   ips=( ${ips[@]} $ip )
   ips_comp=( ${ips_comp[@]} $ip )
-
-  ip=`get_ip_by_mac $NET_NAME_VR $NET_MAC_VR_PREFIX:1$i`
-  echo "INFO: compute node #$i, IP $ip (network $NET_NAME_VR)"
-  ips2=( ${ips2[@]} $ip )
-  ips2_comp=( ${ips2_comp[@]} $ip )
 done
 
 # first machine is master for deploy purposes
@@ -150,13 +139,7 @@ master_ip=$master_ip
 nodes_ips="${ips[@]}"
 nodes_cont_ips="${ips_cont[@]}"
 nodes_comp_ips="${ips_comp[@]}"
-nodes_ips2="${ips2[@]}"
-nodes_cont_ips2="${ips2_cont[@]}"
-nodes_comp_ips2="${ips2_comp[@]}"
 EOF
-
-echo "INFO: environment file:"
-cat $ENV_FILE
 
 if [[ $REGISTRY == 'build' ]]; then
   wait_ssh $build_ip
@@ -274,5 +257,29 @@ done
 for ip in ${ips[@]} ; do
   wait_ssh $ip
 done
+
+# update env file with IP-s from second interface
+declare -a ips2 ips2_cont ips2_comp
+for (( i=0; i<${COMP_NODES}; ++i )); do
+  ip=`get_ip_by_mac $NET_NAME_VR $NET_MAC_VR_PREFIX:1$i`
+  echo "INFO: compute node #$i, IP $ip (network $NET_NAME_VR)"
+  ips2=( ${ips2[@]} $ip )
+  ips2_comp=( ${ips2_comp[@]} $ip )
+done
+for (( i=0; i<${CONT_NODES}; ++i )); do
+  ip=`get_ip_by_mac $NET_NAME_VR $NET_MAC_VR_PREFIX:0$i`
+  echo "INFO: controller node #$i, IP $ip (network $NET_NAME_VR)"
+  ips2=( ${ips2[@]} $ip )
+  ips2_cont=( ${ips2_cont[@]} $ip )
+done
+
+cat <<EOF >>$ENV_FILE
+nodes_ips2="${ips2[@]}"
+nodes_cont_ips2="${ips2_cont[@]}"
+nodes_comp_ips2="${ips2_comp[@]}"
+EOF
+
+echo "INFO: environment file:"
+cat $ENV_FILE
 
 trap - ERR
