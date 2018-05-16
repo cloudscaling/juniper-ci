@@ -5,7 +5,7 @@ my_dir="$(dirname $my_file)"
 
 source "$my_dir/ssh-defs"
 
-cat <<EOF | timeout -s 9 60s $SSH_CMD
+cat <<EOF | timeout -s 9 60s $SSH_CMD ${SSH_USER}@$master_ip
 set -x
 export PATH=\${PATH}:/usr/sbin
 mkdir -p ~/logs/kube-info
