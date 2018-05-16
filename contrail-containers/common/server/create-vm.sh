@@ -125,6 +125,18 @@ for (( i=0; i<${COMP_NODES}; ++i )); do
   ips=( ${ips[@]} $ip )
   ips_comp=( ${ips_comp[@]} $ip )
 done
+# collect ips for second interface
+declare -a ips2 ips2_cont ips2_comp
+for (( i=0; i<${CONT_NODES}; ++i )); do
+  ip=`get_ip_by_mac $NET_NAME_VR $NET_MAC_VR_PREFIX:0$i`
+  ips2=( ${ips2[@]} $ip )
+  ips2_cont=( ${ips2_cont[@]} $ip )
+done
+for (( i=0; i<${COMP_NODES}; ++i )); do
+  ip=`get_ip_by_mac $NET_NAME_VR $NET_MAC_VR_PREFIX:1$i`
+  ips2=( ${ips2[@]} $ip )
+  ips2_comp=( ${ips2_comp[@]} $ip )
+done
 
 # first machine is master for deploy purposes
 master_ip=${ips[0]}
@@ -137,6 +149,9 @@ master_ip=$master_ip
 nodes_ips="${ips[@]}"
 nodes_cont_ips="${ips_cont[@]}"
 nodes_comp_ips="${ips_comp[@]}"
+nodes_ips2="${ips2[@]}"
+nodes_cont_ips2="${ips_cont2[@]}"
+nodes_comp_ips2="${ips_comp2[@]}"
 EOF
 
 if [[ $REGISTRY == 'build' ]]; then

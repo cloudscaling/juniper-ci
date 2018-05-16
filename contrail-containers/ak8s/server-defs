@@ -3,7 +3,9 @@ export JOB_RND=$((RANDOM % 90 + 10))
 export NET_PREFIX="10.11.$JOB_RND"
 export NET_ADDR="$NET_PREFIX.0"
 export NET_MAC_PREFIX="52:54:10:11:${JOB_RND}"
-export NET_ADDR_VR="10.12.$JOB_RND.0"
+
+export NET_PREFIX_VR="10.12.$JOB_RND"
+export NET_ADDR_VR="$NET_PREFIX.0"
 export NET_MAC_VR_PREFIX="52:54:10:12:${JOB_RND}"
 
 # we always need to create machine for containers build if build is required
