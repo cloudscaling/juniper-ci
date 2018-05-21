@@ -16,5 +16,20 @@ function create_iface() {
   local iface=$1
   shift
   local ssh=$@
-  $ssh "sudo bash -c 'echo \"auto $iface\" > /etc/network/interfaces.d/$iface.cfg && echo \"iface $iface inet dhcp\" >> /etc/network/interfaces.d/$iface.cfg && ifup $iface'"
+
+  # trusty/xenial
+  #$ssh "sudo bash -c 'echo \"auto $iface\" > /etc/network/interfaces.d/$iface.cfg && echo \"iface $iface inet dhcp\" >> /etc/network/interfaces.d/$iface.cfg && ifup $iface'"
+
+  # bionic
+  mac=`$ssh "ip link" 2>/dev/null | grep -A 1 " $iface:" | tail -1 | awk '{print $2}'`
+  echo "INFO: create if script for iface=$iface with mac=$mac"
+  if_path="/etc/netplan/50-cloud-init.yaml"
+  cat <<EOF | $ssh
+sudo bash -c 'echo "        ens4:" >> $if_path'
+sudo bash -c 'echo "            dhcp4: true" >> $if_path'
+sudo bash -c 'echo "            match:" >> $if_path'
+sudo bash -c 'echo "                macaddress: 06:db:b3:e0:eb:f8" >> $if_path'
+sudo bash -c 'echo "            set-name: ens4" >> $if_path'
+sudo netplan apply
+EOF
 }
