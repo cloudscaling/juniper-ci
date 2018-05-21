@@ -88,7 +88,7 @@
           export HOST=$(echo {project} | cut -d '-' -f 2)
           export ENVIRONMENT_OS=$(echo {project} | cut -d '-' -f 3)
           if [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
-            export ENVIRONMENT_OS_VERSION='bionic'
+            export ENVIRONMENT_OS_VERSION='xenial'
           fi
           # process TLS here to avoid duplication between targets
           case "$TLS" in
