@@ -17,6 +17,11 @@ mkdir -p "$WORKSPACE/logs"
 source $my_dir/${HOST}-defs
 source $my_dir/../common/functions
 
+# it should fail if Juju deployment is not found
+source $my_dir/../../juju/bmc-contrail/functions
+juju-status-tabular
+# ==============================================
+
 $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
 
@@ -56,15 +61,14 @@ source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
 IP_VIP=${NET_PREFIX}.254
 IP_CONT_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
-IP_CONT_02=`echo $nodes_cont_ips | cut -d ' ' -f 2`
-IP_CONT_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
-IP_COMP_01=`echo $nodes_comp_ips | cut -d ' ' -f 1`
 IP_GW=${NET_PREFIX}.1
 
 IP2_CONT_01=`echo $nodes_cont_ips2 | cut -d ' ' -f 1`
-IP2_CONT_02=`echo $nodes_cont_ips2 | cut -d ' ' -f 2`
-IP2_CONT_03=`echo $nodes_cont_ips2 | cut -d ' ' -f 3`
 IP2_GW=${NET_PREFIX_VR}.1
+
+# from juju
+AUTH_IP=`get_machine_ip keystone`
+METADATA_IP='127.0.0.1'
 
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
 templ=$(cat $my_dir/instances.yaml.tmpl)
@@ -81,19 +85,15 @@ if [[ -z "$image" ]]; then
   docker rm cprep-$JOB_RND
 fi
 
-if echo "$PATCHSET_LIST" | grep -q "/contrail-kolla-ansible " ; then
-  patchset=`echo "$PATCHSET_LIST" | grep "/contrail-kolla-ansible "`
-fi
-
 mkdir -p $WORKSPACE/logs/deployer
 volumes="-v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer"
 volumes+=" -v $HOME/.ssh:/.ssh"
 volumes+=" -v $WORKSPACE/logs/deployer:/root/logs"
 volumes+=" -v $my_dir/__run-gate.sh:/root/run-gate.sh"
-docker run -i --rm --entrypoint /bin/bash $volumes --network host -e KOLLA_PATCHSET_CMD="$patchset" centos-soft -c "/root/run-gate.sh"
+docker run -i --rm --entrypoint /bin/bash $volumes --network host -e centos-soft -c "/root/run-gate.sh"
 
 # TODO: wait till cluster up and initialized
-sleep 300
+sleep 120
 
 # Validate cluster's introspection ports
 for dest in $nodes_ips ; do
@@ -119,18 +119,6 @@ while ! check_introspection "$dest_to_check" ; do
   sleep 30
 done
 test $res == '0'
-
-# validate openstack
-source $my_dir/../common/check-functions
-cd $WORKSPACE
-$SCP ${SSH_USER}@$master_ip:/etc/kolla/admin-openrc.sh $WORKSPACE/
-virtualenv $WORKSPACE/.venv
-source $WORKSPACE/.venv/bin/activate
-source $WORKSPACE/admin-openrc.sh
-pip install python-openstackclient || res=1
-
-check_simple_instance || res=1
-deactivate
 
 # save logs and exit
 trap - ERR

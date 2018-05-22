@@ -1,0 +1,39 @@
+#!/bin/bash
+
+fmy_file="${BASH_SOURCE[0]}"
+fmy_dir="$(dirname $fmy_file)"
+
+function save_logs() {
+  local cnt_name_pattern="$1"
+  source "$fmy_dir/${HOST}/ssh-defs"
+  set +e
+  local ssl_opts=''
+  if [[ -n "$SSL_ENABLE" ]] ; then
+    ssl_opts="SSL_ENABLE=$SSL_ENABLE"
+  fi
+  # save common docker logs
+  local dest=''
+  for dest in $nodes_ips ; do
+    timeout -s 9 20s $SCP "$fmy_dir/../__save-docker-logs.sh" ${SSH_USER}@${dest}:save-docker-logs.sh
+    if [[ $? == 0 ]] ; then
+      $SSH_CMD ${SSH_USER}@${dest} "CNT_NAME_PATTERN='$cnt_name_pattern' $ssl_opts ./save-docker-logs.sh"
+    fi
+  done
+
+  # save env host specific logs
+  # (should save into ~/logs folder on the SSH host)
+  $fmy_dir/${HOST}/save-logs.sh
+
+  # save to workspace
+  for dest in $nodes_ips ; do
+    if timeout -s 9 30s $SSH_CMD ${SSH_USER}@${dest} "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
+      local ldir="$WORKSPACE/logs/$dest"
+      mkdir -p "$ldir"
+      timeout -s 9 10s $SCP $SSH_USER@${dest}:logs.tar.gz "$ldir/logs.tar.gz"
+      pushd "$ldir"
+      tar -xf logs.tar.gz
+      rm logs.tar.gz
+      popd
+    fi
+  done
+}
