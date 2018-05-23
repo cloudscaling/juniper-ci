@@ -31,6 +31,7 @@ function catch_errors() {
 
 cd contrail-ansible-deployer
 ansible-playbook -v -e orchestrator=openstack -e config_file=/root/contrail-ansible-deployer/instances.yaml -e kolla_dir=/tmp playbooks/configure_instances.yml
+ansible-playbook -v -e orchestrator=openstack -e config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/install_openstack.yml
 ansible-playbook -v -e orchestrator=openstack -e config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/install_contrail.yml
 
 trap - ERR

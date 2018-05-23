@@ -1,49 +1,49 @@
 provider_config:
  bms:
-   domainsuffix: local
-   ssh_user: ${SSH_USER}
-   ssh_pwd:
+  domainsuffix: local
+  ssh_user: ${SSH_USER}
+  ssh_pwd:
 
 instances:
  server1:
-     ip: ${IP_CONT_01}
-     provider: bms
-     roles:
-         openstack: null
-         analytics: null
-         analytics_database: null
-         config: null
-         config_database: null
-         control: null
-         webui: null
+  ip: ${IP_CONT_01}
+  provider: bms
+  roles:
+     openstack: null
+     analytics: null
+     analytics_database: null
+     config: null
+     config_database: null
+     control: null
+     webui: null
  server2:
-     ip: ${IP_CONT_02}
-     provider: bms
-     roles:
-         openstack: null
-         analytics: null
-         analytics_database: null
-         config: null
-         config_database: null
-         control: null
-         webui: null
+  ip: ${IP_CONT_02}
+  provider: bms
+  roles:
+     openstack: null
+     analytics: null
+     analytics_database: null
+     config: null
+     config_database: null
+     control: null
+     webui: null
  server3:
-     ip: ${IP_CONT_03}
-     provider: bms
-     roles:
-         openstack: null
-         analytics: null
-         analytics_database: null
-         config: null
-         config_database: null
-         control: null
-         webui: null
+  ip: ${IP_CONT_03}
+  provider: bms
+  roles:
+     openstack: null
+     analytics: null
+     analytics_database: null
+     config: null
+     config_database: null
+     control: null
+     webui: null
  server4:
-     ip: ${IP_COMP_01}
-     provider: bms
-     roles:
-         openstack_compute: null
-         vrouter: null
+  ip: ${IP_COMP_01}
+  provider: bms
+  roles:
+     openstack_compute: null
+     vrouter: null
 
 global_configuration:
  REGISTRY_PRIVATE_INSECURE: True

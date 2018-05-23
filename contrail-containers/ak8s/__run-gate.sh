@@ -18,8 +18,9 @@ function catch_errors() {
 }
 
 cd contrail-ansible-deployer
-ansible-playbook -v -e orchestrator=kubernetes -e config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/configure_instances.yml
-ansible-playbook -v -e orchestrator=kubernetes -e config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/install_contrail.yml
+ansible-playbook -v -e orchestrator=kubernetes config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/configure_instances.yml
+ansible-playbook -v -e orchestrator=kubernetes config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/install_contrail.yml
+ansible-playbook -v -e orchestrator=kubernetes config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/install_k8s.yml
 
 trap - ERR
 save_logs
