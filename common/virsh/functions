@@ -283,13 +283,17 @@ function delete_domain() {
 
 function delete_domains() {
   local domname=${1:-rd-overcloud-${NUM}-}
+  declare name
   for name in `virsh list --all | grep "$domname" | awk '{print $2}'` ; do
     delete_domain $name
-    delete_vbmc $name
   done
 
   delete_domain rd-undercloud-$NUM
   delete_domain rd-undercloud-$NUM-cert-test
+
+  for name in $(vbmc list | grep "$domname" | awk '{print($2)}') ; do
+    delete_vbmc $name
+  done
 }
 
 function delete_volume() {
