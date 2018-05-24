@@ -15,49 +15,17 @@ mkdir -p "$WORKSPACE/logs"
 
 # definition for job deployment
 source $my_dir/${HOST}-defs
-
-function save_logs() {
-  source "$my_dir/../common/${HOST}/ssh-defs"
-  set +e
-  local ssl_opts=''
-  if [[ -n "$SSL_ENABLE" ]] ; then
-    ssl_opts="SSL_ENABLE=$SSL_ENABLE"
-  fi
-  # save common docker logs
-  for dest in $nodes_ips ; do
-    # TODO: when repo be splitted to containers & build here will be containers repo only,
-    # then build repo should be added to be copied below
-    $SCP "$my_dir/../__save-docker-logs.sh" $SSH_USER@${dest}:save-docker-logs.sh
-    $SSH_CMD $SSH_USER@${dest} "$ssl_opts ./save-docker-logs.sh"
-  done
-
-  # save env host specific logs
-  # (should save into ~/logs folder on the SSH host)
-  $my_dir/../common/${HOST}/save-logs.sh
-
-  # save to workspace
-  for dest in $nodes_ips ; do
-    if $SSH_CMD $SSH_USER@${dest} "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
-      local ldir="$WORKSPACE/logs/$dest"
-      mkdir -p "$ldir"
-      $SCP $SSH_USER@${dest}:logs.tar.gz "$ldir/logs.tar.gz"
-      pushd "$ldir"
-      tar -xf logs.tar.gz
-      rm logs.tar.gz
-      popd
-    fi
-  done
-}
+source $my_dir/../common/functions
 
 $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
 
-trap catch_errors ERR;
+trap 'catch_errors $LINENO' ERR
 function catch_errors() {
   local exit_code=$?
-  echo "Errors!" $exit_code $@
+  echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
 
-  save_logs
+  save_logs '2,3'
   if [[ "$CLEAN_ENV" == 'always' ]] ; then
     $my_dir/../common/${HOST}/cleanup.sh
   fi
@@ -91,7 +59,7 @@ $SCP "$my_dir/__run-gate.sh" ${SSH_USER}@$master_ip:run-gate.sh
 timeout -s 9 60m $SSH_CMD ${SSH_USER}@$master_ip "$run_env LINUX_DISTR=$LINUX_DISTR AGENT_MODE=$AGENT_MODE ./run-gate.sh"
 
 trap - ERR
-save_logs
+save_logs '2,3'
 if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
   $my_dir/../common/${HOST}/cleanup.sh
 fi

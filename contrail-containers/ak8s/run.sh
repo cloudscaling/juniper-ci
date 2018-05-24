@@ -15,42 +15,7 @@ mkdir -p "$WORKSPACE/logs"
 
 # definition for job deployment
 source $my_dir/${HOST}-defs
-
-function save_logs() {
-  source "$my_dir/../common/${HOST}/ssh-defs"
-  set +e
-  local ssl_opts=''
-  if [[ -n "$SSL_ENABLE" ]] ; then
-    ssl_opts="SSL_ENABLE=$SSL_ENABLE"
-  fi
-  # save common docker logs
-  for dest in $nodes_ips ; do
-    # TODO: when repo be splitted to containers & build here will be containers repo only,
-    # then build repo should be added to be copied below
-    timeout -s 9 20s $SCP "$my_dir/../__save-docker-logs.sh" ${SSH_USER}@${dest}:save-docker-logs.sh
-    if [[ $? == 0 ]] ; then
-      $SSH_CMD ${SSH_USER}@${dest} "CNT_NAME_PATTERN='1-' $ssl_opts ./save-docker-logs.sh"
-    fi
-  done
-
-  # save env host specific logs
-  # (should save into ~/logs folder on the SSH host)
-  $my_dir/../common/${HOST}/save-logs.sh
-
-  # save to workspace
-  for dest in $nodes_ips ; do
-    if timeout -s 9 30s $SSH_CMD ${SSH_USER}@${dest} "sudo tar -cf logs.tar ./logs ; gzip logs.tar" ; then
-      local lname=$(echo $dest | cut -d '@' -f 2)
-      local ldir="$WORKSPACE/logs/$lname"
-      mkdir -p "$ldir"
-      timeout -s 9 10s $SCP $SSH_USER@${dest}:logs.tar.gz "$ldir/logs.tar.gz"
-      pushd "$ldir"
-      tar -xf logs.tar.gz
-      rm logs.tar.gz
-      popd
-    fi
-  done
-}
+source $my_dir/../common/functions
 
 $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
@@ -60,7 +25,7 @@ function catch_errors() {
   local exit_code=$?
   echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
 
-  save_logs
+  save_logs '1-'
   if [[ "$CLEAN_ENV" == 'always' ]] ; then
     $my_dir/../common/${HOST}/cleanup.sh
   fi
@@ -89,11 +54,14 @@ fi
 # deploy cloud
 source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
+IP_VIP=${NET_PREFIX}.254
 IP_CONT_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
 IP_COMP_01=`echo $nodes_comp_ips | cut -d ' ' -f 1`
 IP_COMP_02=`echo $nodes_comp_ips | cut -d ' ' -f 2`
-IP_VIP=${NET_PREFIX}.254
 IP_GW=${NET_PREFIX}.1
+
+IP2_CONT_01=`echo $nodes_cont_ips2 | cut -d ' ' -f 1`
+IP2_GW=${NET_PREFIX_VR}.1
 
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
 templ=$(cat $my_dir/instances.yaml.tmpl)
@@ -146,24 +114,32 @@ done
 test $res == '0'
 
 function aaa() {
-ssh root@${ips[0]}
-wget -nv https://storage.googleapis.com/kubernetes-helm/helm-v2.9.0-linux-amd64.tar.gz
-tar -xvf helm-v2.9.0-linux-amd64.tar.gz
-mv linux-amd64/helm /usr/bin/
-helm init
-kubectl -n kube-system patch deployment tiller-deploy -p '{"spec": {"template": {"spec": {"automountServiceAccountToken": true}}}}'
-helm version
-kubectl get pods --all-namespaces
-helm repo update
-# ? helm repo add nfs-provisioner https://raw.githubusercontent.com/IlyaSemenov/nfs-provisioner-chart/master/repo
-# ? helm install --name nfs-provisioner --namespace nfs-provisioner nfs-provisioner/nfs-provisioner && sleep 5
-# ? kubectl patch storageclass local-nfs -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
-helm install --name wordpress --set mariadb.persistence.enabled=false --set persistence.enabled=false stable/wordpress
+  # ssh root@${ips[0]}
+
+  kubectl create serviceaccount --namespace kube-system tiller
+  kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+
+  wget -nv https://storage.googleapis.com/kubernetes-helm/helm-v2.9.0-linux-amd64.tar.gz
+  tar -xvf helm-v2.9.0-linux-amd64.tar.gz
+  mv linux-amd64/helm /usr/bin/
+  helm init
+  kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller", "automountServiceAccountToken": true}}}}'
+  helm init --service-account tiller --upgrade
+
+  sleep 5 && helm version
+  kubectl get pods --all-namespaces
+
+  helm repo update
+  # this is needed if we want to enable persistence
+  # ? helm repo add nfs-provisioner https://raw.githubusercontent.com/IlyaSemenov/nfs-provisioner-chart/master/repo
+  # ? helm install --name nfs-provisioner --namespace nfs-provisioner nfs-provisioner/nfs-provisioner && sleep 5
+  # ? kubectl patch storageclass local-nfs -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+  helm install --name wordpress --set mariadb.persistence.enabled=false --set persistence.enabled=false stable/wordpress
 }
 
 # save logs and exit
 trap - ERR
-save_logs
+save_logs '1-'
 if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
   $my_dir/../common/${HOST}/cleanup.sh
 fi

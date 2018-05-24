@@ -70,15 +70,16 @@ EOF
 chown stack:stack /home/stack/.ssh/config
 chmod 644 /home/stack/.ssh/config
 
+# install pip for future run of OS checks
+curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+python get-pip.py
+pip install -q virtualenv
+
 # add OpenStack repositories for centos, for rhel it is added in images
 # ==== TODO: OSP13: remove it after OSP13 release ====
 if [[ "$ENVIRONMENT_OS" != 'rhel' || "$OPENSTACK_VERSION" == 'queens' ]] ; then
   # libguestfs-tools - is for virt-customize tool for overcloud image customization - enabling repos
   yum install -y libguestfs-tools
-  # install pip for future run of OS checks
-  curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
-  python get-pip.py
-  pip install -q virtualenv
 
   if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
     yum-config-manager --enable rhelosp-rhel-7-server-opt

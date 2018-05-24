@@ -14,8 +14,7 @@ fi
 
 function save_logs() {
   mkdir -p /root/logs/kolla
-  cp -r /root/contrail-kolla-ansible/etc/kolla/globals.yml /root/logs/kolla/
-  cp -r /root/contrail-kolla-ansible/ansible/host_vars /root/logs/kolla/
+  cp /root/contrail-kolla-ansible/etc/kolla/globals.yml /root/logs/kolla/
   chmod -R a+rw /root/logs/kolla
 }
 
@@ -30,7 +29,8 @@ function catch_errors() {
 }
 
 cd contrail-ansible-deployer
-ansible-playbook -v -e orchestrator=openstack -e config_file=/root/contrail-ansible-deployer/instances.yaml -e kolla_dir=/tmp playbooks/configure_instances.yml
+ansible-playbook -v -e orchestrator=openstack -e config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/configure_instances.yml
+ansible-playbook -v -e orchestrator=openstack -e config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/install_openstack.yml
 ansible-playbook -v -e orchestrator=openstack -e config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/install_contrail.yml
 
 trap - ERR

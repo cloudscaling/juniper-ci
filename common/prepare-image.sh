@@ -6,7 +6,7 @@ OS="$1"
 
 if [[ -z "$OS" ]]; then
   echo "ERROR: please run as 'prepare_image.sh {ubuntu|centos}"
-  ecit 1
+  exit 1
 fi
 
 case $OS in

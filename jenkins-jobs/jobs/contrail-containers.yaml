@@ -147,6 +147,10 @@
       - kolla-aws-ubuntu:
           slavenode:
             - master
+      - ajupg-server-ubuntu:
+          slavenode:
+            - slave01
+            - slave04
 
 # for old packages use this additions:
 #          contrail_version: 4.1.0.0-8
