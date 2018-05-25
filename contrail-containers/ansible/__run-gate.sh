@@ -25,12 +25,13 @@ function catch_errors() {
   trap - ERR
   set +e
   save_logs
+  tail -f /dev/null
   exit $exit_code
 }
 
 cd contrail-ansible-deployer
 ansible-playbook -v -e orchestrator=openstack -e config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/configure_instances.yml
-ansible-playbook -v -e orchestrator=openstack -e config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/install_openstack.yml
+ansible-playbook -vvv -e orchestrator=openstack -e config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/install_openstack.yml
 ansible-playbook -v -e orchestrator=openstack -e config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/install_contrail.yml
 
 trap - ERR
