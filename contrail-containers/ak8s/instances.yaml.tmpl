@@ -5,30 +5,54 @@ provider_config:
    ssh_pwd:
 
 instances:
- server1:
-     ip: ${IP_CONT_01}
-     provider: bms
-     roles:
-         analytics: null
-         analytics_database: null
-         config: null
-         config_database: null
-         control: null
-         webui: null
-         k8s_master: null
-         kubemanager: null
- server2:
-     ip: ${IP_COMP_01}
-     provider: bms
-     roles:
-         k8s_node: null
-         vrouter: null
- server3:
-     ip: ${IP_COMP_02}
-     provider: bms
-     roles:
-         k8s_node: null
-         vrouter: null
+  server1:
+    ip: ${IP_CONT_01}
+    provider: bms
+    roles:
+      analytics: null
+      analytics_database: null
+      config: null
+      config_database: null
+      control: null
+      webui: null
+      k8s_master: null
+      kubemanager: null
+  server2:
+    ip: ${IP_CONT_02}
+    provider: bms
+    roles:
+      analytics: null
+      analytics_database: null
+      config: null
+      config_database: null
+      control: null
+      webui: null
+      k8s_master: null
+      kubemanager: null
+  server3:
+    ip: ${IP_CONT_03}
+    provider: bms
+    roles:
+      analytics: null
+      analytics_database: null
+      config: null
+      config_database: null
+      control: null
+      webui: null
+      k8s_master: null
+      kubemanager: null
+  server2:
+    ip: ${IP_COMP_01}
+    provider: bms
+    roles:
+      k8s_node: null
+      vrouter: null
+  server3:
+    ip: ${IP_COMP_02}
+    provider: bms
+    roles:
+      k8s_node: null
+      vrouter: null
 
 global_configuration:
  REGISTRY_PRIVATE_INSECURE: True
@@ -36,7 +60,8 @@ global_configuration:
 
 contrail_configuration:
  CONTRAIL_VERSION: ${CONTRAIL_VERSION}
- CONTROL_NODES: ${IP2_CONT_01}
+ CONTROLLER_NODES: ${IP_CONT_01,IP_CONT_02,IP_CONT_03}
+ CONTROL_NODES: ${IP2_CONT_01,IP2_CONT_02,IP2_CONT_03}
  PHYSICAL_INTERFACE: ${IF2}
  VROUTER_GATEWAY: ${IP2_GW}
  CONFIG_NODEMGR__DEFAULTS__minimum_diskGB: "2"
