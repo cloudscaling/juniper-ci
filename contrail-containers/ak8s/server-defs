@@ -11,7 +11,7 @@ export NET_MAC_VR_PREFIX="52:54:10:12:${JOB_RND}"
 # we always need to create machine for containers build if build is required
 export BUILD_NODE_MEM=2048
 
-export CONT_NODES=3
+export CONT_NODES=1
 export CONT_NODE_MEM=8192
 export COMP_NODES=2
 export COMP_NODE_MEM=6144
