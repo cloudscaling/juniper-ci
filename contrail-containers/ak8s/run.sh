@@ -56,15 +56,11 @@ source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
 IP_VIP=${NET_PREFIX}.254
 IP_CONT_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
-IP_CONT_02=`echo $nodes_cont_ips | cut -d ' ' -f 2`
-IP_CONT_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
 IP_COMP_01=`echo $nodes_comp_ips | cut -d ' ' -f 1`
 IP_COMP_02=`echo $nodes_comp_ips | cut -d ' ' -f 2`
 IP_GW=${NET_PREFIX}.1
 
 IP2_CONT_01=`echo $nodes_cont_ips2 | cut -d ' ' -f 1`
-IP2_CONT_02=`echo $nodes_cont_ips2 | cut -d ' ' -f 2`
-IP2_CONT_03=`echo $nodes_cont_ips2 | cut -d ' ' -f 3`
 IP2_GW=${NET_PREFIX_VR}.1
 
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
