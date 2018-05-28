@@ -372,6 +372,8 @@ else
   sed -i "s/ContrailVrouterPhysicalInterface:.*/ContrailVrouterPhysicalInterface: ${vrouter_iface}/g" $contrail_net_file
   sed -i "s/ContrailVrouterDpdkPhysicalInterface:.*/ContrailVrouterDpdkPhysicalInterface: ${vrouter_iface}/g" $contrail_net_file
   sed -i "s/ContrailVrouterGateway:.*/ContrailVrouterGateway: ${prov_ip}/g" $contrail_net_file
+  # for osp13 it can be in services file
+  sed -i "s/ContrailVrouterGateway:.*/ContrailVrouterGateway: ${prov_ip}/g" $contrail_services_file
 fi
 sed -i "s/ControlVirtualInterface:.*/ControlVirtualInterface: ens3/g" $contrail_net_file
 sed -i "s/PublicVirtualInterface:.*/PublicVirtualInterface: ens3/g" $contrail_net_file
@@ -837,8 +839,9 @@ fi
 docker_opts=''
 if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
 
-  sed -i "s/ContrailRegistry:.*/ContrailRegistry: $CONTRAIL_REGISTRY/g" $contrail_services_file
-  sed -i "s/ContrailImageTag:.*/ContrailImageTag: $CONTRAIL_TAG/g" $contrail_services_file
+  sed -i "s/.*ContrailRegistry:.*/  ContrailRegistry: $CONTRAIL_REGISTRY/g" $contrail_services_file
+  sed -i "s/.*ContrailImageTag:.*/  ContrailImageTag: $CONTRAIL_TAG/g" $contrail_services_file
+  sed -i "s/.*ContrailRegistryInsecure:.*/  ContrailRegistryInsecure: True/g" $contrail_services_file
 
   openstack overcloud container image prepare \
     --namespace docker.io/tripleo${OPENSTACK_VERSION} \
