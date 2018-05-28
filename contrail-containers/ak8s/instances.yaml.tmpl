@@ -17,6 +17,30 @@ instances:
       webui: null
       k8s_master: null
       kubemanager: null
+  server2:
+    ip: ${IP_CONT_02}
+    provider: bms
+    roles:
+      analytics: null
+      analytics_database: null
+      config: null
+      config_database: null
+      control: null
+      webui: null
+      k8s_master: null
+      kubemanager: null
+  server3:
+    ip: ${IP_CONT_03}
+    provider: bms
+    roles:
+      analytics: null
+      analytics_database: null
+      config: null
+      config_database: null
+      control: null
+      webui: null
+      k8s_master: null
+      kubemanager: null
   server4:
     ip: ${IP_COMP_01}
     provider: bms
@@ -36,14 +60,9 @@ global_configuration:
 
 contrail_configuration:
  CONTRAIL_VERSION: ${CONTRAIL_VERSION}
- CONTROLLER_NODES: ${IP_CONT_01}
- CONTROL_NODES: ${IP_CONT_01}
- PHYSICAL_INTERFACE: ${IF1}
+ CONTROLLER_NODES: ${IP_CONT_01},${IP_CONT_02},${IP_CONT_03}
  VROUTER_GATEWAY: ${IP_GW}
  CONFIG_NODEMGR__DEFAULTS__minimum_diskGB: "2"
  DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
- SSL_ENABLE: ${SSL_ENABLE}
  JVM_EXTRA_OPTS: "-Xms1g -Xmx2g"
  LOG_LEVEL: SYS_DEBUG
- VROUTER_ENCRYPTION: false
- KUBERNETES_IP_FABRIC_SUBNETS: "${NET_PREFIX}.0/24"
