@@ -88,8 +88,6 @@ echo "INFO: creating environment $(date)"
 "$my_dir"/create_env.sh
 juju-status-tabular
 
-exit 1
-
 "$my_dir"/deploy_manual.sh
 
 #check it

@@ -57,6 +57,9 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   echo "INFO: controller 3 (Contrail): $cont3 / $cont3_ip"
 fi
 
+( set -o posix ; set ) > $WORKSPACE/env
+exit 1
+
 # OpenStack base
 
 echo "INFO: Deploy all $(date)"
