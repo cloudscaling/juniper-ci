@@ -57,8 +57,7 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   echo "INFO: controller 3 (Contrail): $cont3 / $cont3_ip"
 fi
 
-( set -o posix ; set ) > $WORKSPACE/env
-exit 1
+( set -o posix ; set ) > $log_dir/env
 
 # OpenStack base
 
