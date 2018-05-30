@@ -1,11 +1,11 @@
 #!/bin/bash
 
-fmy_file="${BASH_SOURCE[0]}"
-fmy_dir="$(dirname $fmy_file)"
+ccfmy_file="${BASH_SOURCE[0]}"
+ccfmy_dir="$(dirname $ccfmy_file)"
 
 function save_logs() {
   local cnt_name_pattern="$1"
-  source "$fmy_dir/${HOST}/ssh-defs"
+  source "$ccfmy_dir/${HOST}/ssh-defs"
   set +e
   local ssl_opts=''
   if [[ -n "$SSL_ENABLE" ]] ; then
@@ -14,7 +14,7 @@ function save_logs() {
   # save common docker logs
   local dest=''
   for dest in $nodes_ips ; do
-    timeout -s 9 20s $SCP "$fmy_dir/../__save-docker-logs.sh" ${SSH_USER}@${dest}:save-docker-logs.sh
+    timeout -s 9 20s $SCP "$ccfmy_dir/../__save-docker-logs.sh" ${SSH_USER}@${dest}:save-docker-logs.sh
     if [[ $? == 0 ]] ; then
       $SSH_CMD ${SSH_USER}@${dest} "CNT_NAME_PATTERN='$cnt_name_pattern' $ssl_opts ./save-docker-logs.sh"
     fi
@@ -22,7 +22,7 @@ function save_logs() {
 
   # save env host specific logs
   # (should save into ~/logs folder on the SSH host)
-  $fmy_dir/${HOST}/save-logs.sh
+  $ccfmy_dir/${HOST}/save-logs.sh
 
   # save to workspace
   for dest in $nodes_ips ; do
