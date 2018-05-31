@@ -59,12 +59,7 @@ fi
 # deploy cloud
 source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
-IP_VIP=${NET_PREFIX}.254
 IP_CONT_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
-IP_GW=${NET_PREFIX}.1
-
-IP2_CONT_01=`echo $nodes_cont_ips2 | cut -d ' ' -f 1`
-IP2_GW=${NET_PREFIX_VR}.1
 
 # from juju
 AUTH_IP=`get_machine_ip keystone`

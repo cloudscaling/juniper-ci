@@ -54,17 +54,22 @@ fi
 # deploy cloud
 source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
-IP_VIP=${NET_PREFIX}.254
-IP_CONT_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
-IP_CONT_02=`echo $nodes_cont_ips | cut -d ' ' -f 2`
-IP_CONT_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
-IP_COMP_01=`echo $nodes_comp_ips | cut -d ' ' -f 1`
-IP_GW=${NET_PREFIX}.1
+IP_VM_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
+IP_VM_02=`echo $nodes_cont_ips | cut -d ' ' -f 2`
+IP_VM_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
+IP_VM_01=`echo $nodes_comp_ips | cut -d ' ' -f 1`
 
-IP2_CONT_01=`echo $nodes_cont_ips2 | cut -d ' ' -f 1`
-IP2_CONT_02=`echo $nodes_cont_ips2 | cut -d ' ' -f 2`
-IP2_CONT_03=`echo $nodes_cont_ips2 | cut -d ' ' -f 3`
-IP2_GW=${NET_PREFIX_VR}.1
+IP_VIP=10.$((NET_BASE_PREFIX+1)).$JOB_RND.254
+IP_CONT_01=`echo ${nodes_cont_ips}_1 | cut -d ' ' -f 1`
+IP_CONT_02=`echo ${nodes_cont_ips}_1 | cut -d ' ' -f 2`
+IP_CONT_03=`echo ${nodes_cont_ips}_1 | cut -d ' ' -f 3`
+API_IF=ens4
+
+IP2_CONT_01=`echo ${nodes_cont_ips}_2 | cut -d ' ' -f 1`
+IP2_CONT_02=`echo ${nodes_cont_ips}_2 | cut -d ' ' -f 2`
+IP2_CONT_03=`echo ${nodes_cont_ips}_2 | cut -d ' ' -f 3`
+VROUTER_IF=ens5
+VROUTER_GW=10.$((NET_BASE_PREFIX+2)).$JOB_RND.254.1
 
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
 templ=$(cat $my_dir/instances.yaml.tmpl)

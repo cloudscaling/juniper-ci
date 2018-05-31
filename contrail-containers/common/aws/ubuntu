@@ -11,6 +11,9 @@ export IMAGE_ID=ami-0a00ce72
 export IFCONFIG_PATH=/sbin
 export IF1=ens3
 export IF2=ens4
+export IF3=ens5
+export IF4=ens6
+export IF5=ens7
 
 function create_iface() {
   local iface=$1
