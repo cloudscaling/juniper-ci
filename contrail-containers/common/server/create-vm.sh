@@ -213,7 +213,7 @@ set -x
 mkdir -p $logs_dir
 if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
   rm -f /etc/sysconfig/network-scripts/ifcfg-eth0
-  for ((j=1; j<NET_COUNT; ++j)); do
+  for ((j=1; j<$NET_COUNT; ++j)); do
     if_name="ens\$((3+j))"
     mac_if=\$(ip link show \${if_name} | awk '/link/{print \$2}')
     cat <<EOM > /etc/sysconfig/network-scripts/ifcfg-\${if_name}
@@ -234,7 +234,7 @@ EOM
   systemctl disable chronyd.service
   systemctl enable ntpd.service && systemctl start ntpd.service
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
-  for ((j=1; j<NET_COUNT; ++j)); do
+  for ((j=1; j<$NET_COUNT; ++j)); do
     if_name="ens\$((3+j))"
     cat <<EOM > /etc/network/interfaces.d/\${if_name}.cfg
 auto \${if_name}
