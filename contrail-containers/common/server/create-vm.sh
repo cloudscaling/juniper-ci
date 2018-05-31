@@ -240,7 +240,7 @@ auto \${if_name}
 iface \${if_name} inet dhcp
 EOM
     ifup \${if_name}
-  fi
+  done
   apt-get -y update &>>$logs_dir/apt.log
   DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$logs_dir/apt.log
   apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 lsof python-pip python-dev gcc linux-image-extra-\$(uname -r) &>>$logs_dir/apt.log
