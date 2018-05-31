@@ -209,7 +209,6 @@ EOM
   chmod 600 /home/$SSH_USER/.ssh/id_rsa.pub
 fi
 
-set -x
 mkdir -p $logs_dir
 if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
   rm -f /etc/sysconfig/network-scripts/ifcfg-eth0
