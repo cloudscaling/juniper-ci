@@ -71,6 +71,7 @@ content=$(eval "echo \"$templ\"")
 echo "$content" > $config
 echo "INFO: cloud config ------------------------- $(date)"
 cat $config
+cp $config $WORKSPACE/logs/
 
 image=`docker images -a -q centos-soft`
 if [[ -z "$image" ]]; then
