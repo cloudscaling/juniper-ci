@@ -263,7 +263,7 @@ done
 
 # update env file with IP-s from other interfaces
 for ((j=1; j<NET_COUNT; ++j)); do
-  declare -a ips ips_cont ips_comp ; ips=() ; ips_cont=() ; ip_comp=()
+  declare -a ips ips_cont ips_comp ; ips=() ; ips_cont=() ; ips_comp=()
   for (( i=0; i<${CONT_NODES}; ++i )); do
     ip=`get_ip_by_mac ${NET_NAME}_$j 52:54:10:$((NET_BASE_PREFIX+j)):${JOB_RND}:0$i`
     echo "INFO: controller node #$i, IP $ip (network ${NET_NAME}_$j)"

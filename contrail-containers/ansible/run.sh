@@ -57,7 +57,7 @@ source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 IP_VM_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
 IP_VM_02=`echo $nodes_cont_ips | cut -d ' ' -f 2`
 IP_VM_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
-IP_VM_01=`echo $nodes_comp_ips | cut -d ' ' -f 1`
+IP_VM_04=`echo $nodes_comp_ips | cut -d ' ' -f 1`
 
 IP_VIP=10.$((NET_BASE_PREFIX+1)).$JOB_RND.254
 IP_CONT_01=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 1`
