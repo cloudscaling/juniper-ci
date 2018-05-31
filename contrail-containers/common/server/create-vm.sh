@@ -38,8 +38,9 @@ source "$my_dir/${ENVIRONMENT_OS}"
 trap 'catch_errors_cvmb $LINENO' ERR
 function catch_errors_cvmb() {
   local exit_code=$?
-  echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
   trap - ERR
+  echo "Line: $1  Error=$exit_code"
+  echo "Command: '$(eval echo \"$BASH_COMMAND\")'"
   exit $exit_code
 }
 
@@ -63,18 +64,12 @@ for (( i=0; i<${COMP_NODES}; ++i )); do
   assert_env_exists "${VM_NAME}_comp_$i"
 done
 
-# NET_COUNT
-# NET_BASE_PREFIX
-# NET_PREFIX="10.$NET_BASE_PREFIX.$JOB_RND"
-# NET_ADDR="$NET_PREFIX.0"
-# NET_MAC_PREFIX="52:54:10:${NET_BASE_PREFIX}:${JOB_RND}"
-
 # re-create networks
 delete_network_dhcp $NET_NAME
 create_network_dhcp $NET_NAME 10.$NET_BASE_PREFIX.$JOB_RND.0 $BRIDGE_NAME
-for ((i=1; i<NET_COUNT; ++i)); do
-  delete_network_dhcp ${NET_NAME}_$i
-  create_network_dhcp ${NET_NAME}_$i 10.$((NET_BASE_PREFIX+i)).$JOB_RND.0 ${BRIDGE_NAME}_$i
+for ((j=1; j<NET_COUNT; ++j)); do
+  delete_network_dhcp ${NET_NAME}_$j
+  create_network_dhcp ${NET_NAME}_$j 10.$((NET_BASE_PREFIX+j)).$JOB_RND.0 ${BRIDGE_NAME}_$j
 done
 
 # create pool
@@ -88,8 +83,8 @@ function define_node() {
   delete_volume $vol_name $POOL_NAME
   local vol_path=$(create_volume_from $vol_name $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
   local net="$NET_NAME/52:54:10:${NET_BASE_PREFIX}:${JOB_RND}:$mac_octet"
-  for ((i=1; i<NET_COUNT; ++i)); do
-    net="$net,${NET_NAME}_$i/52:54:10:$((NET_BASE_PREFIX+i)):${JOB_RND}:$mac_octet"
+  for ((j=1; j<NET_COUNT; ++j)); do
+    net="$net,${NET_NAME}_$j/52:54:10:$((NET_BASE_PREFIX+j)):${JOB_RND}:$mac_octet"
   done
   define_machine $vm_name $VCPUS $mem $OS_VARIANT $net $vol_path $DISK_SIZE
 }
@@ -217,8 +212,8 @@ fi
 mkdir -p $logs_dir
 if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
   rm -f /etc/sysconfig/network-scripts/ifcfg-eth0
-  for ((i=1; i<NET_COUNT; ++i)); do
-    if_name="ens\$((3+i))"
+  for ((j=1; j<NET_COUNT; ++j)); do
+    if_name="ens\$((3+j))"
     mac_if=\$(ip link show \${if_name} | awk '/link/{print \$2}')
     cat <<EOM > /etc/sysconfig/network-scripts/ifcfg-\${if_name}
 BOOTPROTO=dhcp
@@ -238,8 +233,8 @@ EOM
   systemctl disable chronyd.service
   systemctl enable ntpd.service && systemctl start ntpd.service
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
-  for ((i=1; i<NET_COUNT; ++i)); do
-    if_name="ens\$((3+i))"
+  for ((j=1; j<NET_COUNT; ++j)); do
+    if_name="ens\$((3+j))"
     cat <<EOM > /etc/network/interfaces.d/\${if_name}.cfg
 auto \${if_name}
 iface \${if_name} inet dhcp

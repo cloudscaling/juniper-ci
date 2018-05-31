@@ -1,6 +1,6 @@
 export JOB_RND=$((RANDOM % 90 + 10))
 
-export NET_COUNT=2
+export NET_COUNT=3
 export NET_BASE_PREFIX=20
 
 # we always need to create machine for containers build if build is required
