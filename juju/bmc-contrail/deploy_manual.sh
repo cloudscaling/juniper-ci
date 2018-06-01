@@ -166,9 +166,10 @@ juju-attach contrail-analyticsdb contrail-analyticsdb="$HOME/docker/$image_analy
 echo "INFO: Attach contrail-analytics container $(date)"
 juju-attach contrail-analytics contrail-analytics="$HOME/docker/$image_analytics"
 
-juju-set contrail-controller docker-image-name="$repo_ip:$repo_port/contrail-controller" registry-address="$repo_ip:$repo_port"
-juju-set contrail-analyticsdb docker-image-name="$repo_ip:$repo_port/contrail-analyticsdb" registry-address="$repo_ip:$repo_port"
-juju-set contrail-analytics docker-image-name="$repo_ip:$repo_port/contrail-analytics" registry-address="$repo_ip:$repo_port"
+# TODO(tikitavi): uncomment after merging commmits to Juniper/contrail-charms
+#juju-set contrail-controller docker-image-name="$repo_ip:$repo_port/contrail-controller" registry-address="$repo_ip:$repo_port" registry-insecure=true
+#juju-set contrail-analyticsdb docker-image-name="$repo_ip:$repo_port/contrail-analyticsdb" registry-address="$repo_ip:$repo_port" registry-insecure=true
+#juju-set contrail-analytics docker-image-name="$repo_ip:$repo_port/contrail-analytics" registry-address="$repo_ip:$repo_port" registry-insecure=true
 
 echo "INFO: Add relations $(date)"
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
