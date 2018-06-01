@@ -1,5 +1,6 @@
 export JOB_RND=$((RANDOM % 90 + 10))
-export NET_ADDR=${NET_ADDR:-"10.7.$JOB_RND.0"}
+export NET_COUNT=1
+export NET_BASE_PREFIX=35
 
 echo "ERROR: server deployment is not supported"
 exit 1

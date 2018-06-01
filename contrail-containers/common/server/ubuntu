@@ -3,3 +3,6 @@ OS_VARIANT='ubuntu16.04'
 
 export IF1=ens3
 export IF2=ens4
+export IF3=ens5
+export IF4=ens6
+export IF5=ens7

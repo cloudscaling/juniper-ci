@@ -45,5 +45,8 @@ for job in $existed_jobs ; do
     delete_node $i
   done
   delete_network_dhcp $NET_NAME
-  delete_network_dhcp $NET_NAME_VR
+  delete_network_dhcp ${NET_NAME}_1
+  delete_network_dhcp ${NET_NAME}_2
+  delete_network_dhcp ${NET_NAME}_3
+  delete_network_dhcp ${NET_NAME}_4
 done

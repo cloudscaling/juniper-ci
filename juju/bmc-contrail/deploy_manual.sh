@@ -28,6 +28,14 @@ echo "INFO: apt-repo is ready"
 repo_key=`curl -s http://$repo_ip/ubuntu/repo.key`
 repo_key=`echo "$repo_key" | awk '{printf("      %s\r", $0)}'`
 
+# prepare registry for contrail packages
+repo_port='5000'
+echo "INFO: Prepare local registry on $mrepo"
+ssh $mrepo mkdir docker_images
+scp $HOME/docker/contrail-* "$mrepo:docker_images/"
+scp "$my_dir/../common/prepare-registry.sh" $mrepo:prepare-registry.sh
+ssh $mrepo ./prepare-registry.sh $repo_port
+
 comp1_ip="$addr.$os_comp_1_idx"
 comp1=`get_machine_by_ip $comp1_ip`
 echo "INFO: compute 1: $comp1 / $comp1_ip"
@@ -56,6 +64,8 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   cont3=`get_machine_by_ip $cont3_ip`
   echo "INFO: controller 3 (Contrail): $cont3 / $cont3_ip"
 fi
+
+( set -o posix ; set ) > $log_dir/env
 
 # OpenStack base
 
@@ -148,12 +158,17 @@ wait_for_machines $m1 $m2 $m3 $m4 $m5
 echo "INFO: Apply SSL flag if set $(date)"
 apply_ssl
 
+# TODO(tikitavi): remove after merging commmits to Juniper/contrail-charms
 echo "INFO: Attach contrail-controller container $(date)"
 juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
 echo "INFO: Attach contrail-analyticsdb container $(date)"
 juju-attach contrail-analyticsdb contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
 echo "INFO: Attach contrail-analytics container $(date)"
 juju-attach contrail-analytics contrail-analytics="$HOME/docker/$image_analytics"
+
+juju-set contrail-controller docker-image-name="$repo_ip:$repo_port/contrail-controller" registry-address="$repo_ip:$repo_port"
+juju-set contrail-analyticsdb docker-image-name="$repo_ip:$repo_port/contrail-analyticsdb" registry-address="$repo_ip:$repo_port"
+juju-set contrail-analytics docker-image-name="$repo_ip:$repo_port/contrail-analytics" registry-address="$repo_ip:$repo_port"
 
 echo "INFO: Add relations $(date)"
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"

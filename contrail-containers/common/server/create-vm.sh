@@ -11,10 +11,6 @@ if [[ -z "$WAY" ]] ; then
   echo "WAY variable is expected: helm/k8s/kolla"
   exit -1
 fi
-if [[ -z "$NET_ADDR" ]] ; then
-  echo "NET_ADDR variable is expected: e.g. 192.168.222.0"
-  exit -1
-fi
 if [[ -z "$ENVIRONMENT_OS" ]] ; then
   echo "ENVIRONMENT_OS is expected (e.g. export ENVIRONMENT_OS=centos)"
   exit 1
@@ -29,6 +25,11 @@ if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
     exit 1
   fi
 fi
+NET_COUNT=${NET_COUNT:-1}
+if (( NET_COUNT > 4 )); then
+  echo "NET_COUNT more than 4 is not supported"
+  exit 1
+fi
 
 export ENV_FILE="$WORKSPACE/cloudrc"
 source "$my_dir/definitions"
@@ -37,8 +38,9 @@ source "$my_dir/${ENVIRONMENT_OS}"
 trap 'catch_errors_cvmb $LINENO' ERR
 function catch_errors_cvmb() {
   local exit_code=$?
-  echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
   trap - ERR
+  echo "Line: $1  Error=$exit_code"
+  echo "Command: '$(eval echo \"$BASH_COMMAND\")'"
   exit $exit_code
 }
 
@@ -62,14 +64,13 @@ for (( i=0; i<${COMP_NODES}; ++i )); do
   assert_env_exists "${VM_NAME}_comp_$i"
 done
 
-# re-create network
+# re-create networks
 delete_network_dhcp $NET_NAME
-create_network_dhcp $NET_NAME $NET_ADDR $BRIDGE_NAME
-# second network can be used for vrouter
-if [[ -n "$NET_ADDR_VR" ]]; then
-  delete_network_dhcp $NET_NAME_VR
-  create_network_dhcp $NET_NAME_VR $NET_ADDR_VR $BRIDGE_NAME_VR
-fi
+create_network_dhcp $NET_NAME 10.$NET_BASE_PREFIX.$JOB_RND.0 $BRIDGE_NAME
+for ((j=1; j<NET_COUNT; ++j)); do
+  delete_network_dhcp ${NET_NAME}_$j
+  create_network_dhcp ${NET_NAME}_$j 10.$((NET_BASE_PREFIX+j)).$JOB_RND.0 ${BRIDGE_NAME}_$j
+done
 
 # create pool
 create_pool $POOL_NAME
@@ -81,10 +82,10 @@ function define_node() {
   local vol_name="$vm_name.qcow2"
   delete_volume $vol_name $POOL_NAME
   local vol_path=$(create_volume_from $vol_name $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
-  local net="$NET_NAME/$NET_MAC_PREFIX:$mac_octet"
-  if [[ -n "$NET_ADDR_VR" ]]; then
-    net="$net,$NET_NAME_VR/$NET_MAC_VR_PREFIX:$mac_octet"
-  fi
+  local net="$NET_NAME/52:54:10:${NET_BASE_PREFIX}:${JOB_RND}:$mac_octet"
+  for ((j=1; j<NET_COUNT; ++j)); do
+    net="$net,${NET_NAME}_$j/52:54:10:$((NET_BASE_PREFIX+j)):${JOB_RND}:$mac_octet"
+  done
   define_machine $vm_name $VCPUS $mem $OS_VARIANT $net $vol_path $DISK_SIZE
 }
 
@@ -111,18 +112,18 @@ done
 all_nodes_count=$((build_vm + CONT_NODES + COMP_NODES))
 _ips=( $(wait_dhcp $NET_NAME $all_nodes_count ) )
 if [[ $REGISTRY == 'build' ]]; then
-  build_ip=`get_ip_by_mac $NET_NAME $NET_MAC_PREFIX:ff`
+  build_ip=`get_ip_by_mac $NET_NAME 52:54:10:${NET_BASE_PREFIX}:${JOB_RND}:ff`
 fi
 # collect controller ips first and compute ips next
 declare -a ips ips_cont ips_comp
 for (( i=0; i<${CONT_NODES}; ++i )); do
-  ip=`get_ip_by_mac $NET_NAME $NET_MAC_PREFIX:0$i`
+  ip=`get_ip_by_mac $NET_NAME 52:54:10:${NET_BASE_PREFIX}:${JOB_RND}:0$i`
   echo "INFO: controller node #$i, IP $ip (network $NET_NAME)"
   ips=( ${ips[@]} $ip )
   ips_cont=( ${ips_cont[@]} $ip )
 done
 for (( i=0; i<${COMP_NODES}; ++i )); do
-  ip=`get_ip_by_mac $NET_NAME $NET_MAC_PREFIX:1$i`
+  ip=`get_ip_by_mac $NET_NAME 52:54:10:${NET_BASE_PREFIX}:${JOB_RND}:1$i`
   echo "INFO: compute node #$i, IP $ip (network $NET_NAME)"
   ips=( ${ips[@]} $ip )
   ips_comp=( ${ips_comp[@]} $ip )
@@ -211,19 +212,20 @@ fi
 mkdir -p $logs_dir
 if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
   rm -f /etc/sysconfig/network-scripts/ifcfg-eth0
-  if [[ -n "$NET_ADDR_VR" ]]; then
-    mac_if2=\$(ip link show ens4 | awk '/link/{print \$2}')
-    cat <<EOM > /etc/sysconfig/network-scripts/ifcfg-ens4
+  for ((j=1; j<$NET_COUNT; ++j)); do
+    if_name="ens\$((3+j))"
+    mac_if=\$(ip link show \${if_name} | awk '/link/{print \$2}')
+    cat <<EOM > /etc/sysconfig/network-scripts/ifcfg-\${if_name}
 BOOTPROTO=dhcp
-DEVICE=ens4
-HWADDR=\$mac_if2
+DEVICE=\${if_name}
+HWADDR=\$mac_if
 ONBOOT=yes
 TYPE=Ethernet
 USERCTL=no
 DEFROUTE=no
 EOM
-    ifup ens4
-  fi
+    ifup \${if_name}
+  done
   yum update -y &>>$logs_dir/yum.log
   yum install -y epel-release &>>$logs_dir/yum.log
   yum install -y mc git wget ntp ntpdate iptables iproute libxml2-utils python2.7 lsof python-pip python-devel gcc&>>$logs_dir/yum.log
@@ -231,13 +233,14 @@ EOM
   systemctl disable chronyd.service
   systemctl enable ntpd.service && systemctl start ntpd.service
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
-  if [[ -n "$NET_ADDR_VR" ]]; then
-    cat <<EOM > /etc/network/interfaces.d/ens4.cfg
-auto ens4
-iface ens4 inet dhcp
+  for ((j=1; j<$NET_COUNT; ++j)); do
+    if_name="ens\$((3+j))"
+    cat <<EOM > /etc/network/interfaces.d/\${if_name}.cfg
+auto \${if_name}
+iface \${if_name} inet dhcp
 EOM
-    ifup ens4
-  fi
+    ifup \${if_name}
+  done
   apt-get -y update &>>$logs_dir/apt.log
   DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$logs_dir/apt.log
   apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 lsof python-pip python-dev gcc linux-image-extra-\$(uname -r) &>>$logs_dir/apt.log
@@ -258,26 +261,28 @@ for ip in ${ips[@]} ; do
   wait_ssh $ip
 done
 
-# update env file with IP-s from second interface
-declare -a ips2 ips2_cont ips2_comp
-for (( i=0; i<${COMP_NODES}; ++i )); do
-  ip=`get_ip_by_mac $NET_NAME_VR $NET_MAC_VR_PREFIX:1$i`
-  echo "INFO: compute node #$i, IP $ip (network $NET_NAME_VR)"
-  ips2=( ${ips2[@]} $ip )
-  ips2_comp=( ${ips2_comp[@]} $ip )
-done
-for (( i=0; i<${CONT_NODES}; ++i )); do
-  ip=`get_ip_by_mac $NET_NAME_VR $NET_MAC_VR_PREFIX:0$i`
-  echo "INFO: controller node #$i, IP $ip (network $NET_NAME_VR)"
-  ips2=( ${ips2[@]} $ip )
-  ips2_cont=( ${ips2_cont[@]} $ip )
-done
+# update env file with IP-s from other interfaces
+for ((j=1; j<NET_COUNT; ++j)); do
+  declare -a ips ips_cont ips_comp ; ips=() ; ips_cont=() ; ips_comp=()
+  for (( i=0; i<${CONT_NODES}; ++i )); do
+    ip=`get_ip_by_mac ${NET_NAME}_$j 52:54:10:$((NET_BASE_PREFIX+j)):${JOB_RND}:0$i`
+    echo "INFO: controller node #$i, IP $ip (network ${NET_NAME}_$j)"
+    ips=( ${ips[@]} $ip )
+    ips_cont=( ${ips_cont[@]} $ip )
+  done
+  for (( i=0; i<${COMP_NODES}; ++i )); do
+    ip=`get_ip_by_mac ${NET_NAME}_$j 52:54:10:$((NET_BASE_PREFIX+j)):${JOB_RND}:1$i`
+    echo "INFO: compute node #$i, IP $ip (network ${NET_NAME}_$j)"
+    ips=( ${ips[@]} $ip )
+    ips_comp=( ${ips_comp[@]} $ip )
+  done
 
-cat <<EOF >>$ENV_FILE
-nodes_ips2="${ips2[@]}"
-nodes_cont_ips2="${ips2_cont[@]}"
-nodes_comp_ips2="${ips2_comp[@]}"
+  cat <<EOF >>$ENV_FILE
+nodes_ips_${j}="${ips[@]}"
+nodes_cont_ips_${j}="${ips_cont[@]}"
+nodes_comp_ips_${j}="${ips_comp[@]}"
 EOF
+done
 
 echo "INFO: environment file:"
 cat $ENV_FILE

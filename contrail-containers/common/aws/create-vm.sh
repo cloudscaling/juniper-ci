@@ -3,6 +3,12 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
+NET_COUNT=${NET_COUNT:-2}
+if (( NET_COUNT > 2 )) ; then
+  echo "NET_COUNT more than 2 is not supported."
+  exit 1
+fi
+
 SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
 ENV_FILE="$WORKSPACE/cloudrc"
 

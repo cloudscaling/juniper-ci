@@ -8,10 +8,8 @@ export VCPUS=4
 export POOL_NAME="$WAY"
 export VM_NAME="$prefix-$suffix"
 export NET_NAME="$prefix-$suffix"
-export NET_NAME_VR="$prefix-$suffix-vr"
 # length of bridge name is limited to 15 chars
 export BRIDGE_NAME="${WAY:0:4}-${ENVIRONMENT_OS:0:1}-$suffix"
-export BRIDGE_NAME_VR="${WAY:0:4}-${ENVIRONMENT_OS:0:1}-$suffix-vr"
 
 export DISK_SIZE=${DISK_SIZE:-'128'}
 export NET_DRIVER=${NET_DRIVER:-'e1000'}

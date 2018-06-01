@@ -15,6 +15,13 @@ fi
 # save contrail files
 mkdir -p logs
 sudo chown -R $USER logs
+
+if [ -d /etc/contrail ]; then
+  mkdir -p logs/etc
+  cp -R /etc/contrail logs/etc/
+  chown -R $USER logs/etc
+fi
+
 mkdir -p logs/contrail
 pushd logs/contrail
 for cnt in `sudo docker ps | grep contrail | grep -v pause | awk '{print $1}'` ; do
