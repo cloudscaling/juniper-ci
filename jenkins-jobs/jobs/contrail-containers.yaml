@@ -110,21 +110,22 @@
 - project:
     name: contrail-containers
     project:
-      - helm-aws-ubuntu:
-          slavenode:
-            - master
+# helm on aws - need to fix domain suffix at node labeling stage
+#      - helm-aws-ubuntu:
+#          slavenode:
+#            - master
       - helm-server-ubuntu:
           slavenode:
             - slave01
             - slave04
-      - k8s-server-centos:
-          slavenode:
-            - slave01
-            - slave04
-      - k8s-server-ubuntu:
-          slavenode:
-            - slave01
-            - slave04
+#      - k8s-server-centos:
+#          slavenode:
+#            - slave01
+#            - slave04
+#      - k8s-server-ubuntu:
+#          slavenode:
+#            - slave01
+#            - slave04
       - ansible-server-centos:
           slavenode:
             - slave01
@@ -141,20 +142,15 @@
           slavenode:
             - slave01
             - slave04
-      - kolla-aws-centos:
-          slavenode:
-            - master
-      - kolla-aws-ubuntu:
-          slavenode:
-            - master
+#      - kolla-aws-centos:
+#          slavenode:
+#            - master
+#      - kolla-aws-ubuntu:
+#          slavenode:
+#            - master
       - ajupg-server-ubuntu:
           slavenode:
             - slave01
             - slave04
-
-# for old packages use this additions:
-#          contrail_version: 4.1.0.0-8
-#          packages_url: ''
-
     jobs:
       - 'contrail-{project}'
