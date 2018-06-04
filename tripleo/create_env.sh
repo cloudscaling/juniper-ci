@@ -158,15 +158,22 @@ function define_overcloud_vms() {
   fi
 }
 
+CTRL_MEM=8192
+COMP_MEM=4096
+if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
+  CTRL_MEM=16384
+  COMP_MEM=8192
+fi
+
 # just define overcloud machines
 vbmc_port=$VBMC_PORT_BASE
 define_overcloud_vms 'cont' $CONTROLLER_COUNT 8192 $vbmc_port
 (( vbmc_port+=CONTROLLER_COUNT ))
-define_overcloud_vms $compute_machine_name $COMPUTE_COUNT 4096 $vbmc_port
+define_overcloud_vms $compute_machine_name $COMPUTE_COUNT $COMP_MEM $vbmc_port
 (( vbmc_port+=COMPUTE_COUNT ))
 define_overcloud_vms 'stor' $STORAGE_COUNT 4096 $vbmc_port
 (( vbmc_port+=STORAGE_COUNT ))
-define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT 8192 $vbmc_port
+define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT $CTRL_MEM $vbmc_port
 (( vbmc_port+=CONTRAIL_CONTROLLER_COUNT ))
 define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT 4096 $vbmc_port
 (( vbmc_port+=CONTRAIL_ANALYTICS_COUNT ))
