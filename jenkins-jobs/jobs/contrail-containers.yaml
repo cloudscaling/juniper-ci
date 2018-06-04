@@ -110,14 +110,14 @@
 - project:
     name: contrail-containers
     project:
-      - helm-aws-ubuntu:
-          slavenode:
-            - master
 # helm on aws - need to fix domain suffix at node labeling stage
-#      - helm-server-ubuntu:
+#      - helm-aws-ubuntu:
 #          slavenode:
-#            - slave01
-#            - slave04
+#            - master
+      - helm-server-ubuntu:
+          slavenode:
+            - slave01
+            - slave04
 #      - k8s-server-centos:
 #          slavenode:
 #            - slave01
