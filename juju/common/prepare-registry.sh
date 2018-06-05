@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+repo_ip=$1
+
 sudo apt-get update
 sudo apt-get install \
     apt-transport-https \
@@ -20,6 +22,16 @@ sudo docker run -d --restart=always --name registry_5000\
   -e REGISTRY_HTTP_ADDR=0.0.0.0:5000 -p 5000:5000 \
   registry:2
 
+# Configuring Docker
+cat << EOF >> /etc/docker/daemon.json
+{
+  "insecure-registries" : ["${repo_ip}:5000"]
+}
+EOF
+
+systemctl daemon-reload
+service docker restart
+
 for ff in `ls ./docker_images/*` ; do
   echo "Loading $ff"
   docker load -i $ff
@@ -29,7 +41,7 @@ for ii in "contrail-controller" "contrail-analytics" "contrail-analyticsdb" ; do
   image_id=`docker images | grep ${ii}- | awk '{print $3}'`
   image_name=`docker images | grep ${ii}- | awk '{print $1}'`
   image_tag=`docker images | grep ${ii}- | awk '{print $2}'`
-  docker tag $image_id localhost:5000/$image_name:$image_tag
+  docker tag $image_id ${repo_ip}:5000/$image_name:$image_tag
   echo "INFO: Pushing $image_name:$image_tag to local registry"
-  docker push localhost:5000/$image_name:$image_tag
+  docker push ${repo_ip}:5000/$image_name:$image_tag
 done
