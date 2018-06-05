@@ -1,22 +1,24 @@
-apt install -y docker.io
+#!/bin/bash -e
 
-port=$1
-registry_name="registry_${port}"
-if ! sudo docker ps --all | grep -q "${registry_name}" ; then
-  echo "Start new Docker Registry on port $port"
-  sudo docker run -d --restart=always --name $registry_name\
-    -v /opt:/var/lib/registry:Z \
-    -e REGISTRY_HTTP_ADDR=0.0.0.0:$port -p $port:$port \
-    registry:2
-else
-  if ! sudo docker ps | grep -q "${registry_name}" ; then
-    id=`sudo docker ps --all | grep "${registry_name}" | awk '{print($1)}'`
-    echo "Docker Registry on port $port is already created but stopped, start it"
-    sudo docker start $id
-  else
-    echo "Docker Registry is already started with port $port"
-  fi
-fi
+sudo apt-get update
+sudo apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+sudo apt-get update
+sudo apt-get install -y docker-ce
+
+echo "Start new Docker Registry"
+sudo docker run -d --restart=always --name registry_5000\
+  -v /opt:/var/lib/registry:Z \
+  -e REGISTRY_HTTP_ADDR=0.0.0.0:5000 -p 5000:5000 \
+  registry:2
 
 for ff in `ls ./docker_images/*` ; do
   echo "Loading $ff"
@@ -24,8 +26,10 @@ for ff in `ls ./docker_images/*` ; do
 done
 
 for ii in "contrail-controller" "contrail-analytics" "contrail-analyticsdb" ; do
-  image_id=`docker images | grep $ii- | awk '{print $3}'`
-  docker tag $image_id localhost:$port/$ii:latest
-  echo "INFO: Pushing $ii to local registry"
-  docker push localhost:$port/$ii:latest
+  image_id=`docker images | grep ${ii}- | awk '{print $3}'`
+  image_name=`docker images | grep ${ii}- | awk '{print $1}'`
+  image_tag=`docker images | grep ${ii}- | awk '{print $2}'`
+  docker tag $image_id localhost:5000/$image_name:$image_tag
+  echo "INFO: Pushing $image_name:$image_tag to local registry"
+  docker push localhost:5000/$image_name:$image_tag
 done
