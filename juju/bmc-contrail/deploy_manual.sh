@@ -166,17 +166,17 @@ echo "INFO: Apply SSL flag if set $(date)"
 apply_ssl
 
 # TODO(tikitavi): remove after merging commmits to Juniper/contrail-charms
-echo "INFO: Attach contrail-controller container $(date)"
-juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
-echo "INFO: Attach contrail-analyticsdb container $(date)"
-juju-attach contrail-analyticsdb contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
-echo "INFO: Attach contrail-analytics container $(date)"
-juju-attach contrail-analytics contrail-analytics="$HOME/docker/$image_analytics"
+#echo "INFO: Attach contrail-controller container $(date)"
+#juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
+#echo "INFO: Attach contrail-analyticsdb container $(date)"
+#juju-attach contrail-analyticsdb contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
+#echo "INFO: Attach contrail-analytics container $(date)"
+#juju-attach contrail-analytics contrail-analytics="$HOME/docker/$image_analytics"
 
 # TODO(tikitavi): uncomment after merging commmits to Juniper/contrail-charms
-#juju-set contrail-controller docker-image-name="$docker_controller_name" docker-image-tag="$docker_image_tag" registry-address="$repo_ip:5000" registry-insecure=true
-#juju-set contrail-analyticsdb docker-image-name="$docker_analyticsdb_name" docker-image-tag="$docker_image_tag" registry-address="$repo_ip:5000" registry-insecure=true
-#juju-set contrail-analytics docker-image-name="$docker_analytics_name" docker-image-tag="$docker_image_tag" registry-address="$repo_ip:5000" registry-insecure=true
+juju-set contrail-controller docker-image-name="$docker_controller_name" docker-image-tag="$docker_image_tag" registry-address="$repo_ip:5000" registry-insecure=true
+juju-set contrail-analyticsdb docker-image-name="$docker_analyticsdb_name" docker-image-tag="$docker_image_tag" registry-address="$repo_ip:5000" registry-insecure=true
+juju-set contrail-analytics docker-image-name="$docker_analytics_name" docker-image-tag="$docker_image_tag" registry-address="$repo_ip:5000" registry-insecure=true
 
 echo "INFO: Add relations $(date)"
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
