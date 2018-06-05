@@ -16,28 +16,28 @@ instances:
      config_database: null
      control: null
      webui: null
-# server2:
-#  ip: ${IP_VM_02}
-#  provider: bms
-#  roles:
-#     openstack: null
-#     analytics: null
-#     analytics_database: null
-#     config: null
-#     config_database: null
-#     control: null
-#     webui: null
-# server3:
-#  ip: ${IP_VM_03}
-#  provider: bms
-#  roles:
-#     openstack: null
-#     analytics: null
-#     analytics_database: null
-#     config: null
-#     config_database: null
-#     control: null
-#     webui: null
+ server2:
+  ip: ${IP_VM_02}
+  provider: bms
+  roles:
+     openstack: null
+     analytics: null
+     analytics_database: null
+     config: null
+     config_database: null
+     control: null
+     webui: null
+ server3:
+  ip: ${IP_VM_03}
+  provider: bms
+  roles:
+     openstack: null
+     analytics: null
+     analytics_database: null
+     config: null
+     config_database: null
+     control: null
+     webui: null
  server4:
   ip: ${IP_VM_04}
   provider: bms
@@ -50,14 +50,10 @@ global_configuration:
  CONTAINER_REGISTRY: ${CONTAINER_REGISTRY}
 
 contrail_configuration:
-# CONTRAIL_VERSION: ${CONTRAIL_VERSION}
-# METADATA_PROXY_SECRET: c0ntrail123
-# CONTROLLER_NODES: ${IP_CONT_01},${IP_CONT_02},${IP_CONT_03}
-# CONTROL_NODES: ${IP2_CONT_01},${IP2_CONT_02},${IP2_CONT_03}
- CONTROLLER_NODES: ${IP_CONT_01}
- CONTROL_NODES: ${IP2_CONT_01}
+ CONTRAIL_VERSION: ${CONTRAIL_VERSION}
+ CONTROLLER_NODES: ${IP_CONT_01},${IP_CONT_02},${IP_CONT_03}
+ CONTROL_NODES: ${IP2_CONT_01},${IP2_CONT_02},${IP2_CONT_03}
  AUTH_MODE: keystone
-# KEYSTONE_AUTH_ADMIN_PASSWORD: password
  KEYSTONE_AUTH_URL_VERSION: "/v3"
  RABBITMQ_NODE_PORT: 5673
  AAA_MODE: cloud-admin
@@ -71,14 +67,13 @@ contrail_configuration:
 
 kolla_config:
  kolla_globals:
-#   kolla_internal_vip_address: ${IP_VIP}
-#   kolla_external_vip_address: ${IP_VIP}
+   kolla_internal_vip_address: ${IP_VIP}
+   kolla_external_vip_address: ${OS_VIP}
 #   network_interface: ${API_IF}
 #   kolla_external_vip_interface: ${API_IF}
    contrail_api_interface_address: ${IP_CONT_01}
    enable_ironic: "no"
    enable_swift: "no"
-   enable_haproxy: "no"
  kolla_passwords:
    metadata_secret: c0ntrail123
    keystone_admin_password: password
