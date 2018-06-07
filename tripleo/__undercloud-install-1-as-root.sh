@@ -87,6 +87,12 @@ if [[ "$ENVIRONMENT_OS" != 'rhel' || "$OPENSTACK_VERSION" == 'queens' ]] ; then
   tripeo_repos=`python -c 'import requests;r = requests.get("https://trunk.rdoproject.org/centos7-queens/current"); print r.text ' | grep python2-tripleo-repos | awk -F"href=\"" '{print $2}' | awk -F"\"" '{print $1}'`
   yum install -y https://trunk.rdoproject.org/centos7-queens/current/${tripeo_repos}
   tripleo-repos -b $OPENSTACK_VERSION current
+  # in new centos a variable is introduced,
+  # so it is needed to have it because  yum repos
+  # started using it.
+  if [[ ! -f  /etc/yum/vars/contentdir ]] ; then
+    echo centos > /etc/yum/vars/contentdir
+  fi
 fi
 # ==== TODO: OSP13: remove it after OSP13 release ====
 
