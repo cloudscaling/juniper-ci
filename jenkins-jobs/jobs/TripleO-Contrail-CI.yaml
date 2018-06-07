@@ -245,4 +245,8 @@
       - shell: |
           #!/bin/bash -ex
           export LIBVIRT_DEFAULT_URI=qemu:///system
-          ./juniper-ci/tripleo/clean_env.sh
+          if [ -f /opt/jenkins/tripleo_contrail_clean_env.sh ] ; then
+            sudo -E /opt/jenkins/tripleo_contrail_clean_env.sh
+          else
+            ./juniper-ci/tripleo/clean_env.sh
+          fi
