@@ -55,26 +55,32 @@ fi
 source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
 IP_VM_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
-IP_VM_02=`echo $nodes_cont_ips | cut -d ' ' -f 2`
-IP_VM_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
+if [[ "$HA" == 'ha' ]] ; then
+  IP_VM_02=`echo $nodes_cont_ips | cut -d ' ' -f 2`
+  IP_VM_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
+
+  IP_CONT_01=`echo ${nodes_cont_ips} | cut -d ' ' -f 1`
+  IP_CONT_02=`echo ${nodes_cont_ips} | cut -d ' ' -f 2`
+  IP_CONT_03=`echo ${nodes_cont_ips} | cut -d ' ' -f 3`
+
+  IP_VIP=10.$NET_BASE_PREFIX.$JOB_RND.254
+  OS_VIP=10.$((NET_BASE_PREFIX+1)).$JOB_RND.254
+
+  IP2_CONT_01=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 1`
+  IP2_CONT_02=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 2`
+  IP2_CONT_03=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 3`
+fi
 IP_VM_04=`echo $nodes_comp_ips | cut -d ' ' -f 1`
 
-IP_VIP=10.$NET_BASE_PREFIX.$JOB_RND.254
-IP_CONT_01=`echo ${nodes_cont_ips} | cut -d ' ' -f 1`
-IP_CONT_02=`echo ${nodes_cont_ips} | cut -d ' ' -f 2`
-IP_CONT_03=`echo ${nodes_cont_ips} | cut -d ' ' -f 3`
-API_IF=ens3
-
-OS_VIP=10.$((NET_BASE_PREFIX+1)).$JOB_RND.254
-
-IP2_CONT_01=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 1`
-IP2_CONT_02=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 2`
-IP2_CONT_03=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 3`
 VROUTER_IF=ens5
 VROUTER_GW=10.$((NET_BASE_PREFIX+2)).$JOB_RND.1
 
+[ ! -f $my_dir/instances.yaml.${HA}.tmpl ] || {
+    echo "ERROR: There is no $my_dir/instances.yaml.${HA}.tmpl file. Config $HA is not supported."
+    exit 1
+}
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
-templ=$(cat $my_dir/instances.yaml.tmpl)
+templ=$(cat $my_dir/instances.yaml.${HA}.tmpl)
 content=$(eval "echo \"$templ\"")
 echo "$content" > $config
 echo "INFO: cloud config ------------------------- $(date)"

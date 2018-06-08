@@ -6,7 +6,11 @@ export NET_BASE_PREFIX=20
 # we always need to create machine for containers build if build is required
 export BUILD_NODE_MEM=2048
 
-export CONT_NODES=3
+if [[ "$HA" == 'ha' ]] ; then
+  export CONT_NODES=3
+else
+  export CONT_NODES=1
+fi
 export CONT_NODE_MEM=16384
 export COMP_NODES=1
 export COMP_NODE_MEM=6144

@@ -39,6 +39,11 @@
           choices:
             - disabled
             - contrail
+      - choice:
+          name: HA
+          choices:
+            - ha
+            - aio
       - string:
           name: CCB_PATCHSET
           description: "Additional command to fetch patchset for contrail-container-builer repo."
