@@ -75,7 +75,7 @@ IP_VM_04=`echo $nodes_comp_ips | cut -d ' ' -f 1`
 VROUTER_IF=ens5
 VROUTER_GW=10.$((NET_BASE_PREFIX+2)).$JOB_RND.1
 
-[ ! -f $my_dir/instances.yaml.${HA}.tmpl ] || {
+[ ! -f $my_dir/instances.yaml.${HA}.tmpl ] && {
     echo "ERROR: There is no $my_dir/instances.yaml.${HA}.tmpl file. Config $HA is not supported."
     exit 1
 }

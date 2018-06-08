@@ -60,7 +60,7 @@ IP_CONT_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
 IP_COMP_01=`echo $nodes_comp_ips | cut -d ' ' -f 1`
 IP_COMP_02=`echo $nodes_comp_ips | cut -d ' ' -f 2`
 
-[ ! -f $my_dir/instances.yaml.${HA}.tmpl ] || {
+[ ! -f $my_dir/instances.yaml.${HA}.tmpl ] && {
     echo "ERROR: There is no $my_dir/instances.yaml.${HA}.tmpl file. Config $HA is not supported."
     exit 1 ;
 }
