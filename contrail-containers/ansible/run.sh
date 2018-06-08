@@ -73,6 +73,9 @@ fi
 IP_VM_04=`echo $nodes_comp_ips | cut -d ' ' -f 1`
 
 VROUTER_IF=ens5
+if [[ "$HA" != 'ha' ]] ; then
+  VROUTER_IF=ens3
+fi
 VROUTER_GW=10.$((NET_BASE_PREFIX+2)).$JOB_RND.1
 
 [ ! -f $my_dir/instances.yaml.${HA}.tmpl ] && {
