@@ -9,7 +9,7 @@ cat <<EOF | timeout -s 9 60s $SSH_CMD ${SSH_USER}@$master_ip
 set -x
 export PATH=\${PATH}:/usr/sbin
 mkdir -p ~/logs/kube-info
-if [[ command -v kubectl ]]; then
+if [[ -x \$(command -v kubectl 2>/dev/null) ]] ; then
   kubectl get nodes -o wide > ~/logs/kube-info/nodes 2>&1 || true
   kubectl get pods -o wide --all-namespaces=true > ~/logs/kube-info/pods 2>&1 || true
   kubectl get all -o wide --all-namespaces=true > ~/logs/kube-info/apps 2>&1 || true
