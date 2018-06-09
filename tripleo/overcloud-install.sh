@@ -231,7 +231,7 @@ function create_flavor() {
     echo "Skip flavor creation for $name, count=$count"
   fi
 }
-create_flavor 'baremetal' 1
+#create_flavor 'baremetal' 1
 create_flavor 'control' $CONT_COUNT 'controller'
 create_flavor $compute_flavor_name $COMP_COUNT $compute_flavor_name
 create_flavor 'contrail-controller' $CONTRAIL_CONTROLLER_COUNT 'contrail-controller'
