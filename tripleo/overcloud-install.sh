@@ -293,6 +293,15 @@ else
     export CONTRAIL_TAG="${OPENSTACK_VERSION}-${CONTRAIL_VERSION}"
     export LINUX_DISTR=${LINUX_DISTR:-'centos'}
     export LINUX_DISTR_VER=${LINUX_DISTR_VER:-'7.4.1708'}
+    # save for easier debug
+    cat <<EOF > ~/build_env
+  export CONTRAIL_VERSION=$CONTRAIL_VERSION
+  export _CONTRAIL_REGISTRY_IP=$_CONTRAIL_REGISTRY_IP
+  export CONTRAIL_REGISTRY=$CONTRAIL_REGISTRY
+  export CONTRAIL_TAG=$CONTRAIL_TAG
+  export LINUX_DISTR=$LINUX_DISTR
+  export LINUX_DISTR_VER=$LINUX_DISTR_VER
+EOF
     pushd contrail-container-builder/containers
     # TODO: dont fail build because some containers like vcenter fails in our env
     ./build.sh || { echo "WARNING: some containers are failed." ; cat ./*.log || true ; }
