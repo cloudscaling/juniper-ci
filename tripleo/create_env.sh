@@ -161,7 +161,7 @@ function define_overcloud_vms() {
 CTRL_MEM=8192
 COMP_MEM=4096
 if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
-  CTRL_MEM=16384
+  CTRL_MEM=24576
   COMP_MEM=8192
 fi
 
