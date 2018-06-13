@@ -32,8 +32,9 @@ fi
 
 # install utils & ntpd - it is needed for correct work of OS services
 # (particulary neutron services may not work properly)
+# libguestfs-tools - is for virt-customize tool for overcloud image customization - enabling repos
 yum install -y  ntp wget yum-utils screen mc deltarpm createrepo bind-utils sshpass \
-                gcc make python-devel yum-plugin-priorities sshpass
+                gcc make python-devel yum-plugin-priorities sshpass libguestfs-tools
 chkconfig ntpd on
 service ntpd start
 
@@ -77,13 +78,16 @@ pip install -q virtualenv
 
 # add OpenStack repositories for centos, for rhel it is added in images
 # ==== TODO: OSP13: remove it after OSP13 release ====
-if [[ "$ENVIRONMENT_OS" != 'rhel' || "$OPENSTACK_VERSION" == 'queens' ]] ; then
-  # libguestfs-tools - is for virt-customize tool for overcloud image customization - enabling repos
-  yum install -y libguestfs-tools
-
-  if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-    yum-config-manager --enable rhelosp-rhel-7-server-opt
-  fi
+if [[ "$ENVIRONMENT_OS" == 'rhel' && "$OPENSTACK_VERSION" == 'queens' ]] ; then
+  yum-config-manager --enable rhelosp-rhel-7-server-opt
+  echo "INFO: install latest readhat images"
+  yum install -y rhosp-director-images rhosp-director-images-ipa
+fi
+# if [[ "$ENVIRONMENT_OS" != 'rhel' || "$OPENSTACK_VERSION" == 'queens' ]] ; then
+if [[ "$ENVIRONMENT_OS" != 'rhel' ]] ; then
+  # if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+  #   yum-config-manager --enable rhelosp-rhel-7-server-opt
+  # fi
   tripeo_repos=`python -c 'import requests;r = requests.get("https://trunk.rdoproject.org/centos7-queens/current"); print r.text ' | grep python2-tripleo-repos | awk -F"href=\"" '{print $2}' | awk -F"\"" '{print $1}'`
   yum install -y https://trunk.rdoproject.org/centos7-queens/current/${tripeo_repos}
   tripleo-repos -b $OPENSTACK_VERSION current

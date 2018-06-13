@@ -330,6 +330,7 @@ function rhel_get_repos_for_os() {
   esac
   # ==== TODO: OSP13: begin ====
   if [[ "$enable_repo" == '13' ]] ; then
+    common_repos+=" rhel-7-server-openstack-beta-rpms"
     echo $common_repos
     return
   fi

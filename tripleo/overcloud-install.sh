@@ -853,10 +853,21 @@ if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
   sed -i "s/.*ContrailImageTag:.*/  ContrailImageTag: $CONTRAIL_TAG/g" $contrail_services_file
   sed -i "s/.*ContrailRegistryInsecure:.*/  ContrailRegistryInsecure: True/g" $contrail_services_file
 
+  image_namespace="docker.io/tripleo${OPENSTACK_VERSION}"
+  tag_opts="--tag current-tripleo-rdo"
+  tag_from_label='rdo_version'
+  prefix_opts=''
+  if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+    # TODO: OSP13
+    image_namespace="registry.access.redhat.com/rhosp13-beta"
+    # tag_opts=''
+    # tag_from_label=''
+    prefix_opts="--prefix=openstack-"
+  fi
+
   openstack overcloud container image prepare \
-    --namespace docker.io/tripleo${OPENSTACK_VERSION} \
-    --tag current-tripleo-rdo \
-    --tag-from-label rdo_version \
+    --namespace $image_namespace $tag_opts $prefix_opts\
+    --tag-from-label $tag_from_label \
     --push-destination ${prov_ip}:8787 \
     --output-env-file ~/docker_registry.yaml \
     --output-images-file ~/overcloud_containers.yaml

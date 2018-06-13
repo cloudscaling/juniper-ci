@@ -51,9 +51,6 @@ openstack undercloud install
 
 # function to build images if needed
 function create_images() {
-  mkdir -p images
-  pushd images
-
   # next line is needed only if undercloud's OS is deifferent
   #export NODE_DIST=centos7
   export STABLE_RELEASE="$OPENSTACK_VERSION"
@@ -73,7 +70,6 @@ function create_images() {
   local config_opts=''
   if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
     export OS_YAML="/usr/share/openstack-tripleo-common/image-yaml/overcloud-images-rhel7.yaml"
-    # export DIB_LOCAL_IMAGE=rhel-server-7.4-x86_64-kvm.qcow2
     export REG_REPOS='rhel-7-server-rpms rhel-7-server-extras-rpms rhel-ha-for-rhel-7-server-rpms rhel-7-server-optional-rpms'
     if [ -f /home/stack/overcloud-base-image.qcow2 ] ; then
       export DIB_LOCAL_IMAGE='/home/stack/overcloud-base-image.qcow2'
@@ -84,7 +80,31 @@ function create_images() {
     config_opts="--config-file /usr/share/openstack-tripleo-common/image-yaml/overcloud-images.yaml --config-file $OS_YAML"
   fi
   openstack overcloud image build $config_opts
-  popd
+}
+
+function install_images() {
+  local os_num=''
+  case "$OPENSTACK_VERSION" in
+    newton)
+      os_num='10.0'
+      ;;
+    ocata)
+      os_num='11.0'
+      ;;
+    pike)
+      os_num='12.0'
+      ;;
+    queens)
+      os_num='13.0'
+      ;;
+    *)
+      echo "ERROR: unsupported OS $OPENSTACK_VERSION"
+      exit 1
+  esac
+
+  local packages_install_dir='/usr/share/rhosp-director-images/'
+  tar -xvf $packages_install_dir/overcloud-full-latest-${os_num}.tar
+  tar -xvf $packages_install_dir/ironic-python-agent-latest-${os_num}.tar
 }
 
 cd ~
@@ -92,8 +112,15 @@ if [ -f /tmp/images.tar ] ; then
   # but right now script will use previously built images
   tar -xf /tmp/images.tar
 else
-  create_images
+  mkdir -p images
+  pushd images
+  if [[ "$ENVIRONMENT_OS" != 'rhel' ]] ; then
+    create_images
+  else
+    install_images
+  fi
   tar -cf images.tar images
+  popd
 fi
 
 source ./stackrc
