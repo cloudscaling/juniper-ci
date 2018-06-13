@@ -187,7 +187,8 @@ if [[ 'newton|ocata' =~ $OPENSTACK_VERSION  ]] ; then
   update_contrail_repo='no'
 
   # hack: centos images don have openstack-utilities packages
-  if [[ "$ENVIRONMENT_OS" == 'centos' ]] ; then
+  # TODO: OSP13: no openstack-utils available in beta
+  if [[ "$ENVIRONMENT_OS" == 'centos' || "$OPENSTACK_VERSION" == 'queens' ]] ; then
     case $OPENSTACK_VERSION in
       liberty|mitaka|newton|ocata|pike)
         os_utils_url="http://mirror.comnet.uz/centos/7/cloud/x86_64/openstack-${OPENSTACK_VERSION}/common/openstack-utils-2017.1-1.el7.noarch.rpm"
