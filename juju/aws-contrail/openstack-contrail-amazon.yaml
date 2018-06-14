@@ -155,7 +155,7 @@ relations:
   - [ "nova-compute", "nova-cloud-controller" ]
   - [ "nova-compute:amqp", "rabbitmq-server:amqp" ]
   - [ "nova-compute", "glance" ]
-  - [ "openstack-dashboard", "keystone" ]
+  - [ "openstack-dashboard:identity-service", "keystone" ]
 
   - [ "neutron-api", "mysql" ]
   - [ "neutron-api", "rabbitmq-server" ]

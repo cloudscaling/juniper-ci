@@ -192,7 +192,7 @@ juju-add-relation "nova-compute:image-service" "glance:image-service"
 juju-add-relation "nova-compute:amqp" "rabbitmq-server:amqp"
 juju-add-relation "nova-cloud-controller:shared-db" "mysql:shared-db"
 juju-add-relation "nova-cloud-controller:amqp" "rabbitmq-server:amqp"
-juju-add-relation "openstack-dashboard" "keystone"
+juju-add-relation "openstack-dashboard:identity-service" "keystone"
 
 juju-add-relation "neutron-api:shared-db" "mysql:shared-db"
 juju-add-relation "neutron-api:neutron-api" "nova-cloud-controller:neutron-api"
