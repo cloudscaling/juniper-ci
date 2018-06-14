@@ -116,7 +116,7 @@ juju-deploy $PLACE/contrail-keystone-auth --to lxd:$cont1
 juju-deploy $PLACE/contrail-controller --to $cont1
 juju-expose contrail-controller
 juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4"
-juju-set contrail-controller image-name="$controller_name" image-tag="$image_tag" docker-registry="$repo_ip:5000" docker-registry-insecure=true
+#juju-set contrail-controller image-name="$controller_name" image-tag="$image_tag" docker-registry="$repo_ip:5000" docker-registry-insecure=true
 juju-deploy $PLACE/contrail-analyticsdb --to $cont1
 juju-set contrail-analyticsdb cassandra-minimum-diskgb="4"
 juju-deploy $PLACE/contrail-analytics --to $cont1
@@ -169,7 +169,7 @@ apply_ssl
 
 # TODO(tikitavi): remove after merging commmits to Juniper/contrail-charms
 #echo "INFO: Attach contrail-controller container $(date)"
-#juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
+juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
 #echo "INFO: Attach contrail-analyticsdb container $(date)"
 juju-attach contrail-analyticsdb contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
 #echo "INFO: Attach contrail-analytics container $(date)"
