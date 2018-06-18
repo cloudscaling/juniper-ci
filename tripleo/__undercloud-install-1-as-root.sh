@@ -23,6 +23,30 @@ fi
 NETDEV=${NETDEV:-'eth1'}
 CLOUD_DOMAIN_NAME=${CLOUD_DOMAIN_NAME:-'localdomain'}
 
+# Workaround of the problem with GPG keys in openstack-beta rhel repo
+#   Public key for NetworkManager-config-server-1.10.2-14.el7_5.noarch.rpm is not installed
+#   Public key for heat-cfntools-1.3.0-2.el7ost.noarch.rpm is not installed
+#   Public key for ovirt-guest-agent-common-1.0.14-3.el7ev.noarch.rpm is not installed
+#   --------------------------------------------------------------------------------
+#   Total                                              8.0 MB/s | 157 MB  00:19
+#   Retrieving key from file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-beta
+#   Importing GPG key 0xF21541EB:
+#    Userid     : "Red Hat, Inc. (beta key 2) <security@redhat.com>"
+#    Fingerprint: b08b 659e e86a f623 bc90 e8db 938a 80ca f215 41eb
+#    Package    : redhat-release-server-7.5-8.el7.x86_64 (installed)
+#    From       : /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-beta
+#   Importing GPG key 0x897DA07A:
+#    Userid     : "Red Hat, Inc. (Beta Test Software) <rawhide@redhat.com>"
+#    Fingerprint: 17e8 543d 1d4a a5fa a96a 7e9f fd37 2689 897d a07a
+#    Package    : redhat-release-server-7.5-8.el7.x86_64 (installed)
+#    From       : /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-beta
+#
+# Public key for python2-markupsafe-0.23-16.el7ost.x86_64.rpm is not installed
+#
+# Failing package is: python2-markupsafe-0.23-16.el7ost.x86_64
+# GPG Keys are configured as: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-beta
+rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+
 # update OS
 yum update -y
 
