@@ -855,19 +855,18 @@ if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
 
   image_namespace="docker.io/tripleo${OPENSTACK_VERSION}"
   tag_opts="--tag current-tripleo-rdo"
-  tag_from_label='rdo_version'
+  tag_from_label_opts="--tag_from_label rdo_version"
   prefix_opts=''
   if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
     # TODO: OSP13
     image_namespace="registry.access.redhat.com/rhosp13-beta"
-    # tag_opts=''
-    # tag_from_label=''
+    tag_opts=''
+    # tag_from_label_opts=''
     prefix_opts="--prefix=openstack-"
   fi
 
   openstack overcloud container image prepare \
-    --namespace $image_namespace $tag_opts $prefix_opts\
-    --tag-from-label $tag_from_label \
+    --namespace $image_namespace $tag_opts $prefix_opts $tag_from_label_opts \
     --push-destination ${prov_ip}:8787 \
     --output-env-file ~/docker_registry.yaml \
     --output-images-file ~/overcloud_containers.yaml
