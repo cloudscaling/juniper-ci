@@ -169,7 +169,7 @@ apply_ssl
 
 # TODO(tikitavi): remove after merging commmits to Juniper/contrail-charms
 #echo "INFO: Attach contrail-controller container $(date)"
-#juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
+juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
 #echo "INFO: Attach contrail-analyticsdb container $(date)"
 juju-attach contrail-analyticsdb contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
 #echo "INFO: Attach contrail-analytics container $(date)"
@@ -192,7 +192,7 @@ juju-add-relation "nova-compute:image-service" "glance:image-service"
 juju-add-relation "nova-compute:amqp" "rabbitmq-server:amqp"
 juju-add-relation "nova-cloud-controller:shared-db" "mysql:shared-db"
 juju-add-relation "nova-cloud-controller:amqp" "rabbitmq-server:amqp"
-juju-add-relation "openstack-dashboard" "keystone"
+juju-add-relation "openstack-dashboard:identity-service" "keystone"
 
 juju-add-relation "neutron-api:shared-db" "mysql:shared-db"
 juju-add-relation "neutron-api:neutron-api" "nova-cloud-controller:neutron-api"
