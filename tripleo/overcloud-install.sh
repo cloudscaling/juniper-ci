@@ -861,8 +861,8 @@ if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
     # TODO: OSP13
     image_namespace="registry.access.redhat.com/rhosp13-beta"
     tag_opts=''
-    # tag_from_label_opts=''
-    prefix_opts="--prefix=openstack-"
+    tag_from_label_opts=''
+    prefix_opts='--prefix="openstack-"'
   fi
 
   openstack overcloud container image prepare \
