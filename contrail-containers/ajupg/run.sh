@@ -65,10 +65,6 @@ IP_CONT_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
 AUTH_IP=`get_machine_ip keystone`
 METADATA_IP='127.0.0.1'
 
-[ ! -f $my_dir/instances.yaml.${HA}.tmpl ] && {
-    echo "ERROR: There is no $my_dir/instances.yaml.${HA}.tmpl file. Config $HA is not supported."
-    exit 1
-}
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
 templ=$(cat $my_dir/instances.yaml.${HA}.tmpl)
 content=$(eval "echo \"$templ\"")
