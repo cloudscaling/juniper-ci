@@ -43,7 +43,8 @@
           name: HA
           type: single-select
           value: ha,nonha,aio
-          default-value: {defaultha}
+          visible-items: 3
+          default-value: '{defaultha}'
       - string:
           name: CCB_PATCHSET
           description: "Additional command to fetch patchset for contrail-container-builer repo."
