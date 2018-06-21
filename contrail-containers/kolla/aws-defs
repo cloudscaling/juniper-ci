@@ -1,3 +1,8 @@
+if [[ "$HA" != 'aio' ]] ; then
+  echo "ERROR: Only AIO deployment is supported"
+  exit 1
+fi
+
 export BUILD_NODE_TYPE=m4.large
 export CONT_NODES=1
 export CONT_NODE_TYPE=c4.4xlarge

@@ -39,11 +39,12 @@
           choices:
             - disabled
             - contrail
-      - choice:
+      - extended-choice:
           name: HA
-          choices:
-            - ha
-            - aio
+          type: single-select
+          value: ha,nonha,aio
+          visible-items: 3
+          default-value: '{defaultha}'
       - string:
           name: CCB_PATCHSET
           description: "Additional command to fetch patchset for contrail-container-builer repo."
@@ -117,43 +118,54 @@
     project:
 # helm on aws - need to fix domain suffix at node labeling stage
 #      - helm-aws-ubuntu:
+#          defaultha: ha
 #          slavenode:
 #            - master
       - helm-server-ubuntu:
+          defaultha: ha
           slavenode:
             - slave01
             - slave04
 #      - k8s-server-centos:
+#          defaultha: ha
 #          slavenode:
 #            - slave01
 #            - slave04
 #      - k8s-server-ubuntu:
+#          defaultha: ha
 #          slavenode:
 #            - slave01
 #            - slave04
       - ansible-server-centos:
+          defaultha: ha
           slavenode:
             - slave01
             - slave04
       - ansible-server-ubuntu:
+          defaultha: ha
           slavenode:
             - slave01
             - slave04
       - ak8s-server-centos:
+          defaultha: ha
           slavenode:
             - slave01
             - slave04
       - ak8s-server-ubuntu:
+          defaultha: ha
           slavenode:
             - slave01
             - slave04
 #      - kolla-aws-centos:
+#          defaultha: aio
 #          slavenode:
 #            - master
 #      - kolla-aws-ubuntu:
+#          defaultha: aio
 #          slavenode:
 #            - master
       - ajupg-server-ubuntu:
+          defaultha: nonha
           slavenode:
             - slave01
             - slave04

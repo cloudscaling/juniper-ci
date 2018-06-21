@@ -6,10 +6,11 @@ export NET_BASE_PREFIX=15
 # we always need to create machine for containers build if build is required
 export BUILD_NODE_MEM=2048
 
-if [[ "$HA" == 'ha' ]] ; then
+if [[ "$HA" == 'ha' ]]; then
   export CONT_NODES=3
 else
-  export CONT_NODES=1
+  echo "ERROR: Non-HA and AIO deployments are not supported"
+  exit 1
 fi
 export CONT_NODE_MEM=8192
 export COMP_NODES=2
