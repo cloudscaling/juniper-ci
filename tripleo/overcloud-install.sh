@@ -625,8 +625,19 @@ if [[ "$use_multi_nic" == 'yes' ]] ; then
   multi_nic_opts+=' -e tripleo-heat-templates/environments/contrail/network-isolation.yaml'
 fi
 
-ha_opts=''
+use_pacemaker='false'
+if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
+  # osp13 doesnt work with VIPs w/o it,
+  # keepalived service is not deployed with haproxy,
+  # is it a bug?
+  use_pacemaker='true'
+fi
 if (( CONT_COUNT > 1 )) ; then
+  use_pacemaker='true'
+fi
+
+ha_opts=''
+if [[ "$use_pacemaker" != 'false' ]] ; then
   ha_opts="-e tripleo-heat-templates/environments/puppet-pacemaker.yaml"
 fi
 
@@ -846,8 +857,12 @@ EOF
 
 fi
 
+contrail_vip_env_opts="-e $contrail_vip_env"
 docker_opts=''
+openstack_ver_specific=''
 if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
+  contrail_vip_env_opts=''
+  openstack_ver_specific=' -e tripleo-heat-templates/environments/contrail/contrail-plugins.yaml'
 
   sed -i "s/.*ContrailRegistry:.*/  ContrailRegistry: $CONTRAIL_REGISTRY/g" $contrail_services_file
   sed -i "s/.*ContrailImageTag:.*/  ContrailImageTag: $CONTRAIL_TAG/g" $contrail_services_file
@@ -884,8 +899,9 @@ if [[ "$DEPLOY" != '1' ]] ; then
       $artifact_opts \
       -e $contrail_services_file \
       -e $contrail_net_file \
-      -e $contrail_vip_env \
       -e $misc_opts \
+      $contrail_vip_env_opts \
+      $openstack_ver_specific \
       $ssl_opts \
       $multi_nic_opts \
       $ha_opts \
@@ -903,9 +919,8 @@ openstack overcloud deploy --templates tripleo-heat-templates/ \
   $artifact_opts \
   -e $contrail_services_file \
   -e $contrail_net_file \
-  -e $contrail_vip_env \
   -e $misc_opts \
-  $ssl_opts $multi_nic_opts $ha_opts $sriov_opts $docker_opt
+  $contrail_vip_env_opts $openstack_ver_specific $ssl_opts $multi_nic_opts $ha_opts $sriov_opts $docker_opt
 
 errors=$?
 
