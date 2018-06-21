@@ -869,15 +869,19 @@ if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
   sed -i "s/.*ContrailRegistryInsecure:.*/  ContrailRegistryInsecure: True/g" $contrail_services_file
 
   image_namespace="docker.io/tripleo${OPENSTACK_VERSION}"
-  tag_opts="--tag current-tripleo-rdo"
-  tag_from_label_opts="--tag-from-label rdo_version"
+  tag_opts='--tag current-tripleo-rdo'
+  tag_from_label_opts='--tag-from-label rdo_version'
   prefix_opts=''
+  docker_opt=' -e docker_registry.yaml'
   if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-    # TODO: OSP13
+    # OSP13
     image_namespace="registry.access.redhat.com/rhosp13-beta"
     tag_opts=''
-    # tag_from_label_opts=''
+    tag_from_label_opts='--tag-from-label {version}-{release}'
     prefix_opts="--prefix=openstack-"
+  else
+    # OSP13 doesnt use it, but for opensorce tripleo it is needed...
+    docker_opt+=' -e tripleo-heat-templates/environments/docker.yaml'
   fi
 
   openstack overcloud container image prepare \
@@ -887,9 +891,6 @@ if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
     --output-images-file ~/overcloud_containers.yaml
 
   openstack overcloud container image upload --config-file ~/overcloud_containers.yaml
-
-  docker_opt=' -e docker_registry.yaml'
-  docker_opt+=' -e tripleo-heat-templates/environments/docker.yaml'
 fi
 
 if [[ "$DEPLOY" != '1' ]] ; then
