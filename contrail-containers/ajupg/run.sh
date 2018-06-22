@@ -64,6 +64,8 @@ IP_CONT_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
 # from juju
 AUTH_IP=`get_machine_ip keystone`
 METADATA_IP='127.0.0.1'
+# use machine 0 as we know that this is compute
+METADATA_PROXY_SECRET=`juju ssh 0 sudo grep metadata_proxy_secret /etc/contrail/contrail-vrouter-agent.conf 2>/dev/null | cut -d '=' -f 2 | tr -d ' '`
 
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
 templ=$(cat $my_dir/instances.yaml.${HA}.tmpl)
