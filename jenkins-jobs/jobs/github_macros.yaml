@@ -84,7 +84,7 @@
     name: juniper-contrail-charms
     scm:
       - github:
-          organization: tikitavi
+          organization: Juniper
           repo: contrail-charms
 
 - scm:

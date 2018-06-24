@@ -188,8 +188,11 @@
           name: USE_DPDK
           description: "Deploy Contrail's vrouter in DPDK mode"
           default: false
+      - string:
+          name: CHARMS_BRANCH
+          default: 'master'
     scm:
-      - juniper-contrail-charms
+      - juniper-contrail-charms-branch
       - juniper-ci
     builders:
       - shell: |
