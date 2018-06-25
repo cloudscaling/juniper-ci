@@ -263,7 +263,7 @@ function run_os_checks() {
   if [[ $ret == 0 ]]; then
     openstack floating ip delete 10.5.0.10
     openstack floating ip delete 10.5.0.11
-    delete_network $netsfx
+    #delete_network $netsfx
   fi
 
   return $ret

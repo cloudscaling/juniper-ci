@@ -29,20 +29,20 @@ repo_key=`curl -s http://$repo_ip/ubuntu/repo.key`
 repo_key=`echo "$repo_key" | awk '{printf("      %s\r", $0)}'`
 
 # prepare registry for contrail packages
-repo_5000="$repo_ip:5000"
 echo "INFO: Prepare local registry on $mrepo"
 ssh $mrepo mkdir docker_images
 scp $HOME/docker/contrail-* "$mrepo:docker_images/"
 scp "$my_dir/../common/prepare-registry.sh" $mrepo:prepare-registry.sh
 ssh $mrepo ./prepare-registry.sh $repo_ip
-controller_name=`ssh $mrepo docker images  | grep "$repo_5000/contrail-controller-"  | awk '{print $1}' | sed "s/$repo_5000\///g"`
-analytics_name=`ssh $mrepo docker images   | grep "$repo_5000/contrail-analytics-"   | awk '{print $1}' | sed "s/$repo_5000\///g"`
-analyticsdb_name=`ssh $mrepo docker images | grep "$repo_5000/contrail-analyticsdb-" | awk '{print $1}' | sed "s/$repo_5000\///g"`
-image_tag=`ssh $mrepo docker images | grep "$repo_5000/contrail-controller-" | awk '{print $2}'`
-echo "Docker controller image: $controller_name"
-echo "Docker analytics image: $analytics_name"
-echo "Docker analyticsdb image: $analyticsdb_name"
-echo "Image tag: $image_tag"
+controller_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-controller-" | awk '{print $1}'`
+controller_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-controller-" | awk '{print $2}'`
+analytics_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analytics-" | awk '{print $1}'`
+analytics_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analytics-" | awk '{print $2}'`
+analyticsdb_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analyticsdb-" | awk '{print $1}'`
+analyticsdb_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analyticsdb-" | awk '{print $2}'`
+echo "Docker controller image: $controller_image_name:$controller_image_tag"
+echo "Docker analytics image: $analytics_image_name:$analytics_image_tag"
+echo "Docker analyticsdb image: $analyticsdb_image_name:$analyticsdb_image_tag"
 
 comp1_ip="$addr.$os_comp_1_idx"
 comp1=`get_machine_by_ip $comp1_ip`
@@ -115,11 +115,11 @@ juju-deploy $PLACE/contrail-keystone-auth --to lxd:$cont1
 
 juju-deploy $PLACE/contrail-controller --to $cont1
 juju-expose contrail-controller
-juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4"
-juju-set contrail-controller image-name="$controller_name" image-tag="$image_tag" docker-registry="$repo_ip:5000" docker-registry-insecure=true
+juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4" image-name="$controller_image_name" image-tag="$controller_image_tag" docker-registry="$repo_ip:5000"
 juju-deploy $PLACE/contrail-analyticsdb --to $cont1
-juju-set contrail-analyticsdb cassandra-minimum-diskgb="4"
+juju-set contrail-analyticsdb cassandra-minimum-diskgb="4" image-name="$analyticsdb_image_name" image-tag="$analyticsdb_image_tag" docker-registry="$repo_ip:5000"
 juju-deploy $PLACE/contrail-analytics --to $cont1
+juju-set contrail-analytics image-name="$analytics_image_name" image-tag="$analytics_image_tag" docker-registry="$repo_ip:5000"
 juju-expose contrail-analytics
 
 if [ "$DEPLOY_MODE" == 'ha' ] ; then
@@ -166,19 +166,6 @@ detect_machines
 wait_for_machines $m1 $m2 $m3 $m4 $m5
 echo "INFO: Apply SSL flag if set $(date)"
 apply_ssl
-
-# TODO(tikitavi): remove after merging commmits to Juniper/contrail-charms
-#echo "INFO: Attach contrail-controller container $(date)"
-juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
-#echo "INFO: Attach contrail-analyticsdb container $(date)"
-juju-attach contrail-analyticsdb contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
-#echo "INFO: Attach contrail-analytics container $(date)"
-juju-attach contrail-analytics contrail-analytics="$HOME/docker/$image_analytics"
-
-# TODO(tikitavi): uncomment after merging commmits to Juniper/contrail-charms
-#juju-set contrail-controller  image-name="$controller_name"  image-tag="$image_tag" docker-registry="$repo_ip:5000" docker-registry-insecure=true
-#juju-set contrail-analyticsdb image-name="$analyticsdb_name" image-tag="$image_tag" docker-registry="$repo_ip:5000" docker-registry-insecure=true
-#juju-set contrail-analytics   image-name="$analytics_name"   image-tag="$image_tag" docker-registry="$repo_ip:5000" docker-registry-insecure=true
 
 echo "INFO: Add relations $(date)"
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
