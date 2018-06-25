@@ -86,7 +86,9 @@ if [[ "$(whoami)" != "stack" ]] ; then
 fi
 
 ((prov_ip_addr=176+NUM*10))
+((mgmt_ip_addr=172+NUM*10))
 prov_ip="192.168.${prov_ip_addr}.2"
+mgmt_ip="192.168.${mgmt_ip_addr}.2"
 fixed_ip_base="192.168.${prov_ip_addr}"
 fixed_vip="${fixed_ip_base}.200"
 fixed_controller_ip="${fixed_ip_base}.211"
@@ -678,7 +680,7 @@ countryName = US
 stateOrProvinceName = California
 localityName = Sannyvale
 0.organizationName = OpenContrail
-commonName = ${prov_ip}
+commonName = `hostname`
 
 [ v3_req ]
 basicConstraints = CA:false
@@ -688,6 +690,8 @@ subjectAltName = @alt_names
 [ alt_names ]
 DNS.1 = `hostname`
 DNS.2 = `hostname -f`
+IP.1 = ${prov_ip}
+IP.2 = ${mgmt_ip}
 
 [ ca ]
 default_ca = CA_default
@@ -745,8 +749,11 @@ EOF
 
   # create haproxy server certificate (VIPs)
   sed -i "s/commonName = .*/commonName = overcloud-controller-0/g" $openssl_config_file
-  sed -i "s/DNS.1 = .*/DNS.1 = ${fixed_vip}/g" $openssl_config_file
-  sed -i "s/DNS.2 = .*/DNS.2 = ${fixed_controller_ip}/g" $openssl_config_file
+  sed -i "s/DNS.1 = .*/DNS.1 = overcloud-controller-0/g" $openssl_config_file
+  sed -i "s/DNS.2 = .*/DNS.2 = overcloud-controller-0.${CLOUD_DOMAIN_NAME}/g" $openssl_config_file
+  sed -i "s/IP.1 = .*/IP.1 = ${fixed_vip}/g" $openssl_config_file
+  sed -i "s/IP.2 = .*/IP.2 = ${fixed_controller_ip}/g" $openssl_config_file
+
   openssl genrsa -out server.key.pem 2048
   openssl req -config $openssl_config_file -new -key server.key.pem -new -out server.csr.pem
   yes | openssl ca -config $openssl_config_file -extensions v3_req -days 365 -in server.csr.pem -out server.crt.pem
