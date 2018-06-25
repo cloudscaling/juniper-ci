@@ -117,8 +117,9 @@ juju-deploy $PLACE/contrail-controller --to $cont1
 juju-expose contrail-controller
 juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4" image-name="$controller_image_name" image-tag="$controller_image_tag" docker-registry="$repo_ip:5000"
 juju-deploy $PLACE/contrail-analyticsdb --to $cont1
-juju-set contrail-analyticsdb cassandra-minimum-diskgb="4"
+juju-set contrail-analyticsdb cassandra-minimum-diskgb="4" image-name="$analyticsdb_image_name" image-tag="$analyticsdb_image_tag" docker-registry="$repo_ip:5000"
 juju-deploy $PLACE/contrail-analytics --to $cont1
+juju-set contrail-analytics image-name="$analytics_image_name" image-tag="$analytics_image_tag" docker-registry="$repo_ip:5000"
 juju-expose contrail-analytics
 
 if [ "$DEPLOY_MODE" == 'ha' ] ; then
@@ -165,14 +166,6 @@ detect_machines
 wait_for_machines $m1 $m2 $m3 $m4 $m5
 echo "INFO: Apply SSL flag if set $(date)"
 apply_ssl
-
-# TODO: remove it when all are implemented
-#echo "INFO: Attach contrail-controller container $(date)"
-#juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
-echo "INFO: Attach contrail-analyticsdb container $(date)"
-juju-attach contrail-analyticsdb contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
-echo "INFO: Attach contrail-analytics container $(date)"
-juju-attach contrail-analytics contrail-analytics="$HOME/docker/$image_analytics"
 
 echo "INFO: Add relations $(date)"
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
