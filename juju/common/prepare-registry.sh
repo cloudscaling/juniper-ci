@@ -38,7 +38,7 @@ for ff in `ls ./docker_images/*` ; do
     # image file has properties inside. just grep them.
     image_id=`echo $res | awk '{print $3}'`
     image_name=`echo $image_id | cut -d ':' -f 1`
-    image_tag=`echo $image_id | cut -d ':' -f 1`
+    image_tag=`echo $image_id | cut -d ':' -f 2`
   fi
   echo "INFO: Pushing $image_name:$image_tag (with id $image_id) to local registry"
   docker tag $image_id ${repo_ip}:5000/$image_name:$image_tag
