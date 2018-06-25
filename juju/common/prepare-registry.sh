@@ -29,11 +29,17 @@ for ff in `ls ./docker_images/*` ; do
   echo "Loading $ff"
   res=`docker load -q -i $ff`
   echo "$res"
-  image_id=`echo "$res" | grep -o "sha256:.*" | cut -d ':' -f "2"`
-  docker images | grep ${image_id:0:12}
-  image_name=`docker images | grep ${image_id:0:12} | awk '{print $1}'`
-  image_tag=`docker images | grep ${image_id:0:12} | awk '{print $2}'`
-  docker tag $image_id ${repo_ip}:5000/$image_name:$image_tag
+  if echo "$res" | grep -o "sha256:.*" ; then
+    image_id=`echo "$res" | grep -o "sha256:.*" | cut -d ':' -f "2"`
+    docker images | grep ${image_id:0:12}
+    image_name=`docker images | grep ${image_id:0:12} | awk '{print $1}'`
+    image_tag=`docker images | grep ${image_id:0:12} | awk '{print $2}'`
+  else
+    # image file has properties inside. just grep them.
+    image_name=`echo $res | awk '{print $3}' | cut -d ':' -f 1`
+    image_tag=`echo $res | awk '{print $3}' | cut -d ':' -f 1`
+  fi
   echo "INFO: Pushing $image_name:$image_tag to local registry"
+  docker tag $image_id ${repo_ip}:5000/$image_name:$image_tag
   docker push ${repo_ip}:5000/$image_name:$image_tag &>/dev/null
 done
