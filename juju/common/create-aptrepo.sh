@@ -69,10 +69,7 @@ ask-passphrase
 basedir .
 EOF
 
-for ff in `ls /tmp/pkgs/*.deb` ; do
-  echo "Adding $ff"
-  reprepro includedeb $SERIES $ff
-done
+reprepro includedeb $SERIES /tmp/pkgs/*.deb
 
 cat >apt-repo.conf <<EOF
 Alias /ubuntu/ "/srv/reprepro/ubuntu/"
