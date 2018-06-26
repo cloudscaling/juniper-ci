@@ -5,6 +5,7 @@
 SERIES="${1:-trusty}"
 
 echo "INFO: Date: $(date)"
+mkdir -p $HOME/logs
 
 rm -f apt.log
 for i in {1..6} ; do
@@ -74,6 +75,7 @@ EOF
 echo "INFO: Include all debs: $(date)"
 reprepro includedeb $SERIES /tmp/pkgs/*.deb
 echo "INFO: All debs are included: $(date)"
+reprepro list xenial > $HOME/logs/reprepro.log
 
 cat >apt-repo.conf <<EOF
 Alias /ubuntu/ "/srv/reprepro/ubuntu/"
