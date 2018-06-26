@@ -4,6 +4,8 @@
 
 SERIES="${1:-trusty}"
 
+echo "INFO: Date: $(date)"
+
 rm -f apt.log
 for i in {1..6} ; do
   if sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy reprepro apache2 rng-tools gnupg2 &>apt.log ; then
@@ -69,7 +71,9 @@ ask-passphrase
 basedir .
 EOF
 
+echo "INFO: Include all debs: $(date)"
 reprepro includedeb $SERIES /tmp/pkgs/*.deb
+echo "INFO: All debs are included: $(date)"
 
 cat >apt-repo.conf <<EOF
 Alias /ubuntu/ "/srv/reprepro/ubuntu/"
@@ -84,3 +88,5 @@ if ! grep -q "apt-repo.conf" /etc/apache2/sites-available/000-default.conf ; the
   sudo sed -E -i -e "s|</VirtualHost>|        Include sites-available/apt-repo.conf\n</VirtualHost>|" /etc/apache2/sites-available/000-default.conf
 fi
 sudo service apache2 reload
+
+echo "INFO: Date: $(date)"
