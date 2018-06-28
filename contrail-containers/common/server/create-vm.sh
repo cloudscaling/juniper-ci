@@ -44,15 +44,6 @@ function catch_errors_cvmb() {
   exit $exit_code
 }
 
-# base image for VMs
-if [[ -n "$ENVIRONMENT_OS_VERSION" ]] ; then
-  DEFAULT_BASE_IMAGE_NAME="${ENVIRONMENT_OS}-${ENVIRONMENT_OS_VERSION}.qcow2"
-else
-  DEFAULT_BASE_IMAGE_NAME="${ENVIRONMENT_OS}.qcow2"
-fi
-BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-"$DEFAULT_BASE_IMAGE_NAME"}
-BASE_IMAGE_POOL=${BASE_IMAGE_POOL:-'images'}
-
 source "$my_dir/../../../common/virsh/functions"
 
 # check previous env

@@ -1,5 +1,6 @@
 export SSH_USER=${SSH_USER:-'root'}
-OS_VARIANT='ubuntu16.04'
+export OS_VARIANT='ubuntu16.04'
+export BASE_IMAGE_NAME='ubuntu-xenial.qcow2'
 
 export IF1=ens3
 export IF2=ens4

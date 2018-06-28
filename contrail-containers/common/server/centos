@@ -1,5 +1,6 @@
 export SSH_USER=${SSH_USER:-'root'}
-OS_VARIANT='rhel7'
+export OS_VARIANT='rhel7'
+export BASE_IMAGE_NAME='centos.qcow2'
 
 export IF1=ens3
 export IF2=ens4
