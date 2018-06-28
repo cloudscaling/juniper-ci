@@ -226,11 +226,25 @@ EOM
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
   for ((j=1; j<$NET_COUNT; ++j)); do
     if_name="ens\$((3+j))"
-    cat <<EOM > /etc/network/interfaces.d/\${if_name}.cfg
+    if [[ "$ENVIRONMENT_OS" == 'ubuntu16' ]]; then
+      cat <<EOM > /etc/network/interfaces.d/\${if_name}.cfg
 auto \${if_name}
 iface \${if_name} inet dhcp
 EOM
-    ifup \${if_name}
+      ifup \${if_name}
+    else
+      mac_if=\$(ip link show \${if_name} | awk '/link/{print \$2}')
+      echo "INFO: create if script for iface=\$if_name with mac=\$if_mac"
+      if_path="/etc/netplan/50-cloud-init.yaml"
+      cat <<EOM >>"/etc/netplan/50-cloud-init.yaml"
+        \$if_name:
+            dhcp4: true
+            match:
+                macaddress: \$if_mac
+            set-name: \$if_name
+EOM
+      netplan apply
+    fi
   done
   apt-get -y update &>>$logs_dir/apt.log
   DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$logs_dir/apt.log
