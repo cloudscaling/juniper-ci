@@ -324,6 +324,7 @@ function _start_vm() {
   virt-install --name=$name \
     --ram=$ram \
     --vcpus=2,cores=2 \
+    --memorybacking hugepages=on \
     --os-type=linux \
     --os-variant=rhel7 \
     --virt-type=kvm \

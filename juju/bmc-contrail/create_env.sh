@@ -36,17 +36,13 @@ function run_machine() {
   # optional params
   local ip_vm=$6
 
-  local params=""
-  if echo "$name" | grep -q comp ; then
-    params="--memorybacking hugepages=on"
-  fi
-
   if [[ $SERIES == 'xenial' ]] ; then
     local osv='ubuntu16.04'
   else
     local osv='ubuntu14.04'
   fi
 
+  local params=""
   if [[ -n "$ip_vm" ]] ; then
     params="$params --network network=$nname_vm,model=$net_driver,mac=$mac_base_vm:$mac_suffix"
   fi
@@ -56,6 +52,7 @@ function run_machine() {
   virt-install --name $name \
     --ram $ram \
     --vcpus $cpu \
+    --memorybacking hugepages=on \
     --virt-type kvm \
     --os-type=linux \
     --os-variant $osv \
