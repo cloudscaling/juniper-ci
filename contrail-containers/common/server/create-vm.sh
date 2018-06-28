@@ -150,7 +150,7 @@ mkdir -p $logs_dir
 if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
   yum install -y epel-release &>>$logs_dir/yum.log
   yum install -y mc git wget iptables iproute libxml2-utils &>>$logs_dir/yum.log
-elif [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
+elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
   apt-get -y update &>>$logs_dir/apt.log
   apt-get install -y --no-install-recommends mc git wget libxml2-utils &>>$logs_dir/apt.log
   mv /etc/os-release /etc/os-release.original
@@ -232,7 +232,7 @@ EOM
   yum remove -y python-requests cloud-init
   systemctl disable chronyd.service
   systemctl enable ntpd.service && systemctl start ntpd.service
-elif [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
+elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
   for ((j=1; j<$NET_COUNT; ++j)); do
     if_name="ens\$((3+j))"
     cat <<EOM > /etc/network/interfaces.d/\${if_name}.cfg
