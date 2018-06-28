@@ -132,7 +132,7 @@ test $res == '0'
 # validate openstack
 source $my_dir/../common/check-functions
 cd $WORKSPACE
-$SCP ${SSH_USER}@$master_ip:/etc/kolla/admin-openrc.sh $WORKSPACE/
+$SCP ${SSH_USER}@$master_ip:/etc/kolla/kolla-toolbox/admin-openrc.sh $WORKSPACE/
 virtualenv $WORKSPACE/.venv
 source $WORKSPACE/.venv/bin/activate
 source $WORKSPACE/admin-openrc.sh

@@ -9,7 +9,13 @@ export POOL_NAME="$WAY"
 export VM_NAME="$prefix-$suffix"
 export NET_NAME="$prefix-$suffix"
 # length of bridge name is limited to 15 chars
-export BRIDGE_NAME="${WAY:0:4}-${ENVIRONMENT_OS:0:1}-$suffix"
+if [[ "$ENVIRONMENT_OS" =~ 'ubuntu' ]]; then
+  export BRIDGE_NAME="${WAY:0:4}-${ENVIRONMENT_OS:0:1}${ENVIRONMENT_OS:(-2)}-$suffix"
+else
+  export BRIDGE_NAME="${WAY:0:4}-${ENVIRONMENT_OS:0:1}-$suffix"
+fi
 
 export DISK_SIZE=${DISK_SIZE:-'128'}
 export NET_DRIVER=${NET_DRIVER:-'e1000'}
+
+export BASE_IMAGE_POOL=${BASE_IMAGE_POOL:-'images'}

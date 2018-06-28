@@ -8,8 +8,10 @@ export BUILD_NODE_MEM=2048
 
 if [[ "$HA" == 'ha' ]]; then
   export CONT_NODES=3
+elif [[ "$HA" == 'nonha' ]]; then
+  export CONT_NODES=1
 else
-  echo "ERROR: Non-HA and AIO deployments are not supported"
+  echo "ERROR: AIO deployment is not supported"
   exit 1
 fi
 export CONT_NODE_MEM=8192

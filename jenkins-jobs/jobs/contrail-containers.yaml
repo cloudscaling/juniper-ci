@@ -22,8 +22,8 @@
       - choice:
           name: REGISTRY
           choices:
-            - build
             - opencontrailnightly
+            - build
       - choice:
           name: OPENSTACK_VERSION
           choices:
@@ -93,9 +93,18 @@
           export WAY=$(echo {project} | cut -d '-' -f 1)
           export HOST=$(echo {project} | cut -d '-' -f 2)
           export ENVIRONMENT_OS=$(echo {project} | cut -d '-' -f 3)
-          if [[ "$ENVIRONMENT_OS" == 'ubuntu' ]]; then
-            export ENVIRONMENT_OS_VERSION='xenial'
-          fi
+          case "$ENVIRONMENT_OS" in
+            'ubuntu16' )
+              export ENVIRONMENT_OS_VERSION='xenial'
+              ;;
+            'ubuntu18' )
+              export ENVIRONMENT_OS_VERSION='bionic'
+              ;;
+            * )
+              echo "ERROR: unsupported OS version: $ENVIRONMENT_OS"
+              exit 1
+              ;;
+          esac
           # process TLS here to avoid duplication between targets
           case "$TLS" in
             "contrail" )
@@ -117,11 +126,11 @@
     name: contrail-containers
     project:
 # helm on aws - need to fix domain suffix at node labeling stage
-#      - helm-aws-ubuntu:
+#      - helm-aws-ubuntu16:
 #          defaultha: ha
 #          slavenode:
 #            - master
-      - helm-server-ubuntu:
+      - helm-server-ubuntu16:
           defaultha: ha
           slavenode:
             - slave01
@@ -131,7 +140,7 @@
 #          slavenode:
 #            - slave01
 #            - slave04
-#      - k8s-server-ubuntu:
+#      - k8s-server-ubuntu16:
 #          defaultha: ha
 #          slavenode:
 #            - slave01
@@ -141,7 +150,12 @@
           slavenode:
             - slave01
             - slave04
-      - ansible-server-ubuntu:
+      - ansible-server-ubuntu16:
+          defaultha: ha
+          slavenode:
+            - slave01
+            - slave04
+      - ansible-server-ubuntu18:
           defaultha: ha
           slavenode:
             - slave01
@@ -151,7 +165,12 @@
           slavenode:
             - slave01
             - slave04
-      - ak8s-server-ubuntu:
+      - ak8s-server-ubuntu16:
+          defaultha: ha
+          slavenode:
+            - slave01
+            - slave04
+      - ak8s-server-ubuntu18:
           defaultha: ha
           slavenode:
             - slave01
@@ -160,11 +179,11 @@
 #          defaultha: aio
 #          slavenode:
 #            - master
-#      - kolla-aws-ubuntu:
+#      - kolla-aws-ubuntu16:
 #          defaultha: aio
 #          slavenode:
 #            - master
-      - ajupg-server-ubuntu:
+      - ajupg-server-ubuntu16:
           defaultha: nonha
           slavenode:
             - slave01
