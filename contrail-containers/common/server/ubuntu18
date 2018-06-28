@@ -1,6 +1,6 @@
 export SSH_USER=${SSH_USER:-'root'}
 # 18.04 is not in osinfo db yet. https://bugs.launchpad.net/ubuntu/+source/virt-manager/+bug/1770206
-export OS_VARIANT='ubuntu17.10'
+export OS_VARIANT='ubuntu17.04'
 export BASE_IMAGE_NAME='ubuntu-bionic.qcow2'
 
 export IF1=ens3
