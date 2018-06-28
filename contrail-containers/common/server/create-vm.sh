@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -234,13 +234,13 @@ EOM
       ifup \${if_name}
     else
       mac_if=\$(ip link show \${if_name} | awk '/link/{print \$2}')
-      echo "INFO: create if script for iface=\$if_name with mac=\$if_mac"
+      echo "INFO: create if script for iface=\$if_name with mac=\$mac_if"
       if_path="/etc/netplan/50-cloud-init.yaml"
       cat <<EOM >>"/etc/netplan/50-cloud-init.yaml"
         \$if_name:
             dhcp4: true
             match:
-                macaddress: \$if_mac
+                macaddress: '\$mac_if'
             set-name: \$if_name
 EOM
       netplan apply
