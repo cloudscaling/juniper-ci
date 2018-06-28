@@ -224,6 +224,7 @@ EOM
   systemctl disable chronyd.service
   systemctl enable ntpd.service && systemctl start ntpd.service
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
+  echo "network: {config: disabled}" > /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
   for ((j=1; j<$NET_COUNT; ++j)); do
     if_name="ens\$((3+j))"
     if [[ "$ENVIRONMENT_OS" == 'ubuntu16' ]]; then
@@ -269,6 +270,9 @@ done
 
 for ip in ${ips[@]} ; do
   wait_ssh $ip
+  if [[ "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
+    ssh $SSH_OPTS root@${build_ip} systemctl start ntp.service
+  fi
 done
 
 # update env file with IP-s from other interfaces
