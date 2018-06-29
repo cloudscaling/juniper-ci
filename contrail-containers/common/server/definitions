@@ -1,7 +1,7 @@
 #!/bin/bash
 
-short_prefix="$WAY-$ENVIRONMENT_OS"
-prefix="$WAY-$ENVIRONMENT_OS-$OPENSTACK_VERSION"
+job_prefix="$WAY-$ENVIRONMENT_OS"
+prefix="$job_prefix-$OPENSTACK_VERSION"
 suffix=${JOB_RND:-0}
 
 export VCPUS=4
