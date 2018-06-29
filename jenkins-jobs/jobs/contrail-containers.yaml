@@ -28,7 +28,7 @@
           name: OPENSTACK_VERSION
           choices:
             - ocata
-            - newton
+            - queens
       - choice:
           name: AGENT_MODE
           choices:
