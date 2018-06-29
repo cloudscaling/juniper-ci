@@ -33,7 +33,7 @@ function delete_node() {
 # source default values
 source "$my_dir/definitions"
 # check that current JOB_RND equals to existed in the system
-existed_jobs=`virsh net-list --all | grep $short_prefix | awk '{print $1}' | cut -d '-' -f 4 | cut -d '-' -f 1 | sort | uniq`
+existed_jobs=`virsh net-list --all | grep $short_prefix | awk '{print $1}' | cut -d '-' -f 4 | cut -d '_' -f 1 | sort | uniq`
 echo "INFO: Current job: $JOB_RND, Existed jobs to cleanup: $existed_jobs"
 
 saved_job_rnd=$JOB_RND
