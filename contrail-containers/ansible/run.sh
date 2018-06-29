@@ -42,7 +42,7 @@ if [[ "$REGISTRY" == 'build' ]]; then
   $SSH_CMD ${SSH_USER}@$build_ip "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
   set +o pipefail
   CONTAINER_REGISTRY="$build_ip:5000"
-  CONTRAIL_VERSION="ocata-$CONTRAIL_VERSION"
+  CONTRAIL_VERSION="$OPENSTACK_VERSION-$CONTRAIL_VERSION"
 elif [[ "$REGISTRY" == 'opencontrailnightly' ]]; then
   CONTAINER_REGISTRY='opencontrailnightly'
   CONTRAIL_VERSION='latest'
@@ -99,7 +99,8 @@ volumes="-v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer
 volumes+=" -v $HOME/.ssh:/.ssh"
 volumes+=" -v $WORKSPACE/logs/deployer:/root/logs"
 volumes+=" -v $my_dir/__run-gate.sh:/root/run-gate.sh"
-docker run -i --rm --entrypoint /bin/bash $volumes --network host -e KOLLA_PATCHSET_CMD="$patchset" centos-soft -c "/root/run-gate.sh"
+gate_env="-e KOLLA_PATCHSET_CMD='$patchset' -e OPENSTACK_VERSION=$OPENSTACK_VERSION"
+docker run -i --rm --entrypoint /bin/bash $volumes --network host $gate_env centos-soft -c "/root/run-gate.sh"
 
 # TODO: wait till cluster up and initialized
 sleep 300

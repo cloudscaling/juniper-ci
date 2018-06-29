@@ -42,7 +42,7 @@ if [[ "$REGISTRY" == 'build' ]]; then
   ssh_env+=" LINUX_DISTR=$LINUX_DISTR CONTRAIL_INSTALL_PACKAGES_URL=$CONTRAIL_INSTALL_PACKAGES_URL"
   $SSH_CMD $SSH_USER@$build_ip "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
   set +o pipefail
-  run_env="CONTAINER_REGISTRY=$build_ip:5000 CONTRAIL_VERSION=ocata-$CONTRAIL_VERSION REGISTRY_INSECURE=1"
+  run_env="CONTAINER_REGISTRY=$build_ip:5000 CONTRAIL_VERSION=$OPENSTACK_VERSION-$CONTRAIL_VERSION REGISTRY_INSECURE=1"
 elif [[ "$REGISTRY" == 'opencontrailnightly' ]]; then
   run_env="CONTAINER_REGISTRY=opencontrailnightly CONTRAIL_VERSION=latest REGISTRY_INSECURE=0"
 else
