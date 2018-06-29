@@ -1,6 +1,7 @@
 #!/bin/bash
 
-prefix="$WAY-$ENVIRONMENT_OS-$OPENSTACK_VERSION"
+job_prefix="$WAY-$ENVIRONMENT_OS"
+prefix="$job_prefix-$OPENSTACK_VERSION"
 suffix=${JOB_RND:-0}
 
 export VCPUS=4
@@ -15,7 +16,7 @@ else
   export BRIDGE_NAME="${WAY:0:4}-${ENVIRONMENT_OS:0:1}-$suffix"
 fi
 
-export DISK_SIZE=${DISK_SIZE:-'128'}
+export DISK_SIZE=${DISK_SIZE:-'60'}
 export NET_DRIVER=${NET_DRIVER:-'e1000'}
 
 export BASE_IMAGE_POOL=${BASE_IMAGE_POOL:-'images'}

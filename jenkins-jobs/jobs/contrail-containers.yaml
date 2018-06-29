@@ -28,7 +28,7 @@
           name: OPENSTACK_VERSION
           choices:
             - ocata
-            - newton
+            - queens
       - choice:
           name: AGENT_MODE
           choices:
@@ -114,6 +114,7 @@
               export SSL_ENABLE=false
               ;;
           esac
+          export JOB_RND=$((RANDOM % 90 + 10))
           env|sort
           ./juniper-ci/contrail-containers/$WAY/run.sh
     publishers:

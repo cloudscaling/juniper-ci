@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -33,12 +33,16 @@ function delete_node() {
 # source default values
 source "$my_dir/definitions"
 # check that current JOB_RND equals to existed in the system
-existed_jobs=`virsh net-list --all | grep $prefix | awk '{print $1}' | cut -d '-' -f 4 | sort | uniq`
+existed_jobs=`virsh net-list --all | grep $job_prefix | awk '{print $1}' | cut -d '-' -f 4 | cut -d '_' -f 1 | sort | uniq`
 echo "INFO: Current job: $JOB_RND, Existed jobs to cleanup: $existed_jobs"
 
+saved_job_rnd=$JOB_RND
+saved_os_version=$OPENSTACK_VERSION
 for job in $existed_jobs ; do
-  # override JOB_RND and re-source definitions
+  os_version=`virsh net-list --all | grep $job_prefix | grep $job | head -1 | cut -d '-' -f 3`
+  # override JOB_RND/OPENSTACK_VERSION and re-source definitions
   export JOB_RND="$job"
+  export OPENSTACK_VERSION="$os_version"
   source "$my_dir/definitions"
 
   for i in `virsh list --all | grep $VM_NAME | awk '{print $2}'` ; do
@@ -50,3 +54,5 @@ for job in $existed_jobs ; do
   delete_network_dhcp ${NET_NAME}_3
   delete_network_dhcp ${NET_NAME}_4
 done
+export JOB_RND=$saved_job_rnd
+export OPENSTACK_VERSION=$saved_os_version

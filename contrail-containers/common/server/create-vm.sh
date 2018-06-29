@@ -224,17 +224,37 @@ EOM
   systemctl disable chronyd.service
   systemctl enable ntpd.service && systemctl start ntpd.service
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
+  echo "network: {config: disabled}" > /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
   for ((j=1; j<$NET_COUNT; ++j)); do
     if_name="ens\$((3+j))"
-    cat <<EOM > /etc/network/interfaces.d/\${if_name}.cfg
+    if [[ "$ENVIRONMENT_OS" == 'ubuntu16' ]]; then
+      cat <<EOM > /etc/network/interfaces.d/\${if_name}.cfg
 auto \${if_name}
 iface \${if_name} inet dhcp
 EOM
-    ifup \${if_name}
+      ifup \${if_name}
+    else
+      mac_if=\$(ip link show \${if_name} | awk '/link/{print \$2}')
+      echo "INFO: create if script for iface=\$if_name with mac=\$mac_if"
+      if_path="/etc/netplan/50-cloud-init.yaml"
+      cat <<EOM >>"/etc/netplan/50-cloud-init.yaml"
+        \$if_name:
+            dhcp4: true
+            match:
+                macaddress: '\$mac_if'
+            set-name: \$if_name
+EOM
+      netplan apply
+    fi
   done
   apt-get -y update &>>$logs_dir/apt.log
+  if [[ "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
+    dpdk_req="linux-modules-extra-\$(uname -r)"
+  else
+    dpdk_req="linux-image-extra-\$(uname -r)"
+  fi
   DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$logs_dir/apt.log
-  apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 lsof python-pip python-dev gcc linux-image-extra-\$(uname -r) &>>$logs_dir/apt.log
+  DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 lsof python-pip python-dev gcc \$dpdk_req &>>$logs_dir/apt.log
   mv /etc/os-release /etc/os-release.original
   cat /etc/os-release.original > /etc/os-release
 fi
@@ -250,6 +270,10 @@ done
 
 for ip in ${ips[@]} ; do
   wait_ssh $ip
+  if [[ "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
+    ssh $SSH_OPTS root@$ip systemctl start ntp.service
+    ssh $SSH_OPTS root@$ip "rm /etc/resolv.conf ; ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf"
+  fi
 done
 
 # update env file with IP-s from other interfaces
