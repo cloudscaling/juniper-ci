@@ -1,5 +1,6 @@
 #!/bin/bash
 
+short_prefix="$WAY-$ENVIRONMENT_OS"
 prefix="$WAY-$ENVIRONMENT_OS-$OPENSTACK_VERSION"
 suffix=${JOB_RND:-0}
 
