@@ -272,6 +272,7 @@ for ip in ${ips[@]} ; do
   wait_ssh $ip
   if [[ "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
     ssh $SSH_OPTS root@$ip systemctl start ntp.service
+    ssh $SSH_OPTS root@$ip "rm /etc/resolv.conf ; ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf"
   fi
 done
 
