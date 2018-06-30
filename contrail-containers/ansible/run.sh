@@ -70,6 +70,7 @@ if [[ "$HA" == 'ha' ]] ; then
   IP2_CONT_03=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 3`
 fi
 IP_VM_04=`echo $nodes_comp_ips | cut -d ' ' -f 1`
+IP_VM_05=`echo $nodes_comp_ips | cut -d ' ' -f 2`
 
 VROUTER_GW=10.$((NET_BASE_PREFIX+2)).$JOB_RND.1
 
@@ -137,8 +138,16 @@ source $WORKSPACE/.venv/bin/activate
 source $WORKSPACE/admin-openrc.sh
 pip install python-openstackclient || res=1
 
-prepare_openstack && check_simple_instance || res=1
+set -x
+if ! prepare_openstack ; then
+  echo "ERROR: OpenStack preparation failed"
+  res=1
+else
+  check_simple_instance || res=1
+  check_two_instances || res=1
+fi
 deactivate
+set +x
 
 # save logs and exit
 trap - ERR
