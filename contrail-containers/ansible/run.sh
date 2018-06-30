@@ -137,7 +137,7 @@ source $WORKSPACE/.venv/bin/activate
 source $WORKSPACE/admin-openrc.sh
 pip install python-openstackclient || res=1
 
-check_simple_instance || res=1
+prepare_openstack && check_simple_instance || res=1
 deactivate
 
 # save logs and exit

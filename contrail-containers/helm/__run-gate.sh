@@ -249,7 +249,7 @@ virtualenv .venv
 source .venv/bin/activate
 pip install python-openstackclient &>> $my_dir/logs/pip.log || /bin/true
 
-check_simple_instance
+prepare_openstack && check_simple_instance
 deactivate
 
 exit $err
