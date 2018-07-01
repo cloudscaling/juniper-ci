@@ -118,19 +118,19 @@ function check_simple_instance() {
   local iip=`openstack server show demo1 | awk '/addresses/{print $4}' | cut -d '=' -f 2`
   local hhost=`openstack server show demo1 | awk '/OS-EXT-SRV-ATTR:hypervisor_hostname/{print $4}'`
   get_ssh_cmd $hhost
-  local ip=`get_link_local_ip $iip $ssh_cmd`
-  if [[ -z "$ip" ]]; then
+  local fip=`get_link_local_ip $iip $ssh_cmd`
+  if [[ -z "$fip" ]]; then
     echo "ERROR: there is no link-local IP for VM"
     $ssh_cmd "ip route ; ip addr"
     return 1
   fi
 
-  $ssh_cmd ping -c 3 $ip
+  $ssh_cmd ping -c 3 $fip
 
-  wait_instance_ssh $ip
+  wait_instance_ssh $fip
 
   # test for outside world
-  $ssh_cmd ssh $ssh_opts cirros@$ip ping -q -c 1 -W 2 8.8.8.8 2>/dev/null || /bin/true
+  $ssh_cmd ssh $ssh_opts cirros@$fip ping -q -c 1 -W 2 8.8.8.8 2>/dev/null || /bin/true
   # Check the VM can reach the metadata server
   local curl_proto='http'
   local curl_ssl_opts=''
@@ -138,13 +138,14 @@ function check_simple_instance() {
     curl_proto='https'
     curl_ssl_opts='-k'
   fi
-  $ssh_cmd ssh $ssh_opts cirros@$ip curl $curl_ssl_opts -s --connect-timeout 5 ${curl_proto}://169.254.169.254/latest/meta-data/local-ipv4 2>/dev/null ; echo ''
+  $ssh_cmd ssh $ssh_opts cirros@$fip curl $curl_ssl_opts -s --connect-timeout 5 ${curl_proto}://169.254.169.254/latest/meta-data/local-ipv4 2>/dev/null ; echo ''
 
   openstack server delete demo1
   sleep 5
 }
 
 function check_two_instances() {
+  echo "INFO: test ping VM from VM via underlay"
   local net_id=`openstack network show demo-net -f value -c id`
   openstack server create --image cirros --flavor m1.ms --key-name my_ms_key --nic net-id=$net_id demo1
   sleep 10
@@ -165,16 +166,16 @@ function check_two_instances() {
   fi
 
   get_ssh_cmd $hhost1
-  local ip1=`get_link_local_ip $iip1 $ssh_cmd1`
-  if [[ -z "$ip1" ]]; then
+  local fip1=`get_link_local_ip $iip1 $ssh_cmd1`
+  if [[ -z "$fip1" ]]; then
     echo "ERROR: there is no link-local IP for VM"
     $ssh_cmd "ip route ; ip addr"
     return 1
   fi
 
-  wait_instance_ssh $ip1
+  wait_instance_ssh $fip1
 
-  $ssh_cmd ssh $ssh_opts cirros@$ip ping -c 4 $iip2
+  $ssh_cmd ssh $ssh_opts cirros@$fip1 ping -c 4 $iip2
 
   openstack server delete demo1
   openstack server delete demo2
