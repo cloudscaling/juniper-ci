@@ -100,6 +100,8 @@
             'ubuntu18' )
               export ENVIRONMENT_OS_VERSION='bionic'
               ;;
+            'centos' )
+              ;;
             * )
               echo "ERROR: unsupported OS version: $ENVIRONMENT_OS"
               exit 1
