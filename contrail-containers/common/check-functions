@@ -38,7 +38,7 @@ function create_image() {
   fi
 }
 
-function check_simple_instance() {
+function prepare_openstack() {
   create_image
 
   if ! openstack flavor show m1.ms &>/dev/null ; then
@@ -57,36 +57,27 @@ function check_simple_instance() {
   if ! openstack subnet list --network demo-net | grep -q demo-subnet ; then
     openstack subnet create --network demo-net --subnet-range 192.168.1.0/24 demo-subnet
   fi
+}
 
-  local net_id=`openstack network show demo-net -f value -c id`
-  openstack server create --image cirros --flavor m1.ms --key-name my_ms_key --nic net-id=$net_id demo1
-  sleep 20
-  openstack server show demo1
-  local iip=`openstack server show demo1 | awk '/addresses/{print $4}' | cut -d '=' -f 2`
-  local hhost=`openstack server show demo1 | awk '/OS-EXT-SRV-ATTR:hypervisor_hostname/{print $4}'`
-  local hip=`openstack hypervisor list -c "Hypervisor Hostname" -c "Host IP" | grep "$hhost" | awk '{print $4}'`
+# global vars
+ssh_opts="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5 -i ${HOME}/.ssh/id_rsa"
+ssh_cmd=""
+
+function get_ssh_cmd() {
+  local hip=`openstack hypervisor list -c "Hypervisor Hostname" -c "Host IP" | grep "$1" | awk '{print $4}'`
   if [[ "$hip" == 'None' ]]; then
     # helm case
-    hip=`getent hosts $hhost | awk '{print $1}'`
+    hip=`getent hosts $1 | awk '{print $1}'`
   fi
   local lip=`hostname -i`
-  local ssh_cmd=''
   if [[ "$hip" != "$lip" ]]; then
     ssh_cmd="ssh ${SSH_USER:-root}@$hip"
   fi
+}
 
+function get_link_local_ip() {
+  local iip=$1
   local if_name=`$ssh_cmd sudo vif --list 2>/dev/null| grep -B 1 $iip | awk '/^vif/{print $NF}'`
-  if [[ -z "$if_name" ]]; then
-    # helm doesn't have vif on host yet
-    agent_cid=`$ssh_cmd sudo docker ps 2>/dev/null | grep "/contrail-vrouter-agent@" | awk '{print $1}'`
-    if_name=`$ssh_cmd sudo docker exec -i $agent_cid vif --list 2>/dev/null | grep -B 1 $iip | awk '/^vif/{print $NF}'`
-    if [[ -z "$if_name" ]]; then
-      echo "ERROR: tap interface for VM couldn't be found"
-      $ssh_cmd ip link
-      $ssh_cmd vif --list
-      return 1
-    fi
-  fi
 
   local curl_proto='http'
   local curl_ssl_opts=''
@@ -97,18 +88,15 @@ function check_simple_instance() {
     curl_ssl_opts="--key $key --cert $cert --cacert $ca_cert"
     curl_proto='https'
   fi
+  local curl_ip=$($ssh_cmd hostname -i)
+  local curl_cmd="curl $curl_ssl_opts -s ${curl_proto}://${curl_ip}:8085/Snh_ItfReq?name=$if_name"
 
-  curl_ip=$($ssh_cmd hostname -i)
-  local ip=`$ssh_cmd curl $curl_ssl_opts -s ${curl_proto}://${curl_ip}:8085/Snh_ItfReq?name=$if_name 2>/dev/null | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'`
-  if [[ -z "$ip" ]]; then
-    echo "ERROR: there is no link-local IP for VM"
-    $ssh_cmd curl $curl_ssl_opts -s ${curl_proto}://${curl_ip}:8085/Snh_ItfReq?name=$if_name | xmllint --format -
-    $ssh_cmd ip route
-    return 1
-  fi
-  $ssh_cmd ping -c 3 $ip
+  local ip=`$ssh_cmd $curl_cmd 2>/dev/null | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'`
+  echo $ip
+}
 
-  local ssh_opts="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5 -i ${HOME}/.ssh/id_rsa"
+function wait_instance_ssh() {
+  local ip=$1
   echo "INFO: Wait for instance's ssh is ready"
   local fail=0
   while ! $ssh_cmd ssh $ssh_opts cirros@$ip whoami 2>/dev/null; do
@@ -120,9 +108,29 @@ function check_simple_instance() {
     sleep 10
     echo "attempt $fail of 12"
   done
+}
+
+function check_simple_instance() {
+  local net_id=`openstack network show demo-net -f value -c id`
+  openstack server create --image cirros --flavor m1.ms --key-name my_ms_key --nic net-id=$net_id demo1
+  sleep 20
+  openstack server show demo1
+  local iip=`openstack server show demo1 | awk '/addresses/{print $4}' | cut -d '=' -f 2`
+  local hhost=`openstack server show demo1 | awk '/OS-EXT-SRV-ATTR:hypervisor_hostname/{print $4}'`
+  get_ssh_cmd $hhost
+  local fip=`get_link_local_ip $iip $ssh_cmd`
+  if [[ -z "$fip" ]]; then
+    echo "ERROR: there is no link-local IP for VM"
+    $ssh_cmd "ip route ; ip addr"
+    return 1
+  fi
+
+  $ssh_cmd ping -c 3 $fip
+
+  wait_instance_ssh $fip
 
   # test for outside world
-  $ssh_cmd ssh $ssh_opts cirros@$ip ping -q -c 1 -W 2 8.8.8.8 2>/dev/null || /bin/true
+  $ssh_cmd ssh $ssh_opts cirros@$fip ping -q -c 1 -W 2 8.8.8.8 2>/dev/null || /bin/true
   # Check the VM can reach the metadata server
   local curl_proto='http'
   local curl_ssl_opts=''
@@ -130,5 +138,46 @@ function check_simple_instance() {
     curl_proto='https'
     curl_ssl_opts='-k'
   fi
-  $ssh_cmd ssh $ssh_opts cirros@$ip curl $curl_ssl_opts -s --connect-timeout 5 ${curl_proto}://169.254.169.254/latest/meta-data/local-ipv4 2>/dev/null ; echo ''
+  $ssh_cmd ssh $ssh_opts cirros@$fip curl $curl_ssl_opts -s --connect-timeout 5 ${curl_proto}://169.254.169.254/latest/meta-data/local-ipv4 2>/dev/null ; echo ''
+
+  openstack server delete demo1
+  sleep 5
+}
+
+function check_two_instances() {
+  echo "INFO: test ping VM from VM via underlay"
+  local net_id=`openstack network show demo-net -f value -c id`
+  openstack server create --image cirros --flavor m1.ms --key-name my_ms_key --nic net-id=$net_id demo1
+  sleep 10
+  openstack server create --image cirros --flavor m1.ms --key-name my_ms_key --nic net-id=$net_id demo2
+  sleep 10
+  openstack server show demo1
+  openstack server show demo2
+
+  local iip1=`openstack server show demo1 | awk '/addresses/{print $4}' | cut -d '=' -f 2`
+  local hhost1=`openstack server show demo1 | awk '/OS-EXT-SRV-ATTR:hypervisor_hostname/{print $4}'`
+  local iip2=`openstack server show demo2 | awk '/addresses/{print $4}' | cut -d '=' -f 2`
+  local hhost2=`openstack server show demo2 | awk '/OS-EXT-SRV-ATTR:hypervisor_hostname/{print $4}'`
+  if [[ "$hhost1" == "$hhost2" ]]; then
+    echo "WARNING: instances on the same host. test has no sense"
+    openstack server delete demo1
+    openstack server delete demo2
+    return
+  fi
+
+  get_ssh_cmd $hhost1
+  local fip1=`get_link_local_ip $iip1 $ssh_cmd1`
+  if [[ -z "$fip1" ]]; then
+    echo "ERROR: there is no link-local IP for VM"
+    $ssh_cmd "ip route ; ip addr"
+    return 1
+  fi
+
+  wait_instance_ssh $fip1
+
+  $ssh_cmd ssh $ssh_opts cirros@$fip1 ping -c 4 $iip2
+
+  openstack server delete demo1
+  openstack server delete demo2
+  sleep 5
 }

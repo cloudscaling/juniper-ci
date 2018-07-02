@@ -22,6 +22,12 @@ instances:
   roles:
      openstack_compute: null
      vrouter: null
+ server3:
+  ip: ${IP_VM_05}
+  provider: bms
+  roles:
+     openstack_compute: null
+     vrouter: null
 
 global_configuration:
  REGISTRY_PRIVATE_INSECURE: True

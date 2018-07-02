@@ -42,7 +42,6 @@ if [[ "$REGISTRY" == 'build' ]]; then
   $SSH_CMD ${SSH_USER}@$build_ip "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
   set +o pipefail
   CONTAINER_REGISTRY="$build_ip:5000"
-  CONTRAIL_VERSION="ocata-$CONTRAIL_VERSION"
 elif [[ "$REGISTRY" == 'opencontrailnightly' ]]; then
   CONTAINER_REGISTRY='opencontrailnightly'
   CONTRAIL_VERSION='latest'
@@ -71,6 +70,7 @@ if [[ "$HA" == 'ha' ]] ; then
   IP2_CONT_03=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 3`
 fi
 IP_VM_04=`echo $nodes_comp_ips | cut -d ' ' -f 1`
+IP_VM_05=`echo $nodes_comp_ips | cut -d ' ' -f 2`
 
 VROUTER_GW=10.$((NET_BASE_PREFIX+2)).$JOB_RND.1
 
@@ -99,7 +99,7 @@ volumes="-v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer
 volumes+=" -v $HOME/.ssh:/.ssh"
 volumes+=" -v $WORKSPACE/logs/deployer:/root/logs"
 volumes+=" -v $my_dir/__run-gate.sh:/root/run-gate.sh"
-docker run -i --rm --entrypoint /bin/bash $volumes --network host -e KOLLA_PATCHSET_CMD="$patchset" centos-soft -c "/root/run-gate.sh"
+docker run -i --rm --entrypoint /bin/bash $volumes --network host -e KOLLA_PATCHSET_CMD="$patchset" -e OPENSTACK_VERSION=$OPENSTACK_VERSION centos-soft -c "/root/run-gate.sh"
 
 # TODO: wait till cluster up and initialized
 sleep 300
@@ -138,8 +138,16 @@ source $WORKSPACE/.venv/bin/activate
 source $WORKSPACE/admin-openrc.sh
 pip install python-openstackclient || res=1
 
-check_simple_instance || res=1
+set -x
+if ! prepare_openstack ; then
+  echo "ERROR: OpenStack preparation failed"
+  res=1
+else
+  check_simple_instance || res=1
+  check_two_instances || res=1
+fi
 deactivate
+set +x
 
 # save logs and exit
 trap - ERR

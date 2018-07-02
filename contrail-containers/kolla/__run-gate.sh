@@ -118,7 +118,7 @@ source /etc/kolla/admin-openrc.sh
 $kolla_path/kolla-ansible/init-runonce
 
 ret=0
-check_simple_instance || ret=1
+prepare_openstack && check_simple_instance || ret=1
 
 trap - ERR EXIT
 save_logs

@@ -47,7 +47,6 @@ if [[ "$REGISTRY" == 'build' ]]; then
   $SSH_CMD ${SSH_USER}@$build_ip "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
   set +o pipefail
   CONTAINER_REGISTRY="$build_ip:5000"
-  CONTRAIL_VERSION="ocata-$CONTRAIL_VERSION"
 elif [[ "$REGISTRY" == 'opencontrailnightly' ]]; then
   CONTAINER_REGISTRY='opencontrailnightly'
   CONTRAIL_VERSION='latest'

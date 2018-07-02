@@ -5,7 +5,7 @@ cd /root
 
 # clone contrail-kolla-ansible by here to avoid problems with new files created under root account
 # clone it to be able to apply patchset
-git clone -b contrail/ocata https://github.com/Juniper/contrail-kolla-ansible.git
+git clone -b contrail/$OPENSTACK_VERSION https://github.com/Juniper/contrail-kolla-ansible.git
 if [[ -n "$KOLLA_PATCHSET_CMD" ]]; then
   pushd contrail-kolla-ansible
   /bin/bash -c "$KOLLA_PATCHSET_CMD"
