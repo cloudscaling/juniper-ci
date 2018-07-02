@@ -67,6 +67,7 @@ env_opts+=" RHEL_CERT_TEST=$RHEL_CERT_TEST RHEL_ACCOUNT_FILE=$RHEL_ACCOUNT_FILE"
 ssh -T $ssh_opts $ssh_addr "$env_opts /root/__undercloud-install-1-as-root.sh"
 
 scp $ssh_opts "$my_dir/overcloud-install.sh" ${ssh_addr}:/home/stack/overcloud-install.sh
+scp $ssh_opts "$my_dir/overcloud-delete.sh" ${ssh_addr}:/home/stack/overcloud-delete.sh
 scp $ssh_opts "$my_dir/save_logs.sh" ${ssh_addr}:/home/stack/save_logs.sh
 
 echo "SSH into undercloud: ssh -T $ssh_opts $ssh_addr"

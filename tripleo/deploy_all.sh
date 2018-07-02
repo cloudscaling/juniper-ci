@@ -27,9 +27,10 @@ export CONTRAIL_PACKAGES_DIR=${CONTRAIL_PACKAGES_DIR:-"/home/jenkins/cache"}
 trap 'catch_errors $LINENO' ERR
 
 oc=0
-function save_overcloud_logs() {
+function save_overcloud_logs_and_delete_stack() {
   if [[ $oc == 1 ]] ; then
     ssh -T $ssh_opts $ssh_addr "sudo -u stack /home/stack/save_logs.sh"
+    ssh -T $ssh_opts $ssh_addr "sudo -u stack /home/stack/overcloud-delete.sh"
   fi
 }
 
@@ -41,7 +42,7 @@ function catch_errors() {
   # sleep some time to flush logs
   sleep 20
 
-  save_overcloud_logs
+  save_overcloud_logs_and_delete_stack
   exit $exit_code
 }
 
@@ -87,5 +88,4 @@ fi
 
 trap - ERR
 
-save_overcloud_logs
-
+save_overcloud_logs_and_delete_stack

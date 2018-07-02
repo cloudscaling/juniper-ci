@@ -81,8 +81,7 @@ chown stack:stack /home/stack/.ssh/id_rsa
 chown stack:stack /home/stack/.ssh/id_rsa.pub
 chmod 600 /home/stack/.ssh/id_rsa
 chmod 644 /home/stack/.ssh/id_rsa.pub
-rhel_reg_data='/root/rhel-reg-data'
-[ -f $rhel_reg_data ] && chown stack:stack $rhel_reg_data && mv $rhel_reg_data /home/stack/
+[ -f $RHEL_ACCOUNT_FILE ] && chown stack:stack $RHEL_ACCOUNT_FILE && mv $RHEL_ACCOUNT_FILE /home/stack/
 base_img='/root/overcloud-base-image.qcow2'
 [ -f $base_img ] && chown stack:stack $base_img && mv $base_img /home/stack/
 

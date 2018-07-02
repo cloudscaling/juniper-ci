@@ -74,8 +74,9 @@ function create_images() {
     if [ -f /home/stack/overcloud-base-image.qcow2 ] ; then
       export DIB_LOCAL_IMAGE='/home/stack/overcloud-base-image.qcow2'
     fi
+    local rhel_account_file_name=$(echo $RHEL_ACCOUNT_FILE | awk -F '/' '{print($NF)}')
     set +x
-    source ~/rhel-reg-data
+    source ~/$rhel_account_file_name
     set -x
     config_opts="--config-file /usr/share/openstack-tripleo-common/image-yaml/overcloud-images.yaml --config-file $OS_YAML"
   fi

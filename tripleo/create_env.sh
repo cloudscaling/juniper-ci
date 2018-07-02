@@ -260,8 +260,12 @@ function _change_image() {
   # cp rhel account file
   if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
     local rhel_account_file_dir=$(dirname "$RHEL_ACCOUNT_FILE")
+    local rhel_account_file_name=$(echo $RHEL_ACCOUNT_FILE | awk -F '/' '{print($NF)}')
     mkdir -p $tmpdir/$rhel_account_file_dir
     cp $RHEL_ACCOUNT_FILE $tmpdir/$rhel_account_file_dir/
+    cat <<EOF >> $tmpdir/$rhel_account_file_dir/$rhel_account_file_name
+export RHEL_REPOS="$(rhel_get_repos_for_os | tr ' ' ',')"
+EOF
     chmod -R 644 $tmpdir/$rhel_account_file_dir
     chmod +x $tmpdir/$rhel_account_file_dir
   fi
@@ -340,10 +344,6 @@ _patch_image "$pool_path/undercloud-$NUM.qcow2" \
   'ifcfg-ethM' $mgmt_ip $mgmt_mac \
   'ifcfg-ethA' $prov_ip $prov_mac
 
-if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
-  export RHEL_POOL_ID='8a85f98c61aca5bf0161ad8a8afc0e23'
-fi
-
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   rhel_register_system_and_customize "$pool_path/undercloud-$NUM.qcow2" 'undercloud'
 fi
@@ -390,13 +390,49 @@ sleep 5
 EOF
 }
 
+function _prepare_host() {
+  local addr=$1
+  if [[ "$ENVIRONMENT_OS" != 'rhel' ]] ; then
+    return
+  fi
+  # rhel registration
+  set +x
+  . $RHEL_ACCOUNT_FILE
+  local register_opts=''
+  [ -n "$RHEL_USER" ] && register_opts+=" --username $RHEL_USER"
+  [ -n "$RHEL_PASSWORD" ] && register_opts+=" --password $RHEL_PASSWORD"
+  [ -n "$RHEL_ORG" ] && register_opts+=" --org $RHEL_ORG"
+  [ -n "$RHEL_ACTIVATION_KEY" ] && register_opts+=" --activationkey $RHEL_ACTIVATION_KEY"
+  set -x
+  local attach_opts='--auto'
+  if [[ -n "$RHEL_POOL_ID" ]] ; then
+    attach_opts="--pool $RHEL_POOL_ID"
+  fi
+  local repos_list=$(rhel_get_repos_for_os)
+  local repos_opts=''
+  declare r
+  for r in $repos_list ; do
+    repos_opts+=" --enable=$r"
+  done
+  echo "INFO: enable repos: $repos_list"
+
+  cat <<EOF | $ssh_cmd root@${addr}
+subscription-manager unregister || true
+subscription-manager register $register_opts
+subscription-manager attach $attach_opts
+subscription-manager repos $repos_opts
+EOF
+}
+
 # wait udnercloud and register it in redhat if rhel env
 _wait_machine "${mgmt_ip}.2"
 _prepare_network "${mgmt_ip}.2"  "myhost.my${NUM}domain"
+_prepare_host "${mgmt_ip}.2"
 
 if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
   _wait_machine "${mgmt_ip}.3"
   _prepare_network "${mgmt_ip}.3"  "myhost.my${NUM}certdomain"
+  _prepare_host "${mgmt_ip}.3"
 
   cat <<EOF | $ssh_cmd ${mgmt_ip}.3
 set -x

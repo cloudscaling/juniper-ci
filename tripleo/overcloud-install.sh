@@ -907,10 +907,42 @@ if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
   openstack overcloud container image upload --config-file ~/overcloud_containers.yaml
 fi
 
+rhel_reg_opts=''
+if [ -f $RHEL_ACCOUNT_FILE ] ; then
+  cat <<EOF > environment-rhel-registration.yaml
+parameter_defaults:
+  rhel_reg_activation_key: "$RHEL_ACTIVATION_KEY"
+  rhel_reg_auto_attach: ""
+  rhel_reg_base_url: ""
+  rhel_reg_environment: ""
+  rhel_reg_force: ""
+  rhel_reg_machine_name: ""
+  rhel_reg_org: "$RHEL_ORG"
+  rhel_reg_password: "$RHEL_PASSWORD"
+  rhel_reg_pool_id: "$RHEL_POOL_ID"
+  rhel_reg_release: ""
+  rhel_reg_repos: "$RHEL_REPOS"
+  rhel_reg_sat_url: ""
+  rhel_reg_server_url: ""
+  rhel_reg_service_level: ""
+  rhel_reg_user: "$RHEL_USER"
+  rhel_reg_type: ""
+  rhel_reg_method: "portal"
+  rhel_reg_sat_repo: ""
+  rhel_reg_http_proxy_host: ""
+  rhel_reg_http_proxy_port: ""
+  rhel_reg_http_proxy_username: ""
+  rhel_reg_http_proxy_password: ""
+EOF
+  rhel_reg_opts+="-e environment-rhel-registration.yaml"
+  rhel_reg_opts+=" -e tripleo-heat-templates/extraconfig/pre_deploy/rhel-registration/rhel-registration-resource-registry.yaml"
+fi
+
 if [[ "$DEPLOY" != '1' ]] ; then
   # deploy overcloud. if you do it manually then I recommend to do it in screen.
   echo "openstack overcloud deploy --templates tripleo-heat-templates/ \
       --roles-file $role_file \
+      $rhel_reg_opts \
       $artifact_opts \
       -e $contrail_services_file \
       -e $contrail_net_file \
@@ -931,6 +963,7 @@ set +e
 
 openstack overcloud deploy --templates tripleo-heat-templates/ \
   --roles-file $role_file \
+  $rhel_reg_opts \
   $artifact_opts \
   -e $contrail_services_file \
   -e $contrail_net_file \

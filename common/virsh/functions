@@ -414,7 +414,8 @@ function _rhel_prepare_reg_file() {
     [ -n "$RHEL_POOL_ID" ] && reg_file_content+="export REG_POOL_ID=${RHEL_POOL_ID}\n"
     [ -n "$RHEL_ORG" ] && reg_file_content+="export REG_ORG=${RHEL_ORG}\n"
     [ -n "$RHEL_ACTIVATION_KEY" ] && reg_file_content+="export REG_ACTIVATION_KEY=${RHEL_ACTIVATION_KEY}\n"
-    virt-customize -a $image_file --run-command "echo -e '$reg_file_content' > /root/rhel-reg-data"
+    reg_file_content+="export RHEL_REPOS=$(rhel_get_repos_for_os | tr ' ' ',')\n"
+    virt-customize -a $image_file --run-command "echo -e '$reg_file_content' > $RHEL_ACCOUNT_FILE"
   # fi
   # ==== TODO: OSP13: end ====
 }
@@ -422,18 +423,23 @@ function _rhel_prepare_reg_file() {
 function rhel_register_system_and_customize() {
   local image_file=$1
   local image_type=$2
-  # todo: fix shopt
-  #local old_opt=$(shopt -o xtrace)
-  set +x
-  . $RHEL_ACCOUNT_FILE
-  _rhel_register $image_file
-  _rhel_attach $image_file
-  _rhel_prepare_reg_file $image_file
-  #eval "$old_opt"
-  set -x
-  _rhel_repos $image_file
 
-  virt-customize -a $image_file \
+  # TODO: disable network related actions like rhel registration
+  # virt-customize doesnt work on 18.04 with network
+  # https://bugs.launchpad.net/ubuntu/+source/libguestfs/+bug/1768085
+  local net_opts="--no-network"
+  # # todo: fix shopt
+  # #local old_opt=$(shopt -o xtrace)
+  # set +x
+  # . $RHEL_ACCOUNT_FILE
+  # _rhel_register $image_file
+  # _rhel_attach $image_file
+  # _rhel_prepare_reg_file $image_file
+  # #eval "$old_opt"
+  # set -x
+  # _rhel_repos $image_file
+
+  virt-customize -a $image_file $net_opts \
     --run-command 'xfs_growfs /' \
     --run-command 'systemctl enable sshd' \
     --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
@@ -443,12 +449,12 @@ function rhel_register_system_and_customize() {
 
   if [[ "$image_type" == 'undercloud' ]] ; then
 
-    virt-customize -a $image_file \
+    virt-customize -a $image_file $net_opts \
       --run-command 'yum remove -y cloud-init'
 
     # ==== TODO: OSP13: begin ====
     local env_os_ver=$(echo ${ENVIRONMENT_OS_VERSION:-'7_5'} | tr '_' '.')
-    virt-customize -a $image_file \
+    virt-customize -a $image_file $net_opts \
       --copy-in /home/root/images/rhel-server-${env_os_ver}-x86_64-kvm.qcow2:/root \
       --move /root/rhel-server-${env_os_ver}-x86_64-kvm.qcow2:/root/overcloud-base-image.qcow2
     # ==== TODO: OSP13: end ====
@@ -457,9 +463,13 @@ function rhel_register_system_and_customize() {
 
 function rhel_unregister_system() {
   local image_file=$1
+  # TODO: disable network related actions like rhel registration
+  # virt-customize doesnt work on 18.04 with network
+  # https://bugs.launchpad.net/ubuntu/+source/libguestfs/+bug/1768085
+  local net_opts="--no-network"
   if [[ -f $image_file ]] ; then
-    virt-customize -a $image_file \
-      --run-command "subscription-manager unregister"
+    virt-customize -a $image_file $net_opts \
+      --run-command "subscription-manager unregister" || true
   fi
 }
 
