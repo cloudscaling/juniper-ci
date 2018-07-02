@@ -908,7 +908,10 @@ if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
 fi
 
 rhel_reg_opts=''
-if [ -f $RHEL_ACCOUNT_FILE ] ; then
+rhel_account_file_name=$(echo $RHEL_ACCOUNT_FILE | awk -F '/' '{print($NF)}')
+if [ -f ~/$rhel_account_file_name ] ; then
+  set +x
+  source ~/$rhel_account_file_name
   cat <<EOF > environment-rhel-registration.yaml
 parameter_defaults:
   rhel_reg_activation_key: "$RHEL_ACTIVATION_KEY"
@@ -934,6 +937,7 @@ parameter_defaults:
   rhel_reg_http_proxy_username: ""
   rhel_reg_http_proxy_password: ""
 EOF
+  set -x
   rhel_reg_opts+="-e environment-rhel-registration.yaml"
   rhel_reg_opts+=" -e tripleo-heat-templates/extraconfig/pre_deploy/rhel-registration/rhel-registration-resource-registry.yaml"
 fi
