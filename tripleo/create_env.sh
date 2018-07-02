@@ -395,6 +395,10 @@ function _prepare_host() {
   if [[ "$ENVIRONMENT_OS" != 'rhel' ]] ; then
     return
   fi
+  # copy base image
+  local env_os_ver=$(echo ${ENVIRONMENT_OS_VERSION:-'7_5'} | tr '_' '.')
+  scp $ssh_opts /home/root/images/rhel-server-${env_os_ver}-x86_64-kvm.qcow2 \
+    root@${addr}:/root/overcloud-base-image.qcow2
   # rhel registration
   set +x
   . $RHEL_ACCOUNT_FILE
