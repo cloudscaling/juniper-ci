@@ -397,16 +397,20 @@ misc_opts='misc_opts.yaml'
 rm -f $misc_opts
 touch $misc_opts
 
-# Create ports for Contrail Controller and/or Analytis if any is installed on own node.
-# In that case OS controller will host VIP and haproxy will forward requests.
-contrail_vip_env='contrail_controller_vip_env.yaml'
+
+# TODO: OSP13: for queens only 3 contrail controller nodes are for now
+# (no separate analytics and analytics db nodes)
+if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
+  # Create ports for Contrail Controller and/or Analytis if any is installed on own node.
+  # In that case OS controller will host VIP and haproxy will forward requests.
+  contrail_vip_env='contrail_controller_vip_env.yaml'
   cat <<EOF > $contrail_vip_env
 resource_registry:
 EOF
-if (( CONTRAIL_CONTROLLER_COUNT > 0 )) ; then
-  echo INFO: contrail controllers are installed on own nodes, prepare VIPs env file
-  contrail_controller_vip='contrail_controller_vip.yaml'
-  cat <<EOF > $contrail_controller_vip
+  if (( CONTRAIL_CONTROLLER_COUNT > 0 )) ; then
+    echo INFO: contrail controllers are installed on own nodes, prepare VIPs env file
+    contrail_controller_vip='contrail_controller_vip.yaml'
+    cat <<EOF > $contrail_controller_vip
 heat_template_version: 2016-10-14
 parameters:
   ContrailControllerVirtualFixedIPs:
@@ -432,30 +436,31 @@ outputs:
   ContrailWebuiVIP:
     value: {get_attr: [ContrailControllerVirtualIP, fixed_ips, 0, ip_address]}
 EOF
-  cat <<EOF >> $contrail_vip_env
+    cat <<EOF >> $contrail_vip_env
   OS::TripleO::ContrailControllerVirtualIPs: $contrail_controller_vip
 EOF
-else
-  echo INFO: contrail controllers are installed on OS controller nodes
-  cat <<EOF >> $contrail_vip_env
+  else
+    echo INFO: contrail controllers are installed on OS controller nodes
+    cat <<EOF >> $contrail_vip_env
   OS::TripleO::ContrailControllerVirtualIPs: OS::Heat::None
 EOF
-  echo INFO: add contrail controller services to OS Controller role
-  pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
-  to_add='    - OS::TripleO::Services::ContrailConfig\n    - OS::TripleO::Services::ContrailControl\n'
-  to_add+='    - OS::TripleO::Services::ContrailDatabase\n    - OS::TripleO::Services::ContrailWebUI'
-  sed -i "${pos_to_insert} a\\$to_add" $role_file
-fi
-if (( ANALYTICS_COUNT > 0 || CONTRAIL_CONTROLLER_COUNT > 0 )) ; then
-  if (( ANALYTICS_COUNT > 0 )) ; then
-    echo INFO: contrail analytics is installed on own nodes, prepare VIPs env file
-  else
-    echo INFO: contrail analytics is installed on contrail controller nodes, prepare VIPs env file and put analytics service into ContralController role
-    pos_to_insert=`sed "=" $role_file | sed -n '/^- name: ContrailController/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
-    sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalytics" $role_file
+    echo INFO: add contrail controller services to OS Controller role
+    pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
+    to_add='    - OS::TripleO::Services::ContrailConfig\n    - OS::TripleO::Services::ContrailControl\n'
+    to_add+='    - OS::TripleO::Services::ContrailDatabase\n    - OS::TripleO::Services::ContrailWebUI'
+    sed -i "${pos_to_insert} a\\$to_add" $role_file
   fi
-  contrail_analytics_vip='contrail_analytics_vip.yaml'
-  cat <<EOF > $contrail_analytics_vip
+
+  if (( ANALYTICS_COUNT > 0 || CONTRAIL_CONTROLLER_COUNT > 0 )) ; then
+    if (( ANALYTICS_COUNT > 0 )) ; then
+      echo INFO: contrail analytics is installed on own nodes, prepare VIPs env file
+    else
+      echo INFO: contrail analytics is installed on contrail controller nodes, prepare VIPs env file and put analytics service into ContralController role
+      pos_to_insert=`sed "=" $role_file | sed -n '/^- name: ContrailController/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
+      sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalytics" $role_file
+    fi
+    contrail_analytics_vip='contrail_analytics_vip.yaml'
+    cat <<EOF > $contrail_analytics_vip
 heat_template_version: 2016-10-14
 parameters:
   ContrailAnalyticsVirtualFixedIPs:
@@ -477,46 +482,46 @@ outputs:
   ContrailAnalyticsVIP:
     value: {get_attr: [ContrailAnalyticsVirtualIP, fixed_ips, 0, ip_address]}
 EOF
-  cat <<EOF >> $contrail_vip_env
+    cat <<EOF >> $contrail_vip_env
   OS::TripleO::ContrailAnalyticsVirtualIPs: $contrail_analytics_vip
 EOF
-else
-  echo INFO: contrail analytics are installed on OS controller nodes
-  cat <<EOF >> $contrail_vip_env
+  else
+    echo INFO: contrail analytics are installed on OS controller nodes
+    cat <<EOF >> $contrail_vip_env
   OS::TripleO::ContrailAnalyticsVirtualIPs: OS::Heat::None
 EOF
-  echo INFO: add contrail analytics services to OS Controller role
-  pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
-  sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalytics" $role_file
-fi
-if (( ANALYTICSDB_COUNT > 0 )) ; then
-  echo INFO: contrail analyticsdb is installed on the own node
-else
-  # disable services that are not-exists in R4.0
-  # they prevent to install containers on one node because
-  # of puppet resource declaraion duplication
-  sed -i 's/OS::TripleO::Services::ContrailControl:.*/OS::TripleO::Services::ContrailControl: OS::Heat::None/g' $contrail_services_file
-  sed -i 's/OS::TripleO::Services::ContrailDatabase:.*/OS::TripleO::Services::ContrailDatabase: OS::Heat::None/g' $contrail_services_file
-  # sed -i 's/OS::TripleO::Services::ContrailWebUI:.*/OS::TripleO::Services::ContrailWebUI: OS::Heat::None/g' $contrail_services_file
-  if (( CONTRAIL_CONTROLLER_COUNT > 0 )) ; then
-    echo INFO: contrail analyticsdb is installed on contrail controller nodes, put analyticsdb service into ContralController role
-    pos_to_insert=`sed "=" $role_file | sed -n '/^- name: ContrailController/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
-  else
-    echo INFO: add contrail analyticsdb services to OS Controller role
+    echo INFO: add contrail analytics services to OS Controller role
     pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
+    sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalytics" $role_file
   fi
-  sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalyticsDatabase" $role_file
-  # add simulation contrail_database_node_ips
-  if ! grep -q 'resource_registry:' $misc_opts ;  then
-    cat <<EOF >> $misc_opts
+  if (( ANALYTICSDB_COUNT > 0 )) ; then
+    echo INFO: contrail analyticsdb is installed on the own node
+  else
+    # disable services that are not-exists in R4.0
+    # they prevent to install containers on one node because
+    # of puppet resource declaraion duplication
+    sed -i 's/OS::TripleO::Services::ContrailControl:.*/OS::TripleO::Services::ContrailControl: OS::Heat::None/g' $contrail_services_file
+    sed -i 's/OS::TripleO::Services::ContrailDatabase:.*/OS::TripleO::Services::ContrailDatabase: OS::Heat::None/g' $contrail_services_file
+    # sed -i 's/OS::TripleO::Services::ContrailWebUI:.*/OS::TripleO::Services::ContrailWebUI: OS::Heat::None/g' $contrail_services_file
+    if (( CONTRAIL_CONTROLLER_COUNT > 0 )) ; then
+      echo INFO: contrail analyticsdb is installed on contrail controller nodes, put analyticsdb service into ContralController role
+      pos_to_insert=`sed "=" $role_file | sed -n '/^- name: ContrailController/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
+    else
+      echo INFO: add contrail analyticsdb services to OS Controller role
+      pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Controller/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
+    fi
+    sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::ContrailAnalyticsDatabase" $role_file
+    # add simulation contrail_database_node_ips
+    if ! grep -q 'resource_registry:' $misc_opts ;  then
+      cat <<EOF >> $misc_opts
 resource_registry:
 EOF
-  fi
-  cat <<EOF >> $misc_opts
-  OS::TripleO::Services::ContrailControl: simulate_contrail_control.yaml
-  OS::TripleO::Services::ContrailDatabase: simulate_contrail_database.yaml
+    fi
+    cat <<EOF >> $misc_opts
+    OS::TripleO::Services::ContrailControl: simulate_contrail_control.yaml
+    OS::TripleO::Services::ContrailDatabase: simulate_contrail_database.yaml
 EOF
-  cat <<EOF > simulate_contrail_database.yaml
+    cat <<EOF > simulate_contrail_database.yaml
 heat_template_version: 2016-10-14
 parameters:
   ServiceNetMap:
@@ -535,7 +540,7 @@ outputs:
       config_settings:
         contrail_database_sim: 'contrail_database_sim'
 EOF
-  cat <<EOF > simulate_contrail_control.yaml
+    cat <<EOF > simulate_contrail_control.yaml
 heat_template_version: 2016-10-14
 parameters:
   ServiceNetMap:
@@ -554,7 +559,8 @@ outputs:
       config_settings:
         contrail_control_sim: 'contrail_control_sim'
 EOF
-fi
+  fi
+fi # if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]]
 
 # other options
 if [[ "$DPDK" == 'true' && "$OPENSTACK_VERSION" == 'newton' ]] ; then
