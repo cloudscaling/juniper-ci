@@ -9,9 +9,26 @@ if [[ -z "$NUM" ]] ; then
   echo "Please set NUM variable to specific environment number. (export NUM=4)"
   exit 1
 fi
+if [[ -z "$ENVIRONMENT_OS" ]] ; then
+  echo "Please set ENVIRONMENT_OS variable to specific environment number. (export ENVIRONMENT_OS=rhel)"
+  exit 1
+fi
+
 poolname="rdimages"
 
 source "$my_dir/../common/virsh/functions"
+
+if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+  # delete stack to unregister nodes
+  BASE_ADDR=${BASE_ADDR:-172}
+  ((env_addr=BASE_ADDR+NUM*10))
+  ip_addr="192.168.${env_addr}.2"
+  ssh_opts="-i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+  ssh_addr="root@${ip_addr}"
+  ssh -T $ssh_opts $ssh_addr "sudo -u stack /home/stack/overcloud-delete.sh" || true
+  # unregister undercloud
+  ssh -T $ssh_opts $ssh_addr "sudo subscription-manager unregister" || true
+fi
 
 delete_network management
 delete_network provisioning
