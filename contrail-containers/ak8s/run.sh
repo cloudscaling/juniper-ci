@@ -112,7 +112,7 @@ done
 test $res == '0'
 
 function check_cluster() {
-  cat <<EOM | ssh $SSH_OPTS root@${ip}
+  cat <<EOM | ssh $SSH_OPTS root@${master_ip}
 set -x
 kubectl create serviceaccount --namespace kube-system tiller
 kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
@@ -126,9 +126,10 @@ sleep 60
 helm version
 kubectl get pods --all-namespaces
 helm repo update
-helm install --name wordpress --set mariadb.persistence.enabled=false --set persistence.enabled=false stable/wordpress
-sleep 60
-kubectl get pods --all-namespaces
+helm install --name wordpress --set mariadb.master.persistence.enabled=false --set persistence.enabled=false stable/wordpress
+sleep 90
+kubectl get pods
+kubectl get svc wordpress-wordpress
 set +x
 EOM
 
