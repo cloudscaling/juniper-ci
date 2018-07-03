@@ -111,29 +111,34 @@ while ! check_introspection "$dest_to_check" ; do
 done
 test $res == '0'
 
-function aaa() {
-  # ssh root@${ips[0]}
+function check_cluster() {
+  cat <<EOM | ssh $SSH_OPTS root@${ip}
+set -x
+kubectl create serviceaccount --namespace kube-system tiller
+kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+wget -nv https://storage.googleapis.com/kubernetes-helm/helm-v2.9.0-linux-amd64.tar.gz
+tar -xvf helm-v2.9.0-linux-amd64.tar.gz
+mv linux-amd64/helm /usr/bin/
+helm init
+kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller", "automountServiceAccountToken": true}}}}'
+helm init --service-account tiller --upgrade
+sleep 60
+helm version
+kubectl get pods --all-namespaces
+helm repo update
+helm install --name wordpress --set mariadb.persistence.enabled=false --set persistence.enabled=false stable/wordpress
+sleep 60
+kubectl get pods --all-namespaces
+set +x
+EOM
 
-  kubectl create serviceaccount --namespace kube-system tiller
-  kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-
-  wget -nv https://storage.googleapis.com/kubernetes-helm/helm-v2.9.0-linux-amd64.tar.gz
-  tar -xvf helm-v2.9.0-linux-amd64.tar.gz
-  mv linux-amd64/helm /usr/bin/
-  helm init
-  kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller", "automountServiceAccountToken": true}}}}'
-  helm init --service-account tiller --upgrade
-
-  sleep 5 && helm version
-  kubectl get pods --all-namespaces
-
-  helm repo update
   # this is needed if we want to enable persistence
   # ? helm repo add nfs-provisioner https://raw.githubusercontent.com/IlyaSemenov/nfs-provisioner-chart/master/repo
   # ? helm install --name nfs-provisioner --namespace nfs-provisioner nfs-provisioner/nfs-provisioner && sleep 5
   # ? kubectl patch storageclass local-nfs -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
-  helm install --name wordpress --set mariadb.persistence.enabled=false --set persistence.enabled=false stable/wordpress
 }
+
+check_cluster
 
 # save logs and exit
 trap - ERR
