@@ -9,11 +9,8 @@ if [[ -z "$NUM" ]] ; then
   echo "Please set NUM variable to specific environment number. (export NUM=4)"
   exit 1
 fi
-if [[ -z "$ENVIRONMENT_OS" ]] ; then
-  echo "Please set ENVIRONMENT_OS variable to specific environment number. (export ENVIRONMENT_OS=rhel)"
-  exit 1
-fi
 
+ENVIRONMENT_OS=${ENVIRONMENT_OS:-'rhel'}
 poolname="rdimages"
 
 source "$my_dir/../common/virsh/functions"
