@@ -248,6 +248,7 @@ EOM
     fi
   done
   apt-get -y update &>>$logs_dir/apt.log
+  apt-get -y purge unattended-upgrades
   if [[ "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
     dpdk_req="linux-modules-extra-\$(uname -r)"
   else
