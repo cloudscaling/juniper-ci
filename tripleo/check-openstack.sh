@@ -11,16 +11,16 @@ if [ -z "$WORKSPACE" ] ; then
   export WORKSPACE="$HOME"
 fi
 
-export OS_TLS_OPTS=""
+export OVERCLOUD_TLS_OPTS=""
 if [[ "$TLS" != 'off' ]] ; then
-  OS_TLS_OPTS="--insecure"
+  OVERCLOUD_TLS_OPTS="--insecure"
   if [[ -f /home/stack/ca.crt.pem && -f /home/stack/server.crt.pem && -f /home/stack/server.key.pem ]] ; then
     # export OS_CACERT='/home/stack/ca.crt.pem'
     # export OS_CERT='/home/stack/server.crt.pem'
     # export OS_KEY='/home/stack/server.key.pem'
-    OS_TLS_OPTS=" --os-cacert /home/stack/ca.crt.pem"
-    OS_TLS_OPTS+=" --os-cert /home/stack/server.crt.pem"
-    OS_TLS_OPTS+=" --os-key /home/stack/server.key.pem"
+    OVERCLOUD_TLS_OPTS=" --os-cacert /home/stack/ca.crt.pem"
+    OVERCLOUD_TLS_OPTS+=" --os-cert /home/stack/server.crt.pem"
+    OVERCLOUD_TLS_OPTS+=" --os-key /home/stack/server.key.pem"
   fi
 fi
 
