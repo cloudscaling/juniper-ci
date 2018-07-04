@@ -11,6 +11,19 @@ if [ -z "$WORKSPACE" ] ; then
   export WORKSPACE="$HOME"
 fi
 
+export OS_TLS_OPTS=""
+if [[ "$TLS" != 'off' ]] ; then
+  OS_TLS_OPTS="--insecure"
+  if [[ -f /home/stack/ca.crt.pem && -f /home/stack/server.crt.pem && -f /home/stack/server.key.pem ]] ; then
+    # export OS_CACERT='/home/stack/ca.crt.pem'
+    # export OS_CERT='/home/stack/server.crt.pem'
+    # export OS_KEY='/home/stack/server.key.pem'
+    OS_TLS_OPTS=" --os-cacert /home/stack/ca.crt.pem"
+    OS_TLS_OPTS+=" --os-cert /home/stack/server.crt.pem"
+    OS_TLS_OPTS+=" --os-key /home/stack/server.key.pem"
+  fi
+fi
+
 source ${WORKSPACE}/stackrc
 node_name_regexp='compute'
 if [[ "$DPDK" == 'true' ]]; then
@@ -18,7 +31,8 @@ if [[ "$DPDK" == 'true' ]]; then
 elif [[ "$TSN" == 'true' ]] ; then
   node_name_regexp='tsn'
 fi
-for mid in `nova --insecure list | grep "$node_name_regexp" |  awk '{print $12}'` ; do
+# tls note: undercloud is w/o tls
+for mid in `nova list | grep "$node_name_regexp" |  awk '{print $12}'` ; do
   mip="`echo $mid | cut -d '=' -f 2`"
   ssh heat-admin@$mip sudo yum install -y sshpass
 done
@@ -38,7 +52,7 @@ function check_ui_ip () {
     echo "INFO: check controller $ip port 8180"
     if ! curl -I  http://$ip:8180/ 2>/dev/null| grep "302" ; then
       echo "ERROR: response from port 8180 is not HTTP 302:"
-      curl -I http://$ip:8180/
+      curl -I http://$ip:8180/ || true
       local ret=1
     else
       echo "INFO: ok"
@@ -60,7 +74,8 @@ function check_ui_ip () {
 
 ret=0
 source ${WORKSPACE}/stackrc
-for ctrl in `openstack --insecure server list | grep contrailcontroller | grep -o "ctlplane=[0-9\.]*" | cut -d '=' -f 2` ; do
+# tls note: undercloud is w/o tls
+for ctrl in `openstack server list | grep contrailcontroller | grep -o "ctlplane=[0-9\.]*" | cut -d '=' -f 2` ; do
   check_ui_ip $ctrl || ret=1
 done
 ha_ip=`cat ${WORKSPACE}/overcloudrc | grep OS_AUTH_URL | grep -o "[0-9][0-9\.]*:" | cut -d ':' -f 1`
