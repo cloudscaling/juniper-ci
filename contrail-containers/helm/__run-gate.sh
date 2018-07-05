@@ -217,10 +217,12 @@ global:
     LOG_LEVEL: SYS_DEBUG
     CLOUD_ORCHESTRATOR: openstack
     AAA_MODE: $AAA_MODE
-    VROUTER_GATEWAY:
+    VROUTER_GATEWAY: 10.$NET_BASE_PREFIX.$JOB_RND.1
     SSL_ENABLE: $SSL_ENABLE
     JVM_EXTRA_OPTS: "-Xms1g -Xmx2g"
     BGP_PORT: "1179"
+    CONFIG_NODEMGR__DEFAULTS__minimum_diskGB: "2"
+    DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
 EOF
 
 helm install --name contrail ${CHD_PATH}/contrail --namespace=contrail --values=/tmp/contrail.yaml
