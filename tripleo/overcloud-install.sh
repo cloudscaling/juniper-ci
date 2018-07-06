@@ -775,6 +775,9 @@ EOF
 #  sudo chown stack:stack keystone.crt.pem
 
   ssl_opts+=' -e enable-tls.yaml'
+  if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION  ]] ; then
+    ssl_opts+=" -e tripleo-heat-templates/environments/contrail/contrail-tls.yaml"
+  fi
   if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
     endpoints_file='tripleo-heat-templates/environments/tls-endpoints-public-ip.yaml'
   else
@@ -837,6 +840,11 @@ EOF
     else
       # queens
       ssl_opts+=" -e tripleo-heat-templates/environments/ssl/enable-internal-tls.yaml"
+      cat <<EOF >> enable-tls.yaml
+  # TODO: try local instead of IPA that requires IPA server to be configured
+  CertmongerCA: 'local'
+  CertmongerVncCA: 'local'
+EOF
     fi
   fi
   if [[ "$TLS" == 'all' ]] ; then
