@@ -147,7 +147,13 @@ sed -i -e "s|{{series}}|$SERIES|m" "repo_config_cv.yaml"
 sed -i "s/\r/\n/g" "repo_config_cv.yaml"
 juju-deploy $PLACE/contrail-agent --config repo_config_cv.yaml
 if [[ "$USE_DPDK" == "true" ]] ; then
-  juju-set contrail-agent dpdk=True physical-interface=$IF2 dpdk-coremask=1,2
+  if [[ -n $DPDK_MAIN_MEMPOOL_SIZE && "$DPDK_MAIN_MEMPOOL_SIZE" != "default" ]] ; then
+    mempool="dpdk-main-mempool-size=${DPDK_MAIN_MEMPOOL_SIZE}"
+  fi
+  if [[ -n $VHOST_MTU && "$VHOST_MTU" != "default" ]] ; then
+    mtu=" vhost_mtu=${VHOST_MTU}"
+  fi
+  juju-set contrail-agent dpdk=True physical-interface=$IF2 dpdk-coremask=1,2 $mempool $mtu
 fi
 
 if [ "$DEPLOY_MODE" == 'ha' ] ; then

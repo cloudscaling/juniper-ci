@@ -191,6 +191,18 @@
       - string:
           name: CHARMS_BRANCH
           default: 'master'
+      - choice:
+          name: DPDK_MAIN_MEMPOOL_SIZE
+          description: "Size of DPDK main mempool"
+          choices:
+            - default
+            - "16384"
+      - choice:
+          name: VHOST_MTU
+          description: "MTU on the vhost0 interface"
+          choices:
+            - default
+            - "1540"
     scm:
       - juniper-contrail-charms-branch
       - juniper-ci
