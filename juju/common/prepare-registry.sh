@@ -49,6 +49,7 @@ for ff in `ls ./docker_images/*` ; do
     image_tag=`echo $image_id | cut -d ':' -f 2`
   fi
   echo "INFO: Pushing $image_name:$image_tag (with id $image_id) to local registry"
+  docker login -u $docker_user -p $docker_password ${repo_ip}:5000
   docker tag $image_id ${repo_ip}:5000/$image_name:$image_tag
   docker push ${repo_ip}:5000/$image_name:$image_tag &>/dev/null
 done
