@@ -16,7 +16,6 @@ function save_logs() {
   mkdir -p /root/logs/kolla
   cp /root/contrail-kolla-ansible/etc/kolla/globals.yml /root/logs/kolla/
   cp /root/contrail-kolla-ansible/ansible/host_vars/* /root/logs/kolla/ || /bin/true
-  cp -R /var/lib/docker/volumes/kolla_logs/_data /root/logs/kolla/ || /bin/true
   chmod -R a+rw /root/logs/kolla
 }
 

@@ -22,6 +22,16 @@ if [ -d /etc/contrail ]; then
   chown -R $USER logs/etc
 fi
 
+kl_path='/var/lib/docker/volumes/kolla_logs/_data'
+if [ -d $kl_path ]; then
+  mkdir -p logs/kolla_logs
+  for ii in `ls $kl_path/`; do
+    cp -R "$kl_path/$ii" logs/kolla_logs/
+  done
+  chown -R $USER logs/kolla_logs
+  chmod -R a+rw logs/kolla_logs
+fi
+
 mkdir -p logs/contrail
 pushd logs/contrail
 for cnt in `sudo docker ps | grep contrail | grep -v pause | awk '{print $1}'` ; do
