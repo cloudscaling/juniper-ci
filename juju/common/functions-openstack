@@ -360,10 +360,12 @@ function check_instance_simple() {
 
     _check_instance_log $instance_id || ret=1
 
+    set -x
     local ip=`openstack server show $instance_id | awk '/addresses/{print $4}' | cut -d '=' -f 2`
     local if_name=`juju ssh $mch "sudo vif --list" 2>/dev/null | grep -B 1 $ip | head -1 | awk '{print $3}'`
     local curl_cmd="curl $curl_ssl_opts -s ${curl_proto:-http}://localhost:8085/Snh_ItfReq?name=$if_name"
     local lip=`juju ssh $mch "$curl_cmd" 2>/dev/null | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'`
+    set +x
 
     if [[ -n $lip ]] ; then
       echo "INFO: Instance's link-local address is $lip"
