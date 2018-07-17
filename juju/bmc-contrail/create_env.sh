@@ -132,19 +132,13 @@ function run_compute() {
   fi
   juju-ssh $mch "sudo apt-get -fy install linux-image-extra-$kernel_version dpdk mc wget apparmor-profiles" &>>$log_dir/apt.log
   juju-scp "$my_dir/files/50-cloud-init-compute-$SERIES.cfg" $mch:50-cloud-init.cfg 2>/dev/null
-  juju-scp "$my_dir/../common/edit-50-cloud-init-file.sh" $mch:edit-50-cloud-init-file.sh 2>/dev/null
-  if [[ "$SERIES" == 'trusty' ]]; then
-    iface='eth0'
+  juju-scp "$my_dir/files/prepare-network.sh" $mch:prepare-network.sh 2>/dev/null
+  if [[ "$USE_DPDK" == 'true' ]] ; then
+    iface=$IF2
   else
-    iface='ens3'
+    iface=$IF1
   fi
-  juju-ssh $mch "sudo ./edit-50-cloud-init-file.sh $iface" 2>/dev/null
-  juju-ssh $mch "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
-  if [[ "$SERIES" == 'trusty' ]]; then
-    # '50-cloud-init.cfg' is default name for xenial and it is overwritten
-    juju-ssh $mch "sudo rm /etc/network/interfaces.d/eth0.cfg" 2>/dev/null
-  fi
-  juju-ssh $mch "echo 'supersede routers $addr.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
+  juju-ssh $mch "./prepare-network.sh $iface $addr" 2>/dev/null
   juju-ssh $mch "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $mch juju-ssh
 }
