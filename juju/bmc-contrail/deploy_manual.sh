@@ -30,10 +30,12 @@ repo_key=`echo "$repo_key" | awk '{printf("      %s\r", $0)}'`
 
 # prepare registry for contrail packages
 echo "INFO: Prepare local registry on $mrepo"
+docker_user="docker_user"
+docker_password="docker_password"
 ssh $mrepo mkdir docker_images
 scp $HOME/docker/contrail-* "$mrepo:docker_images/"
 scp "$my_dir/../common/prepare-registry.sh" $mrepo:prepare-registry.sh
-ssh $mrepo ./prepare-registry.sh $repo_ip
+ssh $mrepo ./prepare-registry.sh $repo_ip $docker_user $docker_password
 controller_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-controller-" | awk '{print $1}'`
 controller_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-controller-" | awk '{print $2}'`
 analytics_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analytics-" | awk '{print $1}'`
@@ -115,11 +117,11 @@ juju-deploy $PLACE/contrail-keystone-auth --to lxd:$cont1
 
 juju-deploy $PLACE/contrail-controller --to $cont1
 juju-expose contrail-controller
-juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4" image-name="$controller_image_name" image-tag="$controller_image_tag" docker-registry="$repo_ip:5000"
+juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4" image-name="$controller_image_name" image-tag="$controller_image_tag" docker-registry="$repo_ip:5000" docker-user="$docker_user" docker-password="$docker_password"
 juju-deploy $PLACE/contrail-analyticsdb --to $cont1
-juju-set contrail-analyticsdb cassandra-minimum-diskgb="4" image-name="$analyticsdb_image_name" image-tag="$analyticsdb_image_tag" docker-registry="$repo_ip:5000"
+juju-set contrail-analyticsdb cassandra-minimum-diskgb="4" image-name="$analyticsdb_image_name" image-tag="$analyticsdb_image_tag" docker-registry="$repo_ip:5000" docker-user="$docker_user" docker-password="$docker_password"
 juju-deploy $PLACE/contrail-analytics --to $cont1
-juju-set contrail-analytics image-name="$analytics_image_name" image-tag="$analytics_image_tag" docker-registry="$repo_ip:5000"
+juju-set contrail-analytics image-name="$analytics_image_name" image-tag="$analytics_image_tag" docker-registry="$repo_ip:5000" docker-user="$docker_user" docker-password="$docker_password"
 juju-expose contrail-analytics
 
 if [ "$DEPLOY_MODE" == 'ha' ] ; then
@@ -147,8 +149,9 @@ sed -i -e "s|{{series}}|$SERIES|m" "repo_config_cv.yaml"
 sed -i "s/\r/\n/g" "repo_config_cv.yaml"
 juju-deploy $PLACE/contrail-agent --config repo_config_cv.yaml
 if [[ "$USE_DPDK" == "true" ]] ; then
-  juju-set contrail-agent dpdk=True physical-interface=$IF2 dpdk-coremask=1,2
+  juju-set contrail-agent dpdk=True dpdk-coremask=1,2 dpdk-main-mempool-size=16384
 fi
+juju-set contrail-agent vhost-mtu=1540 physical-interface=$IF2
 
 if [ "$DEPLOY_MODE" == 'ha' ] ; then
   juju-deploy cs:$SERIES/haproxy --to lxd:$cont0

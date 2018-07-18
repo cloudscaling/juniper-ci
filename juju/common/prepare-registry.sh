@@ -1,6 +1,8 @@
 #!/bin/bash -e
 
 repo_ip=$1
+docker_user=$2
+docker_password=$3
 
 sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -20,10 +22,17 @@ service docker restart
 
 echo "Start new Docker Registry"
 sudo docker pull registry:2 &>/dev/null
+mkdir auth
+sudo docker run --entrypoint htpasswd registry:2 -Bbn $docker_user $docker_password > auth/htpasswd
 sudo docker run -d --restart=always --name registry_5000\
   -v /opt:/var/lib/registry:Z \
+  -v `pwd`/auth:/auth \
+  -e "REGISTRY_AUTH=htpasswd" \
+  -e "REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm" \
+  -e "REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd" \
   -e REGISTRY_HTTP_ADDR=0.0.0.0:5000 -p 5000:5000 \
   registry:2
+docker login -u $docker_user -p $docker_password ${repo_ip}:5000
 
 for ff in `ls ./docker_images/*` ; do
   echo "Loading $ff"

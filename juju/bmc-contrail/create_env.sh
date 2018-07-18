@@ -113,6 +113,7 @@ function run_cloud_machine() {
   juju-ssh $mch "sudo bash -c 'echo $name > /etc/hostname ; hostname $name'" 2>/dev/null
   # after first boot we must remove cloud-init
   juju-ssh $mch "sudo rm -rf /etc/systemd/system/cloud-init.target.wants /lib/systemd/system/cloud*"
+  juju-ssh $mch "sudo apt-get -y purge unattended-upgrades" &>>$log_dir/apt.log
   echo "INFO: machine $name (juju machine: $mch) is ready $(date)"
 }
 
@@ -132,12 +133,8 @@ function run_compute() {
   fi
   juju-ssh $mch "sudo apt-get -fy install linux-image-extra-$kernel_version dpdk mc wget apparmor-profiles" &>>$log_dir/apt.log
   juju-scp "$my_dir/files/50-cloud-init-compute-$SERIES.cfg" $mch:50-cloud-init.cfg 2>/dev/null
-  juju-ssh $mch "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
-  if [[ "$SERIES" == 'trusty' ]]; then
-    # '50-cloud-init.cfg' is default name for xenial and it is overwritten
-    juju-ssh $mch "sudo rm /etc/network/interfaces.d/eth0.cfg" 2>/dev/null
-  fi
-  juju-ssh $mch "echo 'supersede routers $addr.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
+  juju-scp "$my_dir/files/__prepare-network.sh" $mch:prepare-network.sh 2>/dev/null
+  juju-ssh $mch "./prepare-network.sh $IF2" 2>/dev/null
   juju-ssh $mch "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $mch juju-ssh
 }

@@ -292,22 +292,6 @@ function _get_instance_machine() {
   get_machine_by_ip $ip
 }
 
-function _get_current_routes() {
-  local mch=$1
-  $SSH_CMD $mch ip route 2>/dev/null | awk '/169.254/{print $1}'
-}
-
-function _check_new_route() {
-  local mch=$1
-  local route=$2
-  if ! $SSH_CMD $mch ip route 2>/dev/null | grep -q "$route" ; then
-    echo "ERROR: Route $route is absent on host:"
-    $SSH_CMD $mch ip route
-    return 1
-  fi
-  return 0
-}
-
 function _check_instance_ping() {
   local mch=$1
   local ip=$2
@@ -353,11 +337,6 @@ function check_instance_simple() {
   local net_id=$1
   local fip=$2
 
-  declare -A rts
-  for mch in `get_machines_index_by_service nova-compute` ; do
-    rts[$mch]=`_get_current_routes $mch`
-  done
-
   local iname="instance_$flavor"
   if ! output=`openstack server create --flavor $flavor --nic net-id=$net_id --image cirros $iname` ; then
     echo "ERROR: Couldn't boot instance"
@@ -367,6 +346,7 @@ function check_instance_simple() {
   local instance_id=`echo "$output" | awk '/ id /{print $4}'`
   local ret=0
   wait_instance $instance_id $((3*MAX_FAIL)) || ret=1
+  local ip=`openstack server show $instance_id | awk '/addresses/{print $4}' | cut -d '=' -f 2`
   for i in {1..$MAX_FAIL} ; do
     if openstack server add floating ip $instance_id $fip ; then
       break
@@ -381,19 +361,16 @@ function check_instance_simple() {
 
     _check_instance_log $instance_id || ret=1
 
-    local routes_to_skip="${rts[${mch}]}"
-    local rt=`_get_current_routes $mch`
-    local new_route=''
-    for r in $rt ; do
-      echo "$routes_to_skip" | grep -q "$r" && continue
-      new_route="$r"
-      break
-    done
-    if [[ -n $new_route ]] ; then
-      echo "INFO: Instance's new route is $new_route"
-      _check_new_route $mch $new_route || ret=1
-      _check_instance_ping $mch $new_route || ret=1
-      _check_instance_ssh_and_metadata $mch $new_route $fip || ret=1
+    set -x
+    local if_name=`juju ssh $mch "sudo vif --list" 2>/dev/null | grep -B 1 $ip | head -1 | awk '{print $3}'`
+    local curl_cmd="curl $curl_ssl_opts -s ${curl_proto:-http}://localhost:8085/Snh_ItfReq?name=$if_name"
+    local lip=`juju ssh $mch "$curl_cmd" 2>/dev/null | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'`
+    set +x
+
+    if [[ -n $lip ]] ; then
+      echo "INFO: Instance's link-local address is $lip"
+      _check_instance_ping $mch $lip || ret=1
+      _check_instance_ssh_and_metadata $mch $lip $fip || ret=1
     else
       echo "INFO: Couldn't find new route 169.254.0.*"
       ret=1
