@@ -1005,12 +1005,16 @@ for i in `echo "$overcloud_nodes" | awk '/contrail|compute|dpdk|tsn/ {print($8)}
     else
       state=`echo "$contrail_status" | grep -v '==' |  grep -v 'supervisor-database' | awk '{print($2)}'`
     fi
-    for st in $state; do
-      if  [[ ! "active timeout backup" =~ "$st" ]] ; then
-        echo "ERROR: some of contrail services are not in active state"
-        ((++errors))
-      fi
-    done
+    # TODO: OSP13
+    # temporary disable check - it is needed to be fixed because of output format was changed
+    if [[ 'newton|ocata' =~ $OPENSTACK_VERSION ]] ; then
+      for st in $state; do
+        if  [[ ! "active timeout backup" =~ "$st" ]] ; then
+          echo "ERROR: some of contrail services are not in active state"
+          ((++errors))
+        fi
+      done
+    fi
 done
 
 echo "INFO: collecting HEAT logs"
