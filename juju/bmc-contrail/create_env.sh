@@ -113,7 +113,7 @@ function run_cloud_machine() {
   juju-ssh $mch "sudo bash -c 'echo $name > /etc/hostname ; hostname $name'" 2>/dev/null
   # after first boot we must remove cloud-init
   juju-ssh $mch "sudo rm -rf /etc/systemd/system/cloud-init.target.wants /lib/systemd/system/cloud*"
-  juju-ssh $mch "apt-get -y purge unattended-upgrades" &>>$log_dir/apt.log
+  juju-ssh $mch "sudo apt-get -y purge unattended-upgrades" &>>$log_dir/apt.log
   echo "INFO: machine $name (juju machine: $mch) is ready $(date)"
 }
 
