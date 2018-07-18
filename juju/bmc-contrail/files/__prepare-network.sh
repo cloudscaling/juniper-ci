@@ -11,5 +11,5 @@ if [[ "$series" == 'trusty' ]]; then
   sudo rm /etc/network/interfaces.d/eth0.cfg
 fi
 
-addr_prefix=`echo $address | cut -d '.' -f 1,2,3`
-echo "supersede routers $addr_prefix.1;" | sudo tee -a /etc/dhcp/dhclient.conf
+# this should be done for first interface!
+echo "supersede routers 10.0.10.1;" | sudo tee -a /etc/dhcp/dhclient.conf
