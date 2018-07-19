@@ -361,26 +361,19 @@ function check_instance_simple() {
 
     _check_instance_log $instance_id || ret=1
 
-    set -x
-    local if_name=`juju ssh $mch "sudo vif --list" 2>/dev/null | grep -B 1 $ip | head -1 | awk '{print $3}'`
+    local if_name=`juju ssh $mch "sudo vif --list" 2>/dev/null | grep -B 1 $ip | head -1 | awk '{print $3}' | sed 's/\r//g'`
     echo "INFO: Private IP is $ip, Interface $if_name"
     local curl_cmd="curl $curl_ssl_opts -s ${curl_proto:-http}://localhost:8085/Snh_ItfReq?name=$if_name"
     local lip=`juju ssh $mch "$curl_cmd" 2>/dev/null | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'`
-    if [[ -z "$lip" ]] ; then
-      echo "WARNING: curl output from vrouter introspect port is empty. wait a bit..."
-      sleep 60
-      lip=`juju ssh $mch "$curl_cmd" 2>/dev/null | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'`
-    fi
     if [[ -n "$lip" ]] ; then
       echo "INFO: Instance's link-local address is $lip"
       _check_instance_ping $mch $lip || ret=1
       _check_instance_ssh_and_metadata $mch $lip $fip || ret=1
     else
       echo "INFO: Couldn't find new route 169.254.0.*"
-      juju ssh $mch "$curl_cmd"
+      juju ssh $mch "$curl_cmd" | xmllint --format -
       ret=1
     fi
-    set +x
 
     # TODO: for now skip VGW cases with DPDK
     if [[ "$USE_DPDK" != "true" ]]; then
