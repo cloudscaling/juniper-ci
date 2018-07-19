@@ -33,6 +33,7 @@ instances:
 global_configuration:
  REGISTRY_PRIVATE_INSECURE: True
  CONTAINER_REGISTRY: ${CONTAINER_REGISTRY}
+ K8S_VERSION: 1.11.0
 
 contrail_configuration:
  CONTRAIL_VERSION: ${CONTRAIL_VERSION}
@@ -41,3 +42,4 @@ contrail_configuration:
  DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
  JVM_EXTRA_OPTS: "-Xms1g -Xmx2g"
  LOG_LEVEL: SYS_DEBUG
+ CLOUD_ORCHESTRATOR: kubernetes
