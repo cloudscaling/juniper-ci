@@ -53,24 +53,29 @@ fi
 # deploy cloud
 source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
-IP_VM_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
+IP_VM_01=`echo $nodes_cont_ips_1 | cut -d ' ' -f 1`
 if [[ "$HA" == 'ha' ]] ; then
-  IP_VM_02=`echo $nodes_cont_ips | cut -d ' ' -f 2`
-  IP_VM_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
+  IP_VM_02=`echo $nodes_cont_ips_1 | cut -d ' ' -f 2`
+  IP_VM_03=`echo $nodes_cont_ips_1 | cut -d ' ' -f 3`
 
-  IP_CONT_01=`echo ${nodes_cont_ips} | cut -d ' ' -f 1`
-  IP_CONT_02=`echo ${nodes_cont_ips} | cut -d ' ' -f 2`
-  IP_CONT_03=`echo ${nodes_cont_ips} | cut -d ' ' -f 3`
+  #IP_CONT_01=`echo ${nodes_cont_ips} | cut -d ' ' -f 1`
+  #IP_CONT_02=`echo ${nodes_cont_ips} | cut -d ' ' -f 2`
+  #IP_CONT_03=`echo ${nodes_cont_ips} | cut -d ' ' -f 3`
+
+  IP1_CONT_01=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 1`
+  IP1_CONT_02=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 2`
+  IP1_CONT_03=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 3`
 
   IP_VIP=10.$NET_BASE_PREFIX.$JOB_RND.254
   OS_VIP=10.$((NET_BASE_PREFIX+1)).$JOB_RND.254
+  IP_VIP=$OS_VIP
 
   IP2_CONT_01=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 1`
   IP2_CONT_02=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 2`
   IP2_CONT_03=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 3`
 fi
-IP_VM_04=`echo $nodes_comp_ips | cut -d ' ' -f 1`
-IP_VM_05=`echo $nodes_comp_ips | cut -d ' ' -f 2`
+IP_VM_04=`echo $nodes_comp_ips_1 | cut -d ' ' -f 1`
+IP_VM_05=`echo $nodes_comp_ips_1 | cut -d ' ' -f 2`
 
 VROUTER_GW=10.$((NET_BASE_PREFIX+2)).$JOB_RND.1
 
