@@ -138,7 +138,6 @@ source $WORKSPACE/.venv/bin/activate
 source $WORKSPACE/admin-openrc.sh
 pip install python-openstackclient || res=1
 
-set -x
 if ! prepare_openstack ; then
   echo "ERROR: OpenStack preparation failed"
   res=1
@@ -147,7 +146,6 @@ else
   check_two_instances || res=1
 fi
 deactivate
-set +x
 
 # save logs and exit
 trap - ERR
