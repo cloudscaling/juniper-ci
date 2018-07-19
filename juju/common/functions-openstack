@@ -361,10 +361,11 @@ function check_instance_simple() {
 
     _check_instance_log $instance_id || ret=1
 
+    set -x
     local if_name=`juju ssh $mch "sudo vif --list" 2>/dev/null | grep -B 1 $ip | head -1 | awk '{print $3}'`
     echo "INFO: Private IP is $ip, Interface $if_name"
     local curl_cmd="curl $curl_ssl_opts -s ${curl_proto:-http}://localhost:8085/Snh_ItfReq?name=$if_name"
-    local lip=`juju ssh $mch "$curl_cmd" | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'`
+    local lip=`juju ssh $mch "$curl_cmd" 2>/dev/null | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'`
     if [[ -n "$lip" ]] ; then
       echo "INFO: Instance's link-local address is $lip"
       _check_instance_ping $mch $lip || ret=1
@@ -374,6 +375,7 @@ function check_instance_simple() {
       juju ssh $mch "$curl_cmd"
       ret=1
     fi
+    set +x
 
     # TODO: for now skip VGW cases with DPDK
     if [[ "$USE_DPDK" != "true" ]]; then
@@ -393,9 +395,8 @@ function check_instance_simple() {
   fi
 
   openstack server show $instance_id
-  if [[ -z "$ret" || $ret == '0' ]]; then
+  if [[ $ret != 1 ]]; then
     openstack server delete $instance_id
   fi
   return $ret
 }
-
