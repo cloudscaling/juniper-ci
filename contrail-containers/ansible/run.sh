@@ -58,12 +58,12 @@ if [[ "$HA" == 'ha' ]] ; then
   IP_VM_02=`echo $nodes_cont_ips | cut -d ' ' -f 2`
   IP_VM_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
 
-  IP_CONT_01=`echo ${nodes_cont_ips} | cut -d ' ' -f 1`
-  IP_CONT_02=`echo ${nodes_cont_ips} | cut -d ' ' -f 2`
-  IP_CONT_03=`echo ${nodes_cont_ips} | cut -d ' ' -f 3`
+  IP1_CONT_01=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 1`
+  IP1_CONT_02=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 2`
+  IP1_CONT_03=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 3`
 
-  IP_VIP=10.$NET_BASE_PREFIX.$JOB_RND.254
-  OS_VIP=10.$((NET_BASE_PREFIX+1)).$JOB_RND.254
+  I_VIP=10.$((NET_BASE_PREFIX+1)).$JOB_RND.254
+  E_VIP=10.$NET_BASE_PREFIX.$JOB_RND.254
 
   IP2_CONT_01=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 1`
   IP2_CONT_02=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 2`
@@ -138,7 +138,6 @@ source $WORKSPACE/.venv/bin/activate
 source $WORKSPACE/admin-openrc.sh
 pip install python-openstackclient || res=1
 
-set -x
 if ! prepare_openstack ; then
   echo "ERROR: OpenStack preparation failed"
   res=1
@@ -147,7 +146,6 @@ else
   check_two_instances || res=1
 fi
 deactivate
-set +x
 
 # save logs and exit
 trap - ERR

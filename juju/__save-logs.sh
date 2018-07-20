@@ -23,6 +23,8 @@ if which vif &>/dev/null ; then
   tar -rf logs.tar vif.log 2>/dev/null
   ifconfig &>if.log
   tar -rf logs.tar if.log 2>/dev/null
+  ip route &>route.log
+  tar -rf logs.tar route.log 2>/dev/null
 fi
 
 if which docker ; then

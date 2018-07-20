@@ -123,6 +123,7 @@ function run_compute() {
   local mac_suffix=${!mac_var_name}
   echo "INFO: creating compute $index (mac suffix $mac_suffix) $(date)"
   local ip="$addr.$mac_suffix"
+  local ip2="$addr_vm.$mac_suffix"
   run_cloud_machine comp-$index $mac_suffix 4096 $ip
   mch=`get_machine_by_ip $ip`
 
@@ -134,7 +135,7 @@ function run_compute() {
   juju-ssh $mch "sudo apt-get -fy install linux-image-extra-$kernel_version dpdk mc wget apparmor-profiles" &>>$log_dir/apt.log
   juju-scp "$my_dir/files/50-cloud-init-compute-$SERIES.cfg" $mch:50-cloud-init.cfg 2>/dev/null
   juju-scp "$my_dir/files/__prepare-network.sh" $mch:prepare-network.sh 2>/dev/null
-  juju-ssh $mch "./prepare-network.sh $IF2" 2>/dev/null
+  juju-ssh $mch "./prepare-network.sh $ip2" 2>/dev/null
   juju-ssh $mch "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $mch juju-ssh
 }
