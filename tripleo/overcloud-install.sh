@@ -296,18 +296,22 @@ else
     if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
       export LINUX_DISTR=${LINUX_DISTR:-'rhel7'}
       export LINUX_DISTR_VER=${LINUX_DISTR_VER:-'latest'}
+      export GENERAL_EXTRA_RPMS=""
+      export BASE_EXTRA_RPMS=""
     else
       export LINUX_DISTR=${LINUX_DISTR:-'centos'}
       export LINUX_DISTR_VER=${LINUX_DISTR_VER:-'7.4.1708'}
     fi
     # save for easier debug
     cat <<EOF > ~/build_env
-  export CONTRAIL_VERSION=$CONTRAIL_VERSION
-  export _CONTRAIL_REGISTRY_IP=$_CONTRAIL_REGISTRY_IP
-  export CONTRAIL_REGISTRY=$CONTRAIL_REGISTRY
-  export CONTRAIL_TAG=$CONTRAIL_TAG
-  export LINUX_DISTR=$LINUX_DISTR
-  export LINUX_DISTR_VER=$LINUX_DISTR_VER
+export CONTRAIL_VERSION=$CONTRAIL_VERSION
+export _CONTRAIL_REGISTRY_IP=$_CONTRAIL_REGISTRY_IP
+export CONTRAIL_REGISTRY=$CONTRAIL_REGISTRY
+export CONTRAIL_TAG=$CONTRAIL_TAG
+export LINUX_DISTR=$LINUX_DISTR
+export LINUX_DISTR_VER=$LINUX_DISTR_VER
+[ -n "${GENERAL_EXTRA_RPMS+x}" ] && export GENERAL_EXTRA_RPMS="$GENERAL_EXTRA_RPMS"
+[ -n "${BASE_EXTRA_RPMS+x}" ] && export BASE_EXTRA_RPMS="$BASE_EXTRA_RPMS"
 EOF
     pushd contrail-container-builder/containers
     # TODO: dont fail build because some containers like vcenter fails in our env
