@@ -287,7 +287,8 @@ if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
   artifact_opts="-e .tripleo/environments/deployment-artifacts.yaml"
 else
   if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
-    git clone https://github.com/juniper/contrail-container-builder
+    # OSP13: TODO: use R5.0, master doesnt have topology and snmp-collector containers for now
+    git clone -b R5.0 https://github.com/juniper/contrail-container-builder
     _old_cv=$CONTRAIL_VERSION
     export CONTRAIL_VERSION=$(ls -1 /var/www/html | grep -o '\([0-9]\+\.\{0,1\}\)\{1,5\}-[0-9]\+' | sort -nr  | head -n 1)
     export _CONTRAIL_REGISTRY_IP=$prov_ip
