@@ -293,8 +293,13 @@ else
     export _CONTRAIL_REGISTRY_IP=$prov_ip
     export CONTRAIL_REGISTRY="${prov_ip}:8787"
     export CONTRAIL_TAG="${OPENSTACK_VERSION}-${CONTRAIL_VERSION}"
-    export LINUX_DISTR=${LINUX_DISTR:-'centos'}
-    export LINUX_DISTR_VER=${LINUX_DISTR_VER:-'7.4.1708'}
+    if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+      export LINUX_DISTR=${LINUX_DISTR:-'rhel7'}
+      export LINUX_DISTR_VER=${LINUX_DISTR_VER:-'latest'}
+    else
+      export LINUX_DISTR=${LINUX_DISTR:-'centos'}
+      export LINUX_DISTR_VER=${LINUX_DISTR_VER:-'7.4.1708'}
+    fi
     # save for easier debug
     cat <<EOF > ~/build_env
   export CONTRAIL_VERSION=$CONTRAIL_VERSION
