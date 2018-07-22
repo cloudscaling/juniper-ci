@@ -473,8 +473,10 @@ function check_instance_simple() {
       ret=1
     fi
 
-    # TODO: for now skip VGW cases with DPDK
-    if [[ "$DPDK" != 'true' ]]; then
+    # TODO: for now skip VGW cases:
+    # - with DPDK
+    # - OSP13, vgw is broken there
+    if [[ "$DPDK" != 'true' && "$OPENSTACK_VERSION" != 'queens' ]]; then
       # add VGW to second compute host and check ping/ssh from there
       local another_compute_host=`_get_machines_by_service nova-compute | grep -v $mch`
       echo "INFO: Adding vgw to another compute: $another_compute_host"
@@ -486,7 +488,7 @@ function check_instance_simple() {
       # remove VGW
       $SSH_CMD $another_compute_host sudo /opt/contrail/utils/provision_vgw_interface.py --oper delete --interface vgw --subnets 10.5.0.0/24 --routes 0.0.0.0/0 --vrf default-domain:admin:public-$netsfx:public-$netsfx
     else
-      echo "WARNING: TODO: SKipped for DPDK the test of access by FIP via VGW"
+      echo "WARNING: TODO: SKipped for DPDK and OSP13 the test of access by FIP via VGW"
     fi
   fi
 
