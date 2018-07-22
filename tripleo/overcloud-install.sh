@@ -288,23 +288,27 @@ if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
 else
   if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
     # OSP13: TODO: use R5.0, master doesnt have topology and snmp-collector containers for now
+    git clone -b R5.0 https://github.com/cloudscaling/contrail-container-builder
+  else
+    # OSP13: TODO: use R5.0, master doesnt have topology and snmp-collector containers for now
     git clone -b R5.0 https://github.com/juniper/contrail-container-builder
-    _old_cv=$CONTRAIL_VERSION
-    export CONTRAIL_VERSION=$(ls -1 /var/www/html | grep -o '\([0-9]\+\.\{0,1\}\)\{1,5\}-[0-9]\+' | sort -nr  | head -n 1)
-    export _CONTRAIL_REGISTRY_IP=$prov_ip
-    export CONTRAIL_REGISTRY="${prov_ip}:8787"
-    export CONTRAIL_TAG="${OPENSTACK_VERSION}-${CONTRAIL_VERSION}"
-    if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-      export LINUX_DISTR=${LINUX_DISTR:-'rhel7'}
-      export LINUX_DISTR_VER=${LINUX_DISTR_VER:-'latest'}
-      export GENERAL_EXTRA_RPMS=""
-      export BASE_EXTRA_RPMS=""
-    else
-      export LINUX_DISTR=${LINUX_DISTR:-'centos'}
-      export LINUX_DISTR_VER=${LINUX_DISTR_VER:-'7.4.1708'}
-    fi
-    # save for easier debug
-    cat <<EOF > ~/build_env
+  fi
+  _old_cv=$CONTRAIL_VERSION
+  export CONTRAIL_VERSION=$(ls -1 /var/www/html | grep -o '\([0-9]\+\.\{0,1\}\)\{1,5\}-[0-9]\+' | sort -nr  | head -n 1)
+  export _CONTRAIL_REGISTRY_IP=$prov_ip
+  export CONTRAIL_REGISTRY="${prov_ip}:8787"
+  export CONTRAIL_TAG="${OPENSTACK_VERSION}-${CONTRAIL_VERSION}"
+  if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+    export LINUX_DISTR=${LINUX_DISTR:-'rhel7'}
+    export LINUX_DISTR_VER=${LINUX_DISTR_VER:-'latest'}
+    export GENERAL_EXTRA_RPMS=""
+    export BASE_EXTRA_RPMS=""
+  else
+    export LINUX_DISTR=${LINUX_DISTR:-'centos'}
+    export LINUX_DISTR_VER=${LINUX_DISTR_VER:-'7.4.1708'}
+  fi
+  # save for easier debug
+  cat <<EOF > ~/build_env
 export CONTRAIL_VERSION=$CONTRAIL_VERSION
 export _CONTRAIL_REGISTRY_IP=$_CONTRAIL_REGISTRY_IP
 export CONTRAIL_REGISTRY=$CONTRAIL_REGISTRY
@@ -314,12 +318,11 @@ export LINUX_DISTR_VER=$LINUX_DISTR_VER
 [ -n "${GENERAL_EXTRA_RPMS+x}" ] && export GENERAL_EXTRA_RPMS="$GENERAL_EXTRA_RPMS"
 [ -n "${BASE_EXTRA_RPMS+x}" ] && export BASE_EXTRA_RPMS="$BASE_EXTRA_RPMS"
 EOF
-    pushd contrail-container-builder/containers
-    # TODO: dont fail build because some containers like vcenter fails in our env
-    ./build.sh || { echo "WARNING: some containers are failed." ; cat ./*.log || true ; }
-    popd
-    CONTRAIL_VERSION=$_old_cv
-  fi
+  pushd contrail-container-builder/containers
+  # TODO: dont fail build because some containers like vcenter fails in our env
+  ./build.sh || { echo "WARNING: some containers are failed." ; cat ./*.log || true ; }
+  popd
+  CONTRAIL_VERSION=$_old_cv
 fi
 
 # prepare tripleo heat templates
