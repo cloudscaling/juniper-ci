@@ -75,6 +75,10 @@ kolla_config:
    kolla_external_vip_address: ${E_VIP}
    enable_ironic: "no"
    enable_swift: "no"
+   horizon_keystone_multidomain: true
+   horizon_keystone_domain_choices:
+    Default: Default
+    domain: domain
  kolla_passwords:
    metadata_secret: c0ntrail123
    keystone_admin_password: password
