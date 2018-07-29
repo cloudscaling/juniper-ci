@@ -66,6 +66,7 @@ if which docker ; then
             mv "$ldir/$srv" "$ldir/var-log-$srv"
           fi
         done
+        find "$ldir" | grep "\.[0-9][0-9]*$" | xargs rm
 
         tar -rf logs.tar "$ldir" 2>/dev/null
       fi
