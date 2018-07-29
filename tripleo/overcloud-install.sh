@@ -263,21 +263,28 @@ fi
 
 # For queens there is no needs to use puppets
 artifact_opts=""
+git_branch_ctp="stable/${OPENSTACK_VERSION}"
+if [[ "$CONTRAIL_VERSION" =~ 4.1 ]] ; then
+  git_branch_pc="R4.1"
+else
+  git_branch_pc="R4.0"
+fi
+if [[ "$CONTRAIL_VERSION" =~ 5.0 ]] ; then
+  git_branch_ccb='R5.0'
+else
+  git_branch_ccb='master'
+fi
+if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
+  git_repo_ctp="cloudscaling"
+  git_repo_pc="cloudscaling"
+  git_repo_ccb='cloudscaling'
+else
+  git_repo_ctp="Juniper"
+  git_repo_pc="Juniper"
+  git_repo_ccb='Juniper'
+fi
 if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
   # prepare Contrail puppet modules via uploading artifacts to swift
-  git_branch_ctp="stable/${OPENSTACK_VERSION}"
-  if [[ "$CONTRAIL_VERSION" =~ 4.1 ]] ; then
-    git_branch_pc="R4.1"
-  else
-    git_branch_pc="R4.0"
-  fi
-  if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
-    git_repo_ctp="cloudscaling"
-    git_repo_pc="cloudscaling"
-  else
-    git_repo_ctp="Juniper"
-    git_repo_pc="Juniper"
-  fi
   rm -rf usr/share/openstack-puppet/modules
   mkdir -p usr/share/openstack-puppet/modules
   git clone https://github.com/${git_repo_ctp}/contrail-tripleo-puppet -b $git_branch_ctp usr/share/openstack-puppet/modules/tripleo
@@ -286,12 +293,13 @@ if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
   upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
   artifact_opts="-e .tripleo/environments/deployment-artifacts.yaml"
 else
-  if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
-    # OSP13: TODO: use R5.0, master doesnt have topology and snmp-collector containers for now
-    git clone -b R5.0 https://github.com/cloudscaling/contrail-container-builder
+  if [[ ! -d contrail-container-builder ]] ; then
+    git clone -b $git_branch_ccb https://github.com/${git_repo_ccb}/contrail-container-builder
   else
-    # OSP13: TODO: use R5.0, master doesnt have topology and snmp-collector containers for now
-    git clone -b R5.0 https://github.com/juniper/contrail-container-builder
+    pushd contrail-container-builder
+    git fetch --all
+    git reset --hard origin/$git_branch_ccb
+    popd
   fi
   _old_cv=$CONTRAIL_VERSION
   export CONTRAIL_VERSION=$(ls -1 /var/www/html | grep -o '\([0-9]\+\.\{0,1\}\)\{1,5\}-[0-9]\+' | sort -nr  | head -n 1)
