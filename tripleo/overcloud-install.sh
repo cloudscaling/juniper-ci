@@ -626,6 +626,7 @@ parameter_defaults:
   RabbitUserName: contrail
   RabbitPassword: contrail
   ContrailInsecure: true
+  AdminPassword: qwe123QWE
   AAAMode: $AAA_MODE
   AAAModeAnalytics: $AAA_MODE_ANALYTICS
   ContrailWebuiHttp: 8180
