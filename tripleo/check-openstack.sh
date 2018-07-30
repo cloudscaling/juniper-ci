@@ -48,24 +48,29 @@ run_os_checks
 function check_ui_ip () {
   local ip="$1"
   local ret=0
-  if [[ "$TLS" == 'off' ]] ; then
-    echo "INFO: check controller $ip port 8180"
-    if ! curl -I  http://$ip:8180/ 2>/dev/null| grep "302" ; then
-      echo "ERROR: response from port 8180 is not HTTP 302:"
-      curl -I http://$ip:8180/ || true
-      local ret=1
+  if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION  ]] ; then
+    if [[ "$TLS" == 'off' ]] ; then
+      echo "INFO: check controller $ip port 8180"
+      if ! curl -I  http://$ip:8180/ 2>/dev/null| grep "302" ; then
+        echo "ERROR: response from port 8180 is not HTTP 302:"
+        curl -I http://$ip:8180/ || true
+        ret=1
+      else
+        echo "INFO: ok"
+      fi
     else
-      echo "INFO: ok"
+      echo "WARN: TODO: skip checking 8180 port in TLS mode, it fails."
     fi
   else
-    echo "WARN: TODO: skip checking 8180 port in TLS mode, it fails."
+      echo "WARN: TODO: skip checking 8180 port in queens, it is not exported."
   fi
+
   echo "INFO: check controller $ctrl port 8143"
   local psize=`curl -I -k https://$ip:8143/ 2>/dev/null | grep "Content-Length" | cut -d ' ' -f 2 | sed 's/\r$//'`
   if (( psize < 1000 )) ; then
     echo "ERROR: response from port 8143 is smaller than 1000 bytes:"
     curl -I -k https://$ip:8143/
-    local ret=1
+    ret=1
   else
     echo "INFO: ok"
   fi
