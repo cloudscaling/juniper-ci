@@ -377,13 +377,14 @@ function _wait_machine() {
 function _prepare_network() {
   local addr=$1
   local my_host=$2
+  local short_host=$(echo $my_host | cut -d '.' -f 1)
   cat <<EOF | $ssh_cmd root@${addr}
 set -x
 echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
 sysctl -p /etc/sysctl.conf
 hostnamectl set-hostname $my_host
 hostnamectl set-hostname --transient $my_host
-echo "$addr       myhost $my_host" > /etc/hosts
+echo "$addr       $my_host $short_host" > /etc/hosts
 echo "127.0.0.1   localhost" >> /etc/hosts
 systemctl restart network
 sleep 5
