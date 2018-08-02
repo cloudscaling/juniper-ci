@@ -127,13 +127,9 @@
           description: "Select slave: one for specific node or multiple for any node."
           default-slaves:
             - slave01
-            - slave02
-            - slave03
             - slave04
           allowed-slaves:
             - slave01
-            - slave02
-            - slave03
             - slave04
           ignore-offline-nodes: false
           allowed-multiselect: true
@@ -210,7 +206,96 @@
           if [[ "$VERSION" == "mitaka" ]] ; then
             export SERIES='trusty'
           fi
-          ./juniper-ci/juju/bmc-contrail/deploy_all.sh
+          ./juniper-ci/juju/bmc-contrail-R4/deploy_all.sh
+    publishers:
+      - archive:
+          artifacts: 'logs/**'
+          allow-empty: 'true'
+
+
+- job:
+    name: Juju-Contrail-R5-OpenStack-KVM
+    description: 'Contrail R5 + OpenStack on KVM by Juju'
+    defaults: global
+    concurrent: true
+    parameters:
+      - node:
+          name: SLAVE_NAME
+          description: "Select slave: one for specific node or multiple for any node."
+          default-slaves:
+            - slave01
+            - slave04
+          allowed-slaves:
+            - slave01
+            - slave04
+          ignore-offline-nodes: false
+          allowed-multiselect: true
+      - choice:
+          name: CLEAN_BEFORE
+          choices:
+            - 'false'
+            - 'true'
+            - clean_and_exit
+      - choice:
+          name: CLEAN_ENV
+          choices:
+            - always
+            - on_success
+            - never
+      - choice:
+          name: VERSION
+          description: "Version of the OpenStack. mitaka implies trusty and newton/ocata implies xenial."
+          choices:
+            - ocata
+            - queens
+      - choice:
+          name: DEPLOY_MODE
+          description: |
+            one: Deploy OpenStack and Contrail to one machine
+            two: Deploy OpenStack and Contrail to different machines
+            ha: Deploy one machine for OpenStack and three machines for Contrail
+          choices:
+            - two
+            - one
+            - ha
+      - choice:
+          name: AAA_MODE
+          description: "aaa-mode for Contrail"
+          choices:
+            - cloud-admin
+            - rbac
+            - no-auth
+      - bool:
+          name: USE_SSL_OS
+          description: "Deploy OpenStack with certificates"
+          default: false
+      - bool:
+          name: USE_DPDK
+          description: "Deploy Contrail's vrouter in DPDK mode"
+          default: false
+      - string:
+          name: CHARMS_BRANCH
+          default: 'R5'
+    scm:
+      - juniper-contrail-charms-branch
+      - juniper-ci
+    builders:
+      - shell: |
+          #!/bin/bash -e
+          desc="$SLAVE_NAME $VERSION $CONTRAIL_BUILD $DEPLOY_TYPE mode=$DEPLOY_MODE $AAA_MODE"
+          if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
+          if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
+          if [[ "$USE_DPDK" == "true" ]] ; then desc="$desc +DPDK" ; fi
+          echo "DESCRIPTION $desc"
+      - description-setter:
+          regexp: "DESCRIPTION (.*)"
+      - shell: |
+          #!/bin/bash -e
+          export SERIES='xenial'
+          if [[ "$VERSION" == "queens" ]] ; then
+            export SERIES='bionic'
+          fi
+          ./juniper-ci/juju/bmc-contrail-R5/deploy_all.sh
     publishers:
       - archive:
           artifacts: 'logs/**'
