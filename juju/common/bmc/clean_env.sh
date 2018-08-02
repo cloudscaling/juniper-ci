@@ -1,10 +1,5 @@
 #!/bin/bash -e
 
-my_file="$(readlink -e "$0")"
-my_dir="$(dirname $my_file)"
-
-source "$my_dir/functions"
-
 if juju show-controller $juju_controller_name ; then
   juju-remove-machine 0 --force || /bin/true
   juju-remove-machine 1 --force || /bin/true
