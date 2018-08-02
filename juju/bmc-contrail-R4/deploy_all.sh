@@ -3,7 +3,8 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
-source "$my_dir/functions"
+export functions="$my_dir/functions"
+source "$functions"
 
 if [[ "$CLEAN_BEFORE" == 'true' || "$CLEAN_BEFORE" == 'clean_and_exit' ]] ; then
   "$my_dir"/../common/bmc/clean_env.sh || /bin/true

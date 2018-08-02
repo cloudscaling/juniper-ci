@@ -3,6 +3,8 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
+source "$functions"
+
 trap 'catch_errors_ce $LINENO' ERR EXIT
 function catch_errors_ce() {
   local exit_code=$?
