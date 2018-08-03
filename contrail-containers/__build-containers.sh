@@ -11,6 +11,15 @@ echo "INFO: Run setup-for-build  $(date)"
 cd contrail-container-builder/containers
 
 ./setup-for-build.sh
+
+cat <<EOF >../tpc.repo.template
+[tpc]
+name = Contrail repo
+baseurl = http://148.251.5.90/tpc
+enabled = 1
+gpgcheck = 0
+EOF
+
 echo "INFO: Run build  $(date)"
 sudo -E ./build.sh || /bin/true
 
