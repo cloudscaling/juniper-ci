@@ -4,6 +4,7 @@
     defaults: global
     node: slave01
     concurrent: true
+    disabled: true
     parameters:
       - choice:
           name: CLEAN_BEFORE

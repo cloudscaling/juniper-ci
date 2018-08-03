@@ -2,7 +2,6 @@
     name: devstack-{project}
     description: "Deploys devstack with {project} and run projects' tests"
     defaults: global
-    disabled: true
     node: master
     properties:
       - build-discarder

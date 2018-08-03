@@ -2,7 +2,8 @@
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
-source "$my_dir/functions"
+
+source "$functions"
 
 trap 'catch_errors_ce $LINENO' ERR EXIT
 function catch_errors_ce() {
@@ -12,39 +13,8 @@ function catch_errors_ce() {
   exit $exit_code
 }
 
-# it also sets variables with names
-check_containers
-
 # version 2
 PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
-
-repo_ip="$addr.$cont_idx"
-mrepo="$image_user@$repo_ip"
-echo "INFO: Prepare apt-repo on $mrepo"
-scp "$HOME/docker/$packages" "$mrepo:contrail_debs.tgz"
-scp "$my_dir/../common/create-aptrepo.sh" $mrepo:create-aptrepo.sh
-ssh $mrepo ./create-aptrepo.sh $SERIES
-echo "INFO: apt-repo is ready"
-repo_key=`curl -s http://$repo_ip/ubuntu/repo.key`
-repo_key=`echo "$repo_key" | awk '{printf("      %s\r", $0)}'`
-
-# prepare registry for contrail packages
-echo "INFO: Prepare local registry on $mrepo"
-docker_user="docker_user"
-docker_password="docker_password"
-ssh $mrepo mkdir docker_images
-scp $HOME/docker/contrail-* "$mrepo:docker_images/"
-scp "$my_dir/../common/prepare-registry.sh" $mrepo:prepare-registry.sh
-ssh $mrepo ./prepare-registry.sh $repo_ip $docker_user $docker_password
-controller_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-controller-" | awk '{print $1}'`
-controller_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-controller-" | awk '{print $2}'`
-analytics_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analytics-" | awk '{print $1}'`
-analytics_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analytics-" | awk '{print $2}'`
-analyticsdb_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analyticsdb-" | awk '{print $1}'`
-analyticsdb_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analyticsdb-" | awk '{print $2}'`
-echo "Docker controller image: $controller_image_name:$controller_image_tag"
-echo "Docker analytics image: $analytics_image_name:$analytics_image_tag"
-echo "Docker analyticsdb image: $analyticsdb_image_name:$analyticsdb_image_tag"
 
 comp1_ip="$addr.$os_comp_1_idx"
 comp1=`get_machine_by_ip $comp1_ip`
@@ -117,11 +87,11 @@ juju-deploy $PLACE/contrail-keystone-auth --to lxd:$cont1
 
 juju-deploy $PLACE/contrail-controller --to $cont1
 juju-expose contrail-controller
-juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4" image-name="$controller_image_name" image-tag="$controller_image_tag" docker-registry="$repo_ip:5000" docker-user="$docker_user" docker-password="$docker_password"
+juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4"
 juju-deploy $PLACE/contrail-analyticsdb --to $cont1
-juju-set contrail-analyticsdb cassandra-minimum-diskgb="4" image-name="$analyticsdb_image_name" image-tag="$analyticsdb_image_tag" docker-registry="$repo_ip:5000" docker-user="$docker_user" docker-password="$docker_password"
+juju-set contrail-analyticsdb cassandra-minimum-diskgb="4"
 juju-deploy $PLACE/contrail-analytics --to $cont1
-juju-set contrail-analytics image-name="$analytics_image_name" image-tag="$analytics_image_tag" docker-registry="$repo_ip:5000" docker-user="$docker_user" docker-password="$docker_password"
+juju-set contrail-analytics
 juju-expose contrail-analytics
 
 if [ "$DEPLOY_MODE" == 'ha' ] ; then
@@ -132,6 +102,8 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   juju-add-unit contrail-analyticsdb --to $cont2
   juju-add-unit contrail-analyticsdb --to $cont3
 fi
+
+# TODO: next is not correct now
 
 cp "$my_dir/../common/repo_config.yaml.tmpl" "repo_config_co.yaml"
 sed -i -e "s|{{charm_name}}|contrail-openstack|m" "repo_config_co.yaml"

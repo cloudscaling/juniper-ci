@@ -1,18 +1,13 @@
 #!/bin/bash -e
 
-inner_script="${1:-deploy-manual.sh}"
-if [[ $# != 0 ]] ; then
-  shift
-  script_params="$@"
-fi
-
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
-source "$my_dir/functions"
+export functions="$my_dir/functions"
+source "$functions"
 
 if [[ "$CLEAN_BEFORE" == 'true' || "$CLEAN_BEFORE" == 'clean_and_exit' ]] ; then
-  "$my_dir"/clean_env.sh || /bin/true
+  "$my_dir"/../common/bmc/clean_env.sh || /bin/true
   if [[ "$CLEAN_BEFORE" == 'clean_and_exit' ]] ; then
     exit
   fi
@@ -74,7 +69,7 @@ function catch_errors() {
 
   if [[ "$CLEAN_ENV" == 'always' ]] ; then
     echo "INFO: cleaning environment $(date)"
-    "$my_dir"/clean_env.sh
+    "$my_dir"/../common/bmc/clean_env.sh
   fi
 
   exit $exit_code
@@ -85,7 +80,7 @@ echo "INFO: Starting deployment process with vars:"
 env|sort
 
 echo "INFO: creating environment $(date)"
-"$my_dir"/create_env.sh
+"$my_dir"/../common/bmc/create_env.sh
 juju-status-tabular
 
 "$my_dir"/deploy_manual.sh
@@ -99,5 +94,5 @@ trap - ERR EXIT
 
 if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
   echo "INFO: cleaning environment $(date)"
-  "$my_dir"/clean_env.sh
+  "$my_dir"/../common/bmc/clean_env.sh
 fi
