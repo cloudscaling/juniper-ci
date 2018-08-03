@@ -1,8 +1,9 @@
 #!/bin/bash -e
 
-address=$1
+main_net_prefix=$1
+vhost_address=$2
 
-sed -i "s/<address>/$address/g" ./50-cloud-init.cfg
+sed -i "s/<address>/$vhost_address/g" ./50-cloud-init.cfg
 
 sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg
 series=`lsb_release -cs`
@@ -12,4 +13,4 @@ if [[ "$series" == 'trusty' ]]; then
 fi
 
 # this should be done for first interface!
-echo "supersede routers 10.0.10.1;" | sudo tee -a /etc/dhcp/dhclient.conf
+echo "supersede routers $main_net_prefix.1;" | sudo tee -a /etc/dhcp/dhclient.conf
