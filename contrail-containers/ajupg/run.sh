@@ -18,7 +18,7 @@ source $my_dir/${HOST}-defs
 source $my_dir/../common/functions
 
 # it should fail if Juju deployment is not found
-source $my_dir/../../juju/bmc-contrail/functions
+source $my_dir/../../juju/bmc-contrail-R4/functions
 juju-status-tabular
 # ==============================================
 
