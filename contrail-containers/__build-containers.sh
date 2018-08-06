@@ -12,10 +12,11 @@ cd contrail-container-builder/containers
 
 ./setup-for-build.sh
 
+#baseurl = http://148.251.5.90/tpc
 cat <<EOF >../tpc.repo.template
 [tpc]
 name = Contrail repo
-baseurl = http://148.251.5.90/tpc
+baseurl = http://contrail-tpc.s3-website-us-west-2.amazonaws.com
 enabled = 1
 gpgcheck = 0
 EOF
