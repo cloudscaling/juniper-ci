@@ -30,7 +30,7 @@ $SSH "sudo mkdir -p /opt/stack"
 $SSH "sudo su -c \"echo '/dev/xvdh1  /opt/stack  auto  defaults,auto  0  0' >> /etc/fstab\""
 $SSH "sudo mount /opt/stack"
 $SSH "sudo chown \$USER /opt/stack"
-$SSH "cd opt/stack; git clone https://github.com/openstack/ec2api-tempest-plugin"
+$SSH "cd /opt/stack; git clone https://github.com/openstack/ec2api-tempest-plugin"
 
 $SSH "sudo sed -i 's/# deb/deb/g' /etc/apt/sources.list"
 $SSH "sudo apt-get -qq update"
