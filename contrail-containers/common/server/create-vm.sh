@@ -271,7 +271,10 @@ done
 
 for ip in ${ips[@]} ; do
   wait_ssh $ip
-  ssh $SSH_OPTS root@${ip} "uname -a"
+  while ! ssh $SSH_OPTS root@${ip} "uname -a" 2>/dev/null ; do
+    echo "WARNING: Machine ${ip} isn't accessible yet"
+    sleep 2
+  done
   if [[ "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
     ssh $SSH_OPTS root@$ip systemctl start ntp.service
     ssh $SSH_OPTS root@$ip "rm /etc/resolv.conf ; ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf"
