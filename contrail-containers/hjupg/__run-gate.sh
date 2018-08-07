@@ -225,16 +225,31 @@ global:
     BGP_PORT: "1179"
     CONFIG_DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
     DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
-    KEYSTONE_AUTH_ADMIN_TENANT: admin
-    KEYSTONE_AUTH_ADMIN_USER: admin
-    KEYSTONE_AUTH_ADMIN_PASSWORD: password
-    KEYSTONE_AUTH_PROJECT_DOMAIN_NAME: admin_domain
-    KEYSTONE_AUTH_USER_DOMAIN_NAME: admin_domain
-    KEYSTONE_AUTH_URL_VERSION: /v3
-    KEYSTONE_AUTH_HOST: ${AUTH_IP}
-    KEYSTONE_AUTH_PROTO: http
     IPFABRIC_SERVICE_HOST: ${METADATA_IP}
     METADATA_PROXY_SECRET: ${METADATA_PROXY_SECRET}
+endpoints:
+  keystone:
+    auth:
+      username: admin
+      password: password
+      project_name: admin
+      user_domain_name: admin_default
+      project_domain_name: admin_default
+      region_name: RegionOne
+    hosts:
+      default: ${AUTH_IP}
+    path:
+      default: /v3
+    port:
+      admin:
+        default: 35357
+      api:
+        default: 5000
+    scheme:
+      default: http
+    host_fqdn_override:
+      default: null
+    namespace: openstack
 EOF
 
 helm install --name contrail ${CHD_PATH}/contrail --namespace=contrail --values=/tmp/contrail.yaml
