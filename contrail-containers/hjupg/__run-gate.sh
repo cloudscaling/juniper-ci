@@ -101,26 +101,6 @@ cat >> $OSH_INFRA_PATH/tools/gate/devel/multinode-inventory.yaml <<EOF
 EOF
 fi
 
-#cat >> $OSH_INFRA_PATH/tools/gate/devel/multinode-inventory.yaml <<EOF
-#    nodes:
-#      hosts:
-#EOF
-#for ip in ${ips[@]:1} ; do
-#  name=`echo node_$ip | tr '.' '_'`
-#  cat >> $OSH_INFRA_PATH/tools/gate/devel/multinode-inventory.yaml <<EOF
-#        $name:
-#          ansible_port: 22
-#          ansible_host: $ip
-#          ansible_user: $SSH_USER
-#          ansible_ssh_extra_args: -o StrictHostKeyChecking=no
-#EOF
-#  if [ -f $key_file ]; then
-#  cat >> $OSH_INFRA_PATH/tools/gate/devel/multinode-inventory.yaml <<EOF
-#          ansible_ssh_private_key_file: $key_file
-#EOF
-#  fi
-#done
-
 set -x
 cd ${OSH_INFRA_PATH}
 make dev-deploy setup-host multinode
@@ -144,35 +124,6 @@ for ip in $nodes_comp_ips ; do
     kubectl label node $name opencontrail.org/vrouter-kernel=enabled
   fi
 done
-
-#cd ${OSH_PATH}
-#extra_neutron_args=''
-#if [[ "$AAA_MODE" == 'rbac' ]]; then
-#  extra_neutron_args="--values ./tools/overrides/backends/opencontrail/neutron-rbac.yaml"
-#fi
-#export OSH_EXTRA_HELM_ARGS_NEUTRON="$extra_neutron_args --set images.tags.opencontrail_neutron_init=$CONTAINER_REGISTRY/contrail-openstack-neutron-init:$tag"
-#echo "INFO: extra neutron args: $OSH_EXTRA_HELM_ARGS_NEUTRON"
-#extra_nova_args=''
-#if [[ "$OPENSTACK_VERSION" == 'ocata' ]]; then
-#  extra_nova_args="--set compute_patch=true"
-#fi
-#export OSH_EXTRA_HELM_ARGS_NOVA="$extra_nova_args --set images.tags.opencontrail_compute_init=$CONTAINER_REGISTRY/contrail-openstack-compute-init:$tag"
-#echo "INFO: extra nova args: $OSH_EXTRA_HELM_ARGS_NOVA"
-#export OSH_EXTRA_HELM_ARGS_HEAT="--set images.tags.opencontrail_heat_init=$CONTAINER_REGISTRY/contrail-openstack-heat-init:$tag"
-#echo "INFO: extra heat args: $OSH_EXTRA_HELM_ARGS_HEAT"
-#
-#./tools/deployment/multinode/010-setup-client.sh
-#./tools/deployment/multinode/021-ingress-opencontrail.sh
-#./tools/deployment/multinode/030-ceph.sh
-#./tools/deployment/multinode/040-ceph-ns-activate.sh
-#./tools/deployment/multinode/050-mariadb.sh
-#./tools/deployment/multinode/060-rabbitmq.sh
-#./tools/deployment/multinode/070-memcached.sh
-#./tools/deployment/multinode/080-keystone.sh
-#./tools/deployment/multinode/090-ceph-radosgateway.sh
-#./tools/deployment/multinode/100-glance.sh
-#./tools/deployment/multinode/110-cinder.sh
-#./tools/deployment/multinode/131-libvirt-opencontrail.sh
 
 cd $CHD_PATH
 make
@@ -258,13 +209,6 @@ helm install --name contrail-controller ${CHD_PATH}/contrail-controller --namesp
 ${OSH_PATH}/tools/deployment/common/wait-for-pods.sh contrail
 
 cd ${OSH_PATH}
-
-#./tools/deployment/multinode/141-compute-kit-opencontrail.sh
-
-# workaround steps. remove later.
-#make build-helm-toolkit
-#make build-heat
-#./tools/deployment/developer/nfs/091-heat-opencontrail.sh
 
 # lets wait for services
 sleep 60
