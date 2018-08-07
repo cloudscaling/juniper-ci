@@ -233,8 +233,8 @@ endpoints:
       username: admin
       password: password
       project_name: admin
-      user_domain_name: admin_default
-      project_domain_name: admin_default
+      user_domain_name: admin_domain
+      project_domain_name: admin_domain
       region_name: RegionOne
     hosts:
       default: ${AUTH_IP}
