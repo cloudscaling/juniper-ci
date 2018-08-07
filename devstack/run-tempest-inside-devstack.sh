@@ -17,7 +17,7 @@ SCP="scp -i kp $SSH_OPTS"
 rm -f *.xml
 echo "running tests"
 echo -------------------------------------------------------------------------- $(date)
-$SSH "cd /opt/stack/tempest; tox -eall-plugin -- $test_suite --concurrency=$concurrency"
+$SSH "cd /opt/stack/tempest; tox -eall -- $test_suite --concurrency=$concurrency"
 exit_code=$?
 echo -------------------------------------------------------------------------- $(date)
 
