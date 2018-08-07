@@ -249,7 +249,7 @@ endpoints:
       default: http
     host_fqdn_override:
       default: null
-    namespace: openstack
+    namespace:
 EOF
 
 helm install --name contrail-thirdparty ${CHD_PATH}/contrail-thirdparty --namespace=contrail --values=/tmp/contrail.yaml
