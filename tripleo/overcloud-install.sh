@@ -18,6 +18,9 @@ export CONTRAIL_REGISTRY=${CONTRAIL_REGISTRY:-'opencontrailnightly'}
 export CONTRAIL_TAG=${CONTRAIL_TAG:-'latest'}
 # --
 
+export THT_PATCHSET=${THT_PATCHSET:-}
+export PP_PATCHSET=${PP_PATCHSET:-}
+
 (( VBMC_PORT_BASE_DEFAULT=16000 + NUM*100))
 VBMC_PORT_BASE=${VBMC_PORT_BASE:-${VBMC_PORT_BASE_DEFAULT}}
 
@@ -303,12 +306,17 @@ else
   fi
   _old_cv=$CONTRAIL_VERSION
   export CONTRAIL_VERSION=$(ls -1 /var/www/html | grep -o '\([0-9]\+\.\{0,1\}\)\{1,5\}-[0-9]\+' | sort -nr  | head -n 1)
-  if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
+  if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' || -n "$PP_PATCHSET" ]] ; then
     [ ! -d contrail-packages ] && git clone https://github.com/Juniper/contrail-packages
     pushd contrail-packages
     rm -rf RPMS openstack
     # update contrail-tripleo-puppet RPM
     git clone https://github.com/${git_repo_ctp}/contrail-tripleo-puppet -b $git_branch_ctp openstack/contrail-tripleo-puppet
+    if [[ -n "$PP_PATCHSET" ]] ; then
+      pushd openstack/contrail-tripleo-puppet
+      $PP_PATCHSET
+      popd
+    fi
     make rpm-contrail-tripleo-puppet
     repo_dir="/var/www/html/${CONTRAIL_VERSION}-${OPENSTACK_VERSION}"
     sudo rm -f $repo_dir/contrail-tripleo-puppet*.rpm
@@ -358,6 +366,11 @@ rm -rf ~/tripleo-heat-templates
 cp -r /usr/share/openstack-tripleo-heat-templates/ ~/tripleo-heat-templates
 rm -rf ~/contrail-tripleo-heat-templates
 git clone https://github.com/${git_repo_ctht}/contrail-tripleo-heat-templates -b $git_branch_tht
+if [[ -n "$THT_PATCHSET" ]] ; then
+  pushd contrail-tripleo-heat-templates
+  $THT_PATCHSET
+  popd
+fi
 if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
   cp -r ~/contrail-tripleo-heat-templates/environments/contrail ~/tripleo-heat-templates/environments
   cp -r ~/contrail-tripleo-heat-templates/puppet/services/network/* ~/tripleo-heat-templates/puppet/services/network
