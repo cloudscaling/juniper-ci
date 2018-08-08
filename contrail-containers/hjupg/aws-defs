@@ -1,0 +1,2 @@
+echo "ERROR: aws deployment is not supported"
+exit 1
