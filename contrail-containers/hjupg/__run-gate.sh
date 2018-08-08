@@ -11,6 +11,7 @@ tag="$CONTRAIL_VERSION"
 
 # tune some host settings
 sudo sysctl -w vm.max_map_count=1048575
+mkdir -p /var/crashes/contrail
 
 if [[ -x $(command -v apt-get 2>/dev/null) ]]; then
   HOST_OS='ubuntu'

@@ -55,6 +55,9 @@ else
   exit 1
 fi
 
+# tune iptables on KVM
+docker run -i --rm --entrypoint /bin/bash -v $my_dir/__fix-iptables.sh:/root/fix-iptables.sh --network host --cap-add NET_RAW --cap-add NET_ADMIN centos-soft -c "/root/fix-iptables.sh"
+
 # from juju
 AUTH_IP=`get_machine_ip keystone`
 METADATA_IP='127.0.0.1'
