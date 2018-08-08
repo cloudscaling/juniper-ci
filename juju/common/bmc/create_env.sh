@@ -124,7 +124,7 @@ function run_compute() {
   echo "INFO: creating compute $index (mac suffix $mac_suffix) $(date)"
   local ip="$addr.$mac_suffix"
   local ip2="$addr_vm.$mac_suffix"
-  run_cloud_machine comp-$index $mac_suffix 4096 $ip
+  run_cloud_machine comp-$index $mac_suffix 8192 $ip
   mch=`get_machine_by_ip $ip`
 
   echo "INFO: preparing compute $index $(date)"
