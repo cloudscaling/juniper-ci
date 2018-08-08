@@ -1,4 +1,4 @@
-export NET_COUNT=1
+export NET_COUNT=2
 export NET_BASE_PREFIX=40
 
 # we always need to create machine for containers build if build is required
