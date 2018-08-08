@@ -197,10 +197,12 @@ helm install --name contrail-thirdparty ${CHD_PATH}/contrail-thirdparty --namesp
 helm install --name contrail-analytics ${CHD_PATH}/contrail-analytics --namespace=contrail --values=/tmp/contrail.yaml
 helm install --name contrail-controller ${CHD_PATH}/contrail-controller --namespace=contrail --values=/tmp/contrail.yaml
 
+echo "INFO: wait for pods. $(date)"
 rm -f wait-for-pods.sh
 wget -nv https://raw.githubusercontent.com/Juniper/openstack-helm/master/tools/deployment/common/wait-for-pods.sh
 chmod a+x wait-for-pods.sh
 ./wait-for-pods.sh contrail
+echo "INFO: pods.ready $(date)"
 
 # lets wait for services
 sleep 20
