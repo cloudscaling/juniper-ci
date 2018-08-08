@@ -22,6 +22,6 @@ exit_code=$?
 echo -------------------------------------------------------------------------- $(date)
 
 suite=`basename "$(readlink -f .)"`
-# to run next python module library 'extras' 'setuptools' 'junitxml' 'python-subunit' must be installed:
-sudo pip install extras setuptools junitxml python-subunit
+# to run next python module library 'extras' must be installed:
+# sudo pip install extras
 $SSH "cd /opt/stack/tempest ; testr last --subunit | subunit-1to2" | python "$my_dir/../tempest/subunit2jenkins.py" -o test_result.xml -s $suite
