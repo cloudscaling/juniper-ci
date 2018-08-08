@@ -12,15 +12,6 @@ tag="$CONTRAIL_VERSION"
 # tune some host settings
 sudo sysctl -w vm.max_map_count=1048575
 
-if [[ "$REGISTRY_INSECURE" == '1' ]] ; then
-  sudo mkdir -p /etc/docker
-  cat | sudo tee /etc/docker/daemon.json << EOF
-{
-    "insecure-registries": ["$CONTAINER_REGISTRY"]
-}
-EOF
-fi
-
 if [[ -x $(command -v apt-get 2>/dev/null) ]]; then
   HOST_OS='ubuntu'
 elif [[ -x $(command -v yum 2>/dev/null) ]]; then

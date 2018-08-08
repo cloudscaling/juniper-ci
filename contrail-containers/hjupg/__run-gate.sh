@@ -12,15 +12,6 @@ tag="$CONTRAIL_VERSION"
 # tune some host settings
 sudo sysctl -w vm.max_map_count=1048575
 
-if [[ "$REGISTRY_INSECURE" == '1' ]] ; then
-  sudo mkdir -p /etc/docker
-  cat | sudo tee /etc/docker/daemon.json << EOF
-{
-    "insecure-registries": ["$CONTAINER_REGISTRY"]
-}
-EOF
-fi
-
 if [[ -x $(command -v apt-get 2>/dev/null) ]]; then
   HOST_OS='ubuntu'
 elif [[ -x $(command -v yum 2>/dev/null) ]]; then
@@ -38,7 +29,6 @@ fi
 
 export BASE_DIR=/opt
 mkdir -p $BASE_DIR
-export OSH_PATH=${BASE_DIR}/openstack-helm
 export OSH_INFRA_PATH=${BASE_DIR}/openstack-helm-infra
 export CHD_PATH=${BASE_DIR}/contrail-helm-deployer
 
@@ -74,8 +64,8 @@ tls_config:
 EOF
 fi
 
-cd ${OSH_PATH}
-./tools/deployment/developer/common/001-install-packages-opencontrail.sh
+sudo apt-get update
+sudo apt-get install --no-install-recommends -y ca-certificates make jq nmap curl uuid-runtime linux-headers-$(uname -r) ipcalc
 
 cat > $OSH_INFRA_PATH/tools/gate/devel/multinode-inventory.yaml <<EOF
 all:
@@ -206,24 +196,9 @@ EOF
 helm install --name contrail-thirdparty ${CHD_PATH}/contrail-thirdparty --namespace=contrail --values=/tmp/contrail.yaml
 helm install --name contrail-analytics ${CHD_PATH}/contrail-analytics --namespace=contrail --values=/tmp/contrail.yaml
 helm install --name contrail-controller ${CHD_PATH}/contrail-controller --namespace=contrail --values=/tmp/contrail.yaml
-${OSH_PATH}/tools/deployment/common/wait-for-pods.sh contrail
-
-cd ${OSH_PATH}
 
 # lets wait for services
-sleep 60
+sleep 120
 sudo contrail-status
-
-sudo apt-get install -fy virtualenv &>> $my_dir/logs/apt.log
-export OS_CLOUD=openstack_helm
-
-cd $my_dir
-source $my_dir/check-functions
-virtualenv .venv
-source .venv/bin/activate
-pip install python-openstackclient &>> $my_dir/logs/pip.log || /bin/true
-
-prepare_openstack && check_simple_instance
-deactivate
 
 exit $err
