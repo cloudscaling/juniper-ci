@@ -170,7 +170,8 @@ make
 kubectl replace -f ${CHD_PATH}/rbac/cluster-admin.yaml
 
 controller_nodes=`echo $nodes_cont_ips | tr ' ' ','`
-control_nodes=`echo $nodes_cont_ips_1 | tr ' ' ','`
+#control_nodes=`echo $nodes_cont_ips_1 | tr ' ' ','`
+#    VROUTER_GATEWAY: 10.$((NET_BASE_PREFIX+1)).$JOB_RND.1
 tee /tmp/contrail.yaml << EOF
 global:
   images:
@@ -210,7 +211,6 @@ global:
     LOG_LEVEL: SYS_DEBUG
     CLOUD_ORCHESTRATOR: openstack
     AAA_MODE: $AAA_MODE
-    VROUTER_GATEWAY: 10.$((NET_BASE_PREFIX+1)).$JOB_RND.1
     SSL_ENABLE: $SSL_ENABLE
     JVM_EXTRA_OPTS: "-Xms1g -Xmx2g"
     BGP_PORT: "1179"
