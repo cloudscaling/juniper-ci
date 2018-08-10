@@ -11,7 +11,7 @@ tag="$CONTRAIL_VERSION"
 
 # tune some host settings
 sudo sysctl -w vm.max_map_count=1048575
-mkdir -p /var/crashes/contrail
+mkdir -p /var/crashes
 
 if [[ -x $(command -v apt-get 2>/dev/null) ]]; then
   HOST_OS='ubuntu'
@@ -170,6 +170,7 @@ global:
     IPFABRIC_SERVICE_HOST: ${METADATA_IP}
     METADATA_PROXY_SECRET: ${METADATA_PROXY_SECRET}
     VROUTER_ENCRYPTION: FALSE
+    PHYSICAL_INTERFACE: ens4
 endpoints:
   keystone:
     auth:
