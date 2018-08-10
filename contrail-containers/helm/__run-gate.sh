@@ -216,6 +216,7 @@ global:
     BGP_PORT: "1179"
     CONFIG_DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
     DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
+    VROUTER_GATEWAY:
 EOF
 
 helm install --name contrail ${CHD_PATH}/contrail --namespace=contrail --values=/tmp/contrail.yaml
