@@ -35,7 +35,7 @@ export CHD_PATH=${BASE_DIR}/contrail-helm-deployer
 
 cat <<EOF > $OSH_INFRA_PATH/tools/gate/devel/multinode-vars.yaml
 version:
-  kubernetes: v1.8.3
+  kubernetes: v1.11.2
   helm: v2.7.2
   cni: v0.6.0
 kubernetes:
@@ -219,7 +219,10 @@ global:
     VROUTER_GATEWAY:
 EOF
 
-helm install --name contrail ${CHD_PATH}/contrail --namespace=contrail --values=/tmp/contrail.yaml
+helm install --name contrail-thirdparty ${CHD_PATH}/contrail-thirdparty --namespace=contrail --values=/tmp/contrail.yaml
+helm install --name contrail-analytics ${CHD_PATH}/contrail-analytics --namespace=contrail --values=/tmp/contrail.yaml
+helm install --name contrail-controller ${CHD_PATH}/contrail-controller --namespace=contrail --values=/tmp/contrail.yaml
+helm install --name contrail-vrouter ${CHD_PATH}/contrail-vrouter --namespace=contrail --values=/tmp/contrail.yaml
 ${OSH_PATH}/tools/deployment/common/wait-for-pods.sh contrail
 
 cd ${OSH_PATH}
