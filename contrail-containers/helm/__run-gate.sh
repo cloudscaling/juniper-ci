@@ -35,7 +35,7 @@ export CHD_PATH=${BASE_DIR}/contrail-helm-deployer
 
 cat <<EOF > $OSH_INFRA_PATH/tools/gate/devel/multinode-vars.yaml
 version:
-  kubernetes: v1.11.2
+  kubernetes: v1.9.3
   helm: v2.7.2
   cni: v0.6.0
 kubernetes:
