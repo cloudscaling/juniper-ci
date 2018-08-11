@@ -9,7 +9,11 @@ instances:
   ip: ${IP_VM_01}
   provider: bms
   roles:
-     openstack: null
+     openstack_control: null
+     openstack_network: null
+     openstack_monitoring: null
+     openstack_storage: null
+#     openstack: null
      analytics: null
      analytics_database: null
      config: null
@@ -36,7 +40,6 @@ global_configuration:
 contrail_configuration:
  CONTRAIL_VERSION: ${CONTRAIL_VERSION}
  OPENSTACK_VERSION: ${OPENSTACK_VERSION}
-# AAA_MODE: rbac
  VROUTER_GATEWAY: ${VROUTER_GW}
  CONFIG_NODEMGR__DEFAULTS__minimum_diskGB: "2"
  CONFIG_DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
