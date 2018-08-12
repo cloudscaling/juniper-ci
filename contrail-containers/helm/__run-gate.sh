@@ -170,8 +170,7 @@ make
 kubectl replace -f ${CHD_PATH}/rbac/cluster-admin.yaml
 
 controller_nodes=`echo $nodes_cont_ips | tr ' ' ','`
-#control_nodes=`echo $nodes_cont_ips_1 | tr ' ' ','`
-#    VROUTER_GATEWAY: 10.$((NET_BASE_PREFIX+1)).$JOB_RND.1
+control_nodes=`echo $nodes_cont_ips_1 | tr ' ' ','`
 tee /tmp/contrail.yaml << EOF
 global:
   images:
@@ -216,7 +215,7 @@ global:
     BGP_PORT: "1179"
     CONFIG_DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
     DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
-    VROUTER_GATEWAY:
+    VROUTER_GATEWAY: 10.$((NET_BASE_PREFIX+1)).$JOB_RND.1
 EOF
 
 helm install --name contrail-thirdparty ${CHD_PATH}/contrail-thirdparty --namespace=contrail --values=/tmp/contrail.yaml

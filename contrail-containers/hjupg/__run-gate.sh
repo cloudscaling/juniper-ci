@@ -121,7 +121,6 @@ make
 kubectl replace -f ${CHD_PATH}/rbac/cluster-admin.yaml
 
 controller_nodes=`echo $nodes_cont_ips | tr ' ' ','`
-control_nodes=`echo $nodes_cont_ips_1 | tr ' ' ','`
 tee /tmp/contrail.yaml << EOF
 global:
   images:
@@ -157,11 +156,9 @@ global:
       dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
   contrail_env:
     CONTROLLER_NODES: $controller_nodes
-    CONTROL_NODES: $control_nodes
     LOG_LEVEL: SYS_DEBUG
     CLOUD_ORCHESTRATOR: openstack
     AAA_MODE: $AAA_MODE
-    VROUTER_GATEWAY: 10.$((NET_BASE_PREFIX+1)).$JOB_RND.1
     SSL_ENABLE: $SSL_ENABLE
     JVM_EXTRA_OPTS: "-Xms1g -Xmx2g"
     BGP_PORT: "1179"
@@ -170,7 +167,6 @@ global:
     IPFABRIC_SERVICE_HOST: ${METADATA_IP}
     METADATA_PROXY_SECRET: ${METADATA_PROXY_SECRET}
     VROUTER_ENCRYPTION: FALSE
-    PHYSICAL_INTERFACE: ens4
 endpoints:
   keystone:
     auth:
