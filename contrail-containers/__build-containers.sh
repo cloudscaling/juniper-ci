@@ -12,7 +12,7 @@ cd contrail-container-builder/containers
 
 ./setup-for-build.sh
 
-baseurl = http://contrail-tpc.s3-website-us-west-2.amazonaws.com
+#baseurl = http://contrail-tpc.s3-website-us-west-2.amazonaws.com
 cat <<EOF >../tpc.repo.template
 [tpc]
 name = Contrail repo
