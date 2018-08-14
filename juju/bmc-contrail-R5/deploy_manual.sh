@@ -103,23 +103,8 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   juju-add-unit contrail-analyticsdb --to $cont3
 fi
 
-# TODO: next is not correct now
-
-cp "$my_dir/../common/repo_config.yaml.tmpl" "repo_config_co.yaml"
-sed -i -e "s|{{charm_name}}|contrail-openstack|m" "repo_config_co.yaml"
-sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_co.yaml"
-sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_co.yaml"
-sed -i -e "s|{{series}}|$SERIES|m" "repo_config_co.yaml"
-sed -i "s/\r/\n/g" "repo_config_co.yaml"
-juju-deploy $PLACE/contrail-openstack --config repo_config_co.yaml
-
-cp "$my_dir/../common/repo_config.yaml.tmpl" "repo_config_cv.yaml"
-sed -i -e "s|{{charm_name}}|contrail-agent|m" "repo_config_cv.yaml"
-sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_cv.yaml"
-sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_cv.yaml"
-sed -i -e "s|{{series}}|$SERIES|m" "repo_config_cv.yaml"
-sed -i "s/\r/\n/g" "repo_config_cv.yaml"
-juju-deploy $PLACE/contrail-agent --config repo_config_cv.yaml
+juju-deploy $PLACE/contrail-openstack
+juju-deploy $PLACE/contrail-agent
 if [[ "$USE_DPDK" == "true" ]] ; then
   juju-set contrail-agent dpdk=True dpdk-coremask=1,2 dpdk-main-mempool-size=16384
 fi
