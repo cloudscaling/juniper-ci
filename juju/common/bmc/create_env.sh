@@ -181,6 +181,9 @@ function run_controller() {
     juju-ssh $mch "sudo reboot" 2>/dev/null || /bin/true
     wait_kvm_machine $mch juju-ssh
   fi
+
+  juju-scp "$my_dir/files/juju-default.yaml" $mch:juju-default.yaml 2>/dev/null
+  juju-ssh $mch "sudo lxc profile create juju-default || /bin/true ; cat ./juju-default.yaml | sudo lxc profile edit juju-default"
 }
 
 run_compute 1
