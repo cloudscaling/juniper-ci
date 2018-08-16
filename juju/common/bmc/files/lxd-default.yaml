@@ -15,5 +15,5 @@ devices:
     path: /sys/module/apparmor/parameters/enabled
     source: /dev/null
     type: disk
-name: juju-default
+name: default
 used_by: []
