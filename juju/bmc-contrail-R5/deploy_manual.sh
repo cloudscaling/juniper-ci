@@ -121,6 +121,7 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   juju-add-relation "contrail-controller:http-services" "haproxy"
   juju-add-relation "contrail-controller:https-services" "haproxy"
   juju-set contrail-controller vip=$addr.254
+  juju-set keepalived virtual_ip=$addr.254
 fi
 
 detect_machines
