@@ -138,11 +138,11 @@
           slavenode:
             - slave01
             - slave04
-#      - k8s-server-centos:
-#          defaultha: ha
-#          slavenode:
-#            - slave01
-#            - slave04
+      - k8s-server-centos:
+          defaultha: ha
+          slavenode:
+            - slave01
+            - slave04
 #      - k8s-server-ubuntu16:
 #          defaultha: ha
 #          slavenode:

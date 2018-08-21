@@ -14,10 +14,10 @@ export PATH=${PATH}:/usr/sbin
 pushd contrail-container-builder/kubernetes/manifests/
 case $AGENT_MODE in
   dpdk)
-    template_name='contrail-template-dpdk.yaml'
+    template_name='contrail-dpdk-standalone-kubernetes.yaml'
     ;;
   *)
-    template_name='contrail-template.yaml'
+    template_name='contrail-dpdk-standalone-kubernetes.yaml'
     ;;
 esac
 ./resolve-manifest.sh < $template_name > ~/my-contrail.yaml
