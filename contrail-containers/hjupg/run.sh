@@ -83,6 +83,7 @@ done
 $SCP "$WORKSPACE/cloudrc" $SSH_USER@$master_ip:cloudrc
 $SCP "$my_dir/../common/check-functions" $SSH_USER@$master_ip:check-functions
 $SCP "$my_dir/__run-gate.sh" $SSH_USER@$master_ip:run-gate.sh
+run_env+=" JOB_RND=$JOB_RND NET_BASE_PREFIX=$NET_BASE_PREFIX"
 run_env+=" OPENSTACK_VERSION=$OPENSTACK_VERSION LINUX_DISTR=$LINUX_DISTR"
 run_env+=" AGENT_MODE=$AGENT_MODE SSL_ENABLE=$SSL_ENABLE"
 run_env+=" AUTH_IP=$AUTH_IP METADATA_IP=$METADATA_IP METADATA_PROXY_SECRET=$METADATA_PROXY_SECRET"

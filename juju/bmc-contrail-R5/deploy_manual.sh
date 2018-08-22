@@ -103,39 +103,26 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   juju-add-unit contrail-analyticsdb --to $cont3
 fi
 
-# TODO: next is not correct now
-
-cp "$my_dir/../common/repo_config.yaml.tmpl" "repo_config_co.yaml"
-sed -i -e "s|{{charm_name}}|contrail-openstack|m" "repo_config_co.yaml"
-sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_co.yaml"
-sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_co.yaml"
-sed -i -e "s|{{series}}|$SERIES|m" "repo_config_co.yaml"
-sed -i "s/\r/\n/g" "repo_config_co.yaml"
-juju-deploy $PLACE/contrail-openstack --config repo_config_co.yaml
-
-cp "$my_dir/../common/repo_config.yaml.tmpl" "repo_config_cv.yaml"
-sed -i -e "s|{{charm_name}}|contrail-agent|m" "repo_config_cv.yaml"
-sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_cv.yaml"
-sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_cv.yaml"
-sed -i -e "s|{{series}}|$SERIES|m" "repo_config_cv.yaml"
-sed -i "s/\r/\n/g" "repo_config_cv.yaml"
-juju-deploy $PLACE/contrail-agent --config repo_config_cv.yaml
+juju-deploy $PLACE/contrail-openstack
+juju-deploy $PLACE/contrail-agent
 if [[ "$USE_DPDK" == "true" ]] ; then
   juju-set contrail-agent dpdk=True dpdk-coremask=1,2 dpdk-main-mempool-size=16384
 fi
-juju-set contrail-agent vhost-mtu=1540 physical-interface=$IF2
+juju-set contrail-agent physical-interface=$IF2
 
-if [ "$DEPLOY_MODE" == 'ha' ] ; then
-  juju-deploy cs:$SERIES/haproxy --to lxd:$cont0
-  juju-expose haproxy
-  juju-add-relation "contrail-analytics" "haproxy"
-  juju-add-relation "contrail-controller:http-services" "haproxy"
-  juju-add-relation "contrail-controller:https-services" "haproxy"
-  mch=`get_machines_index_by_service haproxy`
-  ip=`get-machine-ip-by-number $mch`
-  echo "INFO: HAProxy for Contrail services is on machine $mch / IP $ip"
-  juju-set contrail-controller vip=$ip
-fi
+#if [ "$DEPLOY_MODE" == 'ha' ] ; then
+#  juju-deploy cs:~boucherv29/keepalived-19
+#  juju-deploy cs:$SERIES/haproxy --to $cont1
+#  juju-add-unit haproxy --to $cont2
+#  juju-add-unit haproxy --to $cont3
+#  juju-expose haproxy
+#  juju-add-relation haproxy keepalived
+#  juju-add-relation "contrail-analytics" "haproxy"
+#  juju-add-relation "contrail-controller:http-services" "haproxy"
+#  juju-add-relation "contrail-controller:https-services" "haproxy"
+#  juju-set contrail-controller vip=$addr.254
+#  juju-set keepalived virtual_ip=$addr.254
+#fi
 
 detect_machines
 wait_for_machines $m1 $m2 $m3 $m4 $m5

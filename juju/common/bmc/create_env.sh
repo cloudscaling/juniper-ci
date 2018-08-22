@@ -124,7 +124,7 @@ function run_compute() {
   echo "INFO: creating compute $index (mac suffix $mac_suffix) $(date)"
   local ip="$addr.$mac_suffix"
   local ip2="$addr_vm.$mac_suffix"
-  run_cloud_machine comp-$index $mac_suffix 4096 $ip
+  run_cloud_machine comp-$index $mac_suffix 8192 $ip
   mch=`get_machine_by_ip $ip`
 
   echo "INFO: preparing compute $index $(date)"
@@ -181,6 +181,9 @@ function run_controller() {
     juju-ssh $mch "sudo reboot" 2>/dev/null || /bin/true
     wait_kvm_machine $mch juju-ssh
   fi
+
+  juju-scp "$my_dir/files/lxd-default.yaml" $mch:lxd-default.yaml 2>/dev/null
+  juju-ssh $mch "cat ./lxd-default.yaml | sudo lxc profile edit default"
 }
 
 run_compute 1
