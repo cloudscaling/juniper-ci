@@ -17,7 +17,7 @@ case $AGENT_MODE in
     template_name='contrail-dpdk-standalone-kubernetes.yaml'
     ;;
   *)
-    template_name='contrail-dpdk-standalone-kubernetes.yaml'
+    template_name='contrail-standalone-kubernetes.yaml'
     ;;
 esac
 ./resolve-manifest.sh < $template_name > ~/my-contrail.yaml
