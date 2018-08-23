@@ -13,27 +13,10 @@ function catch_errors_ce() {
   exit $exit_code
 }
 
-jver="$(juju-version)"
-deploy_from=${1:-github}   # Place where to get charms - github or charmstore
-if [[ "$deploy_from" == github ]] ; then
-  if [[ "$jver" == 1 ]] ; then
-    exit 1
-  else
-    # version 2
-    PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
-  fi
-else
-  # deploy_from=charmstore
-  echo "ERROR: Deploy from charmstore is not supported yet"
-  exit 1
-fi
+# version 2
+PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
 
 echo "---------------------------------------------------- From: $deploy_from  Version: $VERSION"
-
-prepare_repo
-repo_ip=`get-machine-ip-by-number $mrepo`
-repo_key=`curl -s http://$repo_ip/ubuntu/repo.key`
-repo_key=`echo "$repo_key" | awk '{printf("      %s\r", $0)}'`
 
 if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
   detect_subnet
@@ -121,9 +104,6 @@ juju-deploy $PLACE/contrail-keystone-auth contrail5-keystone-auth --to $m6
 juju-deploy $PLACE/contrail-controller contrail5-controller --to $m6
 juju-expose contrail5-controller
 juju-set contrail5-controller auth-mode=$AAA_MODE "log-level=SYS_DEBUG"
-if [ "$USE_EXTERNAL_RABBITMQ" == 'true' ]; then
-  juju-set contrail5-controller "use-external-rabbitmq=true"
-fi
 juju-deploy $PLACE/contrail-analyticsdb contrail5-analyticsdb --to $m6
 juju-set contrail5-analyticsdb "log-level=SYS_DEBUG"
 juju-deploy $PLACE/contrail-analytics contrail5-analytics --to $m6
@@ -168,13 +148,6 @@ hack_openstack
 echo "INFO: Apply SSL flag if set $(date)"
 apply_ssl
 
-echo "INFO: Attach contrail5-controller container $(date)"
-juju-attach contrail5-controller contrail-controller="$HOME/docker/$image_controller"
-echo "INFO: Attach contrail5-analyticsdb container $(date)"
-juju-attach contrail5-analyticsdb contrail-analyticsdb="$HOME/docker/$image_analyticsdb"
-echo "INFO: Attach contrail5-analytics container $(date)"
-juju-attach contrail5-analytics contrail-analytics="$HOME/docker/$image_analytics"
-
 echo "INFO: Add relations $(date)"
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
 juju-add-relation "keystone:shared-db" "mysql:shared-db"
@@ -209,10 +182,6 @@ juju-add-relation "contrail5-openstack" "contrail5-controller"
 
 juju-add-relation "contrail5-agent:juju-info" "nova-compute:juju-info"
 juju-add-relation "contrail5-agent" "contrail5-controller"
-
-if [ "$USE_EXTERNAL_RABBITMQ" == 'true' ]; then
-  juju-add-relation "contrail5-controller" "rabbitmq-server:amqp"
-fi
 
 post_deploy
 

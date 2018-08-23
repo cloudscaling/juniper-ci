@@ -36,7 +36,6 @@ export DEPLOY_AS_HA_MODE="${DEPLOY_AS_HA_MODE:-false}"
 export USE_SSL_OS="${USE_SSL_OS:-false}"
 export USE_SSL_CONTRAIL="${USE_SSL_CONTRAIL:-false}"
 export USE_ADDITIONAL_INTERFACE="${USE_ADDITIONAL_INTERFACE:-false}"
-export USE_EXTERNAL_RABBITMQ="${USE_EXTERNAL_RABBITMQ:-false}"
 export AAA_MODE=${AAA_MODE:-rbac}
 
 export PASSWORD=${PASSWORD:-'password'}

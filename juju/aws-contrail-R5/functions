@@ -6,21 +6,6 @@ source $famy_dir/../common/functions-aws
 source $famy_dir/../common/functions-contrail
 source $famy_dir/../common/functions-contrail-R4
 
-function prepare_repo() {
-  echo "INFO: Prepare apt-repo"
-  mrepo=$(create_machine mem=4G cores=1 root-disk=40G)
-  echo "INFO: Machine created: $mrepo"
-  if ! wait_for_machines $mrepo ; then
-    return 1
-  fi
-  juju-deploy cs:$SERIES/ubuntu --to $mrepo
-  juju-scp "$HOME/docker/$packages" "$mrepo:contrail_debs.tgz"
-  juju-scp "$my_dir/../common/create-aptrepo.sh" $mrepo:create-aptrepo.sh
-  open_port $mrepo 80
-  juju-ssh $mrepo ./create-aptrepo.sh $SERIES
-  echo "INFO: apt-repo is ready"
-}
-
 function detect_subnet() {
   local ids=(`aws ec2 describe-subnets --filters Name=availability-zone,Values=$AZ Name=vpc-id,Values=$vpc_id Name=defaultForAz,Values=false --query 'Subnets[*].SubnetId' --output text`)
   if [[ ${#ids[@]} == 0 ]] ; then
