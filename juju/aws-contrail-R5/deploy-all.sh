@@ -29,6 +29,7 @@ if [[ "$jver" == 1 ]] ; then
   exit 1
 fi
 
+export JOB_VERSION=R4
 export SERIES="${SERIES:-xenial}"
 export VERSION="${VERSION:-ocata}"
 export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
@@ -95,7 +96,7 @@ $my_dir/$inner_script $script_params
 $my_dir/../common/check-openstack.sh
 
 if [[ "$RUN_TEMPEST" == 'true' ]] ; then
-  $my_dir/../common/aws/run-tempest.sh
+  $my_dir/../common/run-tempest.sh
 fi
 
 $my_dir/../save-logs.sh

@@ -5,3 +5,6 @@ famy_dir="$(dirname $famy_file)"
 source $famy_dir/../common/functions-aws
 source $famy_dir/../common/functions-contrail
 source $famy_dir/../common/functions-contrail-R4
+
+# aws-functions that are not specific to sandbox
+source $famy_dir/../common/aws/functions

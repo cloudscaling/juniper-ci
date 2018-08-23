@@ -1,0 +1,65 @@
+#!/bin/bash -e
+
+function detect_subnet() {
+  local ids=(`aws ec2 describe-subnets --filters Name=availability-zone,Values=$AZ Name=vpc-id,Values=$vpc_id Name=defaultForAz,Values=false --query 'Subnets[*].SubnetId' --output text`)
+  if [[ ${#ids[@]} == 0 ]] ; then
+    # TODO: add CIDR detection from VPC. add CIDR choosing if it present in another AZ.
+    aws ec2 create-subnet --vpc-id $vpc_id --cidr-block 172.31.100.0/24 --availability-zone $AZ
+    local ids=(`aws ec2 describe-subnets --filters Name=availability-zone,Values=$AZ Name=vpc-id,Values=$vpc_id Name=defaultForAz,Values=false --query 'Subnets[*].SubnetId' --output text`)
+    subnet_id=${ids[0]}
+  else
+    subnet_id=${ids[0]}
+  fi
+  subnet_cidr=`aws ec2 describe-subnets --subnet-id $subnet_id --query 'Subnets[0].CidrBlock' --output text`
+  echo "INFO: additional subnet_id is $subnet_id and CIDR is $subnet_cidr"
+}
+
+function add_interface() {
+  local mch=$1
+  echo "INFO: attaching additional interface to machine $mch"
+
+  if [[ -z "$subnet_id" ]] ; then
+    echo "ERROR: additional subnet is not defined"
+    return 1
+  fi
+
+  iid=`get-machine-id-by-number $mch`
+  if [[ -z "$iid" ]] ; then
+    echo "ERROR: Can't get instance_id for machine $mch"
+    return 1
+  fi
+
+  eni_id=`aws ec2 create-network-interface --subnet-id $subnet_id --query 'NetworkInterface.NetworkInterfaceId' --output text`
+  eni_attach_id=`aws ec2 attach-network-interface --network-interface-id $eni_id --instance-id $iid --device-index 1 --query 'AttachmentId' --output text`
+  aws ec2 modify-network-interface-attribute --network-interface-id $eni_id --attachment AttachmentId=$eni_attach_id,DeleteOnTermination=true
+  sleep 5
+  echo "INFO: additional interface $eni_id is attached to instance $mch:$iid - $eni_attach_id"
+
+  for i in {1..4} ; do
+    nif=`juju-ssh $mch "sudo lshw" 2>/dev/null | grep -A 10 'network.*DISABLED' | awk '/logical name/{print $3}' | head -1 | tr -d '\r'`
+    if [ -n "$nif" ] ; then
+      break
+    fi
+    sleep 5
+  done
+  echo "INFO: interface $nif detected"
+  juju-ssh $mch "sudo bash -c 'echo \"auto $nif\" > /etc/network/interfaces.d/$nif.cfg && echo \"iface $nif inet dhcp\" >> /etc/network/interfaces.d/$nif.cfg && ifup $nif &>ifup.out'" 2>/dev/null
+  echo "INFO: interface $nif added"
+  sleep 5
+  juju-ssh $mch ifconfig 2>/dev/null | grep -A 1 "^[a-z].*" | grep -v "\-\-"
+}
+
+function prepare_repo() {
+  echo "INFO: Prepare apt-repo"
+  mrepo=$(create_machine mem=4G cores=1 root-disk=40G)
+  echo "INFO: Machine created: $mrepo"
+  if ! wait_for_machines $mrepo ; then
+    return 1
+  fi
+  juju-deploy cs:$SERIES/ubuntu --to $mrepo
+  juju-scp "$HOME/docker/$packages" "$mrepo:contrail_debs.tgz"
+  juju-scp "$my_dir/../common/create-aptrepo.sh" $mrepo:create-aptrepo.sh
+  open_port $mrepo 80
+  juju-ssh $mrepo ./create-aptrepo.sh $SERIES
+  echo "INFO: apt-repo is ready"
+}

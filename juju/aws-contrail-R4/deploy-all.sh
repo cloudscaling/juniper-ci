@@ -35,6 +35,7 @@ fi
 # 4.0.1.0-32
 # 4.0.2.0-34
 # 4.1.0.0-8
+export JOB_VERSION=R4
 export SERIES="${SERIES:-trusty}"
 export VERSION="${VERSION:-mitaka}"
 export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
@@ -102,7 +103,7 @@ $my_dir/$inner_script $script_params
 $my_dir/../common/check-openstack.sh
 
 if [[ "$RUN_TEMPEST" == 'true' ]] ; then
-  $my_dir/../common/aws/run-tempest.sh
+  $my_dir/../common/run-tempest.sh
 fi
 
 $my_dir/../save-logs.sh

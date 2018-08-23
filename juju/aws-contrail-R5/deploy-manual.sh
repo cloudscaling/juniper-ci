@@ -16,7 +16,7 @@ function catch_errors_ce() {
 # version 2
 PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
 
-echo "---------------------------------------------------- From: $deploy_from  Version: $VERSION"
+echo "---------------------------------------------------- Version: $VERSION"
 
 if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
   detect_subnet

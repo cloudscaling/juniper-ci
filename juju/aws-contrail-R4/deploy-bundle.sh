@@ -24,18 +24,11 @@ if [ "$DEPLOY_AS_HA_MODE" != 'false' ] ; then
 fi
 
 jver="$(juju-version)"
-deploy_from=${1:-github}   # Place where to get charms - github or charmstore
-if [[ "$deploy_from" == github ]] ; then
-  if [[ "$jver" == 1 ]] ; then
-    exit 1
-  else
-    # version 2
-    JUJU_REPO="$WORKSPACE/contrail-charms"
-  fi
-else
-  # deploy_from=charmstore
-  echo "ERROR: Deploy from charmstore is not supported yet"
+if [[ "$jver" == 1 ]] ; then
   exit 1
+else
+  # version 2
+  JUJU_REPO="$WORKSPACE/contrail-charms"
 fi
 
 echo "---------------------------------------------------- From: $JUJU_REPO  Version: $VERSION"

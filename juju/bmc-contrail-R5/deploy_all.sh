@@ -25,6 +25,7 @@ if [[ "$jver" == 1 ]] ; then
   exit 1
 fi
 
+export JOB_VERSION=R4
 export SERIES="${SERIES:-xenial}"
 export VERSION="${VERSION:-ocata}"
 export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
