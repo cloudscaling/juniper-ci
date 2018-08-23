@@ -48,8 +48,12 @@ if [[ "$REGISTRY" == 'build' ]]; then
   $SSH_CMD ${SSH_USER}@$build_ip "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
   set +o pipefail
   run_env="CONTRAIL_REGISTRY=$build_ip:5000 CONTRAIL_VERSION=$CONTRAIL_VERSION REGISTRY_INSECURE=1"
+  CONTRAIL_REGISTRY="$build_ip:5000"
+  CONTRAIL_CONTAINER_TAG="${OPENSTACK_VERSION}-${CONTRAIL_VERSION}"
 elif [[ "$REGISTRY" == 'opencontrailnightly' ]]; then
   run_env="CONTRAIL_REGISTRY=opencontrailnightly CONTRAIL_CONTAINER_TAG=latest REGISTRY_INSECURE=0"
+  CONTRAIL_REGISTRY=opencontrailnightly
+  CONTRAIL_CONTAINER_TAG=latest
 else
   echo "ERROR: unsupported REGISTRY = $REGISTRY"
   exit 1
