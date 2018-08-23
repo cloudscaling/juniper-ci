@@ -102,7 +102,7 @@ $my_dir/$inner_script $script_params
 $my_dir/../common/check-openstack.sh
 
 if [[ "$RUN_TEMPEST" == 'true' ]] ; then
-  $my_dir/run-tempest.sh
+  $my_dir/../common/aws/run-tempest.sh
 fi
 
 $my_dir/../save-logs.sh

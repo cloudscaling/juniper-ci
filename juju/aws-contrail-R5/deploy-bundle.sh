@@ -5,7 +5,7 @@ my_dir="$(dirname $my_file)"
 source "$my_dir/../common/functions"
 source "$my_dir/functions"
 
-BUNDLE="$my_dir/openstack-contrail-amazon.yaml"
+BUNDLE="$my_dir/../common/aws/openstack-contrail-amazon.yaml"
 
 trap 'catch_errors_ce $LINENO' ERR EXIT
 function catch_errors_ce() {

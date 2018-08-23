@@ -35,7 +35,6 @@
           description: "A place where to get charms"
           choices:
             - github
-            - charmstore
       - choice:
           name: DEPLOY_TYPE
           description: "A method of deployment"
@@ -145,7 +144,6 @@
           description: "A place where to get charms"
           choices:
             - github
-            - charmstore
       - choice:
           name: DEPLOY_TYPE
           description: "A method of deployment"
@@ -175,10 +173,6 @@
           name: USE_ADDITIONAL_INTERFACE
           description: "Deploy Contrail with additional interfaces that is used for control-network"
           default: false
-      - bool:
-          name: USE_EXTERNAL_RABBITMQ
-          description: "Use external RabbitMQ"
-          default: false
       - string:
           name: CHARMS_BRANCH
           default: 'R5'
@@ -205,7 +199,6 @@
           if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
           if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
           if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
-          if [[ "$USE_EXTERNAL_RABBITMQ" == "true" ]] ; then desc="$desc +EXT_MQ" ; fi
           if [[ "$RUN_TEMPEST" == "true" ]] ; then desc="$desc +Tempest" ; fi
           echo "DESCRIPTION $desc"
       - description-setter:

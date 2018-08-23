@@ -1,2 +1,0 @@
-# setUpClass IndexError: list index out of range. there is no neutron agents in deployed Cloud
-tempest.api.network.admin.test_agent_management.AgentManagementTestJSON

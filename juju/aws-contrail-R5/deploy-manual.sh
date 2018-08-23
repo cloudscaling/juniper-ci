@@ -137,10 +137,10 @@ fi
 #  juju-add-relation "contrail5-analytics" "haproxy"
 #  juju-add-relation "contrail5-controller:http-services" "haproxy"
 #  juju-add-relation "contrail5-controller:https-services" "haproxy"
-# TODO(tikitavi): change vip
+#  TODO(tikitavi): change vip
 #  ip=`get-machine-ip-by-number $m0`
 #  juju-set contrail5-controller vip=$ip
-###  juju-set keepalived virtual_ip=$ip
+#  juju-set keepalived virtual_ip=$ip
 #fi
 
 echo "INFO: Update endpoints $(date)"
