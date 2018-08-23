@@ -106,7 +106,117 @@
           if [[ "$VERSION" == "mitaka" ]] ; then
             export SERIES='trusty'
           fi
-          ./juniper-ci/juju/aws-contrail/deploy-all.sh deploy-$DEPLOY_TYPE.sh $DEPLOY_FROM
+          ./juniper-ci/juju/aws-contrail-R4/deploy-all.sh deploy-$DEPLOY_TYPE.sh $DEPLOY_FROM
+    publishers:
+      - archive:
+          artifacts: 'logs/**'
+          allow-empty: true
+      - junit:
+          results: tempest/test_result.xml
+          allow-empty-results: true
+
+
+- job:
+    name: Juju-Contrail-R5-OpenStack-AWS
+    description: "Deploys cluster(manual) with OpenStack + Contrail R5 and checks it. Can be used for debug purposes."
+    defaults: global
+    node: master
+    parameters:
+      - choice:
+          name: CLEAN_BEFORE
+          choices:
+            - 'false'
+            - 'true'
+            - clean_and_exit
+      - choice:
+          name: CLEAN_ENV
+          choices:
+            - always
+            - on_success
+            - never
+      - choice:
+          name: VERSION
+          description: "Version of the OpenStack. ocata implies xenial, queens implies bionic."
+          choices:
+            - ocata
+            - queens
+      - choice:
+          name: DEPLOY_FROM
+          description: "A place where to get charms"
+          choices:
+            - github
+            - charmstore
+      - choice:
+          name: DEPLOY_TYPE
+          description: "A method of deployment"
+          choices:
+            - manual
+            - bundle
+      - choice:
+          name: AAA_MODE
+          description: "aaa-mode for Contrail"
+          choices:
+            - cloud-admin
+            - rbac
+            - no-auth
+      - bool:
+          name: DEPLOY_AS_HA_MODE
+          description: "Deploy 3 controllers instead of 1"
+          default: false
+      - bool:
+          name: USE_SSL_OS
+          description: "Deploy OpenStack with certificates"
+          default: false
+      - bool:
+          name: USE_SSL_CONTRAIL
+          description: "Deploy Contrail with certificates"
+          default: false
+      - bool:
+          name: USE_ADDITIONAL_INTERFACE
+          description: "Deploy Contrail with additional interfaces that is used for control-network"
+          default: false
+      - bool:
+          name: USE_EXTERNAL_RABBITMQ
+          description: "Use external RabbitMQ"
+          default: false
+      - string:
+          name: CHARMS_BRANCH
+          default: 'R5'
+      - bool:
+          name: RUN_TEMPEST
+          description: "Run neutron tests from tempest"
+          default: false
+    scm:
+      - juniper-contrail-charms-branch
+      - juniper-ci
+      - tempest
+    builders:
+      - shell: |
+          #!/bin/bash -e
+          if [[ "$CHARMS_BRANCH" != "master" ]]; then
+            cd contrail-charms
+            git checkout "$CHARMS_BRANCH"
+            cd ..
+          fi
+      - shell: |
+          #!/bin/bash -e
+          desc="$VERSION $CONTRAIL_BUILD $DEPLOY_TYPE $AAA_MODE"
+          if [[ "$DEPLOY_AS_HA_MODE" == "true" ]] ; then desc="$desc +HA" ; fi
+          if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
+          if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
+          if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
+          if [[ "$USE_EXTERNAL_RABBITMQ" == "true" ]] ; then desc="$desc +EXT_MQ" ; fi
+          if [[ "$RUN_TEMPEST" == "true" ]] ; then desc="$desc +Tempest" ; fi
+          echo "DESCRIPTION $desc"
+      - description-setter:
+          regexp: "DESCRIPTION (.*)"
+      - shell: |
+          #!/bin/bash -e
+          export SERIES='xenial'
+          if [[ "$VERSION" == "queens" ]] ; then
+            export SERIES='bionic'
+          fi
+          ./juniper-ci/juju/aws-contrail-R5/deploy-all.sh deploy-$DEPLOY_TYPE.sh $DEPLOY_FROM
     publishers:
       - archive:
           artifacts: 'logs/**'
