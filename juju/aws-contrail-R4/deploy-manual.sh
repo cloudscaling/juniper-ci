@@ -17,21 +17,14 @@ function catch_errors_ce() {
 }
 
 jver="$(juju-version)"
-deploy_from=${1:-github}   # Place where to get charms - github or charmstore
-if [[ "$deploy_from" == github ]] ; then
-  if [[ "$jver" == 1 ]] ; then
-    exit 1
-  else
-    # version 2
-    PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
-  fi
-else
-  # deploy_from=charmstore
-  echo "ERROR: Deploy from charmstore is not supported yet"
+if [[ "$jver" == 1 ]] ; then
   exit 1
+else
+  # version 2
+  PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
 fi
 
-echo "---------------------------------------------------- From: $deploy_from  Version: $VERSION"
+echo "---------------------------------------------------- Version: $VERSION"
 
 prepare_repo
 repo_ip=`get-machine-ip-by-number $mrepo`

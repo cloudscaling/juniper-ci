@@ -29,20 +29,14 @@ if [[ "$jver" == 1 ]] ; then
   exit 1
 fi
 
-# for builds of R4.0 from 1 to 20 version is 4.0.0.0
-# for builds of R4.0 from 21 to 32 version is 4.0.1.0
-# stable builds:
-# 4.0.1.0-32
-# 4.0.2.0-34
-# 4.1.0.0-8
-export SERIES="${SERIES:-trusty}"
-export VERSION="${VERSION:-mitaka}"
+export JOB_VERSION=R5
+export SERIES="${SERIES:-xenial}"
+export VERSION="${VERSION:-ocata}"
 export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
 export DEPLOY_AS_HA_MODE="${DEPLOY_AS_HA_MODE:-false}"
 export USE_SSL_OS="${USE_SSL_OS:-false}"
 export USE_SSL_CONTRAIL="${USE_SSL_CONTRAIL:-false}"
 export USE_ADDITIONAL_INTERFACE="${USE_ADDITIONAL_INTERFACE:-false}"
-export USE_EXTERNAL_RABBITMQ="${USE_EXTERNAL_RABBITMQ:-false}"
 export AAA_MODE=${AAA_MODE:-rbac}
 
 export PASSWORD=${PASSWORD:-'password'}
@@ -102,7 +96,7 @@ $my_dir/$inner_script $script_params
 $my_dir/../common/check-openstack.sh
 
 if [[ "$RUN_TEMPEST" == 'true' ]] ; then
-  $my_dir/run-tempest.sh
+  $my_dir/../common/run-tempest.sh
 fi
 
 $my_dir/../save-logs.sh

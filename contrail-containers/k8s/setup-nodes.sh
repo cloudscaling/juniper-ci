@@ -23,9 +23,6 @@ assert_empty KUBERNETES_API_SERVER
 assert_empty CONTROLLER_NODES
 assert_empty AGENT_NODES
 
-# Set both ZOOKEEPER_PORT and ZOOKEEPER_ANALYTICS_PORT to 2181
-# because there is one zookeeper cluster in this test
-
 function setup_k8s() {
   local dest=$1
   local token_opts=${2:-''}
@@ -45,8 +42,6 @@ _CONTRAIL_REGISTRY_IP=$DOCKER_REGISTRY_ADDR
 OPENSTACK_VERSION=$OPENSTACK_VERSION
 CONTROLLER_NODES=$CONTROLLER_NODES
 AGENT_NODES=$AGENT_NODES
-ZOOKEEPER_PORT=2181
-ZOOKEEPER_ANALYTICS_PORT=2181
 AGENT_MODE=$AGENT_MODE
 PHYSICAL_INTERFACE=\$(ip route get 1 | grep -o 'dev.*' | awk '{print(\$2)}')
 $ssl_opts
@@ -74,7 +69,7 @@ for node_ip in $nodes_ips ; do
     master_dest="$node_ip"
     for (( i=0; i < 10; ++i )) ; do
       echo "get k8s cluster token ${i}/10"
-      token=`$SSH_CMD $SSH_USER@$node_ip "sudo kubeadm token list" | tail -n 1 | awk '{print($1)}'`
+      token=`$SSH_CMD $SSH_USER@$node_ip "kubeadm token list" | awk '/system:bootstrappers:kubeadm:default-node-token/{print($1)}'`
       if [[ -n "$token" ]] ; then
         echo "get k8s cluster token done: $token"
         break

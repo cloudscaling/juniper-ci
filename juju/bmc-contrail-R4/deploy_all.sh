@@ -31,6 +31,7 @@ fi
 # 4.0.1.0-32
 # 4.0.2.0-34
 # 4.1.0.0-8
+export JOB_VERSION=R4
 export SERIES="${SERIES:-xenial}"
 export VERSION="${VERSION:-newton}"
 export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"

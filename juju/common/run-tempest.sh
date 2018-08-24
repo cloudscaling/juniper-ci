@@ -3,8 +3,8 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
-source $my_dir/../common/functions
-source $my_dir/../common/functions-openstack
+source $my_dir/functions
+source $my_dir/functions-openstack
 
 trap 'catch_errors_ce $LINENO' ERR EXIT
 function catch_errors_ce() {

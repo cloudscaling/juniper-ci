@@ -48,12 +48,27 @@ if [[ "$REGISTRY" == 'build' ]]; then
   $SSH_CMD ${SSH_USER}@$build_ip "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
   set +o pipefail
   run_env="CONTRAIL_REGISTRY=$build_ip:5000 CONTRAIL_VERSION=$CONTRAIL_VERSION REGISTRY_INSECURE=1"
+  CONTRAIL_REGISTRY="$build_ip:5000"
+  CONTRAIL_CONTAINER_TAG="${OPENSTACK_VERSION}-${CONTRAIL_VERSION}"
 elif [[ "$REGISTRY" == 'opencontrailnightly' ]]; then
   run_env="CONTRAIL_REGISTRY=opencontrailnightly CONTRAIL_CONTAINER_TAG=latest REGISTRY_INSECURE=0"
+  CONTRAIL_REGISTRY=opencontrailnightly
+  CONTRAIL_CONTAINER_TAG=latest
 else
   echo "ERROR: unsupported REGISTRY = $REGISTRY"
   exit 1
 fi
+
+# when compute has only one interface dpdk images must be pre-pulled to avoid errors when network is not initialized yet
+for dest in $nodes_comp_ips ; do
+  cat <<EOF | $SSH_CMD ${SSH_USER}@$dest
+docker pull $CONTRAIL_REGISTRY/contrail-vrouter-agent:$CONTRAIL_CONTAINER_TAG
+docker pull $CONTRAIL_REGISTRY/contrail-vrouter-agent-dpdk:$CONTRAIL_CONTAINER_TAG
+docker pull $CONTRAIL_REGISTRY/contrail-vrouter-kernel-init:$CONTRAIL_CONTAINER_TAG
+docker pull $CONTRAIL_REGISTRY/contrail-vrouter-kernel-init-dpdk:$CONTRAIL_CONTAINER_TAG
+docker pull $CONTRAIL_REGISTRY/contrail-vrouter-kernel-build-init:$CONTRAIL_CONTAINER_TAG
+EOF
+done
 
 $SCP "$my_dir/__run-gate.sh" ${SSH_USER}@$master_ip:run-gate.sh
 timeout -s 9 60m $SSH_CMD ${SSH_USER}@$master_ip "$run_env LINUX_DISTR=$LINUX_DISTR AGENT_MODE=$AGENT_MODE ./run-gate.sh"
