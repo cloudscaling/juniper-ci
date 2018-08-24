@@ -368,7 +368,7 @@ rm -rf ~/contrail-tripleo-heat-templates
 git clone https://github.com/${git_repo_ctht}/contrail-tripleo-heat-templates -b $git_branch_tht
 if [[ -n "$THT_PATCHSET" ]] ; then
   pushd contrail-tripleo-heat-templates
-  $THT_PATCHSET
+  bash -c "$THT_PATCHSET"
   popd
 fi
 if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
