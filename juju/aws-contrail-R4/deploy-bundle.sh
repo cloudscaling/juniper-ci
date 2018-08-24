@@ -70,7 +70,7 @@ cleanup_computes
 echo "INFO: Set endpoints $(date)"
 hack_openstack
 echo "INFO: Apply SSL flag if set $(date)"
-apply_ssl
+apply_ssl contrail
 
 echo "INFO: Attach contrail-controller container $(date)"
 juju-attach contrail-controller contrail-controller="$HOME/docker/$image_controller"
