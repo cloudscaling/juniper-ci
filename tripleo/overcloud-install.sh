@@ -314,7 +314,7 @@ else
     git clone https://github.com/${git_repo_ctp}/contrail-tripleo-puppet -b $git_branch_ctp openstack/contrail-tripleo-puppet
     if [[ -n "$PP_PATCHSET" ]] ; then
       pushd openstack/contrail-tripleo-puppet
-      $PP_PATCHSET
+      bash -c "$PP_PATCHSET"
       popd
     fi
     make rpm-contrail-tripleo-puppet
