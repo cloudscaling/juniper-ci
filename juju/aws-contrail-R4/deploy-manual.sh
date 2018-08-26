@@ -171,7 +171,7 @@ fi
 echo "INFO: Update endpoints $(date)"
 hack_openstack
 echo "INFO: Apply SSL flag if set $(date)"
-apply_ssl
+apply_ssl contrail4
 
 echo "INFO: Attach contrail4-controller container $(date)"
 juju-attach contrail4-controller contrail-controller="$HOME/docker/$image_controller"

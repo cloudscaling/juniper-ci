@@ -47,7 +47,7 @@ cleanup_computes
 echo "INFO: Set endpoints $(date)"
 hack_openstack
 echo "INFO: Apply SSL flag if set $(date)"
-apply_ssl
+apply_ssl contrail
 
 post_deploy
 

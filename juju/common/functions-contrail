@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 function apply_ssl() {
+  prefix=$1
   ssl_dir="$WORKSPACE/ssl"
   rm -rf "$ssl_dir"
   mkdir -p "$ssl_dir"
@@ -13,8 +14,8 @@ EOF
 
   create_root_ca
 
-  apply_ssl_os
-  apply_ssl_contrail
+  apply_ssl_os $prefix
+  apply_ssl_contrail $prefix
 }
 
 function create_root_ca() {
@@ -28,6 +29,7 @@ function apply_ssl_os() {
     return
   fi
 
+  prefix=$1  
   # due to bug https://bugs.launchpad.net/charm-neutron-api/+bug/1690912 we'll set only keystone SSL
   #local mchs=("$m1" "$m2" "$m3" "$m4" "$m5")
   #local mch_srvs=('openstack-dashboard' 'glance' 'keystone' 'nova-cloud-controller' 'neutron-api')
@@ -49,7 +51,7 @@ function apply_ssl_os() {
 
   juju-set keystone "use-https=True"
 
-  local srv="contrail-keystone-auth"
+  local srv="${prefix}-keystone-auth"
   local ssl_config="$ssl_dir/ssl_config_$srv.yaml"
   echo "$srv:" > "$ssl_config"
   echo "  ssl_ca: |" >> "$ssl_config"
@@ -92,11 +94,12 @@ function apply_ssl_config_by_addr() {
 }
 
 function apply_ssl_contrail() {
+  prefix=$1
   if [[ "$USE_SSL_CONTRAIL" != "true" ]] ; then
     return
   fi
 
   juju-deploy cs:~containers/$SERIES/easyrsa --to $m4
-  juju-add-relation easyrsa contrail-controller
-  juju-add-relation easyrsa contrail-agent
+  juju-add-relation easyrsa ${prefix}-controller
+  juju-add-relation easyrsa ${prefix}-agent
 }

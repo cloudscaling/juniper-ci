@@ -127,7 +127,7 @@ juju-set contrail-agent physical-interface=$IF2
 detect_machines
 wait_for_machines $m1 $m2 $m3 $m4 $m5
 echo "INFO: Apply SSL flag if set $(date)"
-apply_ssl
+apply_ssl contrail
 
 echo "INFO: Add relations $(date)"
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"

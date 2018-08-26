@@ -196,9 +196,9 @@
       - shell: |
           #!/bin/bash -e
           export SERIES='xenial'
-          if [[ "$VERSION" == "queens" ]] ; then
-            export SERIES='bionic'
-          fi
+          #if [[ "$VERSION" == "queens" ]] ; then
+          #  export SERIES='bionic'
+          #fi
           ./juniper-ci/juju/aws-contrail-R5/deploy-all.sh deploy-$DEPLOY_TYPE.sh
     publishers:
       - archive:
@@ -385,9 +385,9 @@
       - shell: |
           #!/bin/bash -e
           export SERIES='xenial'
-          if [[ "$VERSION" == "queens" ]] ; then
-            export SERIES='bionic'
-          fi
+          #if [[ "$VERSION" == "queens" ]] ; then
+          #  export SERIES='bionic'
+          #fi
           ./juniper-ci/juju/bmc-contrail-R5/deploy_all.sh
     publishers:
       - archive:

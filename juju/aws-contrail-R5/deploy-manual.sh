@@ -146,7 +146,7 @@ fi
 echo "INFO: Update endpoints $(date)"
 hack_openstack
 echo "INFO: Apply SSL flag if set $(date)"
-apply_ssl
+apply_ssl contrail5
 
 echo "INFO: Add relations $(date)"
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
