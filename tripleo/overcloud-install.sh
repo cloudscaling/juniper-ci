@@ -264,6 +264,9 @@ fi
 # this is a recommended command to check and wait end of introspection. but previous command can wait itself.
 #sudo journalctl -l -u openstack-ironic-discoverd -u openstack-ironic-discoverd-dnsmasq -u openstack-ironic-conductor -f
 
+git config --global user.name jenkins.progmaticlab
+git config --global user.email jenkins@progmaticlab.com
+
 # For queens there is no needs to use puppets
 artifact_opts=""
 git_branch_ctp="stable/${OPENSTACK_VERSION}"
