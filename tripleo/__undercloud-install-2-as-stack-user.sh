@@ -103,7 +103,7 @@ function install_images() {
       exit 1
   esac
 
-  local packages_install_dir='/usr/share/rhosp-director-images/'
+  local packages_install_dir='/usr/share/rhosp-director-images'
   tar -xvf $packages_install_dir/overcloud-full-latest-${os_num}.tar
   tar -xvf $packages_install_dir/ironic-python-agent-latest-${os_num}.tar
 }
@@ -120,8 +120,8 @@ else
   else
     install_images
   fi
-  tar -cf images.tar images
   popd
+  tar -cf images.tar images
 fi
 
 source ./stackrc
