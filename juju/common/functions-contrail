@@ -1,7 +1,8 @@
 #!/bin/bash -e
 
 function apply_ssl() {
-  prefix=$1
+  local prefix=$1
+  # next variable should be global
   ssl_dir="$WORKSPACE/ssl"
   rm -rf "$ssl_dir"
   mkdir -p "$ssl_dir"
@@ -29,7 +30,7 @@ function apply_ssl_os() {
     return
   fi
 
-  prefix=$1  
+  local prefix=$1
   # due to bug https://bugs.launchpad.net/charm-neutron-api/+bug/1690912 we'll set only keystone SSL
   #local mchs=("$m1" "$m2" "$m3" "$m4" "$m5")
   #local mch_srvs=('openstack-dashboard' 'glance' 'keystone' 'nova-cloud-controller' 'neutron-api')
@@ -94,7 +95,7 @@ function apply_ssl_config_by_addr() {
 }
 
 function apply_ssl_contrail() {
-  prefix=$1
+  local prefix=$1
   if [[ "$USE_SSL_CONTRAIL" != "true" ]] ; then
     return
   fi
