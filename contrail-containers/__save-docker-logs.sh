@@ -17,11 +17,17 @@ mkdir -p logs
 sudo chown -R $USER logs
 
 if [ -d /etc/contrail ]; then
-  mkdir -p logs/etc
-  cp -R /etc/contrail logs/etc/
-  chown -R $USER logs/etc
+  mkdir -p logs/contrail_etc
+  cp -R /etc/contrail logs/contrail_etc/
+  chown -R $USER logs/contrail_etc
+fi
+if [ -d /etc/kolla ]; then
+  mkdir -p logs/kolla_etc
+  cp -R /etc/kolla logs/kolla_etc/
+  chown -R $USER logs/kolla_etc
 fi
 
+ls -l /var/lib/docker/volumes/
 kl_path='/var/lib/docker/volumes/kolla_logs/_data'
 if [ -d $kl_path ]; then
   mkdir -p logs/kolla_logs
@@ -32,16 +38,22 @@ if [ -d $kl_path ]; then
   chmod -R a+rw logs/kolla_logs
 fi
 
+cl_path='/var/log/contrail'
+if [ -d $cl_path ]; then
+  mkdir -p logs/contrail_logs
+  for ii in `ls $cl_path/`; do
+    cp -R "$cl_path/$ii" logs/contrail_logs/
+  done
+  chown -R $USER logs/contrail_logs
+  chmod -R a+rw logs/contrail_logs
+fi
+
 mkdir -p logs/contrail
 pushd logs/contrail
 for cnt in `sudo docker ps | grep contrail | grep -v pause | awk '{print $1}'` ; do
   cnt_name=`sudo docker inspect $cnt | python -c "import json, sys; data=json.load(sys.stdin); print data[0]['Name']" | cut -d '_' -f $CNT_NAME_PATTERN | sed "s|/||g"`
   echo "Collecting files from $cnt_name"
   mkdir -p "$cnt_name"
-  sudo docker cp $cnt:/var/log/contrail $cnt_name/
-  sudo chown -R $USER $cnt_name
-  mv $cnt_name/contrail/* $cnt_name/
-  rm -rf $cnt_name/contrail
   sudo docker cp $cnt:/etc/contrail $cnt_name/
   sudo chown -R $USER $cnt_name
   mv $cnt_name/contrail $cnt_name/etc
