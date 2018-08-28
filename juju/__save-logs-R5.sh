@@ -38,7 +38,7 @@ DL='docker-logs'
 mkdir -p "$DL"
 pushd "$DL"
 for cnt in `sudo docker ps -a | grep contrail | grep -v pause | awk '{print $1}'` ; do
-  cnt_name=`sudo docker inspect $cnt | python -c "import json, sys; data=json.load(sys.stdin); print data[0]['Name']"`
+  cnt_name=`sudo docker inspect $cnt | python -c "import json, sys; data=json.load(sys.stdin); print data[0]['Name']" | sed "s|/||g"`
 
   echo "Collecting files from $cnt_name"
   mkdir -p "$cnt_name"
