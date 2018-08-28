@@ -56,6 +56,7 @@ for cnt in `sudo docker ps -a | grep contrail | grep -v pause | awk '{print $1}'
   sudo docker logs $cnt &> $cnt_name/docker.log
 done
 popd
+tar -rf logs.tar $DL 2>/dev/null
 
 function save_introspect_info() {
   if ! lsof -i ":$2" &>/dev/null ; then
@@ -65,6 +66,7 @@ function save_introspect_info() {
   timeout -s 9 30 curl $ssl_opts -s ${proto}://localhost:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - | grep -P "state|<type|<status" > $1-introspect.log
   echo '' >> $1-introspect.log
   timeout -s 9 30 curl $ssl_opts -s ${proto}://localhost:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - >> $1-introspect.log
+  tar -rf logs.tar $1-introspect.log 2>/dev/null
 }
 
 save_introspect_info HttpPortConfigNodemgr 8100
@@ -87,6 +89,5 @@ save_introspect_info HttpPortDns 8092
 save_introspect_info HttpPortAlarmGenerator 5995
 save_introspect_info HttpPortSnmpCollector 5920
 save_introspect_info HttpPortTopology 5921
-
 
 gzip logs.tar
