@@ -1,5 +1,7 @@
 #!/bin/bash
 
+sudo apt-get install -fy libxml2-utils &>/dev/null
+
 proto='http'
 if [[ "${USE_SSL_CONTRAIL,,}" == 'true' ]] ; then
   proto='https'
