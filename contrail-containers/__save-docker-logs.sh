@@ -60,9 +60,9 @@ for cnt in `sudo docker ps | grep contrail | grep -v pause | awk '{print $1}'` ;
 done
 for cnt in `sudo docker ps -a | grep contrail | grep -v pause | awk '{print $1}'` ; do
   cnt_name=`sudo docker inspect $cnt | python -c "import json, sys; data=json.load(sys.stdin); print data[0]['Name']" | cut -d '_' -f $CNT_NAME_PATTERN | sed "s|/||g"`
-  mkdir -p "$cnt_name"
-  sudo docker inspect $cnt > $cnt_name/inspect.log
-  sudo docker logs $cnt &> $cnt_name/docker.log
+  mkdir -p "$cnt_name-$cnt"
+  sudo docker inspect $cnt > $cnt_name-$cnt/inspect.log
+  sudo docker logs $cnt &> $cnt_name-$cnt/docker.log
 done
 popd
 
