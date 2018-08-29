@@ -5,6 +5,7 @@ my_dir="$(dirname $my_file)"
 source "$my_dir/../common/functions"
 source "$my_dir/functions"
 
+log_dir="$WORKSPACE/logs"
 BUNDLE="$my_dir/openstack-contrail-amazon.yaml"
 
 trap 'catch_errors_ce $LINENO' ERR EXIT
@@ -56,6 +57,7 @@ else
 fi
 sed -i -e "s|%AUTH_MODE%|$AAA_MODE|m" $BUNDLE
 sed -i "s/\r/\n/g" $BUNDLE
+cp $BUNDLE "$log_dir/"
 
 echo "INFO: Deploy bundle $(date)"
 juju-deploy-bundle $BUNDLE
