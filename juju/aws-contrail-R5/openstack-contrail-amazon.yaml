@@ -101,7 +101,7 @@ services:
     options:
       log-level: "SYS_DEBUG"
       auth-mode: "%AUTH_MODE%"
-      cassandra-minimum-diskgb: 4
+      cassandra-minimum-diskgb: "4"
       cassandra-jvm-extra-opts: "-Xms1g -Xmx2g"
     expose: true
     to:
@@ -112,7 +112,7 @@ services:
     num_units: 1
     options:
       log-level: "SYS_DEBUG"
-      cassandra-minimum-diskgb: 4
+      cassandra-minimum-diskgb: "4"
       cassandra-jvm-extra-opts: "-Xms1g -Xmx2g"
     expose: true
     to:
