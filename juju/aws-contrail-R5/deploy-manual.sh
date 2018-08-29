@@ -103,9 +103,9 @@ juju-deploy $PLACE/contrail-keystone-auth contrail5-keystone-auth --to $m6
 
 juju-deploy $PLACE/contrail-controller contrail5-controller --to $m6
 juju-expose contrail5-controller
-juju-set contrail5-controller auth-mode=$AAA_MODE "log-level=SYS_DEBUG" cassandra-minimum-diskgb="4"
+juju-set contrail5-controller auth-mode=$AAA_MODE "log-level=SYS_DEBUG" cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
 juju-deploy $PLACE/contrail-analyticsdb contrail5-analyticsdb --to $m6
-juju-set contrail5-analyticsdb "log-level=SYS_DEBUG" cassandra-minimum-diskgb="4"
+juju-set contrail5-analyticsdb "log-level=SYS_DEBUG" cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
 juju-deploy $PLACE/contrail-analytics contrail5-analytics --to $m6
 juju-set contrail5-analytics "log-level=SYS_DEBUG"
 juju-expose contrail5-analytics
