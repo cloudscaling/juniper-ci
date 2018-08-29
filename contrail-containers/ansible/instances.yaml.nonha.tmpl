@@ -9,11 +9,7 @@ instances:
   ip: ${IP_VM_01}
   provider: bms
   roles:
-     openstack_control: null
-     openstack_network: null
-     openstack_monitoring: null
-     openstack_storage: null
-#     openstack: null
+     openstack: null
      analytics: null
      analytics_database: null
      config: null
@@ -47,6 +43,7 @@ contrail_configuration:
  SSL_ENABLE: ${SSL_ENABLE}
  JVM_EXTRA_OPTS: "-Xms1g -Xmx2g"
  LOG_LEVEL: SYS_DEBUG
+ AGENT_MODE: ${AGENT_MODE}
 
 kolla_config:
  kolla_globals:
