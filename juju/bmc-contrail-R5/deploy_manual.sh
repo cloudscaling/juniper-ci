@@ -87,11 +87,11 @@ juju-deploy $PLACE/contrail-keystone-auth --to lxd:$cont1
 
 juju-deploy $PLACE/contrail-controller --to $cont1
 juju-expose contrail-controller
-juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4"
+juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4" docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 juju-deploy $PLACE/contrail-analyticsdb --to $cont1
-juju-set contrail-analyticsdb cassandra-minimum-diskgb="4"
+juju-set contrail-analyticsdb cassandra-minimum-diskgb="4" docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 juju-deploy $PLACE/contrail-analytics --to $cont1
-juju-set contrail-analytics
+juju-set contrail-analytics docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 juju-expose contrail-analytics
 
 if [ "$DEPLOY_MODE" == 'ha' ] ; then
@@ -104,11 +104,12 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
 fi
 
 juju-deploy $PLACE/contrail-openstack
+juju-set contrail-openstack docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 juju-deploy $PLACE/contrail-agent
+juju-set contrail-agent physical-interface=$IF2 docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 if [[ "$USE_DPDK" == "true" ]] ; then
   juju-set contrail-agent dpdk=True dpdk-coremask=1,2 dpdk-main-mempool-size=16384
 fi
-juju-set contrail-agent physical-interface=$IF2
 
 #if [ "$DEPLOY_MODE" == 'ha' ] ; then
 #  juju-deploy cs:~boucherv29/keepalived-19

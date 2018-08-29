@@ -381,6 +381,16 @@
       - string:
           name: CHARMS_BRANCH
           default: 'R5'
+      - string:
+          name: CONTAINER_REGISTRY
+          default: opencontrailnightly
+      - string:
+          name: CONTRAIL_VERSION
+          default: latest
+      - string:
+          name: DOCKER_USERNAME
+      - string:
+          name: DOCKER_PASSWORD
     scm:
       - juniper-contrail-charms-branch
       - juniper-ci
