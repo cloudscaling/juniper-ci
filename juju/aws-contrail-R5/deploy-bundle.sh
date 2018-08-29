@@ -35,7 +35,6 @@ sed -i -e "s/%SERIES%/$SERIES/m" $BUNDLE
 sed -i -e "s/%OPENSTACK_ORIGIN%/$OPENSTACK_ORIGIN/m" $BUNDLE
 sed -i -e "s/%PASSWORD%/$PASSWORD/m" $BUNDLE
 sed -i -e "s|%JUJU_REPO%|$JUJU_REPO|m" $BUNDLE
-sed -i -e "s|%USE_EXTERNAL_RABBITMQ%|false|m" $BUNDLE
 sed -i -e "s|%AUTH_MODE%|$AAA_MODE|m" $BUNDLE
 sed -i "s/\r/\n/g" $BUNDLE
 cp $BUNDLE "$log_dir/"

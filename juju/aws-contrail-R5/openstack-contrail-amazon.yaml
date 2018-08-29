@@ -134,7 +134,6 @@ services:
     series: %SERIES%
     options:
       log-level: "SYS_DEBUG"
-%REPO_KEY%
 
 
 relations:
