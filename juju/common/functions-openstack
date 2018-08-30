@@ -253,18 +253,14 @@ function run_os_checks() {
   echo ''
 
   sleep 5
-  set -x
   openstack server list
-  set +x
-
   openstack catalog list || keystone catalog || /bin/true
-  deactivate_venv
-
   if [[ $ret == 0 ]]; then
     openstack floating ip delete 10.5.0.10
     openstack floating ip delete 10.5.0.11
     #delete_network $netsfx
   fi
+  deactivate_venv
 
   return $ret
 }
