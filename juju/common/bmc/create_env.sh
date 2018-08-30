@@ -38,6 +38,9 @@ function run_machine() {
 
   if [[ $SERIES == 'xenial' ]] ; then
     local osv='ubuntu16.04'
+  elif [[ $SERIES == 'bionic' ]] ; then
+    # 18.04 is not in osinfo db yet. https://bugs.launchpad.net/ubuntu/+source/virt-manager/+bug/1770206
+    local osv='ubuntu16.04'
   else
     local osv='ubuntu14.04'
   fi
