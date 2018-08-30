@@ -46,13 +46,15 @@ instances:
     provider: bms
     roles:
       k8s_node: null
-      vrouter: null
+      vrouter:
+        AGENT_MODE: ${AGENT_MODE}
   server5:
     ip: ${IP_COMP_02}
     provider: bms
     roles:
       k8s_node: null
-      vrouter: null
+      vrouter:
+        AGENT_MODE: ${AGENT_MODE}
 
 global_configuration:
  REGISTRY_PRIVATE_INSECURE: True
@@ -66,4 +68,3 @@ contrail_configuration:
  JVM_EXTRA_OPTS: "-Xms1g -Xmx2g"
  LOG_LEVEL: SYS_DEBUG
  CLOUD_ORCHESTRATOR: kubernetes
- AGENT_MODE: ${AGENT_MODE}
