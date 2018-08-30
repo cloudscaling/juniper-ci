@@ -216,6 +216,8 @@ global:
     CONFIG_DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
     DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
     VROUTER_GATEWAY: 10.$((NET_BASE_PREFIX+1)).$JOB_RND.1
+manifests:
+  configmap_vrouter_dpdk: true
 EOF
 
 helm install --name contrail-thirdparty ${CHD_PATH}/contrail-thirdparty --namespace=contrail --values=/tmp/contrail.yaml
