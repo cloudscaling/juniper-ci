@@ -54,18 +54,18 @@ fi
 source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
 IP_VM_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
+IP1_CONT_01=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 1`
+IP2_CONT_01=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 1`
 if [[ "$HA" == 'ha' ]] ; then
   IP_VM_02=`echo $nodes_cont_ips | cut -d ' ' -f 2`
   IP_VM_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
 
-  IP1_CONT_01=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 1`
   IP1_CONT_02=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 2`
   IP1_CONT_03=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 3`
 
   I_VIP=10.$((NET_BASE_PREFIX+1)).$JOB_RND.254
   E_VIP=10.$NET_BASE_PREFIX.$JOB_RND.254
 
-  IP2_CONT_01=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 1`
   IP2_CONT_02=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 2`
   IP2_CONT_03=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 3`
 fi
