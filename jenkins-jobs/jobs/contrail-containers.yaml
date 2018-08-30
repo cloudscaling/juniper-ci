@@ -32,7 +32,7 @@
       - choice:
           name: AGENT_MODE
           choices:
-            - kmod
+            - kernel
             - dpdk
       - choice:
           name: TLS
