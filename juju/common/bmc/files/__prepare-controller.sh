@@ -30,7 +30,7 @@ EOF
 }
 
 function do_xenial() {
-  IF1=ens0
+  IF1=ens3
   cat >/etc/network/interfaces.d/50-cloud-init.cfg <<EOF
 # This file is generated from information provided by
 # the datasource.  Changes to it will not persist across an instance.
@@ -57,6 +57,8 @@ EOF
 
 function do_bionic() {
   IF1=ens3
+  rm /etc/resolv.conf
+  ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
 }
 
 apt-get -fy install bridge-utils &>>apt.log
@@ -68,4 +70,4 @@ if [[ "$prepare_for_openstack" == '1' ]]; then
   sed -i -e "s/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-$IF1\"/m" /etc/default/lxd-bridge
 fi
 
-juju-ssh $mch "echo 'supersede routers $main_net_prefix.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
+echo "supersede routers $main_net_prefix.1;" >> /etc/dhcp/dhclient.conf

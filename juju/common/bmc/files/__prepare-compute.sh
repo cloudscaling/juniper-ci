@@ -53,7 +53,8 @@ EOF
 }
 
 function do_bionic() {
-  :
+  rm /etc/resolv.conf
+  ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
 }
 
 series=`lsb_release -cs`
@@ -68,4 +69,4 @@ fi
 apt-get -fy install $dpdk_req dpdk apparmor-profiles &>>apt.log
 
 # this should be done for first interface!
-echo "supersede routers $main_net_prefix.1;" | sudo tee -a /etc/dhcp/dhclient.conf
+echo "supersede routers $main_net_prefix.1;" >> /etc/dhcp/dhclient.conf
