@@ -53,6 +53,7 @@ EOF
 }
 
 function do_bionic() {
+  :
 }
 
 series=`lsb_release -cs`
