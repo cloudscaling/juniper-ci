@@ -55,13 +55,19 @@ EOF
 function do_bionic() {
   rm /etc/resolv.conf
   ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+  apt-get install ifupdown &>>apt.log
+  echo "source /etc/network/interfaces.d/*" >> /etc/network/interfaces
+  do_xenial
+  mv /etc/netplan/50-cloud-init.yaml /etc/netplan/__50-cloud-init.yaml.save
 }
+
+echo "network: {config: disabled}" > /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
 
 series=`lsb_release -cs`
 do_$series
 
 kernel_version=`uname -r | tr -d '\r'`
-if [[ "$SERIES" == 'bionic' ]]; then
+if [[ "$series" == 'bionic' ]]; then
   dpdk_req="linux-modules-extra-$kernel_version"
 else
   dpdk_req="linux-image-extra-$kernel_version"
