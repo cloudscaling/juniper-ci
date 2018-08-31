@@ -72,6 +72,10 @@ juju-deploy cs:$SERIES/keystone --to lxd:$cont0
 juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "preferred-api-version=3"
 juju-expose keystone
 
+juju-deploy cs:$SERIES/heat --to lxd:$cont0
+juju-set heat "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+juju-expose heat
+
 juju-deploy cs:$SERIES/nova-compute --to $comp1
 juju-add-unit nova-compute --to $comp2
 juju-set nova-compute "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "virt-type=kvm" "enable-resize=True" "enable-live-migration=True" "migration-auth-type=ssh"
@@ -135,6 +139,9 @@ juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
 juju-add-relation "keystone:shared-db" "mysql:shared-db"
 juju-add-relation "glance:shared-db" "mysql:shared-db"
 juju-add-relation "keystone:identity-service" "glance:identity-service"
+juju-add-relation "heat:shared-db" "mysql:shared-db"
+juju-add-relation "heat:amqp" "rabbit-server:amqp"
+juju-add-relation "heat" "keystone"
 juju-add-relation "nova-cloud-controller:image-service" "glance:image-service"
 juju-add-relation "nova-cloud-controller:identity-service" "keystone:identity-service"
 juju-add-relation "nova-cloud-controller:cloud-compute" "nova-compute:cloud-compute"
@@ -161,6 +168,7 @@ juju-add-relation "contrail-analytics" "contrail-analyticsdb"
 
 juju-add-relation "contrail-openstack" "neutron-api"
 juju-add-relation "contrail-openstack" "nova-compute"
+#juju-add-relation "contrail-openstack" "heat"
 juju-add-relation "contrail-openstack" "contrail-controller"
 
 juju-add-relation "contrail-agent:juju-info" "nova-compute:juju-info"
