@@ -71,8 +71,13 @@ echo "network: {config: disabled}" > /etc/cloud/cloud.cfg.d/99-disable-network-c
 series=`lsb_release -cs`
 do_$series
 if [[ "$prepare_for_openstack" == '1' ]]; then
-  sed -i -e "s/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m" /etc/default/lxd-bridge
-  sed -i -e "s/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-$IF1\"/m" /etc/default/lxd-bridge
+  if [ -f /etc/default/lxd-bridge ]; then
+    sed -i -e "s/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m" /etc/default/lxd-bridge
+    sed -i -e "s/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-$IF1\"/m" /etc/default/lxd-bridge
+  else
+    echo "USE_LXD_BRIDGE=\"false\"" > /etc/default/lxd-bridge
+    echo "LXD_BRIDGE=\"br-$IF1\"/m" >> /etc/default/lxd-bridge
+  fi
 fi
 
 echo "supersede routers $main_net_prefix.1;" >> /etc/dhcp/dhclient.conf
