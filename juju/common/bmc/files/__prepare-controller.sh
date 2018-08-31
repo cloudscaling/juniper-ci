@@ -8,7 +8,6 @@ function do_trusty() {
   if [[ "$prepare_for_openstack" == '1' ]]; then
     add-apt-repository -y cloud-archive:mitaka &>>apt.log
     apt-get update &>>apt.log
-    apt-get install -fy lxd &>>apt.log
   fi
   cat >/etc/network/interfaces.d/50-cloud-init.cfg <<EOF
 # The primary network interface
@@ -65,7 +64,7 @@ function do_bionic() {
   mv /etc/netplan/50-cloud-init.yaml /etc/netplan/__50-cloud-init.yaml.save
 }
 
-DEBIAN_FRONTEND=noninteractive apt-get -fy install bridge-utils &>>apt.log
+DEBIAN_FRONTEND=noninteractive apt-get -fy install bridge-utils lxd &>>apt.log
 
 echo "network: {config: disabled}" > /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
 
