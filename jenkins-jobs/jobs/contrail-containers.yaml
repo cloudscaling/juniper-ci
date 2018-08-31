@@ -87,7 +87,7 @@
           fi
           # only centos images are supported now and thus only one archive with rpm-s is needed
           export LINUX_DISTR=centos
-          export CONTRAIL_VERSION='5.1.0-262'
+          export CONTRAIL_VERSION='5.1.0-264'
           export CONTRAIL_INSTALL_PACKAGES_URL="https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_"$CONTRAIL_VERSION"-"$LINUX_DISTR"-"$OPENSTACK_VERSION".tgz"
 
           export WAY=$(echo {project} | cut -d '-' -f 1)
