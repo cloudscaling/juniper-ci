@@ -132,14 +132,8 @@ function run_compute() {
   mch=`get_machine_by_ip $ip`
 
   echo "INFO: preparing compute $index $(date)"
-  kernel_version=`juju-ssh $mch uname -r 2>/dev/null | tr -d '\r'`
-  if [[ "$SERIES" == 'trusty' ]]; then
-    juju-ssh ubuntu@$ip "sudo add-apt-repository -y cloud-archive:mitaka ; sudo apt-get update" &>>$log_dir/apt.log
-  fi
-  juju-ssh $mch "sudo apt-get -fy install linux-image-extra-$kernel_version dpdk apparmor-profiles" &>>$log_dir/apt.log
-  juju-scp "$my_dir/files/50-cloud-init-compute-$SERIES.cfg" $mch:50-cloud-init.cfg 2>/dev/null
-  juju-scp "$my_dir/files/__prepare-network.sh" $mch:prepare-network.sh 2>/dev/null
-  juju-ssh $mch "./prepare-network.sh $addr $ip2" 2>/dev/null
+  juju-scp "$my_dir/files/__prepare-compute.sh" $mch:prepare-compute.sh 2>/dev/null
+  juju-ssh $mch "sudo ./prepare-compute.sh $addr $ip2" 2>/dev/null
   juju-ssh $mch "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $mch juju-ssh
 }
@@ -156,21 +150,8 @@ function run_controller() {
   mch=`get_machine_by_ip $ip`
 
   echo "INFO: preparing controller $index $(date)"
-  juju-ssh $mch "sudo apt-get -fy install bridge-utils" &>>$log_dir/apt.log
-  if [[ "$prepare_for_openstack" == '1' ]]; then
-    if [[ "$SERIES" == 'trusty' ]]; then
-      juju-ssh $mch "sudo add-apt-repository -y cloud-archive:mitaka ; sudo apt-get update ; sudo apt-get install -fy lxd" &>>$log_dir/apt.log
-    fi
-    juju-ssh $mch "sudo sed -i -e 's/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m' /etc/default/lxd-bridge" 2>/dev/null
-    juju-ssh $mch "sudo sed -i -e 's/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-$IF1\"/m' /etc/default/lxd-bridge" 2>/dev/null
-  fi
-  juju-scp "$my_dir/files/50-cloud-init-controller-$SERIES.cfg" $mch:50-cloud-init.cfg 2>/dev/null
-  juju-ssh $mch "sudo cp ./50-cloud-init.cfg /etc/network/interfaces.d/50-cloud-init.cfg" 2>/dev/null
-  if [[ "$SERIES" == 'trusty' ]]; then
-    # '50-cloud-init.cfg' is default name for xenial and it is overwritten
-    juju-ssh $mch "sudo rm /etc/network/interfaces.d/eth0.cfg" 2>/dev/null
-  fi
-  juju-ssh $mch "echo 'supersede routers $addr.1;' | sudo tee -a /etc/dhcp/dhclient.conf"
+  juju-scp "$my_dir/files/__prepare-controller.sh" $mch:prepare-controller.sh 2>/dev/null
+  juju-ssh $mch "sudo ./prepare-controller.sh $addr $prepare_for_openstack" 2>/dev/null
   juju-ssh $mch "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $mch juju-ssh
 

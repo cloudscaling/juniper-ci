@@ -37,11 +37,11 @@ export AAA_MODE=${AAA_MODE:-rbac}
 
 export PASSWORD=${PASSWORD:-'password'}
 
-if [[ "$SERIES" == 'xenial' ]]; then
+if [[ "$SERIES" == 'xenial' || "$SERIES" == 'bionic' ]]; then
   export IF1='ens3'
   export IF2='ens4'
 else
-  echo "ERROR: only xenial is supported now"
+  echo "ERROR: only xenial/bionic is supported now"
   exit 1
 fi
 
