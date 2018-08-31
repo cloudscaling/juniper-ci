@@ -72,7 +72,7 @@ if [[ "$series" == 'bionic' ]]; then
 else
   dpdk_req="linux-image-extra-$kernel_version"
 fi
-apt-get -fy install $dpdk_req dpdk apparmor-profiles &>>apt.log
+DEBIAN_FRONTEND=noninteractive apt-get -fy install $dpdk_req dpdk apparmor-profiles &>>apt.log
 
 # this should be done for first interface!
 echo "supersede routers $main_net_prefix.1;" >> /etc/dhcp/dhclient.conf

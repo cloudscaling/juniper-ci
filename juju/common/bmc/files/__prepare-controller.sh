@@ -65,7 +65,7 @@ function do_bionic() {
   mv /etc/netplan/50-cloud-init.yaml /etc/netplan/__50-cloud-init.yaml.save
 }
 
-apt-get -fy install bridge-utils &>>apt.log
+DEBIAN_FRONTEND=noninteractive apt-get -fy install bridge-utils &>>apt.log
 
 echo "network: {config: disabled}" > /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
 
