@@ -147,21 +147,21 @@ function check_simple_instance() {
 function check_two_instances() {
   echo "INFO: test ping VM from VM via underlay"
   local net_id=`openstack network show demo-net -f value -c id`
-  openstack server create --image cirros --flavor m1.ms --key-name my_ms_key --nic net-id=$net_id demo1
+  openstack server create --image cirros --flavor m1.ms --key-name my_ms_key --nic net-id=$net_id demo11
   sleep 10
-  openstack server create --image cirros --flavor m1.ms --key-name my_ms_key --nic net-id=$net_id demo2
+  openstack server create --image cirros --flavor m1.ms --key-name my_ms_key --nic net-id=$net_id demo12
   sleep 10
-  openstack server show demo1
-  openstack server show demo2
+  openstack server show demo11
+  openstack server show demo12
 
-  local iip1=`openstack server show demo1 | awk '/addresses/{print $4}' | cut -d '=' -f 2`
-  local hhost1=`openstack server show demo1 | awk '/OS-EXT-SRV-ATTR:hypervisor_hostname/{print $4}'`
-  local iip2=`openstack server show demo2 | awk '/addresses/{print $4}' | cut -d '=' -f 2`
-  local hhost2=`openstack server show demo2 | awk '/OS-EXT-SRV-ATTR:hypervisor_hostname/{print $4}'`
+  local iip1=`openstack server show demo11 | awk '/addresses/{print $4}' | cut -d '=' -f 2`
+  local hhost1=`openstack server show demo11 | awk '/OS-EXT-SRV-ATTR:hypervisor_hostname/{print $4}'`
+  local iip2=`openstack server show demo12 | awk '/addresses/{print $4}' | cut -d '=' -f 2`
+  local hhost2=`openstack server show demo12 | awk '/OS-EXT-SRV-ATTR:hypervisor_hostname/{print $4}'`
   if [[ "$hhost1" == "$hhost2" ]]; then
     echo "WARNING: instances on the same host. test has no sense"
-    openstack server delete demo1
-    openstack server delete demo2
+    openstack server delete demo11
+    openstack server delete demo12
     return
   fi
 
@@ -177,7 +177,7 @@ function check_two_instances() {
 
   $ssh_cmd ssh $ssh_opts cirros@$fip1 ping -c 4 $iip2
 
-  openstack server delete demo1
-  openstack server delete demo2
+  openstack server delete demo11
+  openstack server delete demo12
   sleep 5
 }
