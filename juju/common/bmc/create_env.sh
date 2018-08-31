@@ -133,7 +133,7 @@ function run_compute() {
 
   echo "INFO: preparing compute $index $(date)"
   juju-scp "$my_dir/files/__prepare-compute.sh" $mch:prepare-compute.sh 2>/dev/null
-  juju-ssh $mch "sudo ./prepare-compute.sh $addr $ip2" 2>/dev/null
+  juju-ssh $mch "sudo ./prepare-compute.sh $addr $ip2"
   juju-ssh $mch "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $mch juju-ssh
 }
@@ -151,7 +151,7 @@ function run_controller() {
 
   echo "INFO: preparing controller $index $(date)"
   juju-scp "$my_dir/files/__prepare-controller.sh" $mch:prepare-controller.sh 2>/dev/null
-  juju-ssh $mch "sudo ./prepare-controller.sh $addr $prepare_for_openstack" 2>/dev/null
+  juju-ssh $mch "sudo ./prepare-controller.sh $addr $prepare_for_openstack"
   juju-ssh $mch "sudo reboot" 2>/dev/null || /bin/true
   wait_kvm_machine $mch juju-ssh
 

@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 main_net_prefix=$1
 prepare_for_openstack=$2
