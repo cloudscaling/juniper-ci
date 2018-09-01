@@ -156,7 +156,7 @@ function create_stackrc() {
   echo "export OS_USERNAME=admin" >> $WORKSPACE/stackrc
   echo "export OS_TENANT_NAME=admin" >> $WORKSPACE/stackrc
   echo "export OS_PROJECT_NAME=admin" >> $WORKSPACE/stackrc
-  echo "export OS_PASSWORD=$PASSWORD" >> $WORKSPACE/stackrc
+  echo "export OS_PASSWORD=${PASSWORD:-password}" >> $WORKSPACE/stackrc
 }
 
 function post_deploy() {
