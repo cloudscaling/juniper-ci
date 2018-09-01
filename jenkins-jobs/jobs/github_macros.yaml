@@ -114,6 +114,13 @@
           branch: ${CHARMS_BRANCH}
 
 
+- scm:
+    name: charm-heat
+    scm:
+      - github:
+          organization: openstack
+          repo: charm-heat
+
 # temporary definition while we use unreleased OpenStack charms
 #- scm:
 #    name: github-tmp

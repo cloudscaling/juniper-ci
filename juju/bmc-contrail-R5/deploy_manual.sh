@@ -72,7 +72,7 @@ juju-deploy cs:$SERIES/keystone --to lxd:$cont0
 juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "preferred-api-version=3"
 juju-expose keystone
 
-juju-deploy cs:$SERIES/heat --to lxd:$cont0
+juju-deploy --series=$SERIES $WORKSPACE/charm-heat --to lxd:$cont0
 juju-set heat "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose heat
 
@@ -183,7 +183,7 @@ juju-add-relation "contrail-analytics" "contrail-analyticsdb"
 
 juju-add-relation "contrail-openstack" "neutron-api"
 juju-add-relation "contrail-openstack" "nova-compute"
-#juju-add-relation "contrail-openstack" "heat"
+juju-add-relation "contrail-openstack" "heat"
 juju-add-relation "contrail-openstack" "contrail-controller"
 
 juju-add-relation "contrail-agent:juju-info" "nova-compute:juju-info"
