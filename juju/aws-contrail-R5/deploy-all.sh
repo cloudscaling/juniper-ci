@@ -32,7 +32,11 @@ fi
 export JOB_VERSION=R5
 export SERIES="${SERIES:-xenial}"
 export VERSION="${VERSION:-ocata}"
-export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
+if [[ "$SERIES" == 'bionic' ]]; then
+  export OPENSTACK_ORIGIN="distro"
+else
+  export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
+fi
 export DEPLOY_AS_HA_MODE="${DEPLOY_AS_HA_MODE:-false}"
 export USE_SSL_OS="${USE_SSL_OS:-false}"
 export USE_SSL_CONTRAIL="${USE_SSL_CONTRAIL:-false}"
