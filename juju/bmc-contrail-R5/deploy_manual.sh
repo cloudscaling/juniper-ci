@@ -134,10 +134,21 @@ wait_for_machines $m1 $m2 $m3 $m4 $m5
 echo "INFO: Apply SSL flag if set $(date)"
 apply_ssl contrail
 
+# re-write resolv.conf for bionic lxd containers to allow names resolving inside lxd containers
 if [[ "$SERIES" == 'bionic' ]]; then
+  # let juju spin up all lxd containers
+  sleep 60
   for mmch in `juju machines | awk '/lxd/{print $1}'` ; do
-    wait_for_machines $mmch
-    juju-ssh $mmch "echo 'nameserver $addr.1' | sudo tee /usr/lib/systemd/resolv.conf ; sudo ln -sf /usr/lib/systemd/resolv.conf /etc/resolv.conf"
+    echo "INFO: apply DNS config for $mmch"
+    res=1
+    for i in 0 1 2 3 4 5 ; do
+      if juju-ssh $mmch "echo 'nameserver $addr.1' | sudo tee /usr/lib/systemd/resolv.conf ; sudo ln -sf /usr/lib/systemd/resolv.conf /etc/resolv.conf" ; then
+        res=0
+        break
+      fi
+      sleep 10
+    done
+    test $res -eq 0 || { echo "ERROR: Machine $mmch is not accessible"; exit 1; }
   done
 fi
 
