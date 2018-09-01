@@ -136,8 +136,6 @@ apply_ssl contrail
 
 # re-write resolv.conf for bionic lxd containers to allow names resolving inside lxd containers
 if [[ "$SERIES" == 'bionic' ]]; then
-  # let juju spin up all lxd containers
-  sleep 60
   for mmch in `juju machines | awk '/lxd/{print $1}'` ; do
     echo "INFO: apply DNS config for $mmch"
     res=1
