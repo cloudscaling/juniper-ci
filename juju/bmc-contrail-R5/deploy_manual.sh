@@ -134,6 +134,13 @@ wait_for_machines $m1 $m2 $m3 $m4 $m5
 echo "INFO: Apply SSL flag if set $(date)"
 apply_ssl contrail
 
+if [[ "$SERIES" == 'bionic' ]]; then
+  for mmch in `juju machines | awk '/lxd/{print $1}'` ; do
+    wait_for_machines $mmch
+    juju-ssh $mmch "echo 'nameserver $addr.1' | sudo tee /usr/lib/systemd/resolv.conf ; sudo ln -sf /usr/lib/systemd/resolv.conf /etc/resolv.conf"
+  done
+fi
+
 echo "INFO: Add relations $(date)"
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
 juju-add-relation "keystone:shared-db" "mysql:shared-db"
@@ -157,7 +164,6 @@ juju-add-relation "neutron-api:identity-service" "keystone:identity-service"
 juju-add-relation "neutron-api:amqp" "rabbitmq-server:amqp"
 
 juju-add-relation "contrail-controller" "ntp"
-juju-add-relation "neutron-api" "ntp"
 juju-add-relation "nova-compute:juju-info" "ntp:juju-info"
 
 juju-add-relation "contrail-controller" "contrail-keystone-auth"
