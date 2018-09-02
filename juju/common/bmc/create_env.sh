@@ -118,7 +118,7 @@ function run_cloud_machine() {
   juju-ssh $mch "sudo rm -rf /etc/systemd/system/cloud-init.target.wants /lib/systemd/system/cloud*"
   juju-ssh $mch "sudo apt-get -y purge unattended-upgrades" &>>$log_dir/apt.log
   juju-ssh $mch "sudo apt-get update" &>>$log_dir/apt.log
-  juju-ssh $mch "DEBIAN_FRONTEND=noninteractive sudo -E apt-get -fy -o Dpkg::Options::='--force-confnew' upgrade" &>>$logs_dir/apt.log
+  juju-ssh $mch "DEBIAN_FRONTEND=noninteractive sudo -E apt-get -fy -o Dpkg::Options::='--force-confnew' upgrade" &>>$log_dir/apt.log
   juju-ssh $mch "sudo apt-get install -fy libxml2-utils mc wget" &>>$log_dir/apt.log
 
   echo "INFO: machine $name (juju machine: $mch) is ready $(date)"
