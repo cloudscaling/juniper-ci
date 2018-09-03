@@ -115,19 +115,19 @@ if [[ "$USE_DPDK" == "true" ]] ; then
   juju-set contrail-agent dpdk=True dpdk-coremask=1,2 dpdk-main-mempool-size=16384
 fi
 
-#if [ "$DEPLOY_MODE" == 'ha' ] ; then
-#  juju-deploy cs:~boucherv29/keepalived-19
-#  juju-deploy cs:$SERIES/haproxy --to $cont1
-#  juju-add-unit haproxy --to $cont2
-#  juju-add-unit haproxy --to $cont3
-#  juju-expose haproxy
-#  juju-add-relation haproxy keepalived
+if [ "$DEPLOY_MODE" == 'ha' ] ; then
+  juju-deploy cs:~boucherv29/keepalived-19
+  juju-deploy cs:$SERIES/haproxy --to $cont1
+  juju-add-unit haproxy --to $cont2
+  juju-add-unit haproxy --to $cont3
+  juju-expose haproxy
+  juju-add-relation haproxy:juju-info keepalived:juju-info
 #  juju-add-relation "contrail-analytics" "haproxy"
-#  juju-add-relation "contrail-controller:http-services" "haproxy"
-#  juju-add-relation "contrail-controller:https-services" "haproxy"
-#  juju-set contrail-controller vip=$addr.254
-#  juju-set keepalived virtual_ip=$addr.254
-#fi
+  juju-add-relation "contrail-controller:http-services" "haproxy"
+  juju-add-relation "contrail-controller:https-services" "haproxy"
+  juju-set contrail-controller vip=$addr.254
+  juju-set keepalived virtual_ip=$addr.254
+fi
 
 detect_machines
 wait_for_machines $m1 $m2 $m3 $m4 $m5
