@@ -372,6 +372,8 @@ function check_instance_simple() {
       _check_instance_ssh_and_metadata $mch $lip $fip || ret=1
     else
       echo "ERROR: Couldn't find new route 169.254.0.*"
+      juju ssh $mch "$curl_cmd" 2>/dev/null | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'
+      echo "ERROR: full output from intospect port:"
       juju ssh $mch "$curl_cmd" | xmllint --format -
       ret=1
     fi
