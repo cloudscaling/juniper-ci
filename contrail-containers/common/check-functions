@@ -77,6 +77,11 @@ function get_ssh_cmd() {
 
 function get_link_local_ip() {
   local iip=$1
+
+  if [[ "$USE_DPDK" == "true" ]]; then
+    $ssh_cmd 'printf "[DEFAULT]\nplatform=dpdk\n" > contrail-vrouter-agent.conf' 2>/dev/null
+    $ssh_cmd 'sudo mkdir -p /etc/contrail ; sudo cp -f contrail-vrouter-agent.conf /etc/contrail/' 2>/dev/null
+  fi
   local if_name=`$ssh_cmd sudo vif --list 2>/dev/null| grep -B 1 $iip | awk '/^vif/{print $NF}'`
 
   local curl_proto='http'
