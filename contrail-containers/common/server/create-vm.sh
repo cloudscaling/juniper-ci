@@ -268,7 +268,11 @@ done
 
 if [[ $AGENT_MODE == 'dpdk' ]]; then
   for ip in ${ips_comp[@]} ; do
-    ssh $SSH_OPTS root@${ip} "sed -i 's/ttyS0/ttyS0 default_hugepagesz=2M hugepagesz=2M hugepages=2048/g' /boot/grub/grub.cfg"
+    if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
+      ssh $SSH_OPTS root@${ip} "sed -i 's/tty0 /tty0 default_hugepagesz=2M hugepagesz=2M hugepages=2048 /g' /boot/grub2/grub.cfg"
+    else
+      ssh $SSH_OPTS root@${ip} "sed -i 's/ttyS0/ttyS0 default_hugepagesz=2M hugepagesz=2M hugepages=2048/g' /boot/grub/grub.cfg"
+    fi
   done
 fi
 
