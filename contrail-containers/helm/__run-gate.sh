@@ -216,7 +216,6 @@ global:
     CONFIG_DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
     DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
     VROUTER_GATEWAY: 10.$((NET_BASE_PREFIX+1)).$JOB_RND.1
-    HUGE_PAGES: "2048"
     VROUTER_ENCRYPTION: FALSE
 manifests:
   configmap_vrouter_dpdk: true

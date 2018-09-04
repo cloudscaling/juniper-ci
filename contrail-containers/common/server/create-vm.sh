@@ -263,10 +263,18 @@ pip install pip --upgrade &>>$logs_dir/pip.log
 hash -r
 pip install setuptools &>>$logs_dir/pip.log
 EOF
+done
 
+
+if [[ $AGENT_MODE == 'dpdk' ]]; then
+  for ip in ${ips_comp[@]} ; do
+    ssh $SSH_OPTS root@${ip} "sed -i 's/ttyS0/ttyS0 default_hugepagesz=2M hugepagesz=2M hugepages=2048/g' /boot/grub/grub.cfg"
+  done
+fi
+
+for ip in ${ips[@]} ; do
   # reboot node
   ssh $SSH_OPTS root@${ip} reboot || /bin/true
-
 done
 
 for ip in ${ips[@]} ; do
