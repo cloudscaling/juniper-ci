@@ -44,7 +44,7 @@ function prepare_openstack() {
   if ! openstack flavor show m1.ms &>/dev/null ; then
     openstack flavor create --disk 1 --vcpus 1 --ram 128 m1.ms >/dev/null
   fi
-  if [[ "$USE_DPDK" == "true" ]]; then
+  if [[ "$AGENT_MODE" == "dpdk" ]]; then
     openstack flavor set --property hw:mem_page_size=any m1.ms
   fi
 
@@ -77,7 +77,7 @@ function get_ssh_cmd() {
 
 function prepare_for_ssh() {
   set -x
-  if [[ "$USE_DPDK" == "true" ]]; then
+  if [[ "$AGENT_MODE" == "dpdk" ]]; then
     $ssh_cmd 'printf "[DEFAULT]\nplatform=dpdk\n" > ./contrail-vrouter-agent.conf' 2>/dev/null
     $ssh_cmd 'sudo mkdir -p /etc/contrail ; sudo cp -f ./contrail-vrouter-agent.conf /etc/contrail/' 2>/dev/null
   fi
