@@ -76,12 +76,10 @@ function get_ssh_cmd() {
 }
 
 function prepare_for_ssh() {
-  set -x
   if [[ "$AGENT_MODE" == "dpdk" ]]; then
     $ssh_cmd 'printf "[DEFAULT]\nplatform=dpdk\n" > ./contrail-vrouter-agent.conf' 2>/dev/null
     $ssh_cmd 'sudo mkdir -p /etc/contrail ; sudo cp -f ./contrail-vrouter-agent.conf /etc/contrail/' 2>/dev/null
   fi
-  set +x
 }
 
 function get_link_local_ip() {
