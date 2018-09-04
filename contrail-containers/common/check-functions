@@ -126,6 +126,10 @@ function check_simple_instance() {
   openstack server show demo1
   local iip=`openstack server show demo1 | awk '/addresses/{print $4}' | cut -d '=' -f 2`
   local hhost=`openstack server show demo1 | awk '/OS-EXT-SRV-ATTR:hypervisor_hostname/{print $4}'`
+  if [[ -z "$iip" ]]; then
+    echo "ERROR: instance is not ready"
+    return 1
+  fi
   get_ssh_cmd $hhost
   prepare_for_ssh
   local fip=`get_link_local_ip $iip $ssh_cmd`
@@ -168,6 +172,10 @@ function check_two_instances() {
   local hhost1=`openstack server show demo11 | awk '/OS-EXT-SRV-ATTR:hypervisor_hostname/{print $4}'`
   local iip2=`openstack server show demo12 | awk '/addresses/{print $4}' | cut -d '=' -f 2`
   local hhost2=`openstack server show demo12 | awk '/OS-EXT-SRV-ATTR:hypervisor_hostname/{print $4}'`
+  if [[ -z "$iip1" || -z "$iip2" ]]; then
+    echo "ERROR: instances are not ready"
+    return 1
+  fi
   if [[ "$hhost1" == "$hhost2" ]]; then
     echo "WARNING: instances on the same host. test has no sense"
     openstack server delete demo11
