@@ -75,13 +75,17 @@ function get_ssh_cmd() {
   fi
 }
 
+function prepare_for_ssh() {
+  set -x
+  if [[ "$USE_DPDK" == "true" ]]; then
+    $ssh_cmd 'printf "[DEFAULT]\nplatform=dpdk\n" > ./contrail-vrouter-agent.conf' 2>/dev/null
+    $ssh_cmd 'sudo mkdir -p /etc/contrail ; sudo cp -f ./contrail-vrouter-agent.conf /etc/contrail/' 2>/dev/null
+  fi
+  set +x
+}
+
 function get_link_local_ip() {
   local iip=$1
-
-  if [[ "$USE_DPDK" == "true" ]]; then
-    $ssh_cmd 'printf "[DEFAULT]\nplatform=dpdk\n" > contrail-vrouter-agent.conf' 2>/dev/null
-    $ssh_cmd 'sudo mkdir -p /etc/contrail ; sudo cp -f contrail-vrouter-agent.conf /etc/contrail/' 2>/dev/null
-  fi
   local if_name=`$ssh_cmd sudo vif --list 2>/dev/null| grep -B 1 $iip | awk '/^vif/{print $NF}'`
 
   local curl_proto='http'
@@ -123,6 +127,7 @@ function check_simple_instance() {
   local iip=`openstack server show demo1 | awk '/addresses/{print $4}' | cut -d '=' -f 2`
   local hhost=`openstack server show demo1 | awk '/OS-EXT-SRV-ATTR:hypervisor_hostname/{print $4}'`
   get_ssh_cmd $hhost
+  prepare_for_ssh
   local fip=`get_link_local_ip $iip $ssh_cmd`
   if [[ -z "$fip" ]]; then
     echo "ERROR: there is no link-local IP for VM"
@@ -171,7 +176,8 @@ function check_two_instances() {
   fi
 
   get_ssh_cmd $hhost1
-  local fip1=`get_link_local_ip $iip1 $ssh_cmd1`
+  prepare_for_ssh
+  local fip1=`get_link_local_ip $iip1 $ssh_cmd`
   if [[ -z "$fip1" ]]; then
     echo "ERROR: there is no link-local IP for VM"
     $ssh_cmd "ip route ; ip addr"
