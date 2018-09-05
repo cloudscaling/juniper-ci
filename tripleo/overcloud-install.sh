@@ -18,8 +18,9 @@ export CONTRAIL_REGISTRY=${CONTRAIL_REGISTRY:-'opencontrailnightly'}
 export CONTRAIL_TAG=${CONTRAIL_TAG:-'latest'}
 # --
 
+export CCB_PATCHSET=${CCB_PATCHSET-}
 export THT_PATCHSET=${THT_PATCHSET:-}
-export PP_PATCHSET="${PP_PATCHSET:-}"
+export PP_PATCHSET=${PP_PATCHSET:-}
 
 (( VBMC_PORT_BASE_DEFAULT=16000 + NUM*100))
 VBMC_PORT_BASE=${VBMC_PORT_BASE:-${VBMC_PORT_BASE_DEFAULT}}
@@ -305,6 +306,11 @@ else
     pushd contrail-container-builder
     git fetch --all
     git reset --hard origin/$git_branch_ccb
+    popd
+  fi
+  if [[ -n "$CCB_PATCHSET" ]] ; then
+    pushd contrail-container-builder
+    bash -c "$CCB_PATCHSET"
     popd
   fi
   _old_cv=$CONTRAIL_VERSION

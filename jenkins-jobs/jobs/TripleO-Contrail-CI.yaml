@@ -159,6 +159,9 @@
           description: Clone puppets from internal repositories or use build's version
           default: true
       - string:
+          name: CCB_PATCHSET
+          description: "Additional command to fetch patchset for contrail-container-builder repo."
+      - string:
           name: THT_PATCHSET
           description: "Additional command to fetch patchset for contrail-tripleo-heat-template repo."
       - string:

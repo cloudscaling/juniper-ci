@@ -56,9 +56,9 @@ if [[ -f $CONTRAIL_PACKAGES_DIR/tag ]] ; then
   build_tag=`cat $CONTRAIL_PACKAGES_DIR/tag`
   ssh_env+=" BUILD_TAG=$build_tag"
 fi
+[ -n "$CCB_PATCHSET" ] && ssh_env+=" CCB_PATCHSET=\"$CCB_PATCHSET\""
 [ -n "$THT_PATCHSET" ] && ssh_env+=" THT_PATCHSET=\"$THT_PATCHSET\""
 [ -n "$PP_PATCHSET" ] && ssh_env+=" PP_PATCHSET=\"$PP_PATCHSET\""
-
 
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
