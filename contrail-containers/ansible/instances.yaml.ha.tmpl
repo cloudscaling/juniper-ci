@@ -9,47 +9,50 @@ instances:
   ip: ${IP_VM_01}
   provider: bms
   roles:
-     openstack: null
-     analytics: null
-     analytics_database: null
-     config: null
-     config_database: null
-     control: null
-     webui: null
+    openstack: null
+    analytics: null
+    analytics_database: null
+    config: null
+    config_database: null
+    control: null
+    webui: null
  server2:
   ip: ${IP_VM_02}
   provider: bms
   roles:
-     openstack: null
-     analytics: null
-     analytics_database: null
-     config: null
-     config_database: null
-     control: null
-     webui: null
+    openstack: null
+    analytics: null
+    analytics_database: null
+    config: null
+    config_database: null
+    control: null
+    webui: null
  server3:
   ip: ${IP_VM_03}
   provider: bms
   roles:
-     openstack: null
-     analytics: null
-     analytics_database: null
-     config: null
-     config_database: null
-     control: null
-     webui: null
+    openstack: null
+    analytics: null
+    analytics_database: null
+    config: null
+    config_database: null
+    control: null
+    webui: null
  server4:
   ip: ${IP_VM_04}
   provider: bms
   roles:
-     openstack_compute: null
-     vrouter: null
+    openstack_compute: null
+    vrouter:
+      AGENT_MODE: ${AGENT_MODE}
  server5:
   ip: ${IP_VM_05}
   provider: bms
   roles:
-     openstack_compute: null
-     vrouter: null
+    openstack_compute: null
+    vrouter:
+      AGENT_MODE: ${AGENT_MODE}
+
 
 global_configuration:
  REGISTRY_PRIVATE_INSECURE: True
@@ -60,15 +63,13 @@ contrail_configuration:
  OPENSTACK_VERSION: ${OPENSTACK_VERSION}
  CONTROLLER_NODES: ${IP1_CONT_01},${IP1_CONT_02},${IP1_CONT_03}
  CONTROL_NODES: ${IP2_CONT_01},${IP2_CONT_02},${IP2_CONT_03}
- AAA_MODE: rbac
  VROUTER_GATEWAY: ${VROUTER_GW}
- CONFIG_NODEMGR__DEFAULTS__minimum_diskGB: "2"
  CONFIG_DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
  DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
  SSL_ENABLE: ${SSL_ENABLE}
  JVM_EXTRA_OPTS: "-Xms1g -Xmx2g"
  LOG_LEVEL: SYS_DEBUG
- API__DEFAULTS__rabbit_health_check_interval: 10
+ VROUTER_ENCRYPTION: FALSE
 
 kolla_config:
  kolla_globals:
@@ -76,10 +77,6 @@ kolla_config:
    kolla_external_vip_address: ${E_VIP}
    enable_ironic: "no"
    enable_swift: "no"
-   horizon_keystone_multidomain: true
-   horizon_keystone_domain_choices:
-    Default: Default
-    domain: domain
  kolla_passwords:
    metadata_secret: c0ntrail123
    keystone_admin_password: password

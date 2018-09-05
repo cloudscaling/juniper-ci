@@ -84,13 +84,17 @@
           fi
       - shell: |
           #!/bin/bash -e
-          desc="$VERSION $CONTRAIL_BUILD $DEPLOY_TYPE $AAA_MODE"
-          if [[ "$DEPLOY_AS_HA_MODE" == "true" ]] ; then desc="$desc +HA" ; fi
-          if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
-          if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
-          if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
-          if [[ "$USE_EXTERNAL_RABBITMQ" == "true" ]] ; then desc="$desc +EXT_MQ" ; fi
-          if [[ "$RUN_TEMPEST" == "true" ]] ; then desc="$desc +Tempest" ; fi
+          if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
+            desc="cleanup"
+          else
+            desc="$VERSION $CONTRAIL_BUILD $DEPLOY_TYPE $AAA_MODE"
+            if [[ "$DEPLOY_AS_HA_MODE" == "true" ]] ; then desc="$desc +HA" ; fi
+            if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
+            if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
+            if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
+            if [[ "$USE_EXTERNAL_RABBITMQ" == "true" ]] ; then desc="$desc +EXT_MQ" ; fi
+            if [[ "$RUN_TEMPEST" == "true" ]] ; then desc="$desc +Tempest" ; fi
+          fi
           echo "DESCRIPTION $desc"
       - description-setter:
           regexp: "DESCRIPTION (.*)"
@@ -130,7 +134,7 @@
             - never
       - choice:
           name: VERSION
-          description: "Version of the OpenStack. ocata implies xenial, queens implies bionic."
+          description: "Version of the OpenStack. ocata -> xenial, queens -> bionic."
           choices:
             - ocata
             - queens
@@ -184,21 +188,25 @@
           fi
       - shell: |
           #!/bin/bash -e
-          desc="$VERSION $CONTRAIL_BUILD $DEPLOY_TYPE $AAA_MODE"
-          if [[ "$DEPLOY_AS_HA_MODE" == "true" ]] ; then desc="$desc +HA" ; fi
-          if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
-          if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
-          if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
-          if [[ "$RUN_TEMPEST" == "true" ]] ; then desc="$desc +Tempest" ; fi
+          if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
+            desc="cleanup"
+          else
+            desc="$VERSION $CONTRAIL_BUILD $DEPLOY_TYPE $AAA_MODE"
+            if [[ "$DEPLOY_AS_HA_MODE" == "true" ]] ; then desc="$desc +HA" ; fi
+            if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
+            if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
+            if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
+            if [[ "$RUN_TEMPEST" == "true" ]] ; then desc="$desc +Tempest" ; fi
+          fi
           echo "DESCRIPTION $desc"
       - description-setter:
           regexp: "DESCRIPTION (.*)"
       - shell: |
           #!/bin/bash -e
           export SERIES='xenial'
-          #if [[ "$VERSION" == "queens" ]] ; then
-          #  export SERIES='bionic'
-          #fi
+          if [[ "$VERSION" == "queens" ]] ; then
+            export SERIES='bionic'
+          fi
           ./juniper-ci/juju/aws-contrail-R5/deploy-all.sh deploy-$DEPLOY_TYPE.sh
     publishers:
       - archive:
@@ -286,10 +294,14 @@
     builders:
       - shell: |
           #!/bin/bash -e
-          desc="$SLAVE_NAME $VERSION $CONTRAIL_BUILD $DEPLOY_TYPE mode=$DEPLOY_MODE $AAA_MODE"
-          if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
-          if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
-          if [[ "$USE_DPDK" == "true" ]] ; then desc="$desc +DPDK" ; fi
+          if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
+            desc="cleanup"
+          else
+            desc="$SLAVE_NAME $VERSION $CONTRAIL_BUILD $DEPLOY_TYPE mode=$DEPLOY_MODE $AAA_MODE"
+            if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
+            if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
+            if [[ "$USE_DPDK" == "true" ]] ; then desc="$desc +DPDK" ; fi
+          fi
           echo "DESCRIPTION $desc"
       - description-setter:
           regexp: "DESCRIPTION (.*)"
@@ -337,7 +349,7 @@
             - never
       - choice:
           name: VERSION
-          description: "Version of the OpenStack. mitaka implies trusty and newton/ocata implies xenial."
+          description: "Version of the OpenStack. ocata -> xenial, queens -> bionic."
           choices:
             - ocata
             - queens
@@ -369,25 +381,40 @@
       - string:
           name: CHARMS_BRANCH
           default: 'R5'
+      - string:
+          name: CONTAINER_REGISTRY
+          default: opencontrailnightly
+      - string:
+          name: CONTRAIL_VERSION
+          default: latest
+      - string:
+          name: DOCKER_USERNAME
+      - string:
+          name: DOCKER_PASSWORD
     scm:
       - juniper-contrail-charms-branch
       - juniper-ci
+      - charm-heat
     builders:
       - shell: |
           #!/bin/bash -e
-          desc="$SLAVE_NAME $VERSION $CONTRAIL_BUILD $DEPLOY_TYPE mode=$DEPLOY_MODE $AAA_MODE"
-          if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
-          if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
-          if [[ "$USE_DPDK" == "true" ]] ; then desc="$desc +DPDK" ; fi
+          if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
+            desc="cleanup"
+          else
+            desc="$SLAVE_NAME $VERSION $CONTRAIL_BUILD $DEPLOY_TYPE mode=$DEPLOY_MODE $AAA_MODE"
+            if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
+            if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
+            if [[ "$USE_DPDK" == "true" ]] ; then desc="$desc +DPDK" ; fi
+          fi
           echo "DESCRIPTION $desc"
       - description-setter:
           regexp: "DESCRIPTION (.*)"
       - shell: |
           #!/bin/bash -e
           export SERIES='xenial'
-          #if [[ "$VERSION" == "queens" ]] ; then
-          #  export SERIES='bionic'
-          #fi
+          if [[ "$VERSION" == "queens" ]] ; then
+            export SERIES='bionic'
+          fi
           ./juniper-ci/juju/bmc-contrail-R5/deploy_all.sh
     publishers:
       - archive:

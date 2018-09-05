@@ -5,6 +5,7 @@ my_dir="$(dirname $my_file)"
 source "$my_dir/../common/functions"
 source "$my_dir/functions"
 
+log_dir="$WORKSPACE/logs"
 BUNDLE="$my_dir/openstack-contrail-amazon.yaml"
 
 trap 'catch_errors_ce $LINENO' ERR EXIT
@@ -34,9 +35,9 @@ sed -i -e "s/%SERIES%/$SERIES/m" $BUNDLE
 sed -i -e "s/%OPENSTACK_ORIGIN%/$OPENSTACK_ORIGIN/m" $BUNDLE
 sed -i -e "s/%PASSWORD%/$PASSWORD/m" $BUNDLE
 sed -i -e "s|%JUJU_REPO%|$JUJU_REPO|m" $BUNDLE
-sed -i -e "s|%USE_EXTERNAL_RABBITMQ%|false|m" $BUNDLE
 sed -i -e "s|%AUTH_MODE%|$AAA_MODE|m" $BUNDLE
 sed -i "s/\r/\n/g" $BUNDLE
+cp $BUNDLE "$log_dir/"
 
 echo "INFO: Deploy bundle $(date)"
 juju-deploy-bundle $BUNDLE
@@ -49,6 +50,9 @@ hack_openstack
 echo "INFO: Apply SSL flag if set $(date)"
 apply_ssl contrail
 
+# wait a bit to avoid catching errors with apt-get install
+sleep 120
+# and then wait for result
 post_deploy
 
 trap - ERR EXIT

@@ -72,6 +72,10 @@ juju-deploy cs:$SERIES/keystone --to lxd:$cont0
 juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "preferred-api-version=3"
 juju-expose keystone
 
+juju-deploy --series=$SERIES $WORKSPACE/charm-heat --to lxd:$cont0
+juju-set heat "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+juju-expose heat
+
 juju-deploy cs:$SERIES/nova-compute --to $comp1
 juju-add-unit nova-compute --to $comp2
 juju-set nova-compute "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "virt-type=kvm" "enable-resize=True" "enable-live-migration=True" "migration-auth-type=ssh"
@@ -87,11 +91,11 @@ juju-deploy $PLACE/contrail-keystone-auth --to lxd:$cont1
 
 juju-deploy $PLACE/contrail-controller --to $cont1
 juju-expose contrail-controller
-juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4"
+juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 juju-deploy $PLACE/contrail-analyticsdb --to $cont1
-juju-set contrail-analyticsdb cassandra-minimum-diskgb="4"
+juju-set contrail-analyticsdb cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 juju-deploy $PLACE/contrail-analytics --to $cont1
-juju-set contrail-analytics
+juju-set contrail-analytics docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 juju-expose contrail-analytics
 
 if [ "$DEPLOY_MODE" == 'ha' ] ; then
@@ -104,36 +108,56 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
 fi
 
 juju-deploy $PLACE/contrail-openstack
+juju-set contrail-openstack docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 juju-deploy $PLACE/contrail-agent
+juju-set contrail-agent physical-interface=$IF2 docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 if [[ "$USE_DPDK" == "true" ]] ; then
   juju-set contrail-agent dpdk=True dpdk-coremask=1,2 dpdk-main-mempool-size=16384
 fi
-juju-set contrail-agent physical-interface=$IF2
 
-#if [ "$DEPLOY_MODE" == 'ha' ] ; then
-#  juju-deploy cs:~boucherv29/keepalived-19
-#  juju-deploy cs:$SERIES/haproxy --to $cont1
-#  juju-add-unit haproxy --to $cont2
-#  juju-add-unit haproxy --to $cont3
-#  juju-expose haproxy
-#  juju-add-relation haproxy keepalived
+if [ "$DEPLOY_MODE" == 'ha' ] ; then
+  juju-deploy cs:~boucherv29/keepalived-19
+  juju-deploy cs:$SERIES/haproxy --to $cont1
+  juju-add-unit haproxy --to $cont2
+  juju-add-unit haproxy --to $cont3
+  juju-expose haproxy
+  juju-add-relation haproxy:juju-info keepalived:juju-info
 #  juju-add-relation "contrail-analytics" "haproxy"
-#  juju-add-relation "contrail-controller:http-services" "haproxy"
-#  juju-add-relation "contrail-controller:https-services" "haproxy"
-#  juju-set contrail-controller vip=$addr.254
-#  juju-set keepalived virtual_ip=$addr.254
-#fi
+  juju-add-relation "contrail-controller:http-services" "haproxy"
+  juju-add-relation "contrail-controller:https-services" "haproxy"
+  juju-set contrail-controller vip=$addr.254
+  juju-set keepalived virtual_ip=$addr.254
+fi
 
 detect_machines
 wait_for_machines $m1 $m2 $m3 $m4 $m5
 echo "INFO: Apply SSL flag if set $(date)"
 apply_ssl contrail
 
+# re-write resolv.conf for bionic lxd containers to allow names resolving inside lxd containers
+if [[ "$SERIES" == 'bionic' ]]; then
+  for mmch in `juju machines | awk '/lxd/{print $1}'` ; do
+    echo "INFO: apply DNS config for $mmch"
+    res=1
+    for i in 0 1 2 3 4 5 ; do
+      if juju-ssh $mmch "echo 'nameserver $addr.1' | sudo tee /usr/lib/systemd/resolv.conf ; sudo ln -sf /usr/lib/systemd/resolv.conf /etc/resolv.conf" ; then
+        res=0
+        break
+      fi
+      sleep 10
+    done
+    test $res -eq 0 || { echo "ERROR: Machine $mmch is not accessible"; exit 1; }
+  done
+fi
+
 echo "INFO: Add relations $(date)"
 juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
 juju-add-relation "keystone:shared-db" "mysql:shared-db"
 juju-add-relation "glance:shared-db" "mysql:shared-db"
 juju-add-relation "keystone:identity-service" "glance:identity-service"
+juju-add-relation "heat:shared-db" "mysql:shared-db"
+juju-add-relation "heat:amqp" "rabbitmq-server:amqp"
+juju-add-relation "heat" "keystone"
 juju-add-relation "nova-cloud-controller:image-service" "glance:image-service"
 juju-add-relation "nova-cloud-controller:identity-service" "keystone:identity-service"
 juju-add-relation "nova-cloud-controller:cloud-compute" "nova-compute:cloud-compute"
@@ -149,7 +173,6 @@ juju-add-relation "neutron-api:identity-service" "keystone:identity-service"
 juju-add-relation "neutron-api:amqp" "rabbitmq-server:amqp"
 
 juju-add-relation "contrail-controller" "ntp"
-juju-add-relation "neutron-api" "ntp"
 juju-add-relation "nova-compute:juju-info" "ntp:juju-info"
 
 juju-add-relation "contrail-controller" "contrail-keystone-auth"
@@ -160,6 +183,7 @@ juju-add-relation "contrail-analytics" "contrail-analyticsdb"
 
 juju-add-relation "contrail-openstack" "neutron-api"
 juju-add-relation "contrail-openstack" "nova-compute"
+juju-add-relation "contrail-openstack" "heat"
 juju-add-relation "contrail-openstack" "contrail-controller"
 
 juju-add-relation "contrail-agent:juju-info" "nova-compute:juju-info"
