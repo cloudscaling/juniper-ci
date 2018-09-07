@@ -5,7 +5,7 @@ sudo apt-get install -fy libxml2-utils &>/dev/null
 proto='http'
 if [[ "${USE_SSL_CONTRAIL,,}" == 'true' ]] ; then
   proto='https'
-  ssl_opts='--key /etc/contrail/ssl/server-privkey.pem --cert /etc/contrail/ssl/server.pem --cacert /etc/contrail/ssl/ca-cert.pem'
+  ssl_opts='--key /etc/contrail/ssl/private/server-privkey.pem --cert /etc/contrail/ssl/certs/server.pem --cacert /etc/contrail/ssl/certs/ca-cert.pem'
 fi
 
 rm -f logs.*
