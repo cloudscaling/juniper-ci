@@ -5,6 +5,7 @@ sudo apt-get install -fy libxml2-utils &>/dev/null
 proto='http'
 if [[ "${USE_SSL_CONTRAIL,,}" == 'true' ]] ; then
   proto='https'
+  ssl_opts='--key /etc/contrail/ssl/server-privkey.pem --cert /etc/contrail/ssl/server.pem --cacert /etc/contrail/ssl/ca-cert.pem'
 fi
 
 rm -f logs.*
@@ -52,14 +53,15 @@ done
 popd
 tar -rf logs.tar $DL 2>/dev/null
 
+host_ip=`hostname -i`
 function save_introspect_info() {
   if ! lsof -i ":$2" &>/dev/null ; then
     return
   fi
   echo "INFO: saving introspect output for $1"
-  timeout -s 9 30 curl -k -s ${proto}://localhost:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - | grep -P "state|<type|<status" > $1-introspect.log
+  timeout -s 9 30 curl $ssl_opts -s ${proto}://$host_ip:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - | grep -P "state|<type|<status" > $1-introspect.log
   echo '' >> $1-introspect.log
-  timeout -s 9 30 curl -k -s ${proto}://localhost:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - >> $1-introspect.log
+  timeout -s 9 30 curl $ssl_opts -s ${proto}://$host_ip:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - >> $1-introspect.log
   tar -rf logs.tar $1-introspect.log 2>/dev/null
 }
 
