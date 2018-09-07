@@ -172,7 +172,6 @@ echo "INFO: Apply SSL flag if set $(date)"
 apply_ssl contrail
 
 echo "INFO: Add relations $(date)"
-juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
 juju-add-relation "keystone:shared-db" "mysql:shared-db"
 juju-add-relation "glance:shared-db" "mysql:shared-db"
 juju-add-relation "keystone:identity-service" "glance:identity-service"

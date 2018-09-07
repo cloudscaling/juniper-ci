@@ -139,7 +139,6 @@ services:
 relations:
   # openstack
   - [ "nova-cloud-controller", "mysql" ]
-  - [ "nova-compute:shared-db", "mysql:shared-db" ]
   - [ "keystone", "mysql" ]
   - [ "glance", "mysql" ]
   - [ "glance", "keystone" ]
