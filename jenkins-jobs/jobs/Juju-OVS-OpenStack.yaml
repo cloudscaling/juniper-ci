@@ -18,13 +18,23 @@
             - always
             - on_success
             - never
+      - choice:
+          name: VERSION
+          description: "Version of the OpenStack. mitaka implies trusty and newton/ocata implies xenial."
+          choices:
+            - ocata
+            - pike
+            - queens
+            - rocky
     scm:
       - progmaticlab-ci
     builders:
       - shell: |
           #!/bin/bash -e
           export SERIES='xenial'
-          export VERSION='ocata'
+          if [[ $VERSION == 'rocky' || $VERSION == 'queens' ]]; then
+            export SERIES='bionic'
+          fi
           ./ci/juju/deploy_all.sh
     publishers:
       - archive:
