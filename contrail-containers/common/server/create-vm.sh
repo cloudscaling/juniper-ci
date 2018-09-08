@@ -238,6 +238,11 @@ elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; t
     apt-get install ifupdown &>>$logs_dir/apt.log
     echo "source /etc/network/interfaces.d/*" >> /etc/network/interfaces
     mv /etc/netplan/50-cloud-init.yaml /etc/netplan/__50-cloud-init.yaml.save
+    if_name="ens\$((3+j))"
+    cat <<EOM > /etc/network/interfaces.d/ens3.cfg
+auto ens3
+iface ens3 inet dhcp
+EOM
   fi
   for ((j=1; j<$NET_COUNT; ++j)); do
     if_name="ens\$((3+j))"
@@ -245,7 +250,6 @@ elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; t
 auto \${if_name}
 iface \${if_name} inet dhcp
 EOM
-    ifup \${if_name}
   done
   mv /etc/os-release /etc/os-release.original
   cat /etc/os-release.original > /etc/os-release
