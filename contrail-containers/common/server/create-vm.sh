@@ -225,6 +225,13 @@ EOM
   systemctl enable ntpd.service && systemctl start ntpd.service
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
   echo "network: {config: disabled}" > /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+  if [[ "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
+    rm /etc/resolv.conf
+    ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+    apt-get install ifupdown &>>apt.log
+    echo "source /etc/network/interfaces.d/*" >> /etc/network/interfaces
+    mv /etc/netplan/50-cloud-init.yaml /etc/netplan/__50-cloud-init.yaml.save
+  fi
   for ((j=1; j<$NET_COUNT; ++j)); do
     if_name="ens\$((3+j))"
     if [[ "$ENVIRONMENT_OS" == 'ubuntu16' ]]; then
@@ -233,18 +240,6 @@ auto \${if_name}
 iface \${if_name} inet dhcp
 EOM
       ifup \${if_name}
-    else
-      mac_if=\$(ip link show \${if_name} | awk '/link/{print \$2}')
-      echo "INFO: create if script for iface=\$if_name with mac=\$mac_if"
-      if_path="/etc/netplan/50-cloud-init.yaml"
-      cat <<EOM >>"/etc/netplan/50-cloud-init.yaml"
-        \$if_name:
-            dhcp4: true
-            match:
-                macaddress: '\$mac_if'
-            set-name: \$if_name
-EOM
-      netplan apply
     fi
   done
   apt-get -y update &>>$logs_dir/apt.log
