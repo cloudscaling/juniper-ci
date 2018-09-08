@@ -81,7 +81,7 @@ function define_node() {
 }
 
 build_vm=0
-if [[ $REGISTRY == 'build' ]]; then
+if [[ $CONTAINER_REGISTRY == 'build' ]]; then
   build_vm=1
   node="${VM_NAME}_build"
   define_node "$node" ${BUILD_NODE_MEM} "ff"
@@ -102,7 +102,7 @@ done
 # wait machine and get IP via virsh net-dhcp-leases $NET_NAME
 all_nodes_count=$((build_vm + CONT_NODES + COMP_NODES))
 _ips=( $(wait_dhcp $NET_NAME $all_nodes_count ) )
-if [[ $REGISTRY == 'build' ]]; then
+if [[ $CONTAINER_REGISTRY == 'build' ]]; then
   build_ip=`get_ip_by_mac $NET_NAME 52:54:10:${NET_BASE_PREFIX}:${JOB_RND}:ff`
 fi
 # collect controller ips first and compute ips next
@@ -133,7 +133,7 @@ nodes_cont_ips="${ips_cont[@]}"
 nodes_comp_ips="${ips_comp[@]}"
 EOF
 
-if [[ $REGISTRY == 'build' ]]; then
+if [[ $CONTAINER_REGISTRY == 'build' ]]; then
   wait_ssh $build_ip
   logs_dir='/root/logs'
   cat <<EOF | ssh $SSH_OPTS root@${build_ip}
