@@ -376,7 +376,7 @@ function check_instance_simple() {
       curl_proto='https'
     fi
     local curl_ip=`juju ssh $mch "hostname -i" 2>/dev/null`
-    local curl_cmd="curl $curl_ssl_opts -s ${curl_proto}://$curl_ip:8085/Snh_ItfReq?name=$if_name"
+    local curl_cmd="sudo curl $curl_ssl_opts -s ${curl_proto}://$curl_ip:8085/Snh_ItfReq?name=$if_name"
 
     local lip=`juju ssh $mch "$curl_cmd" 2>/dev/null | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'`
     if [[ -n "$lip" ]] ; then
