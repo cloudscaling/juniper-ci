@@ -224,11 +224,8 @@ EOM
   systemctl disable chronyd.service
   systemctl enable ntpd.service && systemctl start ntpd.service
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
-  set -x
   echo "network: {config: disabled}" > /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
   if [[ "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
-    rm /etc/resolv.conf
-    ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
     apt-get install ifupdown &>>$logs_dir/apt.log
     echo "source /etc/network/interfaces.d/*" >> /etc/network/interfaces
     mv /etc/netplan/50-cloud-init.yaml /etc/netplan/__50-cloud-init.yaml.save
