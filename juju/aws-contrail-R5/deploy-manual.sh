@@ -69,8 +69,7 @@ echo "INFO: Deploy all $(date)"
 juju-deploy cs:$SERIES/ntp
 
 juju-deploy cs:$SERIES/rabbitmq-server --to $m1
-juju-deploy cs:$SERIES/percona-cluster mysql --to $m1
-juju-set mysql "root-password=$PASSWORD" "max-connections=1500"
+juju-deploy cs:$SERIES/percona-cluster mysql --config "root-password=$PASSWORD" --config "max-connections=1500" --to $m1
 
 juju-deploy cs:$SERIES/openstack-dashboard --to $m1
 juju-set openstack-dashboard "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
