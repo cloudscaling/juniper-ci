@@ -6,7 +6,7 @@ my_dir="$(dirname $my_file)"
 mkdir -p $my_dir/logs
 source "$my_dir/cloudrc"
 
-AAA_MODE=${AAA_MODE:-cloud-admin}
+AAA_MODE=${AAA_MODE:-rbac}
 tag="$CONTRAIL_VERSION"
 
 # tune some host settings
