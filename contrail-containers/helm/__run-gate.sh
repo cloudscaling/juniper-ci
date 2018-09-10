@@ -164,6 +164,7 @@ echo "INFO: extra heat args: $OSH_EXTRA_HELM_ARGS_HEAT"
 ./tools/deployment/multinode/100-glance.sh
 ./tools/deployment/multinode/110-cinder.sh
 ./tools/deployment/multinode/131-libvirt-opencontrail.sh
+./tools/deployment/multinode/141-compute-kit-opencontrail.sh
 
 cd $CHD_PATH
 make
@@ -229,8 +230,6 @@ helm install --name contrail-vrouter ${CHD_PATH}/contrail-vrouter --namespace=co
 ${OSH_PATH}/tools/deployment/common/wait-for-pods.sh contrail
 
 cd ${OSH_PATH}
-
-./tools/deployment/multinode/141-compute-kit-opencontrail.sh
 
 # workaround steps. remove later.
 make build-helm-toolkit
