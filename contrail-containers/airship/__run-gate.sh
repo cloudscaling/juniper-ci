@@ -8,4 +8,4 @@ source "$my_dir/cloudrc"
 
 git clone https://github.com/openstack/airship-in-a-bottle
 cd ./airship-in-a-bottle/manifests/dev_single_node
-./airship-in-a-bottle.sh
+./airship-in-a-bottle.sh -y
