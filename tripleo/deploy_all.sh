@@ -58,6 +58,7 @@ if [[ -f $CONTRAIL_PACKAGES_DIR/tag ]] ; then
 fi
 [ -n "$CCB_PATCHSET" ] && ssh_env+=" CCB_PATCHSET=\"$CCB_PATCHSET\""
 [ -n "$THT_PATCHSET" ] && ssh_env+=" THT_PATCHSET=\"$THT_PATCHSET\""
+[ -n "$TPP_PATCHSET" ] && ssh_env+=" TPP_PATCHSET=\"$TPP_PATCHSET\""
 [ -n "$PP_PATCHSET" ] && ssh_env+=" PP_PATCHSET=\"$PP_PATCHSET\""
 
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then

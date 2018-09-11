@@ -20,6 +20,7 @@ export CONTRAIL_TAG=${CONTRAIL_TAG:-'latest'}
 
 export CCB_PATCHSET=${CCB_PATCHSET-}
 export THT_PATCHSET=${THT_PATCHSET:-}
+export TPP_PATCHSET=${TPP_PATCHSET:-}
 export PP_PATCHSET=${PP_PATCHSET:-}
 
 (( VBMC_PORT_BASE_DEFAULT=16000 + NUM*100))
@@ -295,7 +296,17 @@ if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
   rm -rf usr/share/openstack-puppet/modules
   mkdir -p usr/share/openstack-puppet/modules
   git clone https://github.com/${git_repo_ctp}/contrail-tripleo-puppet -b $git_branch_ctp usr/share/openstack-puppet/modules/tripleo
+  if [[ -n "$TPP_PATCHSET" ]] ; then
+    pushd usr/share/openstack-puppet/modules/tripleo
+    bash -c "$TPP_PATCHSET"
+    popd
+  fi
   git clone https://github.com/${git_repo_pc}/puppet-contrail -b $git_branch_pc usr/share/openstack-puppet/modules/contrail
+  if [[ -n "$PP_PATCHSET" ]] ; then
+    pushd usr/share/openstack-puppet/modules/contrail
+    bash -c "$PP_PATCHSET"
+    popd
+  fi
   tar czvf puppet-modules.tgz usr/
   upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
   artifact_opts="-e .tripleo/environments/deployment-artifacts.yaml"
@@ -315,15 +326,15 @@ else
   fi
   _old_cv=$CONTRAIL_VERSION
   export CONTRAIL_VERSION=$(ls -1 /var/www/html | grep -o '\([0-9]\+\.\{0,1\}\)\{1,5\}-[0-9]\+' | sort -nr  | head -n 1)
-  if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' || -n "$PP_PATCHSET" ]] ; then
+  if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' || -n "$TPP_PATCHSET" ]] ; then
     [ ! -d contrail-packages ] && git clone https://github.com/Juniper/contrail-packages
     pushd contrail-packages
     rm -rf RPMS openstack
     # update contrail-tripleo-puppet RPM
     git clone https://github.com/${git_repo_ctp}/contrail-tripleo-puppet -b $git_branch_ctp openstack/contrail-tripleo-puppet
-    if [[ -n "$PP_PATCHSET" ]] ; then
+    if [[ -n "$TPP_PATCHSET" ]] ; then
       pushd openstack/contrail-tripleo-puppet
-      bash -c "$PP_PATCHSET"
+      bash -c "$TPP_PATCHSET"
       popd
     fi
     make rpm-contrail-tripleo-puppet

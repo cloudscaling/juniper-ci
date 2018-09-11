@@ -165,8 +165,11 @@
           name: THT_PATCHSET
           description: "Additional command to fetch patchset for contrail-tripleo-heat-template repo."
       - string:
-          name: PP_PATCHSET
+          name: TPP_PATCHSET
           description: "Additional command to fetch patchset for contrail-tripleo-puppet repo."
+      - string:
+          name: PP_PATCHSET
+          description: "Additional command to fetch patchset for puppet-contrail repo."
 
     scm:
       - juniper-ci
