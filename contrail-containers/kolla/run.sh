@@ -34,7 +34,7 @@ function catch_errors() {
 }
 
 run_env=''
-if [[ "$REGISTRY" == 'build' ]]; then
+if [[ "$CONTAINER_REGISTRY" == 'build' ]]; then
   $SCP "$my_dir/../__build-containers.sh" $SSH_USER@$build_ip:build-containers.sh
   $SCP -r "$WORKSPACE/contrail-container-builder" $SSH_USER@$build_ip:./
   set -o pipefail
@@ -43,11 +43,8 @@ if [[ "$REGISTRY" == 'build' ]]; then
   $SSH_CMD $SSH_USER@$build_ip "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
   set +o pipefail
   run_env="CONTAINER_REGISTRY=$build_ip:5000 CONTRAIL_VERSION=$OPENSTACK_VERSION-$CONTRAIL_VERSION REGISTRY_INSECURE=1"
-elif [[ "$REGISTRY" == 'opencontrailnightly' ]]; then
-  run_env="CONTAINER_REGISTRY=opencontrailnightly CONTRAIL_VERSION=latest REGISTRY_INSECURE=0"
 else
-  echo "ERROR: unsupported REGISTRY = $REGISTRY"
-  exit 1
+  run_env="CONTAINER_REGISTRY=$CONTAINER_REGISTRY CONTRAIL_VERSION=$CONTRAIL_VERSION REGISTRY_INSECURE=0"
 fi
 
 $SCP "$my_dir/__run-gate.sh" $SSH_USER@$master_ip:run-gate.sh

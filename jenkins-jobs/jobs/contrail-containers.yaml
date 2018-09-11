@@ -20,10 +20,14 @@
             - on_success
             - never
       - choice:
-          name: REGISTRY
+          name: CONTAINER_REGISTRY
           choices:
             - opencontrailnightly
             - build
+      - string:
+          name: CONTRAIL_VERSION
+          default: latest
+          description: "Tag for images from opencontrailnightly"
       - choice:
           name: OPENSTACK_VERSION
           choices:
@@ -87,8 +91,11 @@
           fi
           # only centos images are supported now and thus only one archive with rpm-s is needed
           export LINUX_DISTR=centos
-          export CONTRAIL_VERSION='5.1.0-264'
-          export CONTRAIL_INSTALL_PACKAGES_URL="https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_"$CONTRAIL_VERSION"-"$LINUX_DISTR"-"$OPENSTACK_VERSION".tgz"
+          if [[ "$CONTAINER_REGISTRY" == 'build' ]]; then
+            # hardcoded version of archive on S3
+            export CONTRAIL_VERSION='5.1.0-264'
+            export CONTRAIL_INSTALL_PACKAGES_URL="https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_"$CONTRAIL_VERSION"-"$LINUX_DISTR"-"$OPENSTACK_VERSION".tgz"
+          fi
 
           export WAY=$(echo {project} | cut -d '-' -f 1)
           export HOST=$(echo {project} | cut -d '-' -f 2)

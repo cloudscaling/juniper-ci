@@ -25,7 +25,7 @@ for mch in $(juju-get-machines) ; do
   mkdir -p "$log_dir/$mch"
   juju-ssh $mch "df -hT" &>"$log_dir/$mch/df.log"
   juju-scp "$my_dir/__save-logs-${JOB_VERSION}.sh" $mch:save_logs.sh 2>/dev/null
-  juju-ssh $mch "sudo ./save_logs.sh" 2>/dev/null
+  juju-ssh $mch "USE_SSL_CONTRAIL=$USE_SSL_CONTRAIL sudo -E ./save_logs.sh" 2>/dev/null
   rm -f logs.tar.gz
   juju-scp $mch:logs.tar.gz logs.tar.gz 2>/dev/null
   cdir=`pwd`

@@ -72,7 +72,7 @@ juju-deploy cs:$SERIES/keystone --to lxd:$cont0
 juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "preferred-api-version=3"
 juju-expose keystone
 
-juju-deploy --series=$SERIES $WORKSPACE/charm-heat --to lxd:$cont0
+juju-deploy cs:$SERIES/charm-heat --to lxd:$cont0
 juju-set heat "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose heat
 
@@ -151,7 +151,6 @@ if [[ "$SERIES" == 'bionic' ]]; then
 fi
 
 echo "INFO: Add relations $(date)"
-juju-add-relation "nova-compute:shared-db" "mysql:shared-db"
 juju-add-relation "keystone:shared-db" "mysql:shared-db"
 juju-add-relation "glance:shared-db" "mysql:shared-db"
 juju-add-relation "keystone:identity-service" "glance:identity-service"

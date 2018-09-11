@@ -81,7 +81,7 @@ function define_node() {
 }
 
 build_vm=0
-if [[ $REGISTRY == 'build' ]]; then
+if [[ $CONTAINER_REGISTRY == 'build' ]]; then
   build_vm=1
   node="${VM_NAME}_build"
   define_node "$node" ${BUILD_NODE_MEM} "ff"
@@ -102,7 +102,7 @@ done
 # wait machine and get IP via virsh net-dhcp-leases $NET_NAME
 all_nodes_count=$((build_vm + CONT_NODES + COMP_NODES))
 _ips=( $(wait_dhcp $NET_NAME $all_nodes_count ) )
-if [[ $REGISTRY == 'build' ]]; then
+if [[ $CONTAINER_REGISTRY == 'build' ]]; then
   build_ip=`get_ip_by_mac $NET_NAME 52:54:10:${NET_BASE_PREFIX}:${JOB_RND}:ff`
 fi
 # collect controller ips first and compute ips next
@@ -133,7 +133,7 @@ nodes_cont_ips="${ips_cont[@]}"
 nodes_comp_ips="${ips_comp[@]}"
 EOF
 
-if [[ $REGISTRY == 'build' ]]; then
+if [[ $CONTAINER_REGISTRY == 'build' ]]; then
   wait_ssh $build_ip
   logs_dir='/root/logs'
   cat <<EOF | ssh $SSH_OPTS root@${build_ip}
@@ -224,29 +224,6 @@ EOM
   systemctl disable chronyd.service
   systemctl enable ntpd.service && systemctl start ntpd.service
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
-  echo "network: {config: disabled}" > /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
-  for ((j=1; j<$NET_COUNT; ++j)); do
-    if_name="ens\$((3+j))"
-    if [[ "$ENVIRONMENT_OS" == 'ubuntu16' ]]; then
-      cat <<EOM > /etc/network/interfaces.d/\${if_name}.cfg
-auto \${if_name}
-iface \${if_name} inet dhcp
-EOM
-      ifup \${if_name}
-    else
-      mac_if=\$(ip link show \${if_name} | awk '/link/{print \$2}')
-      echo "INFO: create if script for iface=\$if_name with mac=\$mac_if"
-      if_path="/etc/netplan/50-cloud-init.yaml"
-      cat <<EOM >>"/etc/netplan/50-cloud-init.yaml"
-        \$if_name:
-            dhcp4: true
-            match:
-                macaddress: '\$mac_if'
-            set-name: \$if_name
-EOM
-      netplan apply
-    fi
-  done
   apt-get -y update &>>$logs_dir/apt.log
   apt-get -y purge unattended-upgrades &>>$logs_dir/apt.log
   if [[ "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
@@ -256,15 +233,36 @@ EOM
   fi
   DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$logs_dir/apt.log
   DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 lsof python-pip python-dev gcc \$dpdk_req &>>$logs_dir/apt.log
+  echo "network: {config: disabled}" > /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+  if [[ "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
+    apt-get install ifupdown &>>$logs_dir/apt.log
+    echo "source /etc/network/interfaces.d/*" >> /etc/network/interfaces
+    mv /etc/netplan/50-cloud-init.yaml /etc/netplan/__50-cloud-init.yaml.save
+    if_name="ens\$((3+j))"
+    cat <<EOM > /etc/network/interfaces.d/ens3.cfg
+auto ens3
+iface ens3 inet dhcp
+EOM
+  fi
+  for ((j=1; j<$NET_COUNT; ++j)); do
+    if_name="ens\$((3+j))"
+    cat <<EOM > /etc/network/interfaces.d/\${if_name}.cfg
+auto \${if_name}
+iface \${if_name} inet dhcp
+EOM
+  done
   mv /etc/os-release /etc/os-release.original
   cat /etc/os-release.original > /etc/os-release
 fi
 pip install pip --upgrade &>>$logs_dir/pip.log
 hash -r
 pip install setuptools &>>$logs_dir/pip.log
+if [[ "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
+  rm /etc/resolv.conf
+  ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+fi
 EOF
 done
-
 
 if [[ $AGENT_MODE == 'dpdk' ]]; then
   for ip in ${ips_comp[@]} ; do

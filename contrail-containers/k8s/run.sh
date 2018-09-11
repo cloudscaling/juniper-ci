@@ -39,7 +39,7 @@ done
 $my_dir/setup-nodes.sh
 
 run_env=''
-if [[ "$REGISTRY" == 'build' ]]; then
+if [[ "$CONTAINER_REGISTRY" == 'build' ]]; then
   $SCP -r "$WORKSPACE/contrail-container-builder" $SSH_USER@$build_ip:./
   $SCP "$my_dir/../__build-containers.sh" ${SSH_USER}@$build_ip:build-containers.sh
   set -o pipefail
@@ -50,13 +50,10 @@ if [[ "$REGISTRY" == 'build' ]]; then
   run_env="CONTRAIL_REGISTRY=$build_ip:5000 CONTRAIL_VERSION=$CONTRAIL_VERSION REGISTRY_INSECURE=1"
   CONTRAIL_REGISTRY="$build_ip:5000"
   CONTRAIL_CONTAINER_TAG="${OPENSTACK_VERSION}-${CONTRAIL_VERSION}"
-elif [[ "$REGISTRY" == 'opencontrailnightly' ]]; then
-  run_env="CONTRAIL_REGISTRY=opencontrailnightly CONTRAIL_CONTAINER_TAG=latest REGISTRY_INSECURE=0"
-  CONTRAIL_REGISTRY=opencontrailnightly
-  CONTRAIL_CONTAINER_TAG=latest
 else
-  echo "ERROR: unsupported REGISTRY = $REGISTRY"
-  exit 1
+  run_env="CONTRAIL_REGISTRY=$CONTAINER_REGISTRY CONTRAIL_CONTAINER_TAG=$CONTRAIL_VERSIOM REGISTRY_INSECURE=0"
+  CONTRAIL_REGISTRY=$CONTAINER_REGISTRY
+  CONTRAIL_CONTAINER_TAG=$CONTRAIL_VERSION
 fi
 
 # when compute has only one interface dpdk images must be pre-pulled to avoid errors when network is not initialized yet

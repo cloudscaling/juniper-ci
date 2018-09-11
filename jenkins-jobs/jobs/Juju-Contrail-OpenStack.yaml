@@ -394,7 +394,6 @@
     scm:
       - juniper-contrail-charms-branch
       - juniper-ci
-      - charm-heat
     builders:
       - shell: |
           #!/bin/bash -e
