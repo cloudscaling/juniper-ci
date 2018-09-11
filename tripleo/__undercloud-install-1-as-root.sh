@@ -100,14 +100,11 @@ python get-pip.py
 pip install -q virtualenv
 
 # add OpenStack repositories for centos, for rhel it is added in images
-# ==== TODO: OSP13: remove it after OSP13 release ====
-if [[ "$ENVIRONMENT_OS" == 'rhel' && "$OPENSTACK_VERSION" == 'queens' ]] ; then
-  yum-config-manager --enable rhelosp-rhel-7-server-opt
+if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   echo "INFO: install latest readhat images"
+  yum-config-manager --enable rhelosp-rhel-7-server-opt
   yum install -y rhosp-director-images rhosp-director-images-ipa
-fi
-# ==== TODO: OSP13: remove it after OSP13 release ====
-if [[ "$ENVIRONMENT_OS" != 'rhel' ]] ; then
+else
   tripeo_repos=`python -c 'import requests;r = requests.get("https://trunk.rdoproject.org/centos7-queens/current"); print r.text ' | grep python2-tripleo-repos | awk -F"href=\"" '{print $2}' | awk -F"\"" '{print $1}'`
   yum install -y https://trunk.rdoproject.org/centos7-queens/current/${tripeo_repos}
   tripleo-repos -b $OPENSTACK_VERSION current
