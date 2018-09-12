@@ -137,7 +137,7 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-add-relation "contrail5-controller:http-services" "haproxy"
   juju-add-relation "contrail5-controller:https-services" "haproxy"
   detect_subnet
-  vip=`python -c "import ipaddress; cidr=u'$subnet_cidr';  print ipaddress.ip_network(cidr).broadcast_address-1 "`
+  vip=`python -c "import netaddr; cidr=u'$subnet_cidr';  print netaddr.IPNetwork(cidr).broadcast-1 "`
   juju-set contrail5-controller vip=$vip
   juju-set keepalived virtual_ip=$vip
 fi
