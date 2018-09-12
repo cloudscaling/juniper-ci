@@ -128,19 +128,19 @@ if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
   juju-set contrail5-analytics control-network=$subnet_cidr
 fi
 
-#if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
-#  juju-deploy cs:~boucherv29/keepalived-19
-#  juju-deploy cs:$SERIES/haproxy --to $m0
-#  juju-expose haproxy
-#  juju-add-relation haproxy keepalived
+if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
+  juju-deploy cs:~boucherv29/keepalived-19
+  juju-deploy cs:$SERIES/haproxy --to $m0
+  juju-expose haproxy
+  juju-add-relation haproxy keepalived
 #  juju-add-relation "contrail5-analytics" "haproxy"
-#  juju-add-relation "contrail5-controller:http-services" "haproxy"
-#  juju-add-relation "contrail5-controller:https-services" "haproxy"
-#  TODO(tikitavi): change vip
-#  ip=`get-machine-ip-by-number $m0`
-#  juju-set contrail5-controller vip=$ip
-#  juju-set keepalived virtual_ip=$ip
-#fi
+  juju-add-relation "contrail5-controller:http-services" "haproxy"
+  juju-add-relation "contrail5-controller:https-services" "haproxy"
+  detect_subnet
+  vip=`python -c "import ipaddress; cidr=u'$subnet_cidr';  print ipaddress.ip_network(cidr).broadcast_address-1 "`
+  juju-set contrail5-controller vip=$vip
+  juju-set keepalived virtual_ip=$vip
+fi
 
 echo "INFO: Update endpoints $(date)"
 hack_openstack
