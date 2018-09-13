@@ -136,7 +136,10 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
 #  juju-add-relation "contrail5-analytics" "haproxy"
   juju-add-relation "contrail5-controller:http-services" "haproxy"
   juju-add-relation "contrail5-controller:https-services" "haproxy"
-  detect_subnet
+  #TODO: move to the function
+  subnet_id=`aws ec2 describe-subnets --filters Name=availability-zone,Values=$AZ Name=vpc-id,Values=$vpc_id Name=defaultForAz,Values=True --query 'Subnets[*].SubnetId' --output text`
+  subnet_cidr=`aws ec2 describe-subnets --subnet-id $subnet_id --query 'Subnets[0].CidrBlock' --output text`
+
   vip=`python -c "import netaddr; cidr=u'$subnet_cidr';  print netaddr.IPNetwork(cidr).broadcast-1 "`
   juju-set contrail5-controller vip=$vip
   juju-set keepalived virtual_ip=$vip
