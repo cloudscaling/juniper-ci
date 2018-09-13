@@ -28,7 +28,9 @@ if [[ $(id -u) -ne 0 ]]; then
   exit 1
 fi
 
-LOCAL_IP=`ip addr show ${HOST_IFACE} | awk '/inet /{print $2}' | cut -d '/' -f 1`
+export TARGET_SITE="demo"
+export NODE_NET_IFACE="ens4"
+LOCAL_IP=`ip addr show ${NODE_NET_IFACE} | awk '/inet /{print $2}' | cut -d '/' -f 1`
 export SHORT_HOSTNAME=$(hostname -s)
 
 # Updates the /etc/hosts file
@@ -46,8 +48,6 @@ fi
 export HOSTIP=$LOCAL_IP
 # x/32 will work for CEPH in a single node deploy.
 export HOSTCIDR=$LOCAL_IP/32
-export NODE_NET_IFACE="ens4"
-export TARGET_SITE="demo"
 
 # Changes DNS servers in common-addresses.yaml to the system's DNS servers
 get_dns_servers ()
