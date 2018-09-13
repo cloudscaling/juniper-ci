@@ -141,6 +141,7 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   subnet_cidr=`aws ec2 describe-subnets --subnet-id $subnet_id --query 'Subnets[0].CidrBlock' --output text`
 
   vip=`python -c "import netaddr; cidr=u'$subnet_cidr';  print netaddr.IPNetwork(cidr).broadcast-1 "`
+  echo "INFO: vip is set to $vip (for cidr $subnet_cidr)"
   juju-set contrail5-controller vip=$vip
   juju-set keepalived virtual_ip=$vip
 fi
