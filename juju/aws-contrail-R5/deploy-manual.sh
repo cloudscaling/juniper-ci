@@ -101,13 +101,11 @@ juju-expose neutron-api
 juju-deploy $PLACE/contrail-keystone-auth contrail5-keystone-auth --to $m6
 
 juju-deploy $PLACE/contrail-controller contrail5-controller --to $m6
-juju-expose contrail5-controller
 juju-set contrail5-controller auth-mode=$AAA_MODE "log-level=SYS_DEBUG" cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
 juju-deploy $PLACE/contrail-analyticsdb contrail5-analyticsdb --to $m6
 juju-set contrail5-analyticsdb "log-level=SYS_DEBUG" cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
 juju-deploy $PLACE/contrail-analytics contrail5-analytics --to $m6
 juju-set contrail5-analytics "log-level=SYS_DEBUG"
-juju-expose contrail5-analytics
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-add-unit contrail5-controller --to $m7
@@ -142,9 +140,11 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   subnet_id=`aws ec2 describe-subnets --filters Name=availability-zone,Values=$AZ Name=vpc-id,Values=$vpc_id Name=defaultForAz,Values=True --query 'Subnets[*].SubnetId' --output text`
   subnet_cidr=`aws ec2 describe-subnets --subnet-id $subnet_id --query 'Subnets[0].CidrBlock' --output text`
   vip=`python -c "import netaddr; print netaddr.IPNetwork(u'$subnet_cidr').broadcast-1 "`
-  echo "INFO: vip is set to $vip (for cidr $subnet_cidr)"
   juju-set contrail5-controller vip=$vip
   juju-set keepalived virtual_ip=$vip
+else
+  juju-expose contrail5-controller
+  juju-expose contrail5-analytics
 fi
 
 echo "INFO: Update endpoints $(date)"
