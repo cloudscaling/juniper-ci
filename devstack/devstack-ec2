@@ -11,7 +11,7 @@ ENABLED_SERVICES+=,s-proxy,s-object,s-container,s-account
 #swift3 service was removed due to https://bugs.launchpad.net/swift3/+bug/1786288
 #ENABLED_SERVICES+=,swift3
 
-enable_plugin ec2-api https://github.com/openstack/ec2-api
+enable_plugin ec2-api https://github.com/tikitavi/ec2-api
 enable_plugin neutron-tempest-plugin https://github.com/openstack/neutron-tempest-plugin
 TEMPEST_PLUGINS='/opt/stack/ec2api-tempest-plugin'
 
