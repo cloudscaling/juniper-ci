@@ -28,7 +28,7 @@ if [[ $(id -u) -ne 0 ]]; then
   exit 1
 fi
 
-LOCAL_IP=`ip addr | awk "/inet/ && /${HOST_IFACE}/{sub(/\/.*$/,\"\",\$2); print \$2}"`
+LOCAL_IP=`ip addr show ${HOST_IFACE} | awk '/inet /{print $2}' | cut -d '/' -f 1`
 export SHORT_HOSTNAME=$(hostname -s)
 
 # Updates the /etc/hosts file
