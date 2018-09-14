@@ -117,12 +117,12 @@ fi
 
 if [ "$DEPLOY_MODE" == 'ha' ] ; then
   juju-deploy cs:~boucherv29/keepalived-19
-  juju-deploy cs:$SERIES/haproxy --to $cont1
+  juju-deploy cs:$SERIES/haproxy --to $cont1 --config peering_mode=active-active
   juju-add-unit haproxy --to $cont2
   juju-add-unit haproxy --to $cont3
   juju-expose haproxy
   juju-add-relation haproxy:juju-info keepalived:juju-info
-#  juju-add-relation "contrail-analytics" "haproxy"
+  juju-add-relation "contrail-analytics" "haproxy"
   juju-add-relation "contrail-controller:http-services" "haproxy"
   juju-add-relation "contrail-controller:https-services" "haproxy"
   juju-set contrail-controller vip=$addr.254
