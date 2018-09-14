@@ -39,7 +39,9 @@ sed -i -e "s/%OPENSTACK_ORIGIN%/$OPENSTACK_ORIGIN/m" $BUNDLE
 sed -i -e "s/%PASSWORD%/$PASSWORD/m" $BUNDLE
 sed -i -e "s|%JUJU_REPO%|$JUJU_REPO|m" $BUNDLE
 sed -i -e "s|%AUTH_MODE%|$AAA_MODE|m" $BUNDLE
-sed -i -e "s|%VIP%|$VIP|m" $BUNDLE
+if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
+  sed -i -e "s|%VIP%|$VIP|m" $BUNDLE
+fi
 sed -i "s/\r/\n/g" $BUNDLE
 cp $BUNDLE "$log_dir/"
 
