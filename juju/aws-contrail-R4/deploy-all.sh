@@ -53,10 +53,6 @@ echo "INFO: Starting deployment process with vars:"
 env|sort
 
 if [[ "$inner_script" == "deploy-bundle.sh" ]] ; then
-  if [[ "$DEPLOY_AS_HA_MODE" == "true" ]] ; then
-    echo "ERROR: bundle deployment doesn't support HA mode"
-    exit 1
-  fi
   if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
     echo "ERROR: bundle deployment doesn't support deploying with additional interface"
     exit 1

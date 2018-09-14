@@ -20,8 +20,11 @@ function catch_errors_ce() {
 check_containers
 
 if [ "$DEPLOY_AS_HA_MODE" != 'false' ] ; then
-  echo "ERROR: Deploy from the bundle doesn't support HA mode."
-  exit 1
+  BUNDLE="$my_dir/openstack-contrail-amazon-ha.yaml"
+  # set VIP
+  subnet_id=`aws ec2 describe-subnets --filters Name=availability-zone,Values=$AZ Name=vpc-id,Values=$vpc_id Name=defaultForAz,Values=True --query 'Subnets[*].SubnetId' --output text`
+  subnet_cidr=`aws ec2 describe-subnets --subnet-id $subnet_id --query 'Subnets[0].CidrBlock' --output text`
+  VIP=`python -c "import netaddr; print(netaddr.IPNetwork(u'$subnet_cidr').broadcast - 1)"`
 fi
 
 jver="$(juju-version)"
@@ -56,6 +59,9 @@ else
   sed -i -e "s|%USE_EXTERNAL_RABBITMQ%|false|m" $BUNDLE
 fi
 sed -i -e "s|%AUTH_MODE%|$AAA_MODE|m" $BUNDLE
+if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
+  sed -i -e "s|%VIP%|$VIP|m" $BUNDLE
+fi
 sed -i "s/\r/\n/g" $BUNDLE
 cp $BUNDLE "$log_dir/"
 
