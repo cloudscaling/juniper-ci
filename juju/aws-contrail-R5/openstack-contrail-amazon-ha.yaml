@@ -189,9 +189,9 @@ relations:
 
   #haproxy
   - [ "haproxy:juju-info", "keepalived:juju-info" ]
-  - [ "contrail5-analytics", "haproxy" ]
-  - [ "contrail5-controller:http-services", "haproxy" ]
-  - ["contrail5-controller:https-services", "haproxy" ]
+  - [ "contrail-analytics", "haproxy" ]
+  - [ "contrail-controller:http-services", "haproxy" ]
+  - [ "contrail-controller:https-services", "haproxy" ]
 
 machines:
   "0":
