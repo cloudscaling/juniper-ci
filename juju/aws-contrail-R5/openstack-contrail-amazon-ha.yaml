@@ -128,7 +128,7 @@ services:
       - "5"
       - "6"
       - "7"
-      contrail-openstack:
+  contrail-openstack:
     charm: "%JUJU_REPO%/contrail-openstack"
     series: %SERIES%
   contrail-agent:
@@ -142,7 +142,7 @@ services:
     options:
       virtual_ip: "%VIP%"
   haproxy:
-    charm: "cs:$SERIES/haproxy"
+    charm: "cs:%SERIES%/haproxy"
     num_units: 3
     options:
       peering_mode: "active-active"
