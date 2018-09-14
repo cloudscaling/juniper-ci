@@ -128,18 +128,18 @@ fi
 
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-deploy cs:~boucherv29/keepalived-19
-  juju-deploy cs:$SERIES/haproxy --to $m6
+  juju-deploy cs:$SERIES/haproxy --to $m6 --config peering_mode=active-active
   juju-add-unit haproxy --to $m7
   juju-add-unit haproxy --to $m8
   juju-expose haproxy
   juju-add-relation haproxy:juju-info keepalived:juju-info
-#  juju-add-relation "contrail5-analytics" "haproxy"
+  juju-add-relation "contrail5-analytics" "haproxy"
   juju-add-relation "contrail5-controller:http-services" "haproxy"
   juju-add-relation "contrail5-controller:https-services" "haproxy"
-  #TODO: move to the function
+
   subnet_id=`aws ec2 describe-subnets --filters Name=availability-zone,Values=$AZ Name=vpc-id,Values=$vpc_id Name=defaultForAz,Values=True --query 'Subnets[*].SubnetId' --output text`
   subnet_cidr=`aws ec2 describe-subnets --subnet-id $subnet_id --query 'Subnets[0].CidrBlock' --output text`
-  vip=`python -c "import netaddr; print netaddr.IPNetwork(u'$subnet_cidr').broadcast-1 "`
+  vip=`python -c "import netaddr; print(netaddr.IPNetwork(u'$subnet_cidr').broadcast - 1)"`
   juju-set contrail5-controller vip=$vip
   juju-set keepalived virtual_ip=$vip
 else
