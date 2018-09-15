@@ -178,7 +178,7 @@ global:
     tags:
       kafka: "$CONTAINER_REGISTRY/contrail-external-kafka:$tag"
       cassandra: "$CONTAINER_REGISTRY/contrail-external-cassandra:$tag"
-      redis: "redis:4.0.2"
+      redis: "$CONTAINER_REGISTRY/contrail-external-redis:$tag"
       zookeeper: "$CONTAINER_REGISTRY/contrail-external-zookeeper:$tag"
       contrail_control: "$CONTAINER_REGISTRY/contrail-controller-control-control:$tag"
       control_dns: "$CONTAINER_REGISTRY/contrail-controller-control-dns:$tag"
