@@ -677,6 +677,11 @@ cat <<EOF >> $misc_opts
   ContrailContainerTag: $BUILD_TAG
 EOF
 fi
+if [[ "$DPDK" == 'true' ]] ; then
+cat <<EOF >> $misc_opts
+  ContrailDpdkHugepages1GB: 2
+EOF
+fi
 
 # IMPORTANT: The DNS domain used for the hosts should match the dhcp_domain configured in the Undercloud neutron.
 if (( CONT_COUNT < 2 )) ; then
