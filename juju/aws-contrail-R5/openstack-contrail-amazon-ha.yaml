@@ -95,50 +95,62 @@ services:
   contrail-controller:
     charm: "%JUJU_REPO%/contrail-controller"
     series: %SERIES%
-    num_units: 1
+    num_units: 3
     options:
       log-level: "SYS_DEBUG"
-      use-external-rabbitmq: "%USE_EXTERNAL_RABBITMQ%"
       auth-mode: "%AUTH_MODE%"
-    expose: true
+      cassandra-minimum-diskgb: "4"
+      cassandra-jvm-extra-opts: "-Xms1g -Xmx2g"
+      vip: "%VIP%"
     to:
       - "5"
+      - "6"
+      - "7"
   contrail-analyticsdb:
     charm: "%JUJU_REPO%/contrail-analyticsdb"
     series: %SERIES%
-    num_units: 1
+    num_units: 3
     options:
       log-level: "SYS_DEBUG"
-    expose: true
+      cassandra-minimum-diskgb: "4"
+      cassandra-jvm-extra-opts: "-Xms1g -Xmx2g"
     to:
       - "5"
+      - "6"
+      - "7"
   contrail-analytics:
     charm: "%JUJU_REPO%/contrail-analytics"
     series: %SERIES%
-    num_units: 1
+    num_units: 3
     options:
       log-level: "SYS_DEBUG"
-    expose: true
     to:
       - "5"
+      - "6"
+      - "7"
   contrail-openstack:
     charm: "%JUJU_REPO%/contrail-openstack"
     series: %SERIES%
-    options:
-      install-sources: "deb http://%REPO_IP%/ubuntu %SERIES% main"
-      install-keys: |
-        - |
-%REPO_KEY%
   contrail-agent:
     charm: "%JUJU_REPO%/contrail-agent"
     series: %SERIES%
     options:
       log-level: "SYS_DEBUG"
-      install-sources: "deb http://%REPO_IP%/ubuntu %SERIES% main"
-      install-keys: |
-        - |
-%REPO_KEY%
 
+  keepalived:
+    charm: "cs:~boucherv29/keepalived-19"
+    options:
+      virtual_ip: "%VIP%"
+  haproxy:
+    charm: "cs:%SERIES%/haproxy"
+    num_units: 3
+    options:
+      peering_mode: "active-active"
+    expose: true
+    to:
+      - "5"
+      - "6"
+      - "7"
 
 relations:
   # openstack
@@ -175,6 +187,12 @@ relations:
   - [ "contrail-agent:juju-info", "nova-compute:juju-info" ]
   - [ "contrail-agent", "contrail-controller"]
 
+  #haproxy
+  - [ "haproxy:juju-info", "keepalived:juju-info" ]
+  - [ "contrail-analytics", "haproxy" ]
+  - [ "contrail-controller:http-services", "haproxy" ]
+  - [ "contrail-controller:https-services", "haproxy" ]
+
 machines:
   "0":
     series: %SERIES%
@@ -192,5 +210,11 @@ machines:
     series: %SERIES%
     constraints: mem=8G cores=2 root-disk=40G
   "5":
+    series: %SERIES%
+    constraints: mem=15G cores=2 root-disk=300G
+  "6":
+    series: %SERIES%
+    constraints: mem=15G cores=2 root-disk=300G
+  "7":
     series: %SERIES%
     constraints: mem=15G cores=2 root-disk=300G

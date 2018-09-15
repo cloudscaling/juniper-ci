@@ -72,7 +72,7 @@ juju-deploy cs:$SERIES/keystone --to lxd:$cont0
 juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "preferred-api-version=3"
 juju-expose keystone
 
-juju-deploy cs:$SERIES/charm-heat --to lxd:$cont0
+juju-deploy cs:$SERIES/heat --to lxd:$cont0
 juju-set heat "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose heat
 
@@ -117,12 +117,12 @@ fi
 
 if [ "$DEPLOY_MODE" == 'ha' ] ; then
   juju-deploy cs:~boucherv29/keepalived-19
-  juju-deploy cs:$SERIES/haproxy --to $cont1
+  juju-deploy cs:$SERIES/haproxy --to $cont1 --config peering_mode=active-active
   juju-add-unit haproxy --to $cont2
   juju-add-unit haproxy --to $cont3
   juju-expose haproxy
   juju-add-relation haproxy:juju-info keepalived:juju-info
-#  juju-add-relation "contrail-analytics" "haproxy"
+  juju-add-relation "contrail-analytics" "haproxy"
   juju-add-relation "contrail-controller:http-services" "haproxy"
   juju-add-relation "contrail-controller:https-services" "haproxy"
   juju-set contrail-controller vip=$addr.254
