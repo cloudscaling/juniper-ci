@@ -3,7 +3,7 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
-ssh_key_dir="/home/jenkins"
+ssh_key_dir="/home/jenkins/.ssh"
 
 # common setting from create_env.sh
 if [[ -z "$NUM" ]] ; then
@@ -28,7 +28,7 @@ NETDEV=${NETDEV:-'eth1'}
 # on kvm host do once: create stack user, create home directory, add him to libvirtd group
 ((env_addr=BASE_ADDR+NUM*10))
 ip_addr="192.168.${env_addr}.2"
-ssh_opts="-i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+ssh_opts="-i $ssh_key_dir/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 ssh_addr="root@${ip_addr}"
 
 source "$my_dir/../common/virsh/functions"

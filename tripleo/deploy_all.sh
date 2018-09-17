@@ -8,7 +8,7 @@ check_script="$1"
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
-ssh_key_dir="/home/jenkins"
+ssh_key_dir="/home/jenkins/.ssh"
 
 NUM=${NUM:-0}
 NETWORK_ISOLATION=${NETWORK_ISOLATION:-'single'}
@@ -16,7 +16,7 @@ NETWORK_ISOLATION=${NETWORK_ISOLATION:-'single'}
 BASE_ADDR=${BASE_ADDR:-172}
 ((env_addr=BASE_ADDR+NUM*10))
 ip_addr="192.168.${env_addr}.2"
-ssh_opts="-i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+ssh_opts="-i $ssh_key_dir/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 ssh_addr="root@${ip_addr}"
 
 # TODO: place all definitions here
@@ -73,9 +73,6 @@ fi
 
 echo "INFO: creating environment $(date)"
 "$my_dir"/create_env.sh
-if [[ -n "$SUDO_USER" ]] ; then
-  chown $SUDO_USER:$SUDO_GID $ssh_key_dir/kp-$NUM*
-fi
 echo "INFO: installing undercloud $(date)"
 "$my_dir"/undercloud-install.sh
 
