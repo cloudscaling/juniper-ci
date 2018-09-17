@@ -7,9 +7,6 @@ source "$my_dir/functions"
 
 log_dir="$WORKSPACE/logs"
 BUNDLE="$my_dir/openstack-contrail-amazon.yaml"
-if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
-  BUNDLE="$my_dir/openstack-contrail-amazon-ha.yaml"
-fi
 
 trap 'catch_errors_ce $LINENO' ERR EXIT
 function catch_errors_ce() {
@@ -54,10 +51,6 @@ else
   sed -i -e "s|%USE_EXTERNAL_RABBITMQ%|false|m" $BUNDLE
 fi
 sed -i -e "s|%AUTH_MODE%|$AAA_MODE|m" $BUNDLE
-if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
-  vip=`detect_last_ip`
-  sed -i -e "s|%VIP%|$vip|m" $BUNDLE
-fi
 sed -i "s/\r/\n/g" $BUNDLE
 cp $BUNDLE "$log_dir/"
 

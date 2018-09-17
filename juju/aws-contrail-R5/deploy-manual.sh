@@ -38,15 +38,7 @@ m5=$(create_machine $general_type)
 echo "INFO: General machine created: $m5"
 m6=$(create_machine $contrail_type)
 echo "INFO: Contrail machine created: $m6"
-if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
-  m7=$(create_machine $contrail_type)
-  echo "INFO: Contrail machine created: $m7"
-  m8=$(create_machine $contrail_type)
-  echo "INFO: Contrail machine created: $m8"
-  machines=($m1 $m2 $m3 $m4 $m5 $m6 $m7 $m8)
-else
-  machines=($m1 $m2 $m3 $m4 $m5 $m6)
-fi
+machines=($m1 $m2 $m3 $m4 $m5 $m6)
 
 wait_for_machines ${machines[@]}
 if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
@@ -93,42 +85,17 @@ juju-set neutron-api "debug=true" "manage-neutron-plugin-legacy-mode=false" "ope
 juju-set nova-cloud-controller "network-manager=Neutron"
 juju-expose neutron-api
 
-if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
-  vip=`detect_last_ip`
-  echo "INFO: detected VIP: $vip"
-  juju-deploy cs:~boucherv29/keepalived-19 --config virtual_ip=$vip
-  juju-deploy cs:$SERIES/haproxy --to $m6 --config peering_mode=active-active
-  juju-add-unit haproxy --to $m7
-  juju-add-unit haproxy --to $m8
-  juju-expose haproxy
-  juju-add-relation haproxy:juju-info keepalived:juju-info
-  controller_params="--config vip=$vip"
-fi
-
 # Contrail
 juju-deploy $PLACE/contrail-keystone-auth contrail5-keystone-auth --to $m6
 
-juju-deploy $PLACE/contrail-controller contrail5-controller --to $m6 $controller_params
+juju-deploy $PLACE/contrail-controller contrail5-controller --to $m6
 juju-set contrail5-controller auth-mode=$AAA_MODE "log-level=SYS_DEBUG" cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
+juju-expose contrail5-controller
 juju-deploy $PLACE/contrail-analyticsdb contrail5-analyticsdb --to $m6
 juju-set contrail5-analyticsdb "log-level=SYS_DEBUG" cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
 juju-deploy $PLACE/contrail-analytics contrail5-analytics --to $m6
 juju-set contrail5-analytics "log-level=SYS_DEBUG"
-
-if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
-  juju-add-unit contrail5-controller --to $m7
-  juju-add-unit contrail5-controller --to $m8
-  juju-add-unit contrail5-analytics --to $m7
-  juju-add-unit contrail5-analytics --to $m8
-  juju-add-unit contrail5-analyticsdb --to $m7
-  juju-add-unit contrail5-analyticsdb --to $m8
-  juju-add-relation "contrail5-analytics" "haproxy"
-  juju-add-relation "contrail5-controller:http-services" "haproxy"
-  juju-add-relation "contrail5-controller:https-services" "haproxy"
-else
-  juju-expose contrail5-controller
-  juju-expose contrail5-analytics
-fi
+juju-expose contrail5-analytics
 
 juju-deploy $PLACE/contrail-openstack contrail5-openstack
 juju-deploy $PLACE/contrail-agent contrail5-agent

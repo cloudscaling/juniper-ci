@@ -1,11 +1,5 @@
 #!/bin/bash -e
 
-function detect_last_ip() {
-  local subnet_id=`aws ec2 describe-subnets --filters Name=availability-zone,Values=$AZ Name=vpc-id,Values=$vpc_id Name=defaultForAz,Values=True --query 'Subnets[*].SubnetId' --output text`
-  local subnet_cidr=`aws ec2 describe-subnets --subnet-id $subnet_id --query 'Subnets[0].CidrBlock' --output text`
-  python -c "import netaddr; print(netaddr.IPNetwork(u'$subnet_cidr').broadcast - 1)"
-}
-
 function detect_subnet() {
   local ids=(`aws ec2 describe-subnets --filters Name=availability-zone,Values=$AZ Name=vpc-id,Values=$vpc_id Name=defaultForAz,Values=false --query 'Subnets[*].SubnetId' --output text`)
   if [[ ${#ids[@]} == 0 ]] ; then

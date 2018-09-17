@@ -39,7 +39,6 @@ export JOB_VERSION=R4
 export SERIES="${SERIES:-trusty}"
 export VERSION="${VERSION:-mitaka}"
 export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
-export DEPLOY_AS_HA_MODE="${DEPLOY_AS_HA_MODE:-false}"
 export USE_SSL_OS="${USE_SSL_OS:-false}"
 export USE_SSL_CONTRAIL="${USE_SSL_CONTRAIL:-false}"
 export USE_ADDITIONAL_INTERFACE="${USE_ADDITIONAL_INTERFACE:-false}"
