@@ -78,8 +78,7 @@ echo "INFO: Deploy all $(date)"
 juju-deploy cs:$SERIES/ntp
 
 juju-deploy cs:$SERIES/rabbitmq-server --to $m1
-juju-deploy cs:$SERIES/percona-cluster mysql --to $m1
-juju-set mysql "root-password=$PASSWORD" "max-connections=1500"
+juju-deploy cs:$SERIES/percona-cluster mysql --config "root-password=$PASSWORD" --config "max-connections=1500" --to $m1
 
 juju-deploy cs:$SERIES/openstack-dashboard --to $m1
 juju-set openstack-dashboard "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
@@ -107,10 +106,22 @@ juju-set neutron-api "debug=true" "manage-neutron-plugin-legacy-mode=false" "ope
 juju-set nova-cloud-controller "network-manager=Neutron"
 juju-expose neutron-api
 
+if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
+  vip=`detect_last_ip`
+  echo "INFO: detected VIP: $vip"
+  juju-deploy cs:~boucherv29/keepalived-19 --config virtual_ip=$vip
+  juju-deploy cs:$SERIES/haproxy --to $m6 --config peering_mode=active-active
+  juju-add-unit haproxy --to $m7
+  juju-add-unit haproxy --to $m8
+  juju-expose haproxy
+  juju-add-relation haproxy:juju-info keepalived:juju-info
+  controller_params="--config vip=$vip"
+fi
+
 # Contrail
 juju-deploy $PLACE/contrail-keystone-auth contrail4-keystone-auth --to $m6
 
-juju-deploy $PLACE/contrail-controller contrail4-controller --to $m6
+juju-deploy $PLACE/contrail-controller contrail4-controller --to $m6 $controller_params
 juju-set contrail4-controller auth-mode=$AAA_MODE "log-level=SYS_DEBUG"
 if [ "$USE_EXTERNAL_RABBITMQ" == 'true' ]; then
   juju-set contrail4-controller "use-external-rabbitmq=true"
@@ -127,6 +138,12 @@ if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
   juju-add-unit contrail4-analytics --to $m8
   juju-add-unit contrail4-analyticsdb --to $m7
   juju-add-unit contrail4-analyticsdb --to $m8
+  juju-add-relation "contrail4-analytics" "haproxy"
+  juju-add-relation "contrail4-controller:http-services" "haproxy"
+  juju-add-relation "contrail4-controller:https-services" "haproxy"
+else
+  juju-expose contrail4-controller
+  juju-expose contrail4-analytics
 fi
 
 cp "$my_dir/../common/repo_config.yaml.tmpl" "repo_config_co.yaml"
@@ -150,27 +167,6 @@ if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
   juju-set contrail4-controller control-network=$subnet_cidr
   juju-set contrail4-analyticsdb control-network=$subnet_cidr
   juju-set contrail4-analytics control-network=$subnet_cidr
-fi
-
-if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
-  juju-deploy cs:~boucherv29/keepalived-19
-  juju-deploy cs:$SERIES/haproxy --to $m6 --config peering_mode=active-active
-  juju-add-unit haproxy --to $m7
-  juju-add-unit haproxy --to $m8
-  juju-expose haproxy
-  juju-add-relation "haproxy:juju-info" "keepalived:juju-info"
-  juju-add-relation "contrail4-analytics" "haproxy"
-  juju-add-relation "contrail4-controller:http-services" "haproxy"
-  juju-add-relation "contrail4-controller:https-services" "haproxy"
-
-  subnet_id=`aws ec2 describe-subnets --filters Name=availability-zone,Values=$AZ Name=vpc-id,Values=$vpc_id Name=defaultForAz,Values=True --query 'Subnets[*].SubnetId' --output text`
-  subnet_cidr=`aws ec2 describe-subnets --subnet-id $subnet_id --query 'Subnets[0].CidrBlock' --output text`
-  vip=`python -c "import netaddr; print(netaddr.IPNetwork(u'$subnet_cidr').broadcast - 1)"`
-  juju-set contrail4-controller vip=$vip
-  juju-set keepalived virtual_ip=$vip
-else
-  juju-expose contrail4-controller
-  juju-expose contrail4-analytics
 fi
 
 echo "INFO: Update endpoints $(date)"

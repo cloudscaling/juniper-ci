@@ -7,6 +7,9 @@ source "$my_dir/functions"
 
 log_dir="$WORKSPACE/logs"
 BUNDLE="$my_dir/openstack-contrail-amazon.yaml"
+if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
+  BUNDLE="$my_dir/openstack-contrail-amazon-ha.yaml"
+fi
 
 trap 'catch_errors_ce $LINENO' ERR EXIT
 function catch_errors_ce() {
@@ -18,14 +21,6 @@ function catch_errors_ce() {
 
 # it also sets variables with names
 check_containers
-
-if [ "$DEPLOY_AS_HA_MODE" != 'false' ] ; then
-  BUNDLE="$my_dir/openstack-contrail-amazon-ha.yaml"
-  # set VIP
-  subnet_id=`aws ec2 describe-subnets --filters Name=availability-zone,Values=$AZ Name=vpc-id,Values=$vpc_id Name=defaultForAz,Values=True --query 'Subnets[*].SubnetId' --output text`
-  subnet_cidr=`aws ec2 describe-subnets --subnet-id $subnet_id --query 'Subnets[0].CidrBlock' --output text`
-  VIP=`python -c "import netaddr; print(netaddr.IPNetwork(u'$subnet_cidr').broadcast - 1)"`
-fi
 
 jver="$(juju-version)"
 if [[ "$jver" == 1 ]] ; then
@@ -60,7 +55,8 @@ else
 fi
 sed -i -e "s|%AUTH_MODE%|$AAA_MODE|m" $BUNDLE
 if [ "$DEPLOY_AS_HA_MODE" == 'true' ] ; then
-  sed -i -e "s|%VIP%|$VIP|m" $BUNDLE
+  vip=`detect_last_ip`
+  sed -i -e "s|%VIP%|$vip|m" $BUNDLE
 fi
 sed -i "s/\r/\n/g" $BUNDLE
 cp $BUNDLE "$log_dir/"
