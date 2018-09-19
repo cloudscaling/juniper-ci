@@ -200,7 +200,6 @@ global:
       vrouter_init_kernel: "$CONTAINER_REGISTRY/contrail-vrouter-kernel-init:$tag"
       vrouter_dpdk: "$CONTAINER_REGISTRY/contrail-vrouter-agent-dpdk:$tag"
       vrouter_init_dpdk: "$CONTAINER_REGISTRY/contrail-vrouter-kernel-init-dpdk:$tag"
-      dpdk_watchdog: "$CONTAINER_REGISTRY/contrail-vrouter-net-watchdog:$tag"
       nodemgr: "$CONTAINER_REGISTRY/contrail-nodemgr:$tag"
       contrail_status: "$CONTAINER_REGISTRY/contrail-status:$tag"
       node_init: "$CONTAINER_REGISTRY/contrail-node-init:$tag"

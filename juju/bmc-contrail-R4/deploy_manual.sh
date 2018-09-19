@@ -103,6 +103,10 @@ juju-deploy cs:$SERIES/keystone --to lxd:$cont0
 juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "preferred-api-version=3"
 juju-expose keystone
 
+juju-deploy cs:$SERIES/heat --to lxd:$cont0
+juju-set heat "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+juju-expose heat
+
 juju-deploy cs:$SERIES/nova-compute --to $comp1
 juju-add-unit nova-compute --to $comp2
 juju-set nova-compute "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "virt-type=kvm" "enable-resize=True" "enable-live-migration=True" "migration-auth-type=ssh"
@@ -116,7 +120,17 @@ juju-expose neutron-api
 # Contrail
 juju-deploy $PLACE/contrail-keystone-auth --to lxd:$cont1
 
-juju-deploy $PLACE/contrail-controller --to $cont1
+if [ "$DEPLOY_MODE" == 'ha' ] ; then
+  juju-deploy cs:~boucherv29/keepalived-19 --config virtual_ip=$addr.254
+  juju-deploy cs:$SERIES/haproxy --to $cont1 --config peering_mode=active-active
+  juju-add-unit haproxy --to $cont2
+  juju-add-unit haproxy --to $cont3
+  juju-expose haproxy
+  juju-add-relation haproxy:juju-info keepalived:juju-info
+  controller_params="--config vip=$addr.254"
+fi
+
+juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params
 juju-expose contrail-controller
 juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4" image-name="$controller_image_name" image-tag="$controller_image_tag" docker-registry="$repo_ip:5000" docker-user="$docker_user" docker-password="$docker_password"
 juju-deploy $PLACE/contrail-analyticsdb --to $cont1
@@ -132,6 +146,9 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   juju-add-unit contrail-analytics --to $cont3
   juju-add-unit contrail-analyticsdb --to $cont2
   juju-add-unit contrail-analyticsdb --to $cont3
+  juju-add-relation "contrail-analytics" "haproxy"
+  juju-add-relation "contrail-controller:http-services" "haproxy"
+  juju-add-relation "contrail-controller:https-services" "haproxy"
 fi
 
 cp "$my_dir/../common/repo_config.yaml.tmpl" "repo_config_co.yaml"
@@ -154,18 +171,6 @@ if [[ "$USE_DPDK" == "true" ]] ; then
 fi
 juju-set contrail-agent vhost-mtu=1540 physical-interface=$IF2
 
-if [ "$DEPLOY_MODE" == 'ha' ] ; then
-  juju-deploy cs:$SERIES/haproxy --to lxd:$cont0
-  juju-expose haproxy
-  juju-add-relation "contrail-analytics" "haproxy"
-  juju-add-relation "contrail-controller:http-services" "haproxy"
-  juju-add-relation "contrail-controller:https-services" "haproxy"
-  mch=`get_machines_index_by_service haproxy`
-  ip=`get-machine-ip-by-number $mch`
-  echo "INFO: HAProxy for Contrail services is on machine $mch / IP $ip"
-  juju-set contrail-controller vip=$ip
-fi
-
 detect_machines
 wait_for_machines $m1 $m2 $m3 $m4 $m5
 echo "INFO: Apply SSL flag if set $(date)"
@@ -175,6 +180,9 @@ echo "INFO: Add relations $(date)"
 juju-add-relation "keystone:shared-db" "mysql:shared-db"
 juju-add-relation "glance:shared-db" "mysql:shared-db"
 juju-add-relation "keystone:identity-service" "glance:identity-service"
+juju-add-relation "heat:shared-db" "mysql:shared-db"
+juju-add-relation "heat:amqp" "rabbitmq-server:amqp"
+juju-add-relation "heat" "keystone"
 juju-add-relation "nova-cloud-controller:image-service" "glance:image-service"
 juju-add-relation "nova-cloud-controller:identity-service" "keystone:identity-service"
 juju-add-relation "nova-cloud-controller:cloud-compute" "nova-compute:cloud-compute"
@@ -190,7 +198,6 @@ juju-add-relation "neutron-api:identity-service" "keystone:identity-service"
 juju-add-relation "neutron-api:amqp" "rabbitmq-server:amqp"
 
 juju-add-relation "contrail-controller" "ntp"
-juju-add-relation "neutron-api" "ntp"
 juju-add-relation "nova-compute:juju-info" "ntp:juju-info"
 
 juju-add-relation "contrail-controller" "contrail-keystone-auth"
@@ -201,6 +208,7 @@ juju-add-relation "contrail-analytics" "contrail-analyticsdb"
 
 juju-add-relation "contrail-openstack" "neutron-api"
 juju-add-relation "contrail-openstack" "nova-compute"
+juju-add-relation "contrail-openstack" "heat"
 juju-add-relation "contrail-openstack" "contrail-controller"
 
 juju-add-relation "contrail-agent:juju-info" "nova-compute:juju-info"

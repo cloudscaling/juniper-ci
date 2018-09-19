@@ -89,7 +89,17 @@ juju-expose neutron-api
 # Contrail
 juju-deploy $PLACE/contrail-keystone-auth --to lxd:$cont1
 
-juju-deploy $PLACE/contrail-controller --to $cont1
+if [ "$DEPLOY_MODE" == 'ha' ] ; then
+  juju-deploy cs:~boucherv29/keepalived-19 --config virtual_ip=$addr.254
+  juju-deploy cs:$SERIES/haproxy --to $cont1 --config peering_mode=active-active
+  juju-add-unit haproxy --to $cont2
+  juju-add-unit haproxy --to $cont3
+  juju-expose haproxy
+  juju-add-relation haproxy:juju-info keepalived:juju-info
+  controller_params="--config vip=$addr.254"
+fi
+
+juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params
 juju-expose contrail-controller
 juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 juju-deploy $PLACE/contrail-analyticsdb --to $cont1
@@ -105,6 +115,9 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   juju-add-unit contrail-analytics --to $cont3
   juju-add-unit contrail-analyticsdb --to $cont2
   juju-add-unit contrail-analyticsdb --to $cont3
+  juju-add-relation "contrail-analytics" "haproxy"
+  juju-add-relation "contrail-controller:http-services" "haproxy"
+  juju-add-relation "contrail-controller:https-services" "haproxy"
 fi
 
 juju-deploy $PLACE/contrail-openstack
@@ -113,20 +126,6 @@ juju-deploy $PLACE/contrail-agent
 juju-set contrail-agent physical-interface=$IF2 docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 if [[ "$USE_DPDK" == "true" ]] ; then
   juju-set contrail-agent dpdk=True dpdk-coremask=1,2 dpdk-main-mempool-size=16384
-fi
-
-if [ "$DEPLOY_MODE" == 'ha' ] ; then
-  juju-deploy cs:~boucherv29/keepalived-19
-  juju-deploy cs:$SERIES/haproxy --to $cont1 --config peering_mode=active-active
-  juju-add-unit haproxy --to $cont2
-  juju-add-unit haproxy --to $cont3
-  juju-expose haproxy
-  juju-add-relation haproxy:juju-info keepalived:juju-info
-  juju-add-relation "contrail-analytics" "haproxy"
-  juju-add-relation "contrail-controller:http-services" "haproxy"
-  juju-add-relation "contrail-controller:https-services" "haproxy"
-  juju-set contrail-controller vip=$addr.254
-  juju-set keepalived virtual_ip=$addr.254
 fi
 
 detect_machines

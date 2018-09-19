@@ -127,7 +127,7 @@ global:
     tags:
       kafka: "$CONTAINER_REGISTRY/contrail-external-kafka:$tag"
       cassandra: "$CONTAINER_REGISTRY/contrail-external-cassandra:$tag"
-      redis: "redis:4.0.2"
+      redis: "$CONTAINER_REGISTRY/contrail-external-redis:$tag"
       zookeeper: "$CONTAINER_REGISTRY/contrail-external-zookeeper:$tag"
       contrail_control: "$CONTAINER_REGISTRY/contrail-controller-control-control:$tag"
       control_dns: "$CONTAINER_REGISTRY/contrail-controller-control-dns:$tag"
@@ -149,7 +149,6 @@ global:
       vrouter_init_kernel: "$CONTAINER_REGISTRY/contrail-vrouter-kernel-init:$tag"
       vrouter_dpdk: "$CONTAINER_REGISTRY/contrail-vrouter-agent-dpdk:$tag"
       vrouter_init_dpdk: "$CONTAINER_REGISTRY/contrail-vrouter-kernel-init-dpdk:$tag"
-      dpdk_watchdog: "$CONTAINER_REGISTRY/contrail-vrouter-net-watchdog:$tag"
       nodemgr: "$CONTAINER_REGISTRY/contrail-nodemgr:$tag"
       contrail_status: "$CONTAINER_REGISTRY/contrail-status:$tag"
       node_init: "$CONTAINER_REGISTRY/contrail-node-init:$tag"
