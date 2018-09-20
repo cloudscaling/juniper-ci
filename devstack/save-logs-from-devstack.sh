@@ -19,6 +19,5 @@ mkdir -p logs
 $SCP $SSH_DEST:logs.tar.gz logs/logs.tar.gz
 cd logs
 tar -xvf logs.tar.gz
+rm -f logs.tar.gz
 cd ..
-
-
