@@ -4,7 +4,8 @@
     defaults: global
     node: master
     properties:
-      - build-discarder
+      - build-discarder:
+          num-to-keep: 10
     scm:
       - juniper-ci
     triggers:
@@ -14,6 +15,9 @@
           #!/bin/bash -e
           ./juniper-ci/devstack/run.sh devstack-{project} {tests} {concurrency}
     publishers:
+      - archive:
+          artifacts: 'logs/**'
+          allow-empty: true
       - junit:
           results: test_result.xml
 
