@@ -27,6 +27,7 @@
           allow-empty: true
       - junit:
           results: test_result.xml
+          allow-empty-results: true
 
 - project:
    name: devstack-extended
