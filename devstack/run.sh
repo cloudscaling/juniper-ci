@@ -31,6 +31,13 @@ function catch_errors() {
   exit $exit_code
 }
 
+if [[ "$CLEAN_BEFORE" == 'true' || "$CLEAN_BEFORE" == 'clean_and_exit' ]] ; then
+  $my_dir/cleanup-devstack-cloud.sh
+  if [[ "$CLEAN_BEFORE" == 'clean_and_exit' ]] ; then
+    exit
+  fi
+fi
+
 $my_dir/create-instance-for-devstack-cloud.sh
 
 $my_dir/install-devstack.sh $my_dir/$localrc_file
