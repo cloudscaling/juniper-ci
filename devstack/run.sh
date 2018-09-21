@@ -26,7 +26,9 @@ function catch_errors() {
   echo "Errors!" $exit_code $@
 
   $my_dir/save-logs-from-devstack.sh
-  $my_dir/cleanup-devstack-cloud.sh
+  if [[ "$CLEAN_ENV" == 'always' ]] ; then
+    $my_dir/cleanup-devstack-cloud.sh
+  fi
 
   exit $exit_code
 }
@@ -45,4 +47,6 @@ timeout -s 9 3h $my_dir/run-tempest-inside-devstack.sh $test_suite $concurrency
 
 trap - ERR
 $my_dir/save-logs-from-devstack.sh
-$my_dir/cleanup-devstack-cloud.sh
+if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
+  $my_dir/cleanup-devstack-cloud.sh
+fi

@@ -10,6 +10,12 @@
             - 'false'
             - 'true'
             - clean_and_exit
+      - choice:
+          name: CLEAN_ENV
+          choices:
+            - always
+            - on_success
+            - never
     properties:
       - build-discarder:
           num-to-keep: 10
