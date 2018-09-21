@@ -164,11 +164,10 @@ echo "INFO: extra heat args: $OSH_EXTRA_HELM_ARGS_HEAT"
 ./tools/deployment/multinode/100-glance.sh
 ./tools/deployment/multinode/110-cinder.sh
 ./tools/deployment/multinode/131-libvirt-opencontrail.sh
-./tools/deployment/multinode/141-compute-kit-opencontrail.sh
 
 cd $CHD_PATH
 make
-kubectl replace -f ${CHD_PATH}/rbac/cluster-admin.yaml
+#kubectl replace -f ${CHD_PATH}/rbac/cluster-admin.yaml
 
 controller_nodes=`echo $nodes_cont_ips | tr ' ' ','`
 control_nodes=`echo $nodes_cont_ips_1 | tr ' ' ','`
@@ -228,17 +227,18 @@ helm install --name contrail-controller ${CHD_PATH}/contrail-controller --namesp
 helm install --name contrail-vrouter ${CHD_PATH}/contrail-vrouter --namespace=contrail --values=/tmp/contrail.yaml
 ${OSH_PATH}/tools/deployment/common/wait-for-pods.sh contrail
 
+# lets wait for services
+sleep 60
+sudo contrail-status
+
 cd ${OSH_PATH}
+./tools/deployment/multinode/141-compute-kit-opencontrail.sh
 
 # workaround steps. remove later.
 make build-helm-toolkit
 make build-heat
 
 ./tools/deployment/developer/nfs/091-heat-opencontrail.sh
-
-# lets wait for services
-sleep 60
-sudo contrail-status
 
 sudo apt-get install -fy virtualenv &>> $my_dir/logs/apt.log
 export OS_CLOUD=openstack_helm
