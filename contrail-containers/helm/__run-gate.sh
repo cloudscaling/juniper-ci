@@ -232,7 +232,7 @@ sleep 60
 sudo contrail-status
 
 cd ${OSH_PATH}
-./tools/deployment/multinode/141-compute-kit-opencontrail.sh
+./tools/deployment/multinode/141-compute-kit-opencontrail.sh || /bin/true
 
 # workaround steps. remove later.
 make build-helm-toolkit
