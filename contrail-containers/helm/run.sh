@@ -56,7 +56,7 @@ for ip in $nodes_ips ; do
   $SSH_CMD $SSH_USER@$ip "sudo mkdir -p /opt && sudo chown $SSH_USER /opt"
   for repo in 'openstack-helm' 'openstack-helm-infra' 'contrail-helm-deployer' ; do
     org='Juniper'
-    if [[ "$repo" == 'contrail-helm-deployer' ]]; then org='progmaticlab' ; fi
+    #if [[ "$repo" == 'contrail-helm-deployer' ]]; then org='progmaticlab' ; fi
     $SSH_CMD $SSH_USER@$ip "git clone https://github.com/$org/${repo}.git /opt/$repo"
     if echo "$PATCHSET_LIST" | grep -q "/${repo} " ; then
       patchset=`echo "$PATCHSET_LIST" | grep "/${repo} "`
