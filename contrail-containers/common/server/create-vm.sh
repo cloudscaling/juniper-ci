@@ -68,8 +68,9 @@ create_pool $POOL_NAME
 
 function define_node() {
   local vm_name=$1
-  local mem=$2
-  local mac_octet=$3
+  local vcpus=$2
+  local mem=$3
+  local mac_octet=$4
   local vol_name="$vm_name.qcow2"
   delete_volume $vol_name $POOL_NAME
   local vol_path=$(create_volume_from $vol_name $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
@@ -77,25 +78,25 @@ function define_node() {
   for ((j=1; j<NET_COUNT; ++j)); do
     net="$net,${NET_NAME}_$j/52:54:10:$((NET_BASE_PREFIX+j)):${JOB_RND}:$mac_octet"
   done
-  define_machine $vm_name $VCPUS $mem $OS_VARIANT $net $vol_path $DISK_SIZE
+  define_machine $vm_name $vcpus $mem $OS_VARIANT $net $vol_path $DISK_SIZE
 }
 
 build_vm=0
 if [[ $CONTAINER_REGISTRY == 'build' ]]; then
   build_vm=1
   node="${VM_NAME}_build"
-  define_node "$node" ${BUILD_NODE_MEM} "ff"
+  define_node "$node" $BUILD_NODE_VCPUS $BUILD_NODE_MEM "ff"
   start_vm "$node"
 fi
 # define last octet of MAC address as 0$i or 1$i (assuming that count of machine is not more than 9)
 for (( i=0; i<${CONT_NODES}; ++i )); do
   node="${VM_NAME}_cont_$i"
-  define_node "$node" ${CONT_NODE_MEM} "0$i"
+  define_node "$node" $CONT_NODE_VCPUS $CONT_NODE_MEM "0$i"
   start_vm "$node"
 done
 for (( i=0; i<${COMP_NODES}; ++i )); do
   node="${VM_NAME}_comp_$i"
-  define_node "$node" ${COMP_NODE_MEM} "1$i"
+  define_node "$node" $COMP_NODE_VCPUS $COMP_NODE_MEM "1$i"
   start_vm "$node"
 done
 

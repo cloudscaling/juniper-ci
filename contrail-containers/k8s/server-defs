@@ -1,9 +1,6 @@
 export NET_COUNT=1
 export NET_BASE_PREFIX=30
 
-# we always need to create machine for containers build if build is required
-export BUILD_NODE_MEM=2048
-
 if [[ "$HA" == 'ha' ]]; then
   export CONT_NODES=3
 elif [[ "$HA" == 'nonha' ]]; then
@@ -12,6 +9,6 @@ else
   echo "ERROR: AIO deployment is not supported"
   exit 1
 fi
-export CONT_NODE_MEM=16384
 export COMP_NODES=1
-export COMP_NODE_MEM=6144
+# overrides
+export CONT_NODE_MEM=8192
