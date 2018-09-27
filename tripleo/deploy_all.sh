@@ -78,6 +78,12 @@ fi
 echo "INFO: installing undercloud $(date)"
 "$my_dir"/undercloud-install.sh
 
+if [[ "$CLEAN_ENV" == 'create_vms_only' ]]  ; then
+  echo "INFO: CLEAN_ENV=$CLEAN_ENV, finishing."
+  trap - ERR
+  exit 0
+fi
+
 echo "INFO: installing overcloud $(date)"
 oc=1
 ssh -T $ssh_opts $ssh_addr "sudo -u stack $ssh_env /home/stack/overcloud-install.sh"

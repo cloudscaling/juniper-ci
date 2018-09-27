@@ -116,7 +116,6 @@ else
   fi
 fi
 
-
 # install tripleo clients
 #   osp10 has no preinstalled openstack-utils
 yum -y install python-tripleoclient python-rdomanager-oscplugin  openstack-utils
@@ -143,33 +142,6 @@ fi
 
 # another hack to avoid 'sudo: require tty' error
 sed -i -e 's/Defaults[ \t]*requiretty.*/#Defaults    requiretty/g' /etc/sudoers
-
-cp "$my_dir/__undercloud-install-2-as-stack-user.sh" /home/stack/
-chown stack:stack /home/stack/__undercloud-install-2-as-stack-user.sh
-env_opts="NUM=$NUM NETDEV=$NETDEV OPENSTACK_VERSION=$OPENSTACK_VERSION"
-env_opts+=" ENVIRONMENT_OS=$ENVIRONMENT_OS ENVIRONMENT_OS_VERSION=$ENVIRONMENT_OS_VERSION"
-env_opts+=" TLS=$TLS DPDK=$DPDK TSN=$TSN SRIOV=$SRIOV"
-env_opts+=" RHEL_CERT_TEST=$RHEL_CERT_TEST RHEL_ACCOUNT_FILE=$RHEL_ACCOUNT_FILE"
-sudo -u stack $env_opts /home/stack/__undercloud-install-2-as-stack-user.sh
-
-# increase timeouts due to virtual installation
-openstack-config --set /etc/nova/nova.conf DEFAULT rpc_response_timeout 600
-openstack-config --set /etc/nova/nova.conf DEFAULT dhcp_domain $CLOUD_DOMAIN_NAME
-openstack-config --set /etc/ironic/ironic.conf DEFAULT rpc_response_timeout 600
-openstack-config --set /etc/neutron/neutron.conf DEFAULT  dns_domain $CLOUD_DOMAIN_NAME
-openstack-config --set /etc/neutron/neutron.conf DEFAULT rpc_response_timeout 300
-
-# despite the field is depricated it is still important to set it
-# https://bugs.launchpad.net/neutron/+bug/1657814
-if grep -q '^dhcp_domain.*=' /etc/neutron/dhcp_agent.ini ; then
-  sed -i "s/^dhcp_domain.*=.*/dhcp_domain = ${CLOUD_DOMAIN_NAME}/" /etc/neutron/dhcp_agent.ini
-else
-  sed -i "/^#.*dhcp_domain.*=/a dhcp_domain = ${CLOUD_DOMAIN_NAME}" /etc/neutron/dhcp_agent.ini
-fi
-
-openstack-service restart neutron
-openstack-service restart ironic
-openstack-service restart nova
 
 if [[ 'newton|ocata' =~ $OPENSTACK_VERSION  ]] ; then
   # Before queens there is RPM based deployement,
@@ -243,3 +215,38 @@ else
   popd
 fi
 
+# setup undercloud
+cp "$my_dir/__undercloud-install-2-as-stack-user.sh" /home/stack/
+chown stack:stack /home/stack/__undercloud-install-2-as-stack-user.sh
+env_opts="NUM=$NUM NETDEV=$NETDEV OPENSTACK_VERSION=$OPENSTACK_VERSION"
+env_opts+=" ENVIRONMENT_OS=$ENVIRONMENT_OS ENVIRONMENT_OS_VERSION=$ENVIRONMENT_OS_VERSION"
+env_opts+=" TLS=$TLS DPDK=$DPDK TSN=$TSN SRIOV=$SRIOV"
+env_opts+=" RHEL_CERT_TEST=$RHEL_CERT_TEST RHEL_ACCOUNT_FILE=$RHEL_ACCOUNT_FILE"
+
+if [[ "$CLEAN_ENV" == 'create_vms_only' ]]  ; then
+  echo "INFO: CLEAN_ENV=$CLEAN_ENV, undercloud setup is not finished."
+  echo "      To continue undercloud setup run:"
+  echo "      sudo -u stack $env_opts /home/stack/__undercloud-install-2-as-stack-user.sh"
+  exit 0
+fi
+
+sudo -u stack $env_opts /home/stack/__undercloud-install-2-as-stack-user.sh
+
+# increase timeouts due to virtual installation
+openstack-config --set /etc/nova/nova.conf DEFAULT rpc_response_timeout 600
+openstack-config --set /etc/nova/nova.conf DEFAULT dhcp_domain $CLOUD_DOMAIN_NAME
+openstack-config --set /etc/ironic/ironic.conf DEFAULT rpc_response_timeout 600
+openstack-config --set /etc/neutron/neutron.conf DEFAULT  dns_domain $CLOUD_DOMAIN_NAME
+openstack-config --set /etc/neutron/neutron.conf DEFAULT rpc_response_timeout 300
+
+# despite the field is depricated it is still important to set it
+# https://bugs.launchpad.net/neutron/+bug/1657814
+if grep -q '^dhcp_domain.*=' /etc/neutron/dhcp_agent.ini ; then
+  sed -i "s/^dhcp_domain.*=.*/dhcp_domain = ${CLOUD_DOMAIN_NAME}/" /etc/neutron/dhcp_agent.ini
+else
+  sed -i "/^#.*dhcp_domain.*=/a dhcp_domain = ${CLOUD_DOMAIN_NAME}" /etc/neutron/dhcp_agent.ini
+fi
+
+openstack-service restart neutron
+openstack-service restart ironic
+openstack-service restart nova

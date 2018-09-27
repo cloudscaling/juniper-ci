@@ -150,6 +150,7 @@
             - 'before_only'
             - 'always'
             - 'never'
+            - 'create_vms_only'
       - bool:
           name: RHEL_CERT_TEST
           description: Prepare one more VM with RH certification server or not.

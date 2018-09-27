@@ -86,6 +86,6 @@ trap - ERR
 
 save_logs
 
-if [[ $CLEAN_ENV != 'never' && $CLEAN_ENV != 'before_only' ]] ; then
+if [[ $CLEAN_ENV != 'never' && $CLEAN_ENV != 'before_only' && $CLEAN_ENV != 'create_vms_only' ]] ; then
   cleanup_environment
 fi
