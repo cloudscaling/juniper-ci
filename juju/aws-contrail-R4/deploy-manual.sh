@@ -131,9 +131,9 @@ juju-deploy $PLACE/contrail-agent contrail4-agent --config repo_config_cv.yaml
 juju-set contrail4-agent "log-level=SYS_DEBUG"
 
 if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
-  juju-set contrail4-controller control-network=$subnet_cidr
-  juju-set contrail4-analyticsdb control-network=$subnet_cidr
-  juju-set contrail4-analytics control-network=$subnet_cidr
+  juju-set contrail4-controller api-network=$subnet_cidr
+  juju-set contrail4-analyticsdb api-network=$subnet_cidr
+  juju-set contrail4-analytics api-network=$subnet_cidr
 fi
 
 echo "INFO: Update endpoints $(date)"

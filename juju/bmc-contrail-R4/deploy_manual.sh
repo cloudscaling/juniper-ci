@@ -130,7 +130,7 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   controller_params="--config vip=$addr.254"
 fi
 
-juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params
+juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params --config control-network=$IF2
 juju-expose contrail-controller
 juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4" image-name="$controller_image_name" image-tag="$controller_image_tag" docker-registry="$repo_ip:5000" docker-user="$docker_user" docker-password="$docker_password"
 juju-deploy $PLACE/contrail-analyticsdb --to $cont1
@@ -165,11 +165,10 @@ sed -i -e "s|{{repo_ip}}|$repo_ip|m" "repo_config_cv.yaml"
 sed -i -e "s|{{repo_key}}|$repo_key|m" "repo_config_cv.yaml"
 sed -i -e "s|{{series}}|$SERIES|m" "repo_config_cv.yaml"
 sed -i "s/\r/\n/g" "repo_config_cv.yaml"
-juju-deploy $PLACE/contrail-agent --config repo_config_cv.yaml
+juju-deploy $PLACE/contrail-agent --config repo_config_cv.yaml --config vhost-mtu=1540 --config physical-interface=$IF2
 if [[ "$USE_DPDK" == "true" ]] ; then
   juju-set contrail-agent dpdk=True dpdk-coremask=1,2 dpdk-main-mempool-size=16384
 fi
-juju-set contrail-agent vhost-mtu=1540 physical-interface=$IF2
 
 detect_machines
 wait_for_machines $m1 $m2 $m3 $m4 $m5
