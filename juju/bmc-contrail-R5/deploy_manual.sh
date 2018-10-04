@@ -99,12 +99,12 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   controller_params="--config vip=$addr.254"
 fi
 
-juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params
+juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params --config log-level=SYS_DEBUG
 juju-expose contrail-controller
 juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
-juju-deploy $PLACE/contrail-analyticsdb --to $cont1
+juju-deploy $PLACE/contrail-analyticsdb --to $cont1 --config log-level=SYS_DEBUG
 juju-set contrail-analyticsdb cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
-juju-deploy $PLACE/contrail-analytics --to $cont1
+juju-deploy $PLACE/contrail-analytics --to $cont1 --config log-level=SYS_DEBUG
 juju-set contrail-analytics docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 juju-expose contrail-analytics
 
@@ -122,8 +122,8 @@ fi
 
 juju-deploy $PLACE/contrail-openstack
 juju-set contrail-openstack docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
-juju-deploy $PLACE/contrail-agent
-juju-set contrail-agent physical-interface=$IF2 docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
+juju-deploy $PLACE/contrail-agent --config log-level=SYS_DEBUG
+juju-set contrail-agent physical-interface=$IF2 vhost-gateway=$addr_vm.1 docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 if [[ "$USE_DPDK" == "true" ]] ; then
   juju-set contrail-agent dpdk=True dpdk-coremask=1,2 dpdk-main-mempool-size=16384
 fi
