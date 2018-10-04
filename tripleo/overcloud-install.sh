@@ -27,7 +27,7 @@ export PP_PATCHSET=${PP_PATCHSET:-}
 VBMC_PORT_BASE=${VBMC_PORT_BASE:-${VBMC_PORT_BASE_DEFAULT}}
 
 if [[ -z "$DPDK" ]] ; then
-  echo "DPDK is expected (e.g. export DPDK=true/false)"
+  echo "DPDK is expected"
   exit 1
 fi
 
@@ -71,7 +71,7 @@ DISK_SIZE=${DISK_SIZE:-29}
 IPMI_USER=${IPMI_USER:-'stack'}
 IPMI_PASSWORD=${IPMI_PASSWORD:-'qwe123QWE'}
 
-if [[ "$DPDK" == 'true' ]] ; then
+if [[ "$DPDK" != 'off' ]] ; then
   compute_machine_name='compdpdk'
   compute_flavor_name='compute-dpdk'
 elif [[ "$TSN" == 'true' ]] ; then
@@ -110,7 +110,7 @@ ANALYTICS_COUNT=$(virsh list --all | grep rd-overcloud-$NUM-ctrlanalytics- | wc 
 ANALYTICSDB_COUNT=$(virsh list --all | grep rd-overcloud-$NUM-ctrlanalyticsdb- | wc -l)
 ((OCM_COUNT=CONT_COUNT+COMP_COUNT+CONTRAIL_CONTROLLER_COUNT+ANALYTICS_COUNT+ANALYTICSDB_COUNT))
 
-if [[ "$DPDK" == 'true' ]] ; then
+if [[ "$DPDK" != 'off' ]] ; then
   comp_scale_count=0
   dpdk_scale_count=$COMP_COUNT
   tsn_scale_count=0
@@ -427,7 +427,19 @@ sed -i "s/ComputeCount:.*/ComputeCount: $comp_scale_count/g" $contrail_services_
 sed -i "s/ContrailDpdkCount:.*/ContrailDpdkCount: $dpdk_scale_count/g" $contrail_services_file
 sed -i "s/ContrailTsnCount:.*/ContrailTsnCount: $tsn_scale_count/g" $contrail_services_file
 sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_services_file
-
+if [[ "$DPDK" != 'off' &&  "$DPDK" != 'default' ]] ; then
+  dpdk_nic_file='tripleo-heat-templates/network/config/contrail/examples/dpdk/contrail-dpdk-nic-config-single.yaml'
+  if [[ "$DPDK" == 'default' ]] ; then
+    [ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ] && {
+      sed -i "/driver:.*/d" $dpdk_nic_file
+    }
+  else
+    sed -i "s/ContrailDpdkDriver:.*/ContrailDpdkDriver: $DPDK/g" $contrail_services_file
+    [ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ] && {
+      sed -i "s/driver:.*/driver: $DPDK/g" $dpdk_nic_file
+    }
+  fi
+fi
 # set network parameters
 # TODO: temporary use always single nic
 # if [[ "$NETWORK_ISOLATION" != 'single' || "$DPDK" == 'true' ]] ; then
@@ -635,7 +647,7 @@ EOF
 fi # if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]]
 
 # other options
-if [[ "$DPDK" == 'true' && "$OPENSTACK_VERSION" == 'newton' ]] ; then
+if [[ "$DPDK" != 'off' && "$OPENSTACK_VERSION" == 'newton' ]] ; then
   if ! grep -q 'resource_registry:' $misc_opts ;  then
   cat <<EOF >> $misc_opts
 resource_registry:
@@ -677,7 +689,7 @@ cat <<EOF >> $misc_opts
   ContrailContainerTag: $BUILD_TAG
 EOF
 fi
-if [[ "$DPDK" == 'true' ]] ; then
+if [[ "$DPDK" != 'off' ]] ; then
 cat <<EOF >> $misc_opts
   ContrailDpdkHugepages1GB: 2
 EOF
@@ -692,7 +704,7 @@ cat <<EOF >> $misc_opts
   ContrailControlRNDCSecret: sHE1SM8nsySdgsoRxwARtA==
 EOF
 
-if [[ "$DPDK" == 'true' ]] ; then
+if [[ "$DPDK" != 'off' ]] ; then
   cat <<EOF >> $misc_opts
   ContrailDpdkCoremask: '1'
   ContrailDpdkHugePages: '1000'

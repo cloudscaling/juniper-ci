@@ -17,7 +17,7 @@ if [[ -z "$ENVIRONMENT_OS" ]] ; then
 fi
 
 if [[ -z "$DPDK" ]] ; then
-  echo "DPDK is expected (e.g. export DPDK=true/false)"
+  echo "DPDK is expected (e.g. export DPDK=off/default/vfio-pci/mlnx/uio_pci_generic)"
   exit 1
 fi
 
@@ -48,7 +48,7 @@ fi
 VBMC_PORT_BASE=${VBMC_PORT_BASE:-${VBMC_PORT_BASE_DEFAULT}}
 
 
-if [[ "$DPDK" == 'true' ]] ; then
+if [[ "$DPDK" != 'off' ]] ; then
   compute_machine_name='compdpdk'
 elif [[ "$TSN" == 'true' ]] ; then
   compute_machine_name='comptsn'

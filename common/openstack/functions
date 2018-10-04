@@ -149,13 +149,13 @@ function create_flavors() {
   activate_venv
   if ! openstack $OVERCLOUD_TLS_OPTS flavor show 51 &>/dev/null ; then
     openstack $OVERCLOUD_TLS_OPTS flavor create --disk 1 --vcpus 1 --ram 128 --id 51 test_flavor1 >/dev/null
-    if [[ "$DPDK" == 'true' ]]; then
+    if [[ "$DPDK" != 'off' ]]; then
       openstack $OVERCLOUD_TLS_OPTS flavor set --property hw:mem_page_size=any 51
     fi
   fi
   if ! openstack $OVERCLOUD_TLS_OPTS flavor show 52 &>/dev/null ; then
     openstack $OVERCLOUD_TLS_OPTS flavor create --disk 1 --vcpus 1 --ram 256 --id 52 test_flavor2 >/dev/null
-    if [[ "$DPDK" == 'true' ]]; then
+    if [[ "$DPDK" != 'off' ]]; then
       openstack $OVERCLOUD_TLS_OPTS flavor set --property hw:mem_page_size=any 52
     fi
   fi
@@ -336,7 +336,7 @@ function _get_machines_by_service() {
     _access_undercloud
     if [[ "$srv" == 'nova-compute' ]] ; then
       local node_name_regexp='compute'
-      if [[ "$DPDK" == 'true' ]]; then
+      if [[ "$DPDK" != 'off' ]]; then
         node_name_regexp='dpdk'
       elif [[ "$TSN" == 'true' ]] ; then
         node_name_regexp='tsn'
@@ -476,7 +476,7 @@ function check_instance_simple() {
     # TODO: for now skip VGW cases:
     # - with DPDK
     # - OSP13, vgw is broken there
-    if [[ "$DPDK" != 'true' && "$OPENSTACK_VERSION" != 'queens' ]]; then
+    if [[ "$DPDK" == 'off' && "$OPENSTACK_VERSION" != 'queens' ]]; then
       # add VGW to second compute host and check ping/ssh from there
       local another_compute_host=`_get_machines_by_service nova-compute | grep -v $mch`
       echo "INFO: Adding vgw to another compute: $another_compute_host"

@@ -193,7 +193,7 @@ if [[ 'newton|ocata' =~ $OPENSTACK_VERSION  ]] ; then
   #       temprorary add this package into contrail repo.
   #       It should be fixed by addind the package either into contrail distribution
   #       or into RedHat repo or by enabling additional repo.
-  if [[ "$DPDK" == 'true' ]] ; then
+  if [[ "$DPDK" != 'off' ]] ; then
     curl -o /var/www/html/contrail/liburcu2-0.8.6-21.1.x86_64.rpm  http://ftp5.gwdg.de/pub/opensuse/repositories/devel:/tools:/lttng/RedHat_RHEL-5/x86_64/liburcu2-0.8.6-21.1.x86_64.rpm
     update_contrail_repo='yes'
   fi

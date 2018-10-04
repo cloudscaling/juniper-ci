@@ -26,7 +26,7 @@ fi
 
 source ${WORKSPACE}/stackrc
 node_name_regexp='compute'
-if [[ "$DPDK" == 'true' ]]; then
+if [[ "$DPDK" != 'off' ]]; then
   node_name_regexp='dpdk'
 elif [[ "$TSN" == 'true' ]] ; then
   node_name_regexp='tsn'

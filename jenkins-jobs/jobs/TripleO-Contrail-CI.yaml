@@ -93,10 +93,15 @@
             - 'xmpp_sandesh_only'
             - 'all_except_rabbit'
             - 'all'
-      - bool:
+      - choice:
           name: DPDK
-          description: Deploy vRouter in DPDK mode or not.
-          default: false
+          description: "DPDK driver. If 'off' - kernel mode is used."
+          choices:
+            - 'off'
+            - 'default'
+            - 'vfio-pci'
+            - 'mlnx'
+            - 'uio_pci_generic'
       - bool:
           name: TSN
           description: Deploy vRouter in TSN mode or not.
@@ -128,9 +133,9 @@
                         controller - deploy to OS controller node
                         contrail-controller - deploy to Contrail controller node
           choices:
+            - 'contrail-controller'
             - '1'
             - '3'
-            - 'contrail-controller'
             - 'controller'
       - choice:
           name: CONTRAIL_ANALYTICSDB_COUNT
@@ -139,9 +144,9 @@
                         controller - deploy to OS controller node
                         contrail-controller - deploy to dedicated Contrail controller node
           choices:
+            - 'contrail-controller'
             - '1'
             - '3'
-            - 'contrail-controller'
             - 'controller'
       - choice:
           name: CLEAN_ENV
@@ -181,8 +186,8 @@
           if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
             desc+=' devl'
           fi
-          if [[ "$DPDK" == 'true' ]] ; then
-            desc+=' dpdk'
+          if [[ "$DPDK" != 'off' ]] ; then
+            desc+=" dpdk($DPDK)"
           fi
           if [[ "$TSN" == 'true' ]] ; then
             desc+=' tsn'
@@ -213,7 +218,7 @@
           if [[ "$AAA_MODE_ANALYTICS" == 'auto' ]] ; then
             export AAA_MODE_ANALYTICS=$AAA_MODE
           fi
-          if [[ "$DPDK" == 'true' && "$TSN" == 'true' ]] ; then
+          if [[ "$DPDK" != 'off' && "$TSN" == 'true' ]] ; then
             echo "ERROR: DPDK and TSN cannot be enabled together"
             exit -1
           fi

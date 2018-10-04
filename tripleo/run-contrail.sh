@@ -13,7 +13,7 @@ fi
 export NUM=${NUM:-0}
 export ENVIRONMENT_OS=${ENVIRONMENT_OS:-'centos'}
 export TLS=${TLS:-'false'}
-export DPDK=${DPDK:-'false'}
+export DPDK=${DPDK:-'off'}
 export TSN=${TSN:-'false'}
 export SRIOV=${SRIOV:-'false'}
 export CLEAN_ENV=${CLEAN_ENV:-'auto'}
