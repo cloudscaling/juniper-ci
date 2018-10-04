@@ -40,7 +40,14 @@ auto lo
 iface lo inet loopback
 
 auto ens3
-iface ens3 inet dhcp
+iface ens3 inet manual
+
+auto br-ens3
+iface br-ens3 inet dhcp
+    bridge_ports ens3
+    bridge_stp off
+    bridge_fd 0
+    bridge_maxwait 0
 
 auto ens4
 iface ens4 inet dhcp
@@ -63,14 +70,14 @@ echo "network: {config: disabled}" > /etc/cloud/cloud.cfg.d/99-disable-network-c
 
 series=`lsb_release -cs`
 do_$series
-#if [[ "$prepare_for_openstack" == '1' ]]; then
-#  if [ -f /etc/default/lxd-bridge ]; then
-#    sed -i -e "s/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m" /etc/default/lxd-bridge
-#    sed -i -e "s/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-$IF1\"/m" /etc/default/lxd-bridge
-#  else
-#    echo "USE_LXD_BRIDGE=\"false\"" > /etc/default/lxd-bridge
-#    echo "LXD_BRIDGE=\"br-$IF1\"/m" >> /etc/default/lxd-bridge
-#  fi
-#fi
+if [[ "$prepare_for_openstack" == '1' ]]; then
+  if [ -f /etc/default/lxd-bridge ]; then
+    sed -i -e "s/^USE_LXD_BRIDGE.*$/USE_LXD_BRIDGE=\"false\"/m" /etc/default/lxd-bridge
+    sed -i -e "s/^LXD_BRIDGE.*$/LXD_BRIDGE=\"br-$IF1\"/m" /etc/default/lxd-bridge
+  else
+    echo "USE_LXD_BRIDGE=\"false\"" > /etc/default/lxd-bridge
+    echo "LXD_BRIDGE=\"br-$IF1\"/m" >> /etc/default/lxd-bridge
+  fi
+fi
 
 echo "supersede routers $main_net_prefix.1;" >> /etc/dhcp/dhclient.conf
