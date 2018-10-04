@@ -37,9 +37,11 @@ $SSH "sudo apt-get -qq update"
 $SSH "sudo DEBIAN_FRONTEND=noninteractive apt-get -fqy install git ebtables bridge-utils"
 $SSH "git clone https://github.com/openstack-dev/devstack.git"
 
+$SSH "sudo mkdir /var/log/journal"
 $SSH "sudo mkdir /etc/systemd/journald.conf.d"
 $SSH "echo [Journal] | sudo tee /etc/systemd/journald.conf.d/size.conf > /dev/null"
 $SSH "echo SystemMaxFileSize=60 | sudo tee -a /etc/systemd/journald.conf.d/size.conf > /dev/null"
+$SSH "sudo systemctl restart systemd-journald || true"
 
 echo -------------------------------------------------------------------------- $(date)
 cp $localrcfile localrc
