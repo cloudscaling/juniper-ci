@@ -69,7 +69,7 @@ function get_ssh_cmd() {
     # helm case
     hip=`getent hosts $1 | awk '{print $1}'`
   fi
-  local lip=`hostname -i`
+  local lip=`hostname -i | cut -d ' ' -f 1`
   if [[ "$hip" != "$lip" ]]; then
     ssh_cmd="ssh ${SSH_USER:-root}@$hip"
   fi
@@ -95,7 +95,7 @@ function get_link_local_ip() {
     curl_ssl_opts="--key $key --cert $cert --cacert $ca_cert"
     curl_proto='https'
   fi
-  local curl_ip=$($ssh_cmd hostname -i)
+  local curl_ip=$($ssh_cmd hostname -i | cut -d ' ' -f 1)
   local curl_cmd="curl $curl_ssl_opts -s ${curl_proto}://${curl_ip}:8085/Snh_ItfReq?name=$if_name"
 
   local ip=`$ssh_cmd $curl_cmd 2>/dev/null | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'`

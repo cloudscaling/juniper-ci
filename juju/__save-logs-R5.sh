@@ -53,7 +53,7 @@ done
 popd
 tar -rf logs.tar $DL 2>/dev/null
 
-host_ip=`hostname -i`
+host_ip=`hostname -i | cut -d ' ' -f 1`
 function save_introspect_info() {
   if ! lsof -i ":$2" &>/dev/null ; then
     return
