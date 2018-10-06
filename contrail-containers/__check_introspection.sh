@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 SSL_ENABLE=${SSL_ENABLE:-'false'}
 SERVER_CERTFILE=${SERVER_CERTFILE:-'/etc/contrail/ssl/certs/server.pem'}
