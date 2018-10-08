@@ -250,3 +250,9 @@ fi
 openstack-service restart neutron
 openstack-service restart ironic
 openstack-service restart nova
+
+# disable selinux
+setenforce 0 || true
+sed -i "s/SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config  || true
+getenforce  || true
+cat /etc/selinux/config  || true

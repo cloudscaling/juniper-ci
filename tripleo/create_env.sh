@@ -426,6 +426,8 @@ function _prepare_host() {
 set -x
 setenforce 0
 sed -i "s/SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config
+getenforce
+cat /etc/selinux/config
 subscription-manager unregister || true
 set +x
 echo subscription-manager register ...
