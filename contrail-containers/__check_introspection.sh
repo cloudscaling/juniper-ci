@@ -10,7 +10,7 @@ if [[ "${SSL_ENABLE,,}" == 'true' ]] ; then
   proto='https'
   ssl_opts="--key ${SERVER_KEYFILE} --cert ${SERVER_CERTFILE} --cacert ${SERVER_CA_CERTFILE}"
 fi
-curl_ip=$(hostname -i)
+curl_ip=$(hostname -i | cut -d ' ' -f 1)
 
 declare -A port_map
 port_map['agent-vrouter']=8085
