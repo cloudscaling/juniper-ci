@@ -185,7 +185,7 @@ if [[ 'newton|ocata' =~ $OPENSTACK_VERSION  ]] ; then
         os_utils_url="http://mirror.comnet.uz/centos/7/cloud/x86_64/openstack-${OPENSTACK_VERSION}/openstack-utils-2017.1-1.el7.noarch.rpm"
         ;;
     esac
-    curl -o /var/www/html/contrail/openstack-utils-2017.1-1.el7.noarch.rpm $os_utils_url
+    curl -o ${repo_dir}/openstack-utils-2017.1-1.el7.noarch.rpm $os_utils_url
     update_contrail_repo='yes'
   fi
 
@@ -194,7 +194,7 @@ if [[ 'newton|ocata' =~ $OPENSTACK_VERSION  ]] ; then
   #       It should be fixed by addind the package either into contrail distribution
   #       or into RedHat repo or by enabling additional repo.
   if [[ "$DPDK" != 'off' ]] ; then
-    curl -o /var/www/html/contrail/liburcu2-0.8.6-21.1.x86_64.rpm  http://ftp5.gwdg.de/pub/opensuse/repositories/devel:/tools:/lttng/RedHat_RHEL-5/x86_64/liburcu2-0.8.6-21.1.x86_64.rpm
+    curl -o ${repo_dir}/liburcu2-0.8.6-21.1.x86_64.rpm  http://ftp5.gwdg.de/pub/opensuse/repositories/devel:/tools:/lttng/RedHat_RHEL-5/x86_64/liburcu2-0.8.6-21.1.x86_64.rpm
     update_contrail_repo='yes'
   fi
 

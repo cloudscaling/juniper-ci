@@ -423,8 +423,14 @@ function _prepare_host() {
   echo "INFO: enable repos: $repos_list"
 
   cat <<EOF | $ssh_cmd root@${addr}
+set -x
+setenforce 0
+sed -i "s/SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config
 subscription-manager unregister || true
+set +x
+echo subscription-manager register ...
 subscription-manager register $register_opts
+set -x
 subscription-manager attach $attach_opts
 subscription-manager repos $repos_opts
 EOF
