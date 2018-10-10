@@ -29,8 +29,8 @@ if [[ $(id -u) -ne 0 ]]; then
 fi
 
 export TARGET_SITE="demo"
-export NODE_NET_IFACE="ens4"
-export NODE_NET_IFACE_GATEWAY_IP="10.$((NET_BASE_PREFIX+1)).$JOB_RND.1"
+export NODE_NET_IFACE="ens3"
+export NODE_NET_IFACE_GATEWAY_IP="10.$NET_BASE_PREFIX.$JOB_RND.1"
 LOCAL_IP=`ip addr show ${NODE_NET_IFACE} | awk '/inet /{print $2}' | cut -d '/' -f 1`
 export SHORT_HOSTNAME=$(hostname -s)
 
