@@ -430,12 +430,12 @@ sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_services_fi
 if [[ "$DPDK" != 'off' &&  "$DPDK" != 'default' ]] ; then
   dpdk_nic_file='tripleo-heat-templates/network/config/contrail/examples/dpdk/contrail-dpdk-nic-config-single.yaml'
   if [[ "$DPDK" == 'default' ]] ; then
-    [ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ] && {
+    [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] && {
       sed -i "/driver:.*/d" $dpdk_nic_file
     }
   else
-    sed -i "s/ContrailDpdkDriver:.*/ContrailDpdkDriver: $DPDK/g" $contrail_services_file
-    [ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ] && {
+    sed -i "s/.*ContrailDpdkDriver:.*/  ContrailDpdkDriver: $DPDK/g" $contrail_services_file
+    [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] && {
       sed -i "s/driver:.*/driver: $DPDK/g" $dpdk_nic_file
     }
   fi
