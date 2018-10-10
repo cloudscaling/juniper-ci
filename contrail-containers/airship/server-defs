@@ -1,5 +1,5 @@
 export NET_COUNT=2
-export NET_BASE_PREFIX=45
+export NET_BASE_PREFIX=10
 
 if [[ "$HA" == 'nonha' ]]; then
   export CONT_NODES=1
