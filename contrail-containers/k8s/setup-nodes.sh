@@ -5,7 +5,6 @@ my_dir="$(dirname $my_file)"
 
 source "$my_dir/../common/${HOST}/ssh-defs"
 
-export DOCKER_REGISTRY_ADDR=${master_ip}
 export KUBERNETES_API_SERVER=${master_ip}
 # here we define controller nodes as a ips[0:2]
 export CONTROLLER_NODES=$( echo $nodes_cont_ips | sed 's/ /,/g')
@@ -18,7 +17,6 @@ function assert_empty() {
     exit -1
   fi
 }
-assert_empty DOCKER_REGISTRY_ADDR
 assert_empty KUBERNETES_API_SERVER
 assert_empty CONTROLLER_NODES
 assert_empty AGENT_NODES
@@ -30,7 +28,7 @@ function setup_k8s() {
   if [[ -n "${SSL_ENABLE}" ]] ; then
     ssl_opts="SSL_ENABLE=$SSL_ENABLE"
   fi
-  cat <<EOF | $SSH_CMD $SSH_USER@$dest
+  cat <<EOM | $SSH_CMD $SSH_USER@$dest
 set -x
 export PATH=\${PATH}:/usr/sbin
 cd ~/contrail-container-builder
@@ -38,7 +36,6 @@ cat <<EOM > common.env
 LOG_LEVEL=SYS_DEBUG
 CONTRAIL_VERSION=$CONTRAIL_VERSION
 KUBERNETES_API_SERVER=$KUBERNETES_API_SERVER
-_CONTRAIL_REGISTRY_IP=$DOCKER_REGISTRY_ADDR
 OPENSTACK_VERSION=$OPENSTACK_VERSION
 CONTROLLER_NODES=$CONTROLLER_NODES
 AGENT_NODES=$AGENT_NODES
@@ -57,7 +54,14 @@ for (( i=0; i < 10 ; ++i )); do
     break
   fi
 done
+if [[ -n $build_ip ]]; then
+  mkdir -p /etc/docker
+  cat <<EOF > /etc/docker/daemon.json
+{
+    "insecure-registries": ["$build_ip:5000"]
+}
 EOF
+EOM
 }
 
 token=''
