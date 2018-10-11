@@ -56,7 +56,7 @@ for (( i=0; i < 10 ; ++i )); do
 done
 if [[ -n $build_ip ]]; then
   mkdir -p /etc/docker
-  echo "{ \"insecure-registries\": [\"$build_ip:5000\"] }" > /etc/docker/daemon.json
+  echo \"{ \\\"insecure-registries\\\": [\\\"$build_ip:5000\\\"] }\" > /etc/docker/daemon.json
   systemctl restart docker
 fi
 EOM
