@@ -57,9 +57,9 @@ done
 if [[ -n $build_ip ]]; then
   mkdir -p /etc/docker
   cat <<EOF > /etc/docker/daemon.json
-{
-    "insecure-registries": ["$build_ip:5000"]
-}
+\{
+    \"insecure-registries\": [\"$build_ip:5000\"]
+\}
 EOF
 EOM
 }
