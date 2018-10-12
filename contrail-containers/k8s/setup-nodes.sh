@@ -28,7 +28,7 @@ function setup_k8s() {
   if [[ -n "${SSL_ENABLE}" ]] ; then
     ssl_opts="SSL_ENABLE=$SSL_ENABLE"
   fi
-  cat <<EOM | $SSH_CMD $SSH_USER@$dest
+  cat <<EOS | $SSH_CMD $SSH_USER@$dest
 set -x
 export PATH=\${PATH}:/usr/sbin
 cd ~/contrail-container-builder
@@ -56,10 +56,10 @@ for (( i=0; i < 10 ; ++i )); do
 done
 if [[ -n $build_ip ]]; then
   mkdir -p /etc/docker
-  echo \"{ \\\"insecure-registries\\\": [\\\"$build_ip:5000\\\"] }\" > /etc/docker/daemon.json
+  echo "{ \"insecure-registries\": [\"$build_ip:5000\"] }" > /etc/docker/daemon.json
   systemctl restart docker
 fi
-EOM
+EOS
 }
 
 token=''
