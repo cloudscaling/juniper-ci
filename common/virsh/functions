@@ -83,7 +83,11 @@ function build_network_xml_dhcp() {
   local dhcp=$4
   local fname=`mktemp`
   local net_base_ip=$(echo "$network" | cut -d '.' -f 1,2,3)
-  local nic_ip="${net_base_ip}.1"
+  local nic_ip_last=$(echo "$network" | cut -d '.' -f 4)
+  if [[ -z "$nic_ip_last" || $"nic_ip_last" == '0' ]]; then
+    nic_ip_last=1
+  fi
+  local nic_ip="${net_base_ip}.${nic_ip_last}"
   local dhcp_start="${net_base_ip}.100"
   local dhcp_end="${net_base_ip}.200"
   cat <<EOF > $fname

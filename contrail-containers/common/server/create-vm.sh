@@ -57,10 +57,10 @@ done
 
 # re-create networks
 delete_network_dhcp $NET_NAME
-create_network_dhcp $NET_NAME 10.$NET_BASE_PREFIX.$JOB_RND.0 $BRIDGE_NAME
+create_network_dhcp $NET_NAME 10.$NET_BASE_PREFIX.$JOB_RND.${NET_GW_OCTET:-1} $BRIDGE_NAME
 for ((j=1; j<NET_COUNT; ++j)); do
   delete_network_dhcp ${NET_NAME}_$j
-  create_network_dhcp ${NET_NAME}_$j 10.$((NET_BASE_PREFIX+j)).$JOB_RND.0 ${BRIDGE_NAME}_$j
+  create_network_dhcp ${NET_NAME}_$j 10.$((NET_BASE_PREFIX+j)).$JOB_RND.${NET_GW_OCTET:-1} ${BRIDGE_NAME}_$j
 done
 
 # create pool
