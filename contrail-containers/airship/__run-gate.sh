@@ -33,7 +33,7 @@ export NODE_NET_IFACE="ens4"
 export NODE_NET_IFACE_GATEWAY_IP="10.$((NET_BASE_PREFIX+1)).$JOB_RND.1"
 LOCAL_IP=`ip addr show ${NODE_NET_IFACE} | awk '/inet /{print $2}' | cut -d '/' -f 1`
 export SHORT_HOSTNAME=$(hostname -s)
-export NODE_SUBNETS="10.$NET_BASE_PREFIX.$JOB_RND.0/24,10.$((NET_BASE_PREFIX+1)).$JOB_RND.0/24"
+export NODE_SUBNETS="10.$((NET_BASE_PREFIX+1)).$JOB_RND.0/24"
 
 # Updates the /etc/hosts file
 HOSTS="${LOCAL_IP} ${SHORT_HOSTNAME}"
