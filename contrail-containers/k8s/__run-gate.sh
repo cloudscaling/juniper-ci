@@ -26,6 +26,7 @@ sed -i -e 's|\(AAA_MODE.*\)$|\1\n  DIST_SNAT_PROTO_PORT_LIST: "tcp:10240,udp:102
 sed -i -e 's|\(AAA_MODE.*\)$|\1\n  CONFIG_DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"|' "$tfile"
 sed -i -e 's|\(AAA_MODE.*\)$|\1\n  DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"|' "$tfile"
 sed -i -e 's|\(AAA_MODE.*\)$|\1\n  JVM_EXTRA_OPTS: "-Xms1g -Xmx2g"|' "$tfile"
+sed -i -e 's|\(AAA_MODE.*\)$|\1\n  KUBERNETES_IP_FABRIC_SNAT: "true"|' "$tfile"
 popd
 
 function wait_cluster() {
