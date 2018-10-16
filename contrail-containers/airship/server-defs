@@ -1,6 +1,5 @@
 export NET_COUNT=2
 export NET_BASE_PREFIX=10
-export NET_GW_OCTET=254
 
 if [[ "$HA" == 'nonha' ]]; then
   export CONT_NODES=1
