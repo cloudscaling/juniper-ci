@@ -54,7 +54,7 @@ for (( i=0; i < 10 ; ++i )); do
     break
   fi
 done
-if [[ -n $build_ip ]]; then
+if [[ -n "$build_ip" ]]; then
   mkdir -p /etc/docker
   echo "{ \"insecure-registries\": [\"$build_ip:5000\"] }" > /etc/docker/daemon.json
   systemctl restart docker
