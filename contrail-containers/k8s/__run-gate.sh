@@ -11,6 +11,7 @@ function log_error() {
 # ip is located in /usr/sbin that is not in path...
 export PATH=${PATH}:/usr/sbin
 
+tfile="~/my-contrail.yaml"
 pushd contrail-container-builder/kubernetes/manifests/
 case $AGENT_MODE in
   dpdk)
@@ -20,7 +21,11 @@ case $AGENT_MODE in
     template_name='contrail-standalone-kubernetes.yaml'
     ;;
 esac
-./resolve-manifest.sh < $template_name > ~/my-contrail.yaml
+./resolve-manifest.sh < $template_name > "$tfile"
+sed -i -e 's|\(AAA_MODE.*\)$|\1\n  DIST_SNAT_PROTO_PORT_LIST: "tcp:10240,udp:10240"|' "$tfile"
+sed -i -e 's|\(AAA_MODE.*\)$|\1\n  CONFIG_DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"|' "$tfile"
+sed -i -e 's|\(AAA_MODE.*\)$|\1\n  DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"|' "$tfile"
+sed -i -e 's|\(AAA_MODE.*\)$|\1\n  JVM_EXTRA_OPTS: "-Xms1g -Xmx2g"|' "$tfile"
 popd
 
 function wait_cluster() {
@@ -48,7 +53,7 @@ function wait_cluster() {
 
 log_info "create Contrail cluster"
 # do not validate yaml file cause it contains empty fields for VIP-s
-kubectl create --validate=false -f ~/my-contrail.yaml
+kubectl create --validate=false -f "$tfile"
 wait_cluster "Contrail" "contrail\|zookeeper\|rabbit\|kafka\|redis\|cassandra"
 
 wait_contrail_sec=60
