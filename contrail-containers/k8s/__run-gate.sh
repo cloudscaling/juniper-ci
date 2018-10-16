@@ -11,7 +11,7 @@ function log_error() {
 # ip is located in /usr/sbin that is not in path...
 export PATH=${PATH}:/usr/sbin
 
-tfile="~/my-contrail.yaml"
+tfile="/tmp/my-contrail.yaml"
 pushd contrail-container-builder/kubernetes/manifests/
 case $AGENT_MODE in
   dpdk)
