@@ -22,7 +22,7 @@ case $AGENT_MODE in
     ;;
 esac
 ./resolve-manifest.sh < $template_name > "$tfile"
-sed -i -e 's|\(AAA_MODE.*\)$|\1\n  DIST_SNAT_PROTO_PORT_LIST: "tcp:10240,udp:10240"|' "$tfile"
+sed -i -e 's|\(AAA_MODE.*\)$|\1\n  DIST_SNAT_PROTO_PORT_LIST: "tcp:1024,udp:1024"|' "$tfile"
 sed -i -e 's|\(AAA_MODE.*\)$|\1\n  CONFIG_DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"|' "$tfile"
 sed -i -e 's|\(AAA_MODE.*\)$|\1\n  DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"|' "$tfile"
 sed -i -e 's|\(AAA_MODE.*\)$|\1\n  JVM_EXTRA_OPTS: "-Xms1g -Xmx2g"|' "$tfile"
