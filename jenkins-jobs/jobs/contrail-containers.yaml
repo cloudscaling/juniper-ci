@@ -93,7 +93,7 @@
           export LINUX_DISTR=centos
           if [[ "$CONTAINER_REGISTRY" == 'build' ]]; then
             # hardcoded version of archive on S3
-            export CONTRAIL_VERSION='5.1.0-307'
+            export CONTRAIL_VERSION='5.1.0-329'
             export CONTRAIL_INSTALL_PACKAGES_URL="https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_"$CONTRAIL_VERSION"-"$LINUX_DISTR"-"$OPENSTACK_VERSION".tgz"
           fi
 
