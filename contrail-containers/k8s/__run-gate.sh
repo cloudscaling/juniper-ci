@@ -93,4 +93,7 @@ log_info "run test application"
 kubectl create -f ~/test_app.yaml
 wait_cluster "nginx" "nginx"
 
+kubectl get all --all-namespaces
+kubectl get nodes
+
 # TODO: test connectivities
