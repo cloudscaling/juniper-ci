@@ -37,12 +37,14 @@ for mid in `nova list | grep "$node_name_regexp" |  awk '{print $12}'` ; do
   ssh heat-admin@$mip sudo yum install -y sshpass
 done
 
+ret=0
+
 cd $WORKSPACE
 source "$my_dir/../common/openstack/functions"
-create_virtualenv
-access_overcloud
-prep_os_checks
-run_os_checks
+create_virtualenv || ret=1
+access_overcloud || ret=1
+prep_os_checks || ret=1
+run_os_checks || ret=1
 
 # check Contrail WebUI
 function check_ui_ip () {
@@ -77,7 +79,6 @@ function check_ui_ip () {
   return $ret
 }
 
-ret=0
 source ${WORKSPACE}/stackrc
 # tls note: undercloud is w/o tls
 for ctrl in `openstack server list | grep contrailcontroller | grep -o "ctlplane=[0-9\.]*" | cut -d '=' -f 2` ; do
