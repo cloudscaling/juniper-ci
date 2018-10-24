@@ -195,6 +195,12 @@ if [[ 'newton|ocata' =~ $OPENSTACK_VERSION  ]] ; then
   #       or into RedHat repo or by enabling additional repo.
   if [[ "$DPDK" != 'off' ]] ; then
     curl -o ${repo_dir}/liburcu2-0.8.6-21.1.x86_64.rpm  http://ftp5.gwdg.de/pub/opensuse/repositories/devel:/tools:/lttng/RedHat_RHEL-5/x86_64/liburcu2-0.8.6-21.1.x86_64.rpm
+    # ---
+    # workaround problem of dependency python-opencontrail-vrouter-netns-4.1.2.0-163.el7.x86_64 on this
+    # packages for dpdk case. package is installed earlier - before rhel registration done and repos are enabled
+    curl -o ${repo_dir}/python-websocket-client-0.32.0-116.el7.noarch.rpm http://mirror.centos.org/centos/7/extras/x86_64/Packages/python-websocket-client-0.32.0-116.el7.noarch.rpm   
+    curl -o ${repo_dir}/python-docker-py-1.10.6-4.el7.noarch.rpm http://mirror.centos.org/centos/7/extras/x86_64/Packages/python-docker-py-1.10.6-4.el7.noarch.rpm
+    # ---
     update_contrail_repo='yes'
   fi
 
