@@ -200,6 +200,7 @@ if [[ 'newton|ocata' =~ $OPENSTACK_VERSION  ]] ; then
     # packages for dpdk case. package is installed earlier - before rhel registration done and repos are enabled
     curl -o ${repo_dir}/python-websocket-client-0.32.0-116.el7.noarch.rpm http://mirror.centos.org/centos/7/extras/x86_64/Packages/python-websocket-client-0.32.0-116.el7.noarch.rpm   
     curl -o ${repo_dir}/python-docker-py-1.10.6-4.el7.noarch.rpm http://mirror.centos.org/centos/7/extras/x86_64/Packages/python-docker-py-1.10.6-4.el7.noarch.rpm
+    curl -o ${repo_dir}/python-docker-pycreds-1.10.6-3.el7.noarch.rpm http://mirror.centos.org/centos/7/extras/x86_64/Packages/python-docker-pycreds-1.10.6-3.el7.noarch.rpm
     # ---
     update_contrail_repo='yes'
   fi
