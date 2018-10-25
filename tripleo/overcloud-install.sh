@@ -706,7 +706,7 @@ EOF
 
 if [[ "$DPDK" != 'off' ]] ; then
   cat <<EOF >> $misc_opts
-  ContrailDpdkCoremask: '1'
+  ContrailDpdkCoremask: '0x3'
   ContrailDpdkHugePages: '1000'
 EOF
 fi
