@@ -32,9 +32,11 @@ export TARGET_SITE="demo"
 #export NODE_NET_IFACE="ens3"
 #export NODE_NET_IFACE_GATEWAY_IP="10.$NET_BASE_PREFIX.$JOB_RND.1"
 #export NODE_SUBNETS="10.$NET_BASE_PREFIX.$JOB_RND.0/24"
+#export DNS_SERVER="10.$NET_BASE_PREFIX.$JOB_RND.1"
 export NODE_NET_IFACE="ens4"
 export NODE_NET_IFACE_GATEWAY_IP="10.$((NET_BASE_PREFIX+1)).$JOB_RND.1"
 export NODE_SUBNETS="10.$((NET_BASE_PREFIX+1)).$JOB_RND.0/24"
+export DNS_SERVER="10.$((NET_BASE_PREFIX+1)).$JOB_RND.1"
 
 LOCAL_IP=`ip addr show ${NODE_NET_IFACE} | awk '/inet /{print $2}' | cut -d '/' -f 1`
 export SHORT_HOSTNAME=$(hostname -s)
@@ -55,26 +57,11 @@ export HOSTIP=$LOCAL_IP
 # x/32 will work for CEPH in a single node deploy.
 export HOSTCIDR=$LOCAL_IP/32
 
-# Changes DNS servers in common-addresses.yaml to the system's DNS servers
-get_dns_servers ()
-{
-  if hash nmcli 2>/dev/null; then
-    nmcli dev show | awk '/IP4.DNS/ {print $2}' | xargs
-  else
-    cat /etc/resolv.conf | awk '/nameserver/ {print $2}' | xargs
-  fi
-}
-
 if grep -q "10.96.0.10" "/etc/resolv.conf"; then
   echo "INFO: Not changing DNS servers, /etc/resolv.conf already updated."
 else
   DNS_CONFIG_FILE="../../deployment_files/site/$TARGET_SITE/networks/common-addresses.yaml"
-  declare -a DNS_SERVERS=($(get_dns_servers))
-  NS1=${DNS_SERVERS[0]:-8.8.8.8}
-  NS2=${DNS_SERVERS[1]:-$NS1}
-  echo "Using DNS servers $NS1 and $NS2."
-  sed -i "s/8.8.8.8/$NS1/" $DNS_CONFIG_FILE
-  sed -i "s/8.8.4.4/$NS2/" $DNS_CONFIG_FILE
+  sed -i "s/8.8.4.4/$DNS_SERVER/" $DNS_CONFIG_FILE
 fi
 
 export PEGLEG_IMAGE="quay.io/airshipit/pegleg:1ada48cc360ec52c7ab28b96c28a0c7df8bcee40"
