@@ -432,6 +432,7 @@ if [[ "$DPDK" != 'off' &&  "$DPDK" != 'default' ]] ; then
   if [[ "$DPDK" == 'default' ]] ; then
     [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] && {
       sed -i "/driver:.*/d" $dpdk_nic_file
+      sed -i "s/cpu_list:.*/cpu_list: '$dpdk_core_mask'/g" $dpdk_nic_file
     }
   else
     sed -i "s/.*ContrailDpdkDriver:.*/  ContrailDpdkDriver: $DPDK/g" $contrail_services_file

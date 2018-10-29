@@ -19,6 +19,7 @@ if [[ -z "$ENVIRONMENT_OS" ]] ; then
   exit 1
 fi
 
+CLOUD_DOMAIN_NAME=${CLOUD_DOMAIN_NAME:-'localdomain'}
 NETDEV=${NETDEV:-'eth1'}
 
 ((addr=176+NUM*10))
@@ -45,6 +46,18 @@ network_gateway = $prov_ip.2
 discovery_iprange = $prov_ip.150,$prov_ip.170
 inspection_iprange = $prov_ip.150,$prov_ip.170
 EOF
+
+
+if [[ "$FREE_IPA" == 'true' ]] ; then
+# ipa_otp=$(sudo /usr/libexec/novajoin-ipa-setup ...)
+cat << EOF >> undercloud.conf
+  undercloud_hostname: undercloud.my${NUM}domain
+  undercloud_nameservers: ${prov_ip}.4 
+  overcloud_domain_name: $CLOUD_DOMAIN_NAME
+  enable_novajoin: True
+  ipa_otp: $ipa_otp
+EOF
+fi
 
 # install undercloud
 openstack undercloud install

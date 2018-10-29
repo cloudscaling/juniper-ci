@@ -119,10 +119,12 @@ prov_net=`get_network_name provisioning`
 mgmt_ip=$(get_network_ip "management")
 mgmt_mac="00:16:00:00:0$NUM:02"
 mgmt_mac_cert="00:16:00:01:0$NUM:02"
+mgmt_mac_freeipa="00:16:00:01:0$NUM:03"
 
 prov_ip=$(get_network_ip "provisioning")
 prov_mac="00:16:00:00:0$NUM:06"
 prov_mac_cert="00:16:00:01:0$NUM:06"
+prov_mac_freeipa="00:16:00:02:0$NUM:06"
 
 # create pool
 create_pool $poolname
@@ -189,7 +191,11 @@ if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
     cp $pool_path/undercloud-$NUM.qcow2 $pool_path/undercloud-$NUM-cert-test.qcow2
   fi
+  if [[ "$FREE_IPA" == 'true' ]] ; then
+    cp $pool_path/undercloud-$NUM.qcow2 $pool_path/undercloud-$NUM-freeipa.qcow2
+  fi
 fi
+
 
 # generate password/key for undercloud's root
 rm -f "$ssh_key_dir/kp-$NUM" "$ssh_key_dir/kp-$NUM.pub"
@@ -366,6 +372,18 @@ if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
     $mgmt_mac_cert $prov_mac_cert 4096
 fi
 
+if [[ "$FREE_IPA" == 'true' ]] ; then
+  _patch_image "$pool_path/undercloud-$NUM-freeipa.qcow2" \
+    'ifcfg-ethMF' $mgmt_ip $mgmt_mac_freeipa \
+    'ifcfg-ethAF' $prov_ip $prov_mac_freeipa \
+    'no'
+
+  rhel_register_system_and_customize "$pool_path/undercloud-$NUM-freeipa.qcow2" 'undercloud'
+
+  _start_vm \
+    "rd-undercloud-$NUM-freeipa" "$pool_path/undercloud-$NUM-freeipa.qcow2" \
+    $mgmt_mac_freeipa $prov_mac_freeipa 4096
+fi
 
 ssh_opts="-i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 ssh_cmd="ssh -T $ssh_opts"
@@ -441,12 +459,12 @@ EOF
 
 # wait udnercloud and register it in redhat if rhel env
 _wait_machine "${mgmt_ip}.2"
-_prepare_network "${mgmt_ip}.2"  "myhost.my${NUM}domain"
+_prepare_network "${mgmt_ip}.2"  "undercloud.my${NUM}domain"
 _prepare_host "${mgmt_ip}.2"
 
 if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
   _wait_machine "${mgmt_ip}.3"
-  _prepare_network "${mgmt_ip}.3"  "myhost.my${NUM}certdomain"
+  _prepare_network "${mgmt_ip}.3"  "cert.my${NUM}domain"
   _prepare_host "${mgmt_ip}.3"
 
   cat <<EOF | $ssh_cmd ${mgmt_ip}.3
@@ -461,4 +479,10 @@ sed -i "s/ALLOWED_HOSTS =.*/ALLOWED_HOSTS = ['myhost.my${NUM}certdomain', '${mgm
 systemctl restart httpd
 EOF
 
+fi
+
+if [[ "$FREE_IPA" == 'true' ]] ; then
+  _wait_machine "${mgmt_ip}.4"
+  _prepare_network "${mgmt_ip}.4"  "freeipa.my${NUM}domain"
+  _prepare_host "${mgmt_ip}.4"
 fi

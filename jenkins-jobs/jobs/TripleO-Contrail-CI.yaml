@@ -50,20 +50,20 @@
           name: OPENSTACK_VERSION
           description: "Version of OpenStack"
           choices:
-            - 'ocata'
+            - 'queens'
             - 'newton'
+            - 'ocata'
             - 'mitaka'
             - 'pike'
-            - 'queens'
       - choice:
           name: CONTRAIL_VERSION
           description: "Version of Contrail"
           choices:
+            - '5.0'
+            - '5.1'
             - '4.1'
             - '4.0'
             - '3.2'
-            - '5.0'
-            - '5.1'
       - choice:
           name: CONTRAIL_SERIES
           description: "Series of Contrail builds (cb, release, ...)"
@@ -159,6 +159,10 @@
       - bool:
           name: RHEL_CERT_TEST
           description: Prepare one more VM with RH certification server or not.
+          default: false
+      - bool:
+          name: FREE_IPA
+          description: Create VM and deploy FreeIPA server.
           default: false
       - bool:
           name: USE_DEVELOPMENT_PUPPETS
