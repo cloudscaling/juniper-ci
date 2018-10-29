@@ -437,6 +437,7 @@ if [[ "$DPDK" != 'off' &&  "$DPDK" != 'default' ]] ; then
     sed -i "s/.*ContrailDpdkDriver:.*/  ContrailDpdkDriver: $DPDK/g" $contrail_services_file
     [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] && {
       sed -i "s/driver:.*/driver: $DPDK/g" $dpdk_nic_file
+      sed -i "s/cpu_list:.*/cpu_list: '$dpdk_core_mask'/g" $dpdk_nic_file
     }
   fi
 fi
@@ -704,9 +705,10 @@ cat <<EOF >> $misc_opts
   ContrailControlRNDCSecret: sHE1SM8nsySdgsoRxwARtA==
 EOF
 
+dpdk_core_mask="0x03"
 if [[ "$DPDK" != 'off' ]] ; then
   cat <<EOF >> $misc_opts
-  ContrailDpdkCoremask: '0x3'
+  ContrailDpdkCoremask: "$dpdk_core_mask"
   ContrailDpdkHugePages: '1000'
 EOF
 fi
