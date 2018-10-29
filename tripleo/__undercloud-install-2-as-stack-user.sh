@@ -26,7 +26,11 @@ NETDEV=${NETDEV:-'eth1'}
 prov_ip="192.168.$addr"
 ((addr=172+NUM*10))
 mgmt_ip="192.168.$addr"
-dns_nameserver="8.8.8.8"
+if [[ "$FREE_IPA" == 'true' ]] ; then
+  dns_nameserver="${prov_ip}.4"
+else
+  dns_nameserver="8.8.8.8"
+fi
 
 # create undercloud configuration file. all IP addresses are relevant to create_env.sh script
 if [[ -f /usr/share/instack-undercloud/undercloud.conf.sample ]] ; then
@@ -49,13 +53,12 @@ EOF
 
 
 if [[ "$FREE_IPA" == 'true' ]] ; then
-# ipa_otp=$(sudo /usr/libexec/novajoin-ipa-setup ...)
-cat << EOF >> undercloud.conf
-  undercloud_hostname: undercloud.my${NUM}domain
-  undercloud_nameservers: ${prov_ip}.4 
-  overcloud_domain_name: $CLOUD_DOMAIN_NAME
-  enable_novajoin: True
-  ipa_otp: $ipa_otp
+  cat << EOF >> undercloud.conf
+#undercloud_hostname: undercloud.my${NUM}domain
+#undercloud_nameservers: ${prov_ip}.4 
+overcloud_domain_name: $CLOUD_DOMAIN_NAME
+enable_novajoin: True
+ipa_otp: "$FREE_IPA_OTP"
 EOF
 fi
 

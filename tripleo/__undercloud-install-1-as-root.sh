@@ -23,6 +23,11 @@ fi
 NETDEV=${NETDEV:-'eth1'}
 CLOUD_DOMAIN_NAME=${CLOUD_DOMAIN_NAME:-'localdomain'}
 
+((addr=176+NUM*10))
+prov_ip="192.168.$addr"
+((addr=172+NUM*10))
+mgmt_ip="192.168.$addr"
+
 # Workaround of the problem with GPG keys in openstack-beta rhel repo
 #   Public key for NetworkManager-config-server-1.10.2-14.el7_5.noarch.rpm is not installed
 #   Public key for heat-cfntools-1.3.0-2.el7ost.noarch.rpm is not installed
@@ -120,6 +125,10 @@ fi
 #   osp10 has no preinstalled openstack-utils
 yum -y install python-tripleoclient python-rdomanager-oscplugin  openstack-utils
 
+if [[ "$FREE_IPA" == 'true' ]] ; then
+  yum install -y python-novajoin
+fi
+
 if [[ "$OPENSTACK_VERSION" == 'ocata' && "$ENVIRONMENT_OS" == 'centos' ]] ; then
   yum update -y
   # workaround for https://bugs.launchpad.net/tripleo/+bug/1692899
@@ -134,6 +143,7 @@ if [[ "$OPENSTACK_VERSION" == 'ocata' && "$ENVIRONMENT_OS" == 'centos' ]] ; then
     sed -i 's/return 1/return 0/' /usr/libexec/os-refresh-config/configure.d/50-heat-config-docker-cmd
   fi
 fi
+
 
 # add Ceph repos to workaround bug with redhat-lsb-core package
 # todo: there is enabled ceph repo jewel
@@ -230,6 +240,20 @@ env_opts+=" ENVIRONMENT_OS=$ENVIRONMENT_OS ENVIRONMENT_OS_VERSION=$ENVIRONMENT_O
 env_opts+=" TLS=$TLS DPDK=$DPDK TSN=$TSN SRIOV=$SRIOV"
 env_opts+=" RHEL_CERT_TEST=$RHEL_CERT_TEST RHEL_ACCOUNT_FILE=$RHEL_ACCOUNT_FILE"
 env_opts+=" FREE_IPA=$FREE_IPA"
+
+
+if [[ "$FREE_IPA" == 'true' ]] ; then
+  otp=$(/usr/libexec/novajoin-ipa-setup \
+    --principal admin \
+    --password qwe123QWE \
+    --server ${prov_ip}.4 \
+    --realm ${CLOUD_DOMAIN_NAME^^} \
+    --domain ${CLOUD_DOMAIN_NAME} \
+    --hostname $(hostname -f) \
+    --precreate)
+  echo $otp > ~/free_ipa_otp
+  env_opts+=" FREE_IPA_OTP='$otp'"
+fi
 
 if [[ "$CLEAN_ENV" == 'create_vms_only' ]]  ; then
   echo "INFO: CLEAN_ENV=$CLEAN_ENV, undercloud setup is not finished."

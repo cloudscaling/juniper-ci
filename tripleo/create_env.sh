@@ -485,4 +485,19 @@ if [[ "$FREE_IPA" == 'true' ]] ; then
   _wait_machine "${mgmt_ip}.4"
   _prepare_network "${mgmt_ip}.4"  "freeipa.my${NUM}domain"
   _prepare_host "${mgmt_ip}.4"
+
+  cat <<EOF | $ssh_cmd root@${mgmt_ip}.4
+set -x
+cd ~
+yum install -y wget
+wget https://raw.githubusercontent.com/openstack/tripleo-heat-templates/master/ci/scripts/freeipa_setup.sh
+chmod +x ~/freeipa_setup.sh
+echo Hostname=freeipa.my${NUM}domain >> ~/freeipa-setup.env
+echo FreeIPAIP=${prov_ip}.202 >> ~/freeipa-setup.env
+echo DirectoryManagerPassword=qwe123QWE >> ~/freeipa-setup.env
+echo AdminPassword=qwe123QWE >> ~/freeipa-setup.env
+echo UndercloudFQDN=undercloud.my${NUM}domain >> ~/freeipa-setup.env
+~/freeipa_setup.sh || echo "ERROR: Failed to setup free ipa server"
+EOF
+
 fi

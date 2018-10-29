@@ -97,6 +97,8 @@ mgmt_ip="192.168.${mgmt_ip_addr}.2"
 fixed_ip_base="192.168.${prov_ip_addr}"
 fixed_vip="${fixed_ip_base}.200"
 fixed_controller_ip="${fixed_ip_base}.211"
+ipa_ip="192.168.${prov_ip_addr}.202"
+
 
 ((addr=BASE_ADDR+NUM*10))
 virt_host_ip="192.168.${addr}.1"
@@ -476,7 +478,12 @@ fi
 sed -i "s/ControlVirtualInterface:.*/ControlVirtualInterface: ens3/g" $contrail_net_file
 sed -i "s/PublicVirtualInterface:.*/PublicVirtualInterface: ens3/g" $contrail_net_file
 sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_net_file
-sed -i 's/DnsServers:.*/DnsServers: ["8.8.8.8","8.8.4.4"]/g' $contrail_net_file
+
+if [[ "$FREE_IPA" == 'true' ]] ; then
+  sed -i "s/DnsServers:.*/DnsServers: [\"$ipa_ip\",\"8.8.8.8\",\"8.8.4.4\"]/g" $contrail_net_file
+else
+  sed -i 's/DnsServers:.*/DnsServers: ["8.8.8.8","8.8.4.4"]/g' $contrail_net_file
+fi
 
 # file for other options
 misc_opts='misc_opts.yaml'
@@ -696,6 +703,13 @@ cat <<EOF >> $misc_opts
   ContrailDpdkHugepages1GB: 2
 EOF
 fi
+if [[ "$FREE_IPA" == 'true' ]] ; then
+cat <<EOF >> $misc_opts
+  CloudName: overcloud.$CLOUD_DOMAIN_NAME
+  CloudNameInternal: overcloud.internalapi.$CLOUD_DOMAIN_NAME
+  CloudNameCtlplane: overcloud.ctlplane.$CLOUD_DOMAIN_NAME
+EOF
+fi
 
 # IMPORTANT: The DNS domain used for the hosts should match the dhcp_domain configured in the Undercloud neutron.
 if (( CONT_COUNT < 2 )) ; then
@@ -874,8 +888,13 @@ EOF
   if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
     endpoints_file='tripleo-heat-templates/environments/tls-endpoints-public-ip.yaml'
   else
-    endpoints_file='tripleo-heat-templates/environments/ssl/tls-endpoints-public-ip.yaml'
+    if [[ "$FREE_IPA" == 'true' ]] ; then
+      endpoints_file='tripleo-heat-templates/environments/ssl/tls-everywhere-endpoints-dns.yaml'
+    else
+      endpoints_file='tripleo-heat-templates/environments/ssl/tls-endpoints-public-ip.yaml'
+    fi
   fi
+  
   ssl_opts+=" -e $endpoints_file"
   cat <<EOF > ctlplane-port.yaml
 parameters:
@@ -888,12 +907,23 @@ outputs:
   ip_address:
     value: {get_param: [DeployedServerPortMap, {get_param: Hostname}, ip_address]}
 EOF
+
   cat <<EOF > enable-tls.yaml
 resource_registry:
-  OS::TripleO::NodeTLSData: tripleo-heat-templates/puppet/extraconfig/tls/tls-cert-inject.yaml
-  OS::TripleO::NodeTLSCAData: tripleo-heat-templates/puppet/extraconfig/tls/ca-inject.yaml
   # OS::TripleO::Controller::Ports::InternalApiPort: tripleo-heat-templates/network/ports/internal_api_from_pool.yaml
   OS::TripleO::Controller::ControlPlanePort: ctlplane-port.yaml
+EOF
+
+  if [[ "$FREE_IPA" == 'true' ]] ; then
+    ssl_opts+=" -e tripleo-heat-templates/environments/services/haproxy-public-tls-certmonger.yaml"
+  else
+  cat <<EOF >> enable-tls.yaml
+  OS::TripleO::NodeTLSData: tripleo-heat-templates/puppet/extraconfig/tls/tls-cert-inject.yaml
+  OS::TripleO::NodeTLSCAData: tripleo-heat-templates/puppet/extraconfig/tls/ca-inject.yaml
+EOF
+  fi
+
+  cat <<EOF >> enable-tls.yaml
 parameter_defaults:
   # ControllerIPs:
   #   ctlplane:
@@ -933,18 +963,21 @@ EOF
     else
       # queens
       ssl_opts+=" -e tripleo-heat-templates/environments/ssl/enable-internal-tls.yaml"
-      cat <<EOF >> enable-tls.yaml
-  # TODO: try local instead of IPA that requires IPA server to be configured
+      if [[ "$FREE_IPA" != 'true' ]] ; then
+        cat <<EOF >> enable-tls.yaml
   CertmongerCA: 'local'
   CertmongerVncCA: 'local'
 EOF
+      fi
     fi
   fi
+
   if [[ "$TLS" == 'all' ]] ; then
     cat <<EOF >> enable-tls.yaml
   RabbitClientUseSSL: true
 EOF
   fi
+  
   cat <<EOF >> enable-tls.yaml
   ContrailSslEnabled: true
   ContrailInsecure: false
