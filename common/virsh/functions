@@ -295,6 +295,7 @@ function delete_domains() {
 
   delete_domain rd-undercloud-$NUM
   delete_domain rd-undercloud-$NUM-cert-test
+  delete_domain rd-undercloud-$NUM-freeipa
 
   for name in $(vbmc list | grep "$domname" | awk '{print($2)}') ; do
     delete_vbmc $name
