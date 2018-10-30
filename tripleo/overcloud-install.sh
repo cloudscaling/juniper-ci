@@ -429,7 +429,7 @@ sed -i "s/ComputeCount:.*/ComputeCount: $comp_scale_count/g" $contrail_services_
 sed -i "s/ContrailDpdkCount:.*/ContrailDpdkCount: $dpdk_scale_count/g" $contrail_services_file
 sed -i "s/ContrailTsnCount:.*/ContrailTsnCount: $tsn_scale_count/g" $contrail_services_file
 sed -i 's/NtpServer:.*/NtpServer: 3.europe.pool.ntp.org/g' $contrail_services_file
-if [[ "$DPDK" != 'off' &&  "$DPDK" != 'default' ]] ; then
+if [[ "$DPDK" != 'off' ]] ; then
   dpdk_nic_file='tripleo-heat-templates/network/config/contrail/examples/dpdk/contrail-dpdk-nic-config-single.yaml'
   if [[ "$DPDK" == 'default' ]] ; then
     [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] && {
