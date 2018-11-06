@@ -120,15 +120,15 @@ juju-expose neutron-api
 # Contrail
 juju-deploy $PLACE/contrail-keystone-auth --to lxd:$cont1
 
-if [ "$DEPLOY_MODE" == 'ha' ] ; then
-  juju-deploy cs:~boucherv29/keepalived-19 --config virtual_ip=$addr.254
-  juju-deploy cs:$SERIES/haproxy --to $cont1 --config peering_mode=active-active
-  juju-add-unit haproxy --to $cont2
-  juju-add-unit haproxy --to $cont3
-  juju-expose haproxy
-  juju-add-relation haproxy:juju-info keepalived:juju-info
-  controller_params="--config vip=$addr.254"
-fi
+#if [ "$DEPLOY_MODE" == 'ha' ] ; then
+#  juju-deploy cs:~boucherv29/keepalived-19 --config virtual_ip=$addr.254
+#  juju-deploy cs:$SERIES/haproxy --to $cont1 --config peering_mode=active-active
+#  juju-add-unit haproxy --to $cont2
+#  juju-add-unit haproxy --to $cont3
+#  juju-expose haproxy
+#  juju-add-relation haproxy:juju-info keepalived:juju-info
+#  controller_params="--config vip=$addr.254"
+#fi
 
 juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params --config control-network=$IF2
 juju-expose contrail-controller
@@ -146,9 +146,9 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   juju-add-unit contrail-analytics --to $cont3
   juju-add-unit contrail-analyticsdb --to $cont2
   juju-add-unit contrail-analyticsdb --to $cont3
-  juju-add-relation "contrail-analytics" "haproxy"
-  juju-add-relation "contrail-controller:http-services" "haproxy"
-  juju-add-relation "contrail-controller:https-services" "haproxy"
+#  juju-add-relation "contrail-analytics" "haproxy"
+#  juju-add-relation "contrail-controller:http-services" "haproxy"
+#  juju-add-relation "contrail-controller:https-services" "haproxy"
 fi
 
 cp "$my_dir/../common/repo_config.yaml.tmpl" "repo_config_co.yaml"
