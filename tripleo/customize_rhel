@@ -66,4 +66,9 @@ virt-customize -a $dst_image \
     --run-command 'sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config' \
     --run-command 'systemctl enable sshd' \
     --root-password password:qwe123QWE \
+    --run-command 'useradd -m stack -s /bin/bash' \
+    --run-command 'echo "stack:qwe123QWE" | chpasswd' \
+    --run-command 'echo "stack ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/stack' \
+    --ssh-inject root:file:/home/jenkins/.ssh/id_rsa.pub \
+    --ssh-inject stack:file:/home/jenkins/.ssh/id_rsa.pub \
     --selinux-relabel

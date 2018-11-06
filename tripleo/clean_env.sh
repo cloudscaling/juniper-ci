@@ -3,7 +3,7 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
-ssh_key_dir="/home/jenkins"
+ssh_key_dir="/home/jenkins/.ssh"
 
 if [[ -z "$NUM" ]] ; then
   echo "Please set NUM variable to specific environment number. (export NUM=4)"
@@ -11,17 +11,14 @@ if [[ -z "$NUM" ]] ; then
 fi
 
 ENVIRONMENT_OS=${ENVIRONMENT_OS:-'rhel'}
-poolname="rdimages"
 
+source "$my_dir/env_desc.sh"
 source "$my_dir/../common/virsh/functions"
 
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   # delete stack to unregister nodes
-  BASE_ADDR=${BASE_ADDR:-172}
-  ((env_addr=BASE_ADDR+NUM*10))
-  ip_addr="192.168.${env_addr}.2"
-  ssh_opts="-i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-  ssh_addr="root@${ip_addr}"
+  ssh_opts="-i $ssh_key_dir/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+  ssh_addr="root@${mgmt_ip}"
   ssh -T $ssh_opts $ssh_addr "sudo -u stack /home/stack/overcloud-delete.sh" || true
   # unregister undercloud
   ssh -T $ssh_opts $ssh_addr "sudo subscription-manager unregister" || true
@@ -33,23 +30,24 @@ delete_network external
 delete_network dpdk
 delete_network tsn
 
+delete_network_dhcp $NET_NAME_MGMT
+delete_network_dhcp $NET_NAME_PROV
+
 delete_domains
 
 vol_path=$(get_pool_path $poolname)
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]]; then
-  rhel_unregister_system $vol_path/undercloud-$NUM.qcow2 || true
-  rhel_unregister_system $vol_path/undercloud-$NUM-cert-test.qcow2 || true
-  rhel_unregister_system $vol_path/undercloud-$NUM-freeipa.qcow2 || true
+  rhel_unregister_system $vol_path/$undercloud_vm_volume || true
+  rhel_unregister_system $vol_path/$undercloud_cert_vm_volume || true
+  rhel_unregister_system $vol_path/$undercloud_freeipa_vm_volume || true
 fi
 
-delete_volume undercloud-$NUM.qcow2 $poolname
-delete_volume undercloud-$NUM-cert-test.qcow2 $poolname
-delete_volume undercloud-$NUM-freeipa.qcow2 $poolname
+delete_volume $undercloud_vm_volume $poolname
+delete_volume $undercloud_cert_vm_volume $poolname
+delete_volume $undercloud_freeipa_vm_volume $poolname
 for vol in `virsh vol-list $poolname | awk "/overcloud-$NUM-/ {print \$1}"` ; do
   if [[ "$ENVIRONMENT_OS" == 'rhel' ]]; then
     rhel_unregister_system $vol_path/$vol || true
   fi
   delete_volume $vol $poolname
 done
-
-rm -f "$ssh_key_dir/kp-$NUM" "$ssh_key_dir/kp-$NUM.pub"

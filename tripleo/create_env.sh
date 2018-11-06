@@ -61,7 +61,7 @@ RHEL_CERT_TEST=${RHEL_CERT_TEST:-'false'}
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
-ssh_key_dir="/home/jenkins"
+ssh_key_dir="/home/jenkins/.ssh"
 
 # base image for VMs
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
@@ -73,6 +73,7 @@ BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-"$DEFAULT_BASE_IMAGE_NAME"}
 BASE_IMAGE_DIR=${BASE_IMAGE_DIR:-'/home/root/images'}
 mkdir -p ${BASE_IMAGE_DIR}
 BASE_IMAGE="${BASE_IMAGE_DIR}/${BASE_IMAGE_NAME}"
+echo BASE_IMAGE $BASE_IMAGE
 
 # number of machines in overcloud
 # by default scripts will create hyperconverged environment with SDS on compute
@@ -95,36 +96,38 @@ fi
 
 # disk size for overcloud machines
 vm_disk_size="30G"
-# volume's poolname
-poolname="rdimages"
+
 net_driver=${net_driver:-e1000}
 
+source "$my_dir/env_desc.sh"
 source "$my_dir/../common/virsh/functions"
 
 # check if environment is present
-assert_env_exists "rd-undercloud-$NUM"
+assert_env_exists $undercloud_vmname
 
-# create three networks (i don't know why external is needed)
-create_network management
-mgmt_net=`get_network_name management`
-create_network provisioning
-prov_net=`get_network_name provisioning`
-#create_network external
-#ext_net=`get_network_name external`
-#create_network dpdk
-#dpdk_net=`get_network_name dpdk`
-#create_network tsn
-#tsn_net=`get_network_name tsn`
 # define MAC's
-mgmt_ip=$(get_network_ip "management")
 mgmt_mac="00:16:00:00:0$NUM:02"
 mgmt_mac_cert="00:16:00:01:0$NUM:02"
+mgmt_cert_ip="${mgmt_subnet}.3"
 mgmt_mac_freeipa="00:16:00:01:0$NUM:03"
+mgmt_freeipa_ip="${mgmt_subnet}.4"
 
-prov_ip=$(get_network_ip "provisioning")
 prov_mac="00:16:00:00:0$NUM:06"
 prov_mac_cert="00:16:00:01:0$NUM:06"
+prov_cert_ip="${prov_subnet}.3"
 prov_mac_freeipa="00:16:00:02:0$NUM:06"
+prov_freeipa_ip="${prov_subnet}.4"
+
+# create networks and setup DHCP rules
+create_network_dhcp $NET_NAME_MGMT $mgmt_subnet $BRIDGE_NAME_MGMT
+update_network_dhcp $NET_NAME_MGMT $undercloud_vmname $mgmt_mac $mgmt_ip
+update_network_dhcp $NET_NAME_MGMT $undercloud_cert_vmname $mgmt_mac_cert $mgmt_cert_ip
+update_network_dhcp $NET_NAME_MGMT $undercloud_cert_vmname $mgmt_mac_freeipa $mgmt_freeipa_ip
+
+create_network_dhcp $NET_NAME_PROV $prov_subnet $BRIDGE_NAME_PROV
+update_network_dhcp $NET_NAME_PROV $undercloud_vmname $prov_mac $prov_ip
+update_network_dhcp $NET_NAME_PROV $undercloud_cert_vmname $prov_mac_cert $prov_cert_ip
+update_network_dhcp $NET_NAME_PROV $undercloud_cert_vmname $prov_mac_freeipa $prov_freeipa_ip
 
 # create pool
 create_pool $poolname
@@ -152,8 +155,8 @@ function define_overcloud_vms() {
       local vol_name="overcloud-$NUM-${name}-$i"
       create_root_volume $vol_name
       local vm_name="rd-$vol_name"
-      define_machine $vm_name $vcpu $mem rhel7 $prov_net "${pool_path}/${vol_name}.qcow2"
-      start_vbmc $vbmc_port $vm_name ${mgmt_ip}.1 stack qwe123QWE
+      define_machine $vm_name $vcpu $mem rhel7 $NET_NAME_PROV "${pool_path}/${vol_name}.qcow2"
+      start_vbmc $vbmc_port $vm_name $mgmt_gateway stack qwe123QWE
       (( vbmc_port+=1 ))
     done
   else
@@ -184,145 +187,22 @@ define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT 8192 $vbmc_po
 (( vbmc_port+=CONTRAIL_ANALYTICSDB_COUNT ))
 
 # copy image for undercloud and resize them
-cp -p $BASE_IMAGE $pool_path/undercloud-$NUM.qcow2
+cp -p $BASE_IMAGE $pool_path/$undercloud_vm_volume
 
 # for RHEL make a copy of disk to run one more VM for test server
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
-    cp $pool_path/undercloud-$NUM.qcow2 $pool_path/undercloud-$NUM-cert-test.qcow2
+    cp $pool_path/$undercloud_vm_volume $pool_path/$undercloud_cert_vm_volume
   fi
   if [[ "$FREE_IPA" == 'true' ]] ; then
-    cp $pool_path/undercloud-$NUM.qcow2 $pool_path/undercloud-$NUM-freeipa.qcow2
+    cp $pool_path/$undercloud_vm_volume $pool_path/$undercloud_freeipa_vm_volume
   fi
 fi
-
-
-# generate password/key for undercloud's root
-rm -f "$ssh_key_dir/kp-$NUM" "$ssh_key_dir/kp-$NUM.pub"
-ssh-keygen -b 2048 -t rsa -f "$ssh_key_dir/kp-$NUM" -q -N ""
-rootpass=`openssl passwd -1 123`
 
 #check that nbd kernel module is loaded
 if ! lsmod |grep '^nbd ' ; then
   modprobe nbd max_part=8
 fi
-
-function _change_iface() {
-  local templ=$1
-  local iface=$2
-  local network=$3
-  local mac=$4
-  local iface_file=$tmpdir/etc/sysconfig/network-scripts/ifcfg-$iface
-  cp "$my_dir/$templ" $iface_file
-  sed -i "s/{{network}}/$network/g" $iface_file
-  sed -i "s/{{mac-address}}/$mac/g" $iface_file
-  sed -i "s/{{num}}/$NUM/g" $iface_file
-}
-
-function _change_image() {
-  local mgmt_templ=$1
-  local mgmt_network=$2
-  local mgmt_mac=$3
-  local prov_templ=$4
-  local prov_network=$5
-  local prov_mac=$6
-  local prepare_contrail_pkgs=$7
-
-  # configure eth0 - management
-  _change_iface $mgmt_templ 'eth0' $mgmt_network $mgmt_mac
-
-  # configure eth1 - provisioning
-  _change_iface $prov_templ 'eth1' $prov_network $prov_mac
-
-  # configure root access
-  mkdir -p $tmpdir/root/.ssh
-  cp "$ssh_key_dir/kp-$NUM.pub" $tmpdir/root/.ssh/authorized_keys
-  cp "/home/stack/.ssh/id_rsa" $tmpdir/root/stack_id_rsa
-  cp "/home/stack/.ssh/id_rsa.pub" $tmpdir/root/stack_id_rsa.pub
-  echo "PS1='\${debian_chroot:+(\$debian_chroot)}undercloud:\[\033[01;31m\](\$?)\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\\\$ '" >> $tmpdir/root/.bashrc
-  sed -i "s root:\*: root:$rootpass: " $tmpdir/etc/shadow
-  sed -i "s root:\!\!: root:$rootpass: " $tmpdir/etc/shadow
-  grep root $tmpdir/etc/shadow
-  echo "PermitRootLogin yes" > $tmpdir/etc/ssh/sshd_config
-
-  # prepare contrail pkgs
-  if [[ "$CONTRAIL_SERIES" == 'release' ]] ; then
-    build_series=''
-  else
-    build_series='cb-'
-  fi
-
-  if [[ "$prepare_contrail_pkgs" == 'yes' ]] ; then
-    rm -rf $tmpdir/root/contrail_packages
-    mkdir -p $tmpdir/root/contrail_packages
-    aws s3 sync s3://contrailrhel7 $CONTRAIL_PACKAGES_DIR
-    latest_ver_rpm=`ls ${CONTRAIL_PACKAGES_DIR}/${build_series}contrail-install* -vr  | grep $CONTRAIL_VERSION | grep $OPENSTACK_VERSION | head -n1`
-    cp $latest_ver_rpm $tmpdir/root/contrail_packages/
-    # WORKAROUND to bug #1767456
-    # TODO: remove net-snmp after fix bug #1767456
-    mkdir -p $tmpdir/root/contrail_packages/net_snmp
-    cp /home/jenkins/net-snmp/* $tmpdir/root/contrail_packages/net_snmp/
-  fi
-
-  # cp rhel account file
-  if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-    local rhel_account_file_dir=$(dirname "$RHEL_ACCOUNT_FILE")
-    local rhel_account_file_name=$(echo $RHEL_ACCOUNT_FILE | awk -F '/' '{print($NF)}')
-    mkdir -p $tmpdir/$rhel_account_file_dir
-    cp $RHEL_ACCOUNT_FILE $tmpdir/$rhel_account_file_dir/
-    cat <<EOF >> $tmpdir/$rhel_account_file_dir/$rhel_account_file_name
-export RHEL_REPOS="$(rhel_get_repos_for_os | tr ' ' ',')"
-EOF
-    chmod -R 644 $tmpdir/$rhel_account_file_dir
-    chmod +x $tmpdir/$rhel_account_file_dir
-  fi
-}
-
-function _patch_image() {
-  local image=$1
-  local mgmt_templ=$2
-  local mgmt_network=$3
-  local mgmt_mac=$4
-  local prov_templ=$5
-  local prov_network=$6
-  local prov_mac=$7
-  local prepare_contrail_pkgs=${8:-'yes'}
-
-  # TODO: use guestfish instead of manual attachment
-  # mount undercloud root disk. (it helps to create multienv)
-  # !!! WARNING !!! in case of errors you need to unmount/disconnect it manually!!!
-  local nbd_dev="/dev/nbd${NUM}"
-  qemu-nbd -d $nbd_dev || true
-  qemu-nbd -n -c $nbd_dev $image
-  sleep 5
-  if [ ! -e ${nbd_dev}p1 ] ; then
-    echo "No dev ${nbd_dev}p1 after nbd mount, try to update manually"
-    partx -a $nbd_dev
-    lsblk
-  fi
-  local ret=0
-  local tmpdir=$(mktemp -d)
-  mount ${nbd_dev}p1 $tmpdir || ret=1
-  sleep 2
-
-  # patch image
-  [ $ret == 0 ] && _change_image \
-    $mgmt_templ $mgmt_network $mgmt_mac \
-    $prov_templ $prov_network $prov_mac \
-    $prepare_contrail_pkgs || ret=2
-
-  # unmount disk
-  [ $ret != 1 ] && umount ${nbd_dev}p1 || ret=2
-  sleep 2
-  rm -rf $tmpdir || ret=3
-  qemu-nbd -d $nbd_dev || ret=4
-  sleep 2
-
-  if [[ $ret != 0 ]] ; then
-    echo "ERROR: there were errors in changing image $image, ret=$ret"
-    exit 1
-  fi
-}
 
 function _start_vm() {
   local name=$1
@@ -343,55 +223,41 @@ function _start_vm() {
     --disk "path=$image",size=40,cache=writeback,bus=virtio,serial=$(uuidgen) \
     --boot hd \
     --noautoconsole \
-    --network network=$mgmt_net,model=$net_driver,mac=$mgmt_mac \
-    --network network=$prov_net,model=$net_driver,mac=$prov_mac \
+    --network network=$NET_NAME_MGMT,model=$net_driver,mac=$mgmt_mac \
+    --network network=$NET_NAME_PROV,model=$net_driver,mac=$prov_mac \
     --graphics vnc,listen=0.0.0.0
 }
 
-_patch_image "$pool_path/undercloud-$NUM.qcow2" \
-  'ifcfg-ethM' $mgmt_ip $mgmt_mac \
-  'ifcfg-ethA' $prov_ip $prov_mac
-
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-  rhel_register_system_and_customize "$pool_path/undercloud-$NUM.qcow2" 'undercloud'
+  rhel_register_system_and_customize "$pool_path/$undercloud_vm_volume" 'undercloud'
 fi
 
-_start_vm "rd-undercloud-$NUM" "$pool_path/undercloud-$NUM.qcow2" \
+_start_vm "$undercloud_vmname" "$pool_path/$undercloud_vm_volume" \
   $mgmt_mac $prov_mac
 
 if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
-  _patch_image "$pool_path/undercloud-$NUM-cert-test.qcow2" \
-    'ifcfg-ethMC' $mgmt_ip $mgmt_mac_cert \
-    'ifcfg-ethAC' $prov_ip $prov_mac_cert \
-    'no'
-
-  rhel_register_system_and_customize "$pool_path/undercloud-$NUM-cert-test.qcow2" 'undercloud'
+  rhel_register_system_and_customize "$pool_path/$undercloud_cert_vm_volume" 'undercloud'
 
   _start_vm \
-    "rd-undercloud-$NUM-cert-test" "$pool_path/undercloud-$NUM-cert-test.qcow2" \
+    "$undercloud_cert_vmname" "$pool_path/$undercloud_cert_vm_volume" \
     $mgmt_mac_cert $prov_mac_cert 4096
 fi
 
 if [[ "$FREE_IPA" == 'true' ]] ; then
-  _patch_image "$pool_path/undercloud-$NUM-freeipa.qcow2" \
-    'ifcfg-ethMF' $mgmt_ip $mgmt_mac_freeipa \
-    'ifcfg-ethAF' $prov_ip $prov_mac_freeipa \
-    'no'
-
-  rhel_register_system_and_customize "$pool_path/undercloud-$NUM-freeipa.qcow2" 'undercloud'
+  rhel_register_system_and_customize "$pool_path/$undercloud_freeipa_vm_volume" 'undercloud'
 
   _start_vm \
-    "rd-undercloud-$NUM-freeipa" "$pool_path/undercloud-$NUM-freeipa.qcow2" \
+    "$undercloud_freeipa_vmname" "$pool_path/$undercloud_freeipa_vm_volume" \
     $mgmt_mac_freeipa $prov_mac_freeipa 4096
 fi
 
-ssh_opts="-i $ssh_key_dir/kp-$NUM -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+ssh_opts="-i $ssh_key_dir/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 ssh_cmd="ssh -T $ssh_opts"
 
 # wait for undercloud machine
 function _wait_machine() {
   local addr=$1
-  wait_ssh $addr "$ssh_key_dir/kp-$NUM"
+  wait_ssh $addr "$ssh_key_dir/id_rsa"
 }
 
 function _prepare_network() {
@@ -409,6 +275,55 @@ echo "127.0.0.1   localhost" >> /etc/hosts
 systemctl restart network
 sleep 5
 EOF
+}
+
+function _update_contrail_packages() {
+  aws s3 sync s3://contrailrhel7 $CONTRAIL_PACKAGES_DIR
+}
+
+function _prepare_contrail() {
+  local addr=$1
+  local tmpdir=$(mktemp -d)
+
+  # copy stack's keys
+  scp $ssh_opts /home/stack/.ssh/id_rsa root@${addr}:/root/stack_id_rsa
+  scp $ssh_opts /home/stack/.ssh/id_rsa.pub root@${addr}:/root/stack_id_rsa.pub
+
+  # prepare contrail pkgs
+  if [[ "$CONTRAIL_SERIES" == 'release' ]] ; then
+    build_series=''
+  else
+    build_series='cb-'
+  fi
+  if [[ "$prepare_contrail_pkgs" == 'yes' ]] ; then
+    mkdir -p $tmpdir/contrail_packages
+    latest_ver_rpm=`ls ${CONTRAIL_PACKAGES_DIR}/${build_series}contrail-install* -vr  | grep $CONTRAIL_VERSION | grep $OPENSTACK_VERSION | head -n1`
+    cp $latest_ver_rpm $tmpdir/contrail_packages/
+    # WORKAROUND to bug #1767456
+    # TODO: remove net-snmp after fix bug #1767456
+    mkdir -p $tmpdir/contrail_packages/net_snmp
+    cp /home/jenkins/net-snmp/* $tmpdir/contrail_packages/net_snmp/
+    scp $ssh_opts -r $tmpdir/contrail_packages root@${addr}:/root/
+    rm -rf $tmpdir || ret=3
+  fi
+}
+
+function _prepare_rhel_account() {
+  local addr=$1
+  if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+    local tmpdir=$(mktemp -d)
+    local rhel_account_file_dir=$(dirname "$RHEL_ACCOUNT_FILE")
+    local rhel_account_file_name=$(echo $RHEL_ACCOUNT_FILE | awk -F '/' '{print($NF)}')
+    mkdir -p $tmpdir/$rhel_account_file_dir
+    cp $RHEL_ACCOUNT_FILE $tmpdir/$rhel_account_file_dir/
+    cat <<EOF >> $tmpdir/$rhel_account_file_dir/$rhel_account_file_name
+export RHEL_REPOS="$(rhel_get_repos_for_os | tr ' ' ',')"
+EOF
+    chmod -R 644 $tmpdir/$rhel_account_file_dir
+    chmod +x $tmpdir/$rhel_account_file_dir
+    scp $ssh_opts -r $tmpdir/$rhel_account_file_dir root@${addr}:/
+    rm -rf $tmpdir || ret=3
+  fi
 }
 
 function _prepare_host() {
@@ -457,17 +372,22 @@ subscription-manager repos $repos_opts
 EOF
 }
 
+_update_contrail_packages
+
 # wait udnercloud and register it in redhat if rhel env
-_wait_machine "${mgmt_ip}.2"
-_prepare_network "${mgmt_ip}.2"  "undercloud.my${NUM}domain"
-_prepare_host "${mgmt_ip}.2"
+_wait_machine $mgmt_ip
+_prepare_network $mgmt_ip "undercloud.my${NUM}domain"
+_prepare_contrail $mgmt_ip
+_prepare_rhel_account $mgmt_ip
+_prepare_host $mgmt_ip
 
 if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
-  _wait_machine "${mgmt_ip}.3"
-  _prepare_network "${mgmt_ip}.3"  "cert.my${NUM}domain"
-  _prepare_host "${mgmt_ip}.3"
+  _wait_machine $mgmt_cert_ip
+  _prepare_network $mgmt_cert_ip "cert.my${NUM}domain"
+  _prepare_rhel_account $mgmt_cert_ip
+  _prepare_host $mgmt_cert_ip
 
-  cat <<EOF | $ssh_cmd ${mgmt_ip}.3
+  cat <<EOF | $ssh_cmd root@${mgmt_cert_ip}
 set -x
 iptables -I INPUT 1 -p udp -m multiport --dports 8009 -m comment --comment \"rhcertd\" -m state --state NEW -j ACCEPT
 iptables -I INPUT 1 -p tcp -m multiport --dports 8009 -m comment --comment \"rhcertd\" -m state --state NEW -j ACCEPT
@@ -475,25 +395,26 @@ iptables -I INPUT 1 -p tcp -m multiport --dports 80,443 -m comment --comment \"h
 yum install -y redhat-certification
 systemctl start httpd
 rhcertd start
-sed -i "s/ALLOWED_HOSTS =.*/ALLOWED_HOSTS = ['myhost.my${NUM}certdomain', '${mgmt_ip}.3', '${prov_ip}.201', 'localhost.localdomain', 'localhost', '127.0.0.1']/" /var/www/rhcert/project/settings.py
+sed -i "s/ALLOWED_HOSTS =.*/ALLOWED_HOSTS = ['myhost.my${NUM}certdomain', '$mgmt_cert_ip', '$prov_cert_ip', 'localhost.localdomain', 'localhost', '127.0.0.1']/" /var/www/rhcert/project/settings.py
 systemctl restart httpd
 EOF
 
 fi
 
 if [[ "$FREE_IPA" == 'true' ]] ; then
-  _wait_machine "${mgmt_ip}.4"
-  _prepare_network "${mgmt_ip}.4"  "freeipa.my${NUM}domain"
-  _prepare_host "${mgmt_ip}.4"
+  _wait_machine $mgmt_freeipa_ip
+  _prepare_network $mgmt_freeipa_ip "freeipa.my${NUM}domain"
+  _prepare_rhel_account $mgmt_freeipa_ip
+  _prepare_host $mgmt_freeipa_ip
 
-  cat <<EOF | $ssh_cmd root@${mgmt_ip}.4
+  cat <<EOF | $ssh_cmd root@${mgmt_freeipa_ip}
 set -x
 cd ~
 yum install -y wget
 wget https://raw.githubusercontent.com/openstack/tripleo-heat-templates/master/ci/scripts/freeipa_setup.sh
 chmod +x ~/freeipa_setup.sh
 echo Hostname=freeipa.my${NUM}domain >> ~/freeipa-setup.env
-echo FreeIPAIP=${prov_ip}.202 >> ~/freeipa-setup.env
+echo FreeIPAIP=${prov_subnet}.202 >> ~/freeipa-setup.env
 echo DirectoryManagerPassword=qwe123QWE >> ~/freeipa-setup.env
 echo AdminPassword=qwe123QWE >> ~/freeipa-setup.env
 echo UndercloudFQDN=undercloud.my${NUM}domain >> ~/freeipa-setup.env

@@ -1,7 +1,0 @@
-DEVICE=eth1
-BOOTPROTO=none
-HWADDR="{{mac-address}}"
-ONBOOT=no
-HOTPLUG=no
-NM_CONTROLLED=no
-DEVICETYPE=ovs
