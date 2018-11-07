@@ -37,12 +37,12 @@ ssh $mrepo mkdir docker_images
 scp $HOME/docker/contrail-* "$mrepo:docker_images/"
 scp "$my_dir/../common/prepare-registry.sh" $mrepo:prepare-registry.sh
 ssh $mrepo ./prepare-registry.sh $repo_ip $docker_user $docker_password
-controller_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-controller-" | awk '{print $1}'`
-controller_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-controller-" | awk '{print $2}'`
-analytics_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analytics-" | awk '{print $1}'`
-analytics_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analytics-" | awk '{print $2}'`
-analyticsdb_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analyticsdb-" | awk '{print $1}'`
-analyticsdb_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analyticsdb-" | awk '{print $2}'`
+controller_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-controller-" | grep $CONTRAIL_BUILD | awk '{print $1}'`
+controller_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-controller-" | grep $CONTRAIL_BUILD | awk '{print $2}'`
+analytics_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analytics-" | grep $CONTRAIL_BUILD | awk '{print $1}'`
+analytics_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analytics-" | grep $CONTRAIL_BUILD | awk '{print $2}'`
+analyticsdb_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analyticsdb-" | grep $CONTRAIL_BUILD | awk '{print $1}'`
+analyticsdb_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analyticsdb-" | grep $CONTRAIL_BUILD | awk '{print $2}'`
 echo "Docker controller image: $controller_image_name:$controller_image_tag"
 echo "Docker analytics image: $analytics_image_name:$analytics_image_tag"
 echo "Docker analyticsdb image: $analyticsdb_image_name:$analyticsdb_image_tag"

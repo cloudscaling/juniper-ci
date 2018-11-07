@@ -31,6 +31,8 @@ fi
 # 4.0.1.0-32
 # 4.0.2.0-34
 # 4.1.0.0-8
+# 4.1.1.0-12
+# 4.1.2.0-16
 export JOB_VERSION=R4
 export SERIES="${SERIES:-xenial}"
 export VERSION="${VERSION:-newton}"
