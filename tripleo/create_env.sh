@@ -283,7 +283,6 @@ function _update_contrail_packages() {
 
 function _prepare_contrail() {
   local addr=$1
-  local tmpdir=$(mktemp -d)
 
   # copy stack's keys
   scp $ssh_opts /home/stack/.ssh/id_rsa root@${addr}:/root/stack_id_rsa
@@ -295,17 +294,16 @@ function _prepare_contrail() {
   else
     build_series='cb-'
   fi
-  if [[ "$prepare_contrail_pkgs" == 'yes' ]] ; then
-    mkdir -p $tmpdir/contrail_packages
-    latest_ver_rpm=`ls ${CONTRAIL_PACKAGES_DIR}/${build_series}contrail-install* -vr  | grep $CONTRAIL_VERSION | grep $OPENSTACK_VERSION | head -n1`
-    cp $latest_ver_rpm $tmpdir/contrail_packages/
-    # WORKAROUND to bug #1767456
-    # TODO: remove net-snmp after fix bug #1767456
-    mkdir -p $tmpdir/contrail_packages/net_snmp
-    cp /home/jenkins/net-snmp/* $tmpdir/contrail_packages/net_snmp/
-    scp $ssh_opts -r $tmpdir/contrail_packages root@${addr}:/root/
-    rm -rf $tmpdir || ret=3
-  fi
+  cat <<EOF | $ssh_cmd root@${addr}
+set -x
+mkdir -p /root/contrail_packages
+mkdir -p /root/contrail_packages/net_snmp
+EOF
+  local latest_ver_rpm=`ls ${CONTRAIL_PACKAGES_DIR}/${build_series}contrail-install* -vr  | grep $CONTRAIL_VERSION | grep $OPENSTACK_VERSION | head -n1`
+  scp $ssh_opts $latest_ver_rpm root@${addr}:/root/contrail_packages/
+  # WORKAROUND to bug #1767456
+  # TODO: remove net-snmp after fix bug #1767456
+  scp -r $ssh_opts /home/jenkins/net-snmp root@${addr}:/root/contrail_packages/
 }
 
 function _prepare_rhel_account() {
@@ -314,14 +312,17 @@ function _prepare_rhel_account() {
     local tmpdir=$(mktemp -d)
     local rhel_account_file_dir=$(dirname "$RHEL_ACCOUNT_FILE")
     local rhel_account_file_name=$(echo $RHEL_ACCOUNT_FILE | awk -F '/' '{print($NF)}')
-    mkdir -p $tmpdir/$rhel_account_file_dir
-    cp $RHEL_ACCOUNT_FILE $tmpdir/$rhel_account_file_dir/
-    cat <<EOF >> $tmpdir/$rhel_account_file_dir/$rhel_account_file_name
+    cp $RHEL_ACCOUNT_FILE $tmpdir/
+    cat <<EOF >> $tmpdir/$rhel_account_file_name
 export RHEL_REPOS="$(rhel_get_repos_for_os | tr ' ' ',')"
 EOF
-    chmod -R 644 $tmpdir/$rhel_account_file_dir
-    chmod +x $tmpdir/$rhel_account_file_dir
-    scp $ssh_opts -r $tmpdir/$rhel_account_file_dir root@${addr}:/
+    chmod 644 $tmpdir/$rhel_account_file_name
+    chmod +x $tmpdir/$rhel_account_file_name
+    cat <<EOF | $ssh_cmd root@${addr}
+set -x
+mkdir -p $rhel_account_file_dir
+EOF
+    scp $ssh_opts $tmpdir/$rhel_account_file_name root@${addr}:$rhel_account_file_dir/
     rm -rf $tmpdir || ret=3
   fi
 }
