@@ -130,12 +130,13 @@ juju-deploy $PLACE/contrail-keystone-auth --to lxd:$cont1
 #  controller_params="--config vip=$addr.254"
 #fi
 
-juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params --config control-network=$IF2
+juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params
+# --config control-network=$IF2
 juju-expose contrail-controller
 juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4" image-name="$controller_image_name" image-tag="$controller_image_tag" docker-registry="$repo_ip:5000" docker-user="$docker_user" docker-password="$docker_password"
-juju-deploy $PLACE/contrail-analyticsdb --to $cont1 --config control-network=$IF2
+juju-deploy $PLACE/contrail-analyticsdb --to $cont1
 juju-set contrail-analyticsdb cassandra-minimum-diskgb="4" image-name="$analyticsdb_image_name" image-tag="$analyticsdb_image_tag" docker-registry="$repo_ip:5000" docker-user="$docker_user" docker-password="$docker_password"
-juju-deploy $PLACE/contrail-analytics --to $cont1 --config control-network=$IF2
+juju-deploy $PLACE/contrail-analytics --to $cont1
 juju-set contrail-analytics image-name="$analytics_image_name" image-tag="$analytics_image_tag" docker-registry="$repo_ip:5000" docker-user="$docker_user" docker-password="$docker_password"
 juju-expose contrail-analytics
 
