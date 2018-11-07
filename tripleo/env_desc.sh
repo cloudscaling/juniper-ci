@@ -9,7 +9,7 @@ poolname="rdimages"
 undercloud_prefix="undercloud"
 undercloud_vmname="rd-undercloud-$NUM"
 undercloud_cert_vmname="rd-undercloud-$NUM-cert-test"
-undercloud_cert_vmname="rd-undercloud-$NUM-freeipa"
+undercloud_freeipa_vmname="rd-undercloud-$NUM-freeipa"
 
 #define virtual machine's volumes
 
