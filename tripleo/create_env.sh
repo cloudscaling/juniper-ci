@@ -124,7 +124,7 @@ update_network_dhcp $NET_NAME_MGMT $undercloud_vmname $mgmt_mac $mgmt_ip
 update_network_dhcp $NET_NAME_MGMT $undercloud_cert_vmname $mgmt_mac_cert $mgmt_cert_ip
 update_network_dhcp $NET_NAME_MGMT $undercloud_freeipa_vmname $mgmt_mac_freeipa $mgmt_freeipa_ip
 
-create_network_dhcp $NET_NAME_PROV $prov_subnet $BRIDGE_NAME_PROV
+create_network_dhcp $NET_NAME_PROV $prov_subnet $BRIDGE_NAME_PROV 'yes' 'no_forward'
 update_network_dhcp $NET_NAME_PROV $undercloud_vmname $prov_mac $prov_ip
 update_network_dhcp $NET_NAME_PROV $undercloud_cert_vmname $prov_mac_cert $prov_cert_ip
 update_network_dhcp $NET_NAME_PROV $undercloud_freeipa_vmname $prov_mac_freeipa $prov_freeipa_ip
