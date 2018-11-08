@@ -26,6 +26,8 @@
     builders:
       - shell: |
           #!/bin/bash -e
+          rm -f ./test_result.xml
+          rm -rf ./logs
           ./juniper-ci/devstack/run.sh devstack-{project} {tests} {concurrency}
     publishers:
       - archive:
