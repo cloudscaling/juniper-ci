@@ -149,6 +149,15 @@
             - '3'
             - 'controller'
       - choice:
+          name: CONTRAIL_ISSU_COUNT
+          description:  Count of additional nodes for ISSU upgrade
+                        Non zero value  means ISSUE enabled.
+          choices:
+            - '0'
+            - '1'
+            - '2'
+            - '3'
+      - choice:
           name: CLEAN_ENV
           choices:
             - 'auto'

@@ -83,6 +83,7 @@ STORAGE_COUNT=${STORAGE_COUNT:-0}
 CONTRAIL_CONTROLLER_COUNT=${CONTRAIL_CONTROLLER_COUNT:-1}
 CONTRAIL_ANALYTICS_COUNT=${CONTRAIL_ANALYTICS_COUNT:-1}
 CONTRAIL_ANALYTICSDB_COUNT=${CONTRAIL_ANALYTICSDB_COUNT:-1}
+CONTRAIL_ISSU_COUNT=${CONTRAIL_ISSU_COUNT:-0}
 
 # ready image for undercloud - using CentOS cloud image. just run and ssh into it.
 if [[ ! -f ${BASE_IMAGE} ]] ; then
@@ -170,6 +171,7 @@ if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
   CTRL_MEM=24576
   COMP_MEM=8192
 fi
+ISSU_MEM=24576
 
 # just define overcloud machines
 vbmc_port=$VBMC_PORT_BASE
@@ -185,6 +187,8 @@ define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT 4096 $vbmc_port
 (( vbmc_port+=CONTRAIL_ANALYTICS_COUNT ))
 define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT 8192 $vbmc_port
 (( vbmc_port+=CONTRAIL_ANALYTICSDB_COUNT ))
+define_overcloud_vms 'issu' $CONTRAIL_ISSU_COUNT $ISSU_MEM $vbmc_port 4
+(( vbmc_port+=CONTRAIL_ISSU_COUNT ))
 
 # copy image for undercloud and resize them
 cp -p $BASE_IMAGE $pool_path/$undercloud_vm_volume

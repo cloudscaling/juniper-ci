@@ -110,7 +110,8 @@ COMP_COUNT=$(virsh list --all | grep rd-overcloud-$NUM-$compute_machine_name- | 
 CONTRAIL_CONTROLLER_COUNT=$(virsh list --all | grep rd-overcloud-$NUM-ctrlcont- | wc -l)
 ANALYTICS_COUNT=$(virsh list --all | grep rd-overcloud-$NUM-ctrlanalytics- | wc -l)
 ANALYTICSDB_COUNT=$(virsh list --all | grep rd-overcloud-$NUM-ctrlanalyticsdb- | wc -l)
-((OCM_COUNT=CONT_COUNT+COMP_COUNT+CONTRAIL_CONTROLLER_COUNT+ANALYTICS_COUNT+ANALYTICSDB_COUNT))
+CONTRAIL_ISSU_COUNT=$(virsh list --all | grep rd-overcloud-$NUM-issu- | wc -l)
+((OCM_COUNT=CONT_COUNT+COMP_COUNT+CONTRAIL_CONTROLLER_COUNT+ANALYTICS_COUNT+ANALYTICSDB_COUNT+CONTRAIL_ISSU_COUNT))
 
 if [[ "$DPDK" != 'off' ]] ; then
   comp_scale_count=0
@@ -143,6 +144,7 @@ get_macs $compute_machine_name $COMP_COUNT
 get_macs ctrlcont $CONTRAIL_CONTROLLER_COUNT
 get_macs ctrlanalytics $ANALYTICS_COUNT
 get_macs ctrlanalyticsdb $ANALYTICSDB_COUNT
+get_macs issu $CONTRAIL_ISSU_COUNT
 
 function define_machine() {
   local caps=$1
@@ -199,6 +201,9 @@ define_vms 'ctrlanalytics' $ANALYTICS_COUNT 'profile:contrail-analytics,boot_opt
 (( vbmc_port+=ANALYTICS_COUNT ))
 define_vms 'ctrlanalyticsdb' $ANALYTICSDB_COUNT 'profile:contrail-analyticsdb,boot_option:local' $vbmc_port
 (( vbmc_port+=ANALYTICSDB_COUNT ))
+define_vms 'issu' $CONTRAIL_ISSU_COUNT 'profile:issu,boot_option:local' $vbmc_port
+(( vbmc_port+=CONTRAIL_ISSU_COUNT ))
+
 # remove last comma
 head -n -1 ~/instackenv.json > ~/instackenv.json.tmp
 mv ~/instackenv.json.tmp ~/instackenv.json
@@ -246,6 +251,7 @@ create_flavor $compute_flavor_name $COMP_COUNT $compute_flavor_name
 create_flavor 'contrail-controller' $CONTRAIL_CONTROLLER_COUNT 'contrail-controller'
 create_flavor 'contrail-analytics' $ANALYTICS_COUNT 'contrail-analytics'
 create_flavor 'contrail-analytics-database' $ANALYTICSDB_COUNT 'contrail-analyticsdb'
+create_flavor 'issu' $CONTRAIL_ISSU_COUNT 'issu'
 
 openstack flavor list --long
 
