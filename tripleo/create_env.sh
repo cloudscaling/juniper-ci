@@ -301,7 +301,7 @@ function _prepare_contrail() {
   cat <<EOF | $ssh_cmd root@${addr}
 set -x
 mkdir -p /root/contrail_packages
-mkdir -p /root/contrail_packages/net_snmp
+mkdir -p /root/contrail_packages/net-snmp
 EOF
   local latest_ver_rpm=`ls ${CONTRAIL_PACKAGES_DIR}/${build_series}contrail-install* -vr  | grep $CONTRAIL_VERSION | grep $OPENSTACK_VERSION | head -n1`
   scp $ssh_opts $latest_ver_rpm root@${addr}:/root/contrail_packages/

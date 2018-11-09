@@ -217,7 +217,7 @@ if [[ 'newton|ocata' =~ $OPENSTACK_VERSION  ]] ; then
 
   # WORKAROUND to bug #1767456
   # TODO: remove net-snmp after fix bug #1767456
-    cp /root/contrail_packages/net_snmp/* ${repo_dir}
+    cp /root/contrail_packages/net-snmp/* ${repo_dir}
     update_contrail_repo='yes'
 
   if [[ "$update_contrail_repo" != 'no' ]] ; then
