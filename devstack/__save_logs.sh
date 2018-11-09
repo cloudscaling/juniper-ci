@@ -2,19 +2,19 @@
 
 for u in `systemctl list-unit-files | grep devstack | awk '{print $1}'`; do
   name=$(echo $u | sed 's/devstack@/screen-/' | sed 's/\.service//')
-  journalctl -o short-precise --unit $u | tee /opt/stack/logs/$name.txt > /dev/null
+  sudo journalctl -a --since="2017-01-01" -o short-precise --unit $u | tee /opt/stack/logs/$name.txt > /dev/null
 done
 # Export the journal in export format to make it downloadable
 # for later searching. It can then be rewritten to a journal native
 # format locally using systemd-journal-remote. This makes a class of
 # debugging much easier. We don't do the native conversion here as
 # some distros do not package that tooling.
-journalctl -u 'devstack@*' -o export | \
+sudo journalctl -u 'devstack@*' -o export | \
     xz --threads=0 - > /opt/stack/logs/devstack.journal.xz
 # The journal contains everything running under systemd, we'll
 # build an old school version of the syslog with just the
 # kernel and sudo messages.
-journalctl \
+sudo journalctl \
     -t kernel \
     -t sudo \
     --no-pager \
