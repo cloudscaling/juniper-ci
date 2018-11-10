@@ -260,16 +260,17 @@ for i in $(openstack baremetal node list -f value -c UUID) ; do
   openstack baremetal node delete $i || true
 done
 # import overcloud configuration
-if [[ 'newton|ocata' =~ $OPENSTACK_VERSION ]] ; then
-  openstack baremetal import --json ~/instackenv.json
-  openstack baremetal list
-  openstack baremetal configure boot
-  openstack baremetal introspection bulk start
-else
-  openstack overcloud node import ~/instackenv.json
-  openstack baremetal node list
+openstack overcloud node import ~/instackenv.json
+openstack baremetal node list
+
+for i in {1..3} ; do
   openstack overcloud node introspect --all-manageable --provide
-fi
+  if ! openstack baremetal node list 2>&1 | grep -q 'manageable' ; then
+    break
+  fi
+  sleep 5
+done
+openstack baremetal node list
 
 # this is a recommended command to check and wait end of introspection. but previous command can wait itself.
 #sudo journalctl -l -u openstack-ironic-discoverd -u openstack-ironic-discoverd-dnsmasq -u openstack-ironic-conductor -f
