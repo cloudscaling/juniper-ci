@@ -51,9 +51,6 @@ source "$my_dir/../common/virsh/functions"
 # copy images for overcloud to it. (images can be build manually but it's too long - use previously built images)
 if [ -f $IMAGES ] ; then
   scp $SSH_OPTS -B $IMAGES ${ssh_addr_stack}:/tmp/images.tar
-else
-  echo "ERROR: image building is not supported"
-  exit 1
 fi
 
 for fff in __undercloud-install-1-as-root.sh __undercloud-install-2-as-stack-user.sh ; do

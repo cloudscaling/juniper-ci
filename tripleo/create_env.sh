@@ -232,24 +232,16 @@ function _start_vm() {
     --graphics vnc,listen=0.0.0.0
 }
 
-if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-  rhel_register_system_and_customize "$pool_path/$undercloud_vm_volume" 'undercloud'
-fi
-
 _start_vm "$undercloud_vmname" "$pool_path/$undercloud_vm_volume" \
   $mgmt_mac $prov_mac
 
 if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
-  rhel_register_system_and_customize "$pool_path/$undercloud_cert_vm_volume" 'undercloud'
-
   _start_vm \
     "$undercloud_cert_vmname" "$pool_path/$undercloud_cert_vm_volume" \
     $mgmt_mac_cert $prov_mac_cert 4096
 fi
 
 if [[ "$FREE_IPA" == 'true' ]] ; then
-  rhel_register_system_and_customize "$pool_path/$undercloud_freeipa_vm_volume" 'undercloud'
-
   _start_vm \
     "$undercloud_freeipa_vmname" "$pool_path/$undercloud_freeipa_vm_volume" \
     $mgmt_mac_freeipa $prov_mac_freeipa 4096

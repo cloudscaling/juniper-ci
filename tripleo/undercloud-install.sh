@@ -35,31 +35,13 @@ source "$my_dir/../common/virsh/functions"
 
 # copy images for overcloud to it. (images can be build manually but it's too long - use previously built images)
 if [ -f $IMAGES ] ; then
-  # TODO: to avoid duplication for undercloud and overcloud
-  # register rhel overcloud image
-  if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-    tmp_dir=$(mktemp -d)
-    if [[ -z "$tmp_dir" ]] ; then
-      echo "ERROR: failed to get tmp dir"
-      exit 1
-    fi
-    pushd $tmp_dir
-    tar -xf $IMAGES
-    rhel_register_system_and_customize "images/overcloud-full.qcow2" 'overcloud'
-    chown -R stack:stack images
-    tar -cf images.tar images
-    chown stack:stack images.tar
-    scp $ssh_opts -B images.tar ${ssh_addr}:/tmp/images.tar
-    popd
-    rm -rf $tmp_dir
-  else
-    scp $ssh_opts -B $IMAGES ${ssh_addr}:/tmp/images.tar
-  fi
+  scp $ssh_opts -B $IMAGES ${ssh_addr}:/tmp/images.tar
 fi
 
-for fff in __undercloud-install-1-as-root.sh __undercloud-install-2-as-stack-user.sh ; do
-  scp $ssh_opts -B "$my_dir/$fff" ${ssh_addr}:/root/$fff
+for fff in "$my_dir/../common/virsh/functions" __undercloud-install-1-as-root.sh __undercloud-install-2-as-stack-user.sh ; do
+  scp $ssh_opts -B "$my_dir/$fff" ${ssh_addr}:/root/
 done
+
 env_opts="NUM=$NUM NETDEV=$NETDEV OPENSTACK_VERSION=$OPENSTACK_VERSION"
 env_opts+=" ENVIRONMENT_OS=$ENVIRONMENT_OS ENVIRONMENT_OS_VERSION=$ENVIRONMENT_OS_VERSION"
 env_opts+=" TLS=$TLS DPDK=$DPDK TSN=$TSN SRIOV=$SRIOV"

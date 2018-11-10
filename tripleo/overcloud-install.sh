@@ -262,7 +262,6 @@ done
 # import overcloud configuration
 openstack overcloud node import ~/instackenv.json
 openstack baremetal node list
-
 for i in {1..3} ; do
   openstack overcloud node introspect --all-manageable --provide
   if ! openstack baremetal node list 2>&1 | grep -q 'manageable' ; then

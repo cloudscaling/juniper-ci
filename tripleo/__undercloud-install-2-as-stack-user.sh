@@ -4,6 +4,10 @@
 
 cd ~
 
+my_file="$(readlink -e "$0")"
+my_dir="$(dirname $my_file)"
+source "$my_dir/functions"
+
 if [[ -z "$NUM" ]] ; then
   echo "Please set NUM variable to specific environment number. (export NUM=4)"
   exit 1
@@ -120,8 +124,10 @@ function install_images() {
   esac
 
   local packages_install_dir='/usr/share/rhosp-director-images'
-  tar -xvf $packages_install_dir/overcloud-full-latest-${os_num}.tar
-  tar -xvf $packages_install_dir/ironic-python-agent-latest-${os_num}.tar
+  local ret=0
+  tar -xvf $packages_install_dir/overcloud-full-latest-${os_num}.tar || ret=1
+  tar -xvf $packages_install_dir/ironic-python-agent-latest-${os_num}.tar || ret=1
+  return $ret
 }
 
 cd ~
@@ -131,10 +137,12 @@ if [ -f /tmp/images.tar ] ; then
 else
   mkdir -p images
   pushd images
-  if [[ "$ENVIRONMENT_OS" != 'rhel' ]] ; then
+
+  if ! install_images ; then
     create_images
-  else
-    install_images
+  fi
+  if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+    rhel_customize "overcloud-full.qcow2" 'overcloud'
   fi
   popd
   tar -cf images.tar images

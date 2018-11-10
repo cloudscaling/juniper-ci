@@ -427,7 +427,7 @@ function _rhel_prepare_reg_file() {
   # ==== TODO: OSP13: end ====
 }
 
-function rhel_register_system_and_customize() {
+function rhel_customize() {
   local image_file=$1
   local image_type=$2
 
