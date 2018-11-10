@@ -53,8 +53,8 @@ if [ -f $IMAGES ] ; then
   scp $SSH_OPTS -B $IMAGES ${ssh_addr_stack}:/tmp/images.tar
 fi
 
-for fff in __undercloud-install-1-as-root.sh __undercloud-install-2-as-stack-user.sh ; do
-  scp $SSH_OPTS -B "$my_dir/$fff" ${ssh_addr_root}:/root/$fff
+for fff in "../common/virsh/functions" __undercloud-install-1-as-root.sh __undercloud-install-2-as-stack-user.sh ; do
+  scp $SSH_OPTS -B "$my_dir/$fff" ${ssh_addr_root}:/root/
 done
 env_opts="NUM=$NUM OPENSTACK_VERSION=$OPENSTACK_VERSION"
 env_opts+=" ENVIRONMENT_OS=$ENVIRONMENT_OS ENVIRONMENT_OS_VERSION=$ENVIRONMENT_OS_VERSION"

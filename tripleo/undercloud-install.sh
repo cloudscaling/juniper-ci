@@ -38,7 +38,7 @@ if [ -f $IMAGES ] ; then
   scp $ssh_opts -B $IMAGES ${ssh_addr}:/tmp/images.tar
 fi
 
-for fff in "$my_dir/../common/virsh/functions" __undercloud-install-1-as-root.sh __undercloud-install-2-as-stack-user.sh ; do
+for fff in "../common/virsh/functions" __undercloud-install-1-as-root.sh __undercloud-install-2-as-stack-user.sh ; do
   scp $ssh_opts -B "$my_dir/$fff" ${ssh_addr}:/root/
 done
 
