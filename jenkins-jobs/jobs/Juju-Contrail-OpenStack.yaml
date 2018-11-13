@@ -378,7 +378,8 @@
           default: opencontrailnightly
       - string:
           name: CONTRAIL_VERSION
-          default: latest
+          default: master-latest
+          description: "Tag's suffix for images from opencontrailnightly. Prefix is a OPENSTACK_VERSION"
       - string:
           name: DOCKER_USERNAME
       - string:
@@ -402,6 +403,8 @@
           regexp: "DESCRIPTION (.*)"
       - shell: |
           #!/bin/bash -e
+          # build CONTRAIL_VERSION as a tag for opencontrailnightly
+          export CONTRAIL_VERSION="$VERSION-$CONTRAIL_VERSION"
           export SERIES='xenial'
           if [[ "$VERSION" == "queens" ]] ; then
             export SERIES='bionic'

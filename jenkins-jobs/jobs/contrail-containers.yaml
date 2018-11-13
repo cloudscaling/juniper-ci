@@ -26,8 +26,8 @@
             - build
       - string:
           name: CONTRAIL_VERSION
-          default: latest
-          description: "Tag for images from opencontrailnightly"
+          default: master-latest
+          description: "Tag's suffix for images from opencontrailnightly. Prefix is a OPENSTACK_VERSION"
       - choice:
           name: OPENSTACK_VERSION
           choices:
@@ -72,6 +72,17 @@
     builders:
       - shell: |
           #!/bin/bash -e
+          if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
+            desc="cleanup"
+          else
+            desc="$SLAVE_NAME $CONTAINER_REGISTRY/$CONTRAIL_VERSION $OPENSTACK_VERSION $AGENT_MODE"
+            if [[ "$TLS" == "contrail" ]] ; then desc="$desc +SSL_C" ; fi
+          fi
+          echo "DESCRIPTION $desc"
+      - description-setter:
+          regexp: "DESCRIPTION (.*)"
+      - shell: |
+          #!/bin/bash -e
           if [[ -n "$CCB_REPO" ]]; then
             pushd contrail-container-builder
             git remote add custom $CCB_REPO
@@ -89,6 +100,8 @@
             eval "$CAD_PATCHSET"
             popd
           fi
+          # build CONTRAIL_VERSION as a tag for opencontrailnightly
+          export CONTRAIL_VERSION="$OPENSTACK_VERSION-$CONTRAIL_VERSION"
           # only centos images are supported now and thus only one archive with rpm-s is needed
           export LINUX_DISTR=centos
           if [[ "$CONTAINER_REGISTRY" == 'build' ]]; then
