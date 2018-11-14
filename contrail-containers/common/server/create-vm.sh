@@ -227,10 +227,12 @@ EOM
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
   apt-get -y update &>>$logs_dir/apt.log
   apt-get -y purge unattended-upgrades &>>$logs_dir/apt.log
-  if [[ "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
-    dpdk_req="linux-modules-extra-\$(uname -r)"
-  else
-    dpdk_req="linux-image-extra-\$(uname -r)"
+  if [[ $AGENT_MODE == 'dpdk' ]]; then
+    if [[ "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
+      dpdk_req="linux-modules-extra-\$(uname -r)"
+    else
+      dpdk_req="linux-image-extra-\$(uname -r)"
+    fi
   fi
   DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$logs_dir/apt.log
   DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 lsof python-pip python-dev gcc \$dpdk_req &>>$logs_dir/apt.log
