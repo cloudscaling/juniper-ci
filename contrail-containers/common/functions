@@ -42,6 +42,7 @@ function get_address() {
   local ip="$1"
   if [[ ${USE_FQDN,,} == 'true' ]] ; then
     echo "node-$(echo $ip | tr '.' '-').local"
+  else
+    echo $ip
   fi
-  echo $ip
 }
