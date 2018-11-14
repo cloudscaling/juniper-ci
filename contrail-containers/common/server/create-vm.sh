@@ -173,10 +173,10 @@ for ip in ${ips[@]} ; do
 hname="node-\$(echo $ip | tr '.' '-')"
 echo \$hname > /etc/hostname
 hostname \$hname
-domainname localdomain
+domainname local
 for i in ${ips[@]} ; do
   hname="node-\$(echo \$i | tr '.' '-')"
-  echo \$i  \${hname}.localdomain  \${hname} >> /etc/hosts
+  echo \$i  \${hname}.local  \${hname} >> /etc/hosts
 done
 
 cat <<EOM > /root/.ssh/config

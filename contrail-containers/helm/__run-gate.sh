@@ -122,12 +122,12 @@ kubectl get nodes -o wide
 
 # names are assigned by kubernetes. use the same algorithm to generate name.
 for ip in $nodes_cont_ips ; do
-  name="node-$(echo $ip | tr '.' '-').localdomain"
+  name="node-$(echo $ip | tr '.' '-').local"
   kubectl label node $name --overwrite openstack-compute-node=disable
   kubectl label node $name opencontrail.org/controller=enabled
 done
 for ip in $nodes_comp_ips ; do
-  name="node-$(echo $ip | tr '.' '-').localdomain"
+  name="node-$(echo $ip | tr '.' '-').local"
   kubectl label node $name --overwrite openstack-control-plane=disable
   if [[ "$AGENT_MODE" == "dpdk" ]]; then
     kubectl label node $name opencontrail.org/vrouter-dpdk=enabled

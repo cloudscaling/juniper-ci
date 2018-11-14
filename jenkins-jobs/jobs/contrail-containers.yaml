@@ -49,6 +49,10 @@
           value: ha,nonha,aio
           visible-items: 3
           default-value: '{defaultha}'
+      - bool:
+          name: USE_FQDN
+          description: Use FQDN for services instead of IP-s. It's related not to all jobs.
+          default: false
       - string:
           name: CCB_PATCHSET
           description: "Additional command to fetch patchset for contrail-container-builer repo."

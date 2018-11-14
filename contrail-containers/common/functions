@@ -37,3 +37,11 @@ function save_logs() {
     fi
   done
 }
+
+function get_address() {
+  local ip="$1"
+  if [[ ${USE_FQDN,,} == 'true' ]] ; then
+    echo "node-$(echo $ip | tr '.' '-').local"
+  fi
+  echo $ip
+}
