@@ -79,7 +79,7 @@
           if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
             desc="cleanup"
           else
-            desc="$SLAVE_NAME $CONTAINER_REGISTRY/$CONTRAIL_VERSION $OPENSTACK_VERSION $AGENT_MODE"
+            desc="$SLAVE_NAME $HA $CONTAINER_REGISTRY/$CONTRAIL_VERSION $OPENSTACK_VERSION $AGENT_MODE"
             if [[ "$TLS" == "contrail" ]] ; then desc="$desc +SSL_C" ; fi
           fi
           echo "DESCRIPTION $desc"
