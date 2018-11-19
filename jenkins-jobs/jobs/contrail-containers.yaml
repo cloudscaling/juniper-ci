@@ -69,6 +69,10 @@
           allowed-slaves: '{obj:slavenode}'
           ignore-offline-nodes: false
           allowed-multiselect: true
+      - string:
+          name: BUILD_NUM
+          default: "5.1.0-386"
+          description: "Build number that is stored on S3 now"
     scm:
       - juniper-ci
       - contrail-container-builder
@@ -79,7 +83,9 @@
           if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
             desc="cleanup"
           else
-            desc="$SLAVE_NAME $HA $CONTAINER_REGISTRY/$CONTRAIL_VERSION $OPENSTACK_VERSION $AGENT_MODE"
+            bn="$CONTAINER_REGISTRY/$CONTRAIL_VERSION"
+            if [[ "$CONTAINER_REGISTRY" == 'build' ]]; then bn="$CONTAINER_REGISTRY/$BUILD_NUM" ; fi
+            desc="$SLAVE_NAME $HA $bn $OPENSTACK_VERSION $AGENT_MODE"
             if [[ "$TLS" == "contrail" ]] ; then desc="$desc +SSL_C" ; fi
           fi
           echo "DESCRIPTION $desc"
@@ -110,7 +116,7 @@
           export LINUX_DISTR=centos
           if [[ "$CONTAINER_REGISTRY" == 'build' ]]; then
             # hardcoded version of archive on S3
-            export CONTRAIL_VERSION='5.1.0-386'
+            export CONTRAIL_VERSION="$BUILD_NUMBER"
             export CONTRAIL_INSTALL_PACKAGES_URL="https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_"$CONTRAIL_VERSION"-"$LINUX_DISTR"-"$OPENSTACK_VERSION".tgz"
           fi
 
