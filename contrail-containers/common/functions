@@ -46,3 +46,15 @@ function get_address() {
     echo $ip
   fi
 }
+
+function prepare_image() {
+  local image_name="$1"
+  local image=`docker images -a -q image_name`
+  if [[ -z "$image" ]]; then
+    docker pull centos
+    local tname="cprep-$RANDOM"
+    docker run -i --name $tname --entrypoint /bin/bash centos -c "yum install -y epel-release && yum install -y python-ipaddress git python-pip sudo vim gcc python-devel && pip install pip --upgrade && hash -r && pip install 'ansible<2.5.0' pycrypto oslo_utils oslo_config jinja2 requests"
+    docker commit $tname centos-soft
+    docker rm $tname
+  fi
+}

@@ -53,6 +53,7 @@ else
 fi
 
 # tune iptables on KVM
+prepare_image centos-soft
 docker run -i --rm --entrypoint /bin/bash -v $my_dir/__fix-iptables.sh:/root/fix-iptables.sh --network host --cap-add NET_RAW --cap-add NET_ADMIN centos-soft -c "/root/fix-iptables.sh"
 
 # from juju

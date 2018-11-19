@@ -69,13 +69,7 @@ echo "INFO: cloud config ------------------------- $(date)"
 cat $config
 cp $config $WORKSPACE/logs/
 
-image=`docker images -a -q centos-soft`
-if [[ -z "$image" ]]; then
-  docker pull centos
-  docker run -i --name cprep-$JOB_RND --entrypoint /bin/bash centos -c "yum install -y epel-release && yum install -y python-ipaddress git python-pip sudo vim gcc python-devel && pip install pip --upgrade && hash -r && pip install 'ansible<2.5.0' pycrypto oslo_utils oslo_config jinja2"
-  docker commit cprep-$JOB_RND centos-soft
-  docker rm cprep-$JOB_RND
-fi
+prepare_image centos-soft
 
 mkdir -p $WORKSPACE/logs/deployer
 volumes="-v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer"
