@@ -259,7 +259,7 @@ EOM
 fi
 pip install pip --upgrade &>>$logs_dir/pip.log
 hash -r
-pip install setuptools &>>$logs_dir/pip.log
+pip install setuptools requests &>>$logs_dir/pip.log
 if [[ "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
   rm /etc/resolv.conf
   ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
