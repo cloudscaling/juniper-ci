@@ -310,6 +310,16 @@ for ((j=1; j<NET_COUNT; ++j)); do
     ips_comp=( ${ips_comp[@]} $ip )
   done
 
+  for ip in ${ips[@]} ; do
+    # post-prepare node: fill /etc/hosts with all other ips
+    cat <<EOF | ssh $SSH_OPTS root@${ip}
+for i in ${ips[@]} ; do
+  hname="node-\$(echo \$i | tr '.' '-')"
+  echo \$i  \${hname}.local  \${hname} >> /etc/hosts
+done
+EOF
+  done
+
   cat <<EOF >>$ENV_FILE
 nodes_ips_${j}="${ips[@]}"
 nodes_cont_ips_${j}="${ips_cont[@]}"
