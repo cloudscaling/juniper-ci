@@ -170,22 +170,28 @@ if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
 fi
 ISSU_MEM=24576
 
-# just define overcloud machines
-vbmc_port=$VBMC_PORT_BASE
-define_overcloud_vms 'cont' $CONTROLLER_COUNT 8192 $vbmc_port 4
-(( vbmc_port+=CONTROLLER_COUNT ))
-define_overcloud_vms $compute_machine_name $COMPUTE_COUNT $COMP_MEM $vbmc_port 4
-(( vbmc_port+=COMPUTE_COUNT ))
-define_overcloud_vms 'stor' $STORAGE_COUNT 4096 $vbmc_port
-(( vbmc_port+=STORAGE_COUNT ))
-define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT $CTRL_MEM $vbmc_port 4
-(( vbmc_port+=CONTRAIL_CONTROLLER_COUNT ))
-define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT 4096 $vbmc_port
-(( vbmc_port+=CONTRAIL_ANALYTICS_COUNT ))
-define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT 8192 $vbmc_port
-(( vbmc_port+=CONTRAIL_ANALYTICSDB_COUNT ))
-define_overcloud_vms 'issu' $CONTRAIL_ISSU_COUNT $ISSU_MEM $vbmc_port 4
-(( vbmc_port+=CONTRAIL_ISSU_COUNT ))
+
+if [[ "$FREE_IPA" == 'false' ]] ; then
+  # setup overcloud only without freeipa (temp condition while testing freepia installation)
+
+  # just define overcloud machines
+  vbmc_port=$VBMC_PORT_BASE
+  define_overcloud_vms 'cont' $CONTROLLER_COUNT 8192 $vbmc_port 4
+  (( vbmc_port+=CONTROLLER_COUNT ))
+  define_overcloud_vms $compute_machine_name $COMPUTE_COUNT $COMP_MEM $vbmc_port 4
+  (( vbmc_port+=COMPUTE_COUNT ))
+  define_overcloud_vms 'stor' $STORAGE_COUNT 4096 $vbmc_port
+  (( vbmc_port+=STORAGE_COUNT ))
+  define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT $CTRL_MEM $vbmc_port 4
+  (( vbmc_port+=CONTRAIL_CONTROLLER_COUNT ))
+  define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT 4096 $vbmc_port
+  (( vbmc_port+=CONTRAIL_ANALYTICS_COUNT ))
+  define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT 8192 $vbmc_port
+  (( vbmc_port+=CONTRAIL_ANALYTICSDB_COUNT ))
+  define_overcloud_vms 'issu' $CONTRAIL_ISSU_COUNT $ISSU_MEM $vbmc_port 4
+  (( vbmc_port+=CONTRAIL_ISSU_COUNT ))
+
+fi
 
 # copy image for undercloud and resize them
 cp -p $BASE_IMAGE $pool_path/$undercloud_vm_volume
@@ -429,14 +435,17 @@ ifdown eth1
 ifup eth1
 cd ~
 yum install -y wget
+wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+yum localinstall -y ./epel-release-latest-7.noarch.rpm
 wget https://raw.githubusercontent.com/openstack/tripleo-heat-templates/master/ci/scripts/freeipa_setup.sh
 chmod +x ~/freeipa_setup.sh
 echo Hostname=freeipa.my${NUM}domain >> ~/freeipa-setup.env
-echo FreeIPAIP=${prov_subnet}.202 >> ~/freeipa-setup.env
+echo FreeIPAIP=${prov_subnet}.4 >> ~/freeipa-setup.env
 echo DirectoryManagerPassword=qwe123QWE >> ~/freeipa-setup.env
 echo AdminPassword=qwe123QWE >> ~/freeipa-setup.env
 echo UndercloudFQDN=undercloud.my${NUM}domain >> ~/freeipa-setup.env
+cp ~/freeipa-setup.env /tmp/freeipa-setup.env
 ~/freeipa_setup.sh || echo "ERROR: Failed to setup free ipa server"
 EOF
-
+# cp above is required due to bug in freeipa_setup.sh (line 14 - test should be without double quotes when used with '~')
 fi

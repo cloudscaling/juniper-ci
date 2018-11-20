@@ -11,6 +11,13 @@ my_dir="$(dirname $my_file)"
 ssh_key_dir="/home/jenkins/.ssh"
 
 NUM=${NUM:-0}
+
+if [[ "$FREE_IPA" == 'false' ]] ; then
+  CLOUD_DOMAIN_NAME=${CLOUD_DOMAIN_NAME:-"localdomain"}
+else
+  CLOUD_DOMAIN_NAME=${CLOUD_DOMAIN_NAME:-"my${NUM}domain"}
+fi
+
 NETWORK_ISOLATION=${NETWORK_ISOLATION:-'single'}
 
 BASE_ADDR=${BASE_ADDR:-172}
@@ -52,7 +59,7 @@ ssh_env+=" TLS=$TLS DPDK=$DPDK TSN=$TSN SRIOV=$SRIOV"
 ssh_env+=" KEYSTONE_API_VERSION=$KEYSTONE_API_VERSION"
 ssh_env+=" AAA_MODE=$AAA_MODE AAA_MODE_ANALYTICS=$AAA_MODE_ANALYTICS"
 ssh_env+=" USE_DEVELOPMENT_PUPPETS=$USE_DEVELOPMENT_PUPPETS CONTRAIL_VERSION=$CONTRAIL_VERSION"
-ssh_env+=" FREE_IPA=$FREE_IPA"
+ssh_env+=" FREE_IPA=$FREE_IPA CLOUD_DOMAIN_NAME=$CLOUD_DOMAIN_NAME"
 if [[ -f $CONTRAIL_PACKAGES_DIR/tag ]] ; then
   build_tag=`cat $CONTRAIL_PACKAGES_DIR/tag`
   ssh_env+=" BUILD_TAG=$build_tag"
@@ -73,6 +80,7 @@ fi
 
 echo "INFO: creating environment $(date)"
 "$my_dir"/create_env.sh
+
 echo "INFO: installing undercloud $(date)"
 "$my_dir"/undercloud-install.sh
 
@@ -82,15 +90,18 @@ if [[ "$CLEAN_ENV" == 'create_vms_only' ]]  ; then
   exit 0
 fi
 
-echo "INFO: installing overcloud $(date)"
-oc=1
-ssh -T $ssh_opts $ssh_addr "sudo -u stack $ssh_env /home/stack/overcloud-install.sh"
+if [[ "$FREE_IPA" == 'false' ]] ; then
+  # setup overcloud only without freeipa (temp condition while testing freepia installation)
+  echo "INFO: installing overcloud $(date)"
+  oc=1
+  ssh -T $ssh_opts $ssh_addr "sudo -u stack $ssh_env /home/stack/overcloud-install.sh"
 
-echo "INFO: checking overcloud $(date)"
-if [[ -n "$check_script" ]] ; then
-  $check_script $ssh_addr "$ssh_opts"
-else
-  echo "WARNING: Deployment will not be checked!"
+  echo "INFO: checking overcloud $(date)"
+  if [[ -n "$check_script" ]] ; then
+    $check_script $ssh_addr "$ssh_opts"
+  else
+    echo "WARNING: Deployment will not be checked!"
+  fi
 fi
 
 trap - ERR
