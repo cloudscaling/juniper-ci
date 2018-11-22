@@ -126,7 +126,7 @@ fi
 yum -y install python-tripleoclient python-rdomanager-oscplugin  openstack-utils
 
 if [[ "$FREE_IPA" == 'true' ]] ; then
-  pip install -y novajoin
+  pip install novajoin
 fi
 
 if [[ "$OPENSTACK_VERSION" == 'ocata' && "$ENVIRONMENT_OS" == 'centos' ]] ; then
