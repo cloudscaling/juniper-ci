@@ -126,7 +126,7 @@ fi
 yum -y install python-tripleoclient python-rdomanager-oscplugin  openstack-utils
 
 if [[ "$FREE_IPA" == 'true' ]] ; then
-  yum install -y python-novajoin
+  pip install -y novajoin
 fi
 
 if [[ "$OPENSTACK_VERSION" == 'ocata' && "$ENVIRONMENT_OS" == 'centos' ]] ; then
@@ -246,7 +246,7 @@ env_opts+=" FREE_IPA=$FREE_IPA CLOUD_DOMAIN_NAME=$CLOUD_DOMAIN_NAME"
 
 
 if [[ "$FREE_IPA" == 'true' ]] ; then
-  otp=$(/usr/libexec/novajoin-ipa-setup \
+  otp=$(/usr/lib/python2.7/site-packages/usr/libexec/novajoin-ipa-setup \
     --principal admin \
     --password qwe123QWE \
     --server ${prov_ip}.4 \
