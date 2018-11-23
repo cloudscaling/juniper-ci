@@ -242,8 +242,8 @@ env_opts+=" FREE_IPA=$FREE_IPA CLOUD_DOMAIN_NAME=$CLOUD_DOMAIN_NAME"
 
 
 if [[ "$FREE_IPA" == 'true' ]] ; then
-  yum install -y PyYAML
-  pip install novajoin
+  # Pinned versions to avoid conflict with system PyYAML package
+  pip install novajoin==1.0.18 oslo.policy==1.33.2
   otp=$(/usr/lib/python2.7/site-packages/usr/libexec/novajoin-ipa-setup \
     --principal admin \
     --password qwe123QWE \
