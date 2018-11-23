@@ -49,29 +49,32 @@ fi
 source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
 IP_VM_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
-IP1_CONT_01=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 1`
-IP1_CONT_01=`get_address $IP1_CONT_01`
-IP2_CONT_01=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 1`
-IP2_CONT_01=`get_address $IP2_CONT_01`
+IP_VM_04=`echo $nodes_comp_ips | cut -d ' ' -f 1`
+IP_VM_05=`echo $nodes_comp_ips | cut -d ' ' -f 2`
+
+IP0_CONT_01=`echo ${nodes_cont_ips}   | cut -d ' ' -f 1` ; IP0_CONT_01=`get_address $IP0_CONT_01`
+IP1_CONT_01=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 1` ; IP1_CONT_01=`get_address $IP1_CONT_01`
+IP2_CONT_01=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 1` ; IP2_CONT_01=`get_address $IP2_CONT_01`
 if [[ "$HA" == 'ha' ]] ; then
   IP_VM_02=`echo $nodes_cont_ips | cut -d ' ' -f 2`
   IP_VM_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
 
-  IP1_CONT_02=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 2`
-  IP1_CONT_02=`get_address $IP1_CONT_02`
-  IP1_CONT_03=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 3`
-  IP1_CONT_03=`get_address $IP1_CONT_03`
+  IP0_CONT_02=`echo ${nodes_cont_ips}   | cut -d ' ' -f 2` ; IP0_CONT_02=`get_address $IP0_CONT_02`
+  IP1_CONT_02=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 2` ; IP1_CONT_02=`get_address $IP1_CONT_02`
+  IP2_CONT_02=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 2` ; IP2_CONT_02=`get_address $IP2_CONT_02`
 
-  I_VIP=10.$((NET_BASE_PREFIX+1)).$JOB_RND.254
-  E_VIP=10.$NET_BASE_PREFIX.$JOB_RND.254
+  IP0_CONT_03=`echo ${nodes_cont_ips}   | cut -d ' ' -f 3` ; IP0_CONT_03=`get_address $IP0_CONT_03`
+  IP1_CONT_03=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 3` ; IP1_CONT_03=`get_address $IP1_CONT_03`
+  IP2_CONT_03=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 3` ; IP2_CONT_03=`get_address $IP2_CONT_03`
 
-  IP2_CONT_02=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 2`
-  IP2_CONT_02=`get_address $IP2_CONT_02`
-  IP2_CONT_03=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 3`
-  IP2_CONT_03=`get_address $IP2_CONT_03`
+  I_VIP=10.$NET_BASE_PREFIX.$JOB_RND.254
+  E_VIP=10.$((NET_BASE_PREFIX+1)).$JOB_RND.254
+  CONTROLLER_NODES="${IP0_CONT_01},${IP0_CONT_02},${IP0_CONT_03}"
+  CONTROL_NODES="${IP2_CONT_01},${IP2_CONT_02},${IP2_CONT_03}"
+else
+  CONTROLLER_NODES="${IP0_CONT_01}"
+  CONTROL_NODES="${IP2_CONT_01}"
 fi
-IP_VM_04=`echo $nodes_comp_ips | cut -d ' ' -f 1`
-IP_VM_05=`echo $nodes_comp_ips | cut -d ' ' -f 2`
 
 VROUTER_GW=10.$((NET_BASE_PREFIX+2)).$JOB_RND.1
 
