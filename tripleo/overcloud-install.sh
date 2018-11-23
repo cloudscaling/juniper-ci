@@ -251,7 +251,7 @@ create_flavor $compute_flavor_name $COMP_COUNT $compute_flavor_name
 create_flavor 'contrail-controller' $CONTRAIL_CONTROLLER_COUNT 'contrail-controller'
 create_flavor 'contrail-analytics' $ANALYTICS_COUNT 'contrail-analytics'
 create_flavor 'contrail-analytics-database' $ANALYTICSDB_COUNT 'contrail-analyticsdb'
-create_flavor 'issu' $CONTRAIL_ISSU_COUNT 'issu'
+create_flavor 'contrail-controller-issu' $CONTRAIL_ISSU_COUNT 'contrail-controller-issu'
 
 openstack flavor list --long
 
