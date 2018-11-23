@@ -170,28 +170,22 @@ if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
 fi
 ISSU_MEM=24576
 
-
-if [[ "$FREE_IPA" == 'false' ]] ; then
-  # setup overcloud only without freeipa (temp condition while testing freepia installation)
-
-  # just define overcloud machines
-  vbmc_port=$VBMC_PORT_BASE
-  define_overcloud_vms 'cont' $CONTROLLER_COUNT 8192 $vbmc_port 4
-  (( vbmc_port+=CONTROLLER_COUNT ))
-  define_overcloud_vms $compute_machine_name $COMPUTE_COUNT $COMP_MEM $vbmc_port 4
-  (( vbmc_port+=COMPUTE_COUNT ))
-  define_overcloud_vms 'stor' $STORAGE_COUNT 4096 $vbmc_port
-  (( vbmc_port+=STORAGE_COUNT ))
-  define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT $CTRL_MEM $vbmc_port 4
-  (( vbmc_port+=CONTRAIL_CONTROLLER_COUNT ))
-  define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT 4096 $vbmc_port
-  (( vbmc_port+=CONTRAIL_ANALYTICS_COUNT ))
-  define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT 8192 $vbmc_port
-  (( vbmc_port+=CONTRAIL_ANALYTICSDB_COUNT ))
-  define_overcloud_vms 'issu' $CONTRAIL_ISSU_COUNT $ISSU_MEM $vbmc_port 4
-  (( vbmc_port+=CONTRAIL_ISSU_COUNT ))
-
-fi
+# just define overcloud machines
+vbmc_port=$VBMC_PORT_BASE
+define_overcloud_vms 'cont' $CONTROLLER_COUNT 8192 $vbmc_port 4
+(( vbmc_port+=CONTROLLER_COUNT ))
+define_overcloud_vms $compute_machine_name $COMPUTE_COUNT $COMP_MEM $vbmc_port 4
+(( vbmc_port+=COMPUTE_COUNT ))
+define_overcloud_vms 'stor' $STORAGE_COUNT 4096 $vbmc_port
+(( vbmc_port+=STORAGE_COUNT ))
+define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT $CTRL_MEM $vbmc_port 4
+(( vbmc_port+=CONTRAIL_CONTROLLER_COUNT ))
+define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT 4096 $vbmc_port
+(( vbmc_port+=CONTRAIL_ANALYTICS_COUNT ))
+define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT 8192 $vbmc_port
+(( vbmc_port+=CONTRAIL_ANALYTICSDB_COUNT ))
+define_overcloud_vms 'issu' $CONTRAIL_ISSU_COUNT $ISSU_MEM $vbmc_port 4
+(( vbmc_port+=CONTRAIL_ISSU_COUNT ))
 
 # copy image for undercloud and resize them
 cp -p $BASE_IMAGE $pool_path/$undercloud_vm_volume
