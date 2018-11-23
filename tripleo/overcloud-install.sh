@@ -399,12 +399,7 @@ if [[ -n "$THT_PATCHSET" ]] ; then
   bash -c "$THT_PATCHSET"
   popd
 fi
-if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
-  cp -r ~/contrail-tripleo-heat-templates/environments/contrail ~/tripleo-heat-templates/environments
-  cp -r ~/contrail-tripleo-heat-templates/puppet/services/network/* ~/tripleo-heat-templates/puppet/services/network
-else
-  cp -r ~/contrail-tripleo-heat-templates/* ~/tripleo-heat-templates
-fi
+cp -r ~/contrail-tripleo-heat-templates/* ~/tripleo-heat-templates
 
 case "$OPENSTACK_VERSION" in
   newton)
