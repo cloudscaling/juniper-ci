@@ -125,10 +125,6 @@ fi
 #   osp10 has no preinstalled openstack-utils
 yum -y install python-tripleoclient python-rdomanager-oscplugin  openstack-utils
 
-if [[ "$FREE_IPA" == 'true' ]] ; then
-  pip install novajoin
-fi
-
 if [[ "$OPENSTACK_VERSION" == 'ocata' && "$ENVIRONMENT_OS" == 'centos' ]] ; then
   yum update -y
   # workaround for https://bugs.launchpad.net/tripleo/+bug/1692899
@@ -246,6 +242,8 @@ env_opts+=" FREE_IPA=$FREE_IPA CLOUD_DOMAIN_NAME=$CLOUD_DOMAIN_NAME"
 
 
 if [[ "$FREE_IPA" == 'true' ]] ; then
+  yum install -y PyYAML
+  pip install novajoin
   otp=$(/usr/lib/python2.7/site-packages/usr/libexec/novajoin-ipa-setup \
     --principal admin \
     --password qwe123QWE \
