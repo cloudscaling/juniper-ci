@@ -44,7 +44,7 @@ done
 
 # Copy undercloud OTP token for FreeIPA
 freeipaip="192.168.${env_addr}.4"
-otp=$(ssh -T $ssh_opts root@freeipaip cat ~/undercloud_otp)
+otp=$(ssh -T $ssh_opts root@$freeipaip cat ~/undercloud_otp)
 
 env_opts="NUM=$NUM NETDEV=$NETDEV OPENSTACK_VERSION=$OPENSTACK_VERSION"
 env_opts+=" ENVIRONMENT_OS=$ENVIRONMENT_OS ENVIRONMENT_OS_VERSION=$ENVIRONMENT_OS_VERSION"
