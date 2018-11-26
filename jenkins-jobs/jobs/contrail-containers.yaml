@@ -24,6 +24,7 @@
           choices:
             - opencontrailnightly
             - build
+            - fullbuild
       - string:
           name: CONTRAIL_VERSION
           default: master-latest
@@ -85,6 +86,7 @@
           else
             bn="$CONTAINER_REGISTRY/$CONTRAIL_VERSION"
             if [[ "$CONTAINER_REGISTRY" == 'build' ]]; then bn="$CONTAINER_REGISTRY/$BUILD_NUM" ; fi
+            if [[ "$CONTAINER_REGISTRY" == 'fullbuild' ]]; then bn="$CONTAINER_REGISTRY/master" ; fi
             desc="$SLAVE_NAME $HA $bn $OPENSTACK_VERSION $AGENT_MODE"
             if [[ "$TLS" == "contrail" ]] ; then desc="$desc +SSL_C" ; fi
           fi
@@ -113,11 +115,12 @@
           # build CONTRAIL_VERSION as a tag for opencontrailnightly
           export CONTRAIL_VERSION="$OPENSTACK_VERSION-$CONTRAIL_VERSION"
           # only centos images are supported now and thus only one archive with rpm-s is needed
-          export LINUX_DISTR=centos
           if [[ "$CONTAINER_REGISTRY" == 'build' ]]; then
             # hardcoded version of archive on S3
             export CONTRAIL_VERSION="$BUILD_NUM"
-            export CONTRAIL_INSTALL_PACKAGES_URL="https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_"$CONTRAIL_VERSION"-"$LINUX_DISTR"-"$OPENSTACK_VERSION".tgz"
+            export CONTRAIL_INSTALL_PACKAGES_URL="https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_"$CONTRAIL_VERSION"-centos-"$OPENSTACK_VERSION".tgz"
+          elif [[ "$CONTAINER_REGISTRY" == 'fullbuild' ]]; then
+            export CONTRAIL_VERSION="0"
           fi
 
           export WAY=$(echo {project} | cut -d '-' -f 1)
