@@ -64,7 +64,6 @@ function build_containers() {
     $SCP -r "$WORKSPACE/contrail-container-builder" ${SSH_USER}@$build_ip:./
     $SCP "$my_dir/../__build-containers.sh" ${SSH_USER}@$build_ip:build-containers.sh
   elif [[ "$CONTAINER_REGISTRY" == 'fullbuild' ]]; then
-    $SCP -r "$WORKSPACE/contrail-container-builder" ${SSH_USER}@$build_ip:./
     $SCP "$my_dir/../__build-full.sh" ${SSH_USER}@$build_ip:build-containers.sh
   fi
   set -o pipefail

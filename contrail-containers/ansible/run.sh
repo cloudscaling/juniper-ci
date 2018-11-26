@@ -33,6 +33,8 @@ function catch_errors() {
   exit $exit_code
 }
 
+set -x
+
 if [[ "$CONTAINER_REGISTRY" == 'build' || "$CONTAINER_REGISTRY" == 'fullbuild' ]]; then
   build_containers
   CONTAINER_REGISTRY="$build_ip:5000"

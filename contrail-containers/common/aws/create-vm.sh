@@ -173,7 +173,7 @@ function run_instance() {
   fi
 }
 
-if [[ "$CONTAINER_REGISTRY" == 'build' ]]; then
+if [[ "$CONTAINER_REGISTRY" == 'build' || "$CONTAINER_REGISTRY" == 'fullbuild' ]]; then
   run_instance $BUILD_NODE_TYPE build 'false'
   build_ip=`grep public_ip_build $ENV_FILE | cut -d '=' -f 2`
 fi

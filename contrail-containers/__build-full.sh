@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -10,10 +10,10 @@ linux=$(awk -F"=" '/^ID=/{print $2}' /etc/os-release | tr -d '"')
 
 case "${linux}" in
   "ubuntu" )
-    apt-get install -y docker.io git
+    apt-get install -y docker.io
     ;;
   "centos" | "rhel" )
-    yum install -y docker git
+    yum install -y docker
     ;;
 esac
 
