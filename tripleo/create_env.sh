@@ -431,8 +431,6 @@ cd ~
 yum install -y wget
 wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 yum localinstall -y ./epel-release-latest-7.noarch.rpm
-wget https://raw.githubusercontent.com/openstack/tripleo-heat-templates/master/ci/scripts/freeipa_setup.sh
-chmod +x ~/freeipa_setup.sh
 echo Hostname=freeipa.my${NUM}domain >> ~/freeipa-setup.env
 echo FreeIPAIP=${prov_subnet}.4 >> ~/freeipa-setup.env
 echo DirectoryManagerPassword=qwe123QWE >> ~/freeipa-setup.env
