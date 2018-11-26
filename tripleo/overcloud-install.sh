@@ -201,7 +201,7 @@ define_vms 'ctrlanalytics' $ANALYTICS_COUNT 'profile:contrail-analytics,boot_opt
 (( vbmc_port+=ANALYTICS_COUNT ))
 define_vms 'ctrlanalyticsdb' $ANALYTICSDB_COUNT 'profile:contrail-analyticsdb,boot_option:local' $vbmc_port
 (( vbmc_port+=ANALYTICSDB_COUNT ))
-define_vms 'issu' $CONTRAIL_ISSU_COUNT 'profile:issu,boot_option:local' $vbmc_port
+define_vms 'issu' $CONTRAIL_ISSU_COUNT 'profile:contrail-controller-issu,boot_option:local' $vbmc_port
 (( vbmc_port+=CONTRAIL_ISSU_COUNT ))
 
 # remove last comma
