@@ -412,6 +412,8 @@ if [[ "$FREE_IPA" == 'true' ]] ; then
   _prepare_network $mgmt_freeipa_ip "freeipa.my${NUM}domain"
   _prepare_rhel_account $mgmt_freeipa_ip
   _prepare_host $mgmt_freeipa_ip
+  
+  scp $my_dir/freeipa_setup.sh root@${mgmt_freeipa_ip}:.
 
   cat <<EOF | $ssh_cmd root@${mgmt_freeipa_ip}
 set -x
@@ -437,6 +439,7 @@ echo DirectoryManagerPassword=qwe123QWE >> ~/freeipa-setup.env
 echo AdminPassword=qwe123QWE >> ~/freeipa-setup.env
 echo UndercloudFQDN=undercloud.my${NUM}domain >> ~/freeipa-setup.env
 cp ~/freeipa-setup.env /tmp/freeipa-setup.env
+chmod +x ~/freeipa_setup.sh
 ~/freeipa_setup.sh || echo "ERROR: Failed to setup free ipa server"
 EOF
 # cp above is required due to bug in freeipa_setup.sh (line 14 - test should be without double quotes when used with '~')
