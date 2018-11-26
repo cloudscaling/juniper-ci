@@ -413,7 +413,7 @@ if [[ "$FREE_IPA" == 'true' ]] ; then
   _prepare_rhel_account $mgmt_freeipa_ip
   _prepare_host $mgmt_freeipa_ip
   
-  scp $my_dir/freeipa_setup.sh root@${mgmt_freeipa_ip}:.
+  scp $ssh_opts $my_dir/freeipa_setup.sh root@${mgmt_freeipa_ip}:.
 
   cat <<EOF | $ssh_cmd root@${mgmt_freeipa_ip}
 set -x
