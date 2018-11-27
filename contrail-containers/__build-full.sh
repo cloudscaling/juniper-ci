@@ -23,7 +23,20 @@ git clone https://github.com/Juniper/contrail-dev-env.git
 cd contrail-dev-env
 sudo ./startup.sh
 docker ps -a
-docker exec -i contrail-developer-sandbox "cd /root/contrail-dev-env ; make sync ; make fetch_packages ; make setup ; make dep ; cd /root/contrail ; scons"
+
+echo > build.sh <<EOF
+#!/bin/bash -ex
+cd /root/contrail-dev-env
+make sync
+make fetch_packages
+make setup
+make dep
+cd /root/contrail
+scons
+EOF
+chmod a+x ./build.sh
+docker cp ./build.sh contrail-developer-sandbox:/root/build.sh
+docker exec -i contrail-developer-sandbox /root/build.sh
 
 sudo docker images
 
