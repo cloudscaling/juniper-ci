@@ -31,8 +31,8 @@ make sync
 make fetch_packages
 make setup
 make dep
-cd /root/contrail
-scons
+make rpm
+make containers
 EOF
 chmod a+x ./build.sh
 docker cp ./build.sh contrail-developer-sandbox:/root/build.sh
