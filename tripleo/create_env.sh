@@ -438,6 +438,7 @@ echo FreeIPAIP=${prov_subnet}.4 >> ~/freeipa-setup.env
 echo DirectoryManagerPassword=qwe123QWE >> ~/freeipa-setup.env
 echo AdminPassword=qwe123QWE >> ~/freeipa-setup.env
 echo UndercloudFQDN=undercloud.my${NUM}domain >> ~/freeipa-setup.env
+echo ENVIRONMENT_OS=$ENVIRONMENT_OS >> ~/freeipa-setup.env
 cp ~/freeipa-setup.env /tmp/freeipa-setup.env
 chmod +x ~/freeipa_setup.sh
 ~/freeipa_setup.sh || echo "ERROR: Failed to setup free ipa server"
