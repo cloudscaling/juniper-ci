@@ -24,7 +24,7 @@ cd contrail-dev-env
 sudo ./startup.sh
 docker ps -a
 
-echo > build.sh <<EOF
+cat >build.sh <<EOF
 #!/bin/bash -ex
 cd /root/contrail-dev-env
 make sync
