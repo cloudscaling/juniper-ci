@@ -45,7 +45,24 @@ yum -q -y remove openstack-dashboard
 yum -q install -y ipa-server ipa-server-dns epel-release rng-tools mod_nss git
 yum -q install -y haveged
 
-# install pip for novajoin
+# install complicated python deps for novajoin
+# add OpenStack repositories for centos, for rhel it is added in images
+if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+  yum-config-manager --enable rhelosp-rhel-7-server-opt
+else
+  tripeo_repos=`python -c 'import requests;r = requests.get("https://trunk.rdoproject.org/centos7-queens/current"); print r.text ' | grep python2-tripleo-repos | awk -F"href=\"" '{print $2}' | awk -F"\"" '{print $1}'`
+  yum install -y https://trunk.rdoproject.org/centos7-queens/current/${tripeo_repos}
+  tripleo-repos -b $OPENSTACK_VERSION current
+  # in new centos a variable is introduced,
+  # so it is needed to have it because  yum repos
+  # started using it.
+  if [[ ! -f  /etc/yum/vars/contentdir ]] ; then
+    echo centos > /etc/yum/vars/contentdir
+  fi
+fi
+# install python deps for novajoin, but install instead from pip because we need 1.0.21
+yum deplist python-novajoin | awk '/provider:/ {print $2}' | sort -u | xargs yum -y install
+
 curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
 python get-pip.py
 pip install -q virtualenv
@@ -109,11 +126,10 @@ echo $AdminPassword | kinit admin
 klist
 
 # Precreate undercloud entry and generate OTP
-undercloudip = $(echo -n $FreeIPAIP | awk -F. '{ printf("%s.%s.%s.4",$1,$2,$3) }' )}
 otp=$(/usr/lib/python2.7/site-packages/usr/libexec/novajoin-ipa-setup \
     --principal admin \
     --password "$AdminPassword" \
-    --server ${FreeIPAIP} \
+    --server `hostname -f` \
     --realm ${CLOUD_DOMAIN_NAME^^} \
     --domain ${CLOUD_DOMAIN_NAME} \
     --hostname ${UndercloudFQDN} \

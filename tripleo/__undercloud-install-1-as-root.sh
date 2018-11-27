@@ -106,7 +106,7 @@ pip install -q virtualenv
 
 # add OpenStack repositories for centos, for rhel it is added in images
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-  echo "INFO: install latest readhat images"
+  echo "INFO: install latest redhat images"
   yum-config-manager --enable rhelosp-rhel-7-server-opt
   yum install -y rhosp-director-images rhosp-director-images-ipa
 else
