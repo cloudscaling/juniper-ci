@@ -58,8 +58,8 @@ EOF
 
 if [[ "$FREE_IPA" == 'true' ]] ; then
   cat << EOF >> undercloud.conf
-#undercloud_hostname: undercloud.my${NUM}domain
-#undercloud_nameservers: ${prov_ip}.4 
+undercloud_hostname: undercloud.my${NUM}domain
+undercloud_nameservers: ${prov_ip}.4 
 overcloud_domain_name: $CLOUD_DOMAIN_NAME
 enable_novajoin: True
 ipa_otp: "$FREE_IPA_OTP"
