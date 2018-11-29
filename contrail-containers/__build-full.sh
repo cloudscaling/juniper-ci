@@ -50,15 +50,14 @@ make setup
 
 cd /root/contrail
 for repoc in \`find . | grep ".git/config\$" | grep -v "\.repo"\` ; do
-  repo=\`echo $repoc | rev | cut -d '/' -f 3- | rev\`
+  repo=\`echo \$repoc | rev | cut -d '/' -f 3- | rev\`
   url=\`grep "url =" \$repoc | cut -d '=' -f 2 | sed -e 's/ //g'\`
   name=\`echo \$url | rev | cut -d '/' -f 1 | rev\`
-  patchset=\`echo "$full_list" | grep "/\$name "\ || /bin/true`
-  if [ -n "\$patchset" ]; then
-     cd $repo
-     $patchset
-     git pull --rebase origin master
-  fi
+  pushd \$repo
+  for patchset in \`echo "\$full_list" | grep "/\$name "\` ; do
+    \$patchset
+  done
+  popd
 done
 
 cd /root/contrail-dev-env
