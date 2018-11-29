@@ -19,6 +19,8 @@ esac
 
 echo "INFO: Start build $(date)"
 
+full_list=`printf "$PATCHSET_LIST\n${CCB_PATCHSET}\n${CAD_PATCHSET}`
+
 git clone https://github.com/Juniper/contrail-dev-env.git
 cd contrail-dev-env
 
@@ -45,6 +47,23 @@ cd /root/contrail-dev-env
 make sync
 make fetch_packages
 make setup
+
+cd /root/contrail
+for repo in 'ls -1' ; do
+  if [ ! -f \$repo/.git/config ]; then
+    continue
+  fi
+  url=`grep "url =" \$repo/.git/config | cut -d '=' -f 2 | sed -e 's/ //g'`
+  name=`echo \$url | rev | cut -d '/' -f 1 | rev`
+  patchset=`echo "$full_list" | grep "/\$name "`
+  if [ -n \$patchset ]; then
+     cd $repo
+     $patchset
+     git pull --rebase origin master
+  fi
+done
+
+cd /root/contrail-dev-env
 make dep
 make rpm
 make containers
