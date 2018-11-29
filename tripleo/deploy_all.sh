@@ -90,18 +90,15 @@ if [[ "$CLEAN_ENV" == 'create_vms_only' ]]  ; then
   exit 0
 fi
 
-if [[ "$FREE_IPA" == 'false' ]] ; then
-  # setup overcloud only without freeipa (temp condition while testing freepia installation)
-  echo "INFO: installing overcloud $(date)"
-  oc=1
-  ssh -T $ssh_opts $ssh_addr "sudo -u stack $ssh_env /home/stack/overcloud-install.sh"
+echo "INFO: installing overcloud $(date)"
+oc=1
+ssh -T $ssh_opts $ssh_addr "sudo -u stack $ssh_env /home/stack/overcloud-install.sh"
 
-  echo "INFO: checking overcloud $(date)"
-  if [[ -n "$check_script" ]] ; then
-    $check_script $ssh_addr "$ssh_opts"
-  else
-    echo "WARNING: Deployment will not be checked!"
-  fi
+echo "INFO: checking overcloud $(date)"
+if [[ -n "$check_script" ]] ; then
+  $check_script $ssh_addr "$ssh_opts"
+else
+  echo "WARNING: Deployment will not be checked!"
 fi
 
 trap - ERR
