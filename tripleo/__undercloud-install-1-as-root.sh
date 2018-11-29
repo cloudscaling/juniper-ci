@@ -245,6 +245,8 @@ if [[ "$FREE_IPA" == 'true' ]] ; then
   # Pinned versions to avoid conflict with system PyYAML package
   pip install novajoin==1.0.21 oslo.policy==1.33.2
   yum install -y ipa-client
+  mkdir -p /etc/novajoin
+  touch /etc/novajoin/join.conf
   env_opts+=" FREE_IPA_OTP=$FREE_IPA_OTP"
 fi
 
