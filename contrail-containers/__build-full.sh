@@ -43,6 +43,8 @@ docker ps -a
 cat >build.sh <<EOF
 #!/bin/bash -ex
 export OPENSTACK_VERSION=$OPENSTACK_VERSION
+full_list=`cat /root/patches`
+
 cd /root/contrail-dev-env
 make sync
 make fetch_packages
@@ -66,6 +68,7 @@ make rpm
 make containers
 EOF
 chmod a+x ./build.sh
+docker cp /root/patches contrail-developer-sandbox:/root/patches
 docker cp ./build.sh contrail-developer-sandbox:/root/build.sh
 docker exec -i contrail-developer-sandbox /root/build.sh
 
