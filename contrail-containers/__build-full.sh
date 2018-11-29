@@ -19,7 +19,7 @@ esac
 
 echo "INFO: Start build $(date)"
 
-full_list=`printf "$PATCHSET_LIST\n${CCB_PATCHSET}\n${CAD_PATCHSET}"`
+full_list=`cat /root/patches`
 
 git clone https://github.com/Juniper/contrail-dev-env.git
 cd contrail-dev-env

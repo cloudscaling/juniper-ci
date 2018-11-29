@@ -66,9 +66,14 @@ function build_containers() {
   elif [[ "$CONTAINER_REGISTRY" == 'fullbuild' ]]; then
     $SCP "$my_dir/../__build-full.sh" ${SSH_USER}@$build_ip:build-containers.sh
   fi
-  set -o pipefail
+
+  echo "$PATCHSET_LIST" > "$WORKSPACE/patches"
+  echo "$CCB_PATCHSET" >> "$WORKSPACE/patches"
+  echo "$CAD_PATCHSET" >> "$WORKSPACE/patches"
+  $SCP "$WORKSPACE/patches" ${SSH_USER}@$build_ip:patches
   ssh_env="CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION"
   ssh_env+=" CONTRAIL_INSTALL_PACKAGES_URL=$CONTRAIL_INSTALL_PACKAGES_URL"
+  set -o pipefail
   $SSH_CMD ${SSH_USER}@$build_ip "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
   set +o pipefail
 }
