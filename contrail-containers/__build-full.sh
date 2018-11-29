@@ -19,8 +19,6 @@ esac
 
 echo "INFO: Start build $(date)"
 
-full_list=`cat /root/patches`
-
 git clone https://github.com/Juniper/contrail-dev-env.git
 cd contrail-dev-env
 
@@ -43,7 +41,7 @@ docker ps -a
 cat >build.sh <<EOF
 #!/bin/bash -ex
 export OPENSTACK_VERSION=$OPENSTACK_VERSION
-full_list=`cat /root/patches`
+full_list=\`cat /root/patches\`
 
 cd /root/contrail-dev-env
 make sync
