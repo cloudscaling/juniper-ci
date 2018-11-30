@@ -39,23 +39,24 @@ sudo ./startup.sh
 docker ps -a
 
 cat >build.sh <<EOF
-#!/bin/bash -ex
+#!/bin/bash -e
 export OPENSTACK_VERSION=$OPENSTACK_VERSION
 cd /root/contrail-dev-env
 make sync
 make fetch_packages
 make setup
-
+git config --global user.email john@google.com
 cd /root/contrail
 for repoc in \`find . | grep ".git/config\$" | grep -v "\.repo"\` ; do
   repo=\`echo \$repoc | rev | cut -d '/' -f 3- | rev\`
   url=\`grep "url =" \$repoc | cut -d '=' -f 2 | sed -e 's/ //g'\`
   name=\`echo \$url | rev | cut -d '/' -f 1 | rev\`
-  pushd \$repo
-  for patchset in "\`grep "/\$name " /root/patches\`" ; do
-    eval \$patchset
-  done
-  popd
+  if patchlist=`grep "/\$name " /root/patches` ; then
+    pushd \$repo >/dev/null
+    git reset --hard && git checkout github/master
+    eval "\$patchlist"
+    popd >/dev/nul
+  fi
 done
 
 cd /root/contrail-dev-env
