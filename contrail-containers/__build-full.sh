@@ -51,9 +51,8 @@ for repoc in \`find . | grep ".git/config\$" | grep -v "\.repo"\` ; do
   repo=\`echo \$repoc | rev | cut -d '/' -f 3- | rev\`
   url=\`grep "url =" \$repoc | cut -d '=' -f 2 | sed -e 's/ //g'\`
   name=\`echo \$url | rev | cut -d '/' -f 1 | rev\`
-  if patchlist=`grep "/\$name " /root/patches` ; then
+  if patchlist=\`grep "/\$name " /root/patches\` ; then
     pushd \$repo >/dev/null
-    git reset --hard && git checkout github/master
     eval "\$patchlist"
     popd >/dev/nul
   fi
