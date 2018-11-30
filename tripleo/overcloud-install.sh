@@ -97,7 +97,7 @@ mgmt_ip="192.168.${mgmt_ip_addr}.2"
 fixed_ip_base="192.168.${prov_ip_addr}"
 fixed_vip="${fixed_ip_base}.200"
 fixed_controller_ip="${fixed_ip_base}.211"
-ipa_ip="192.168.${prov_ip_addr}.202"
+ipa_ip="192.168.${prov_ip_addr}.4"
 
 
 ((addr=BASE_ADDR+NUM*10))
