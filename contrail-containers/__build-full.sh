@@ -54,7 +54,7 @@ for repoc in \`find . | grep ".git/config\$" | grep -v "\.repo"\` ; do
   url=\`grep "url =" \$repoc | cut -d '=' -f 2 | sed -e 's/ //g'\`
   name=\`echo \$url | rev | cut -d '/' -f 1 | rev\`
   pushd \$repo
-  for patchset in \`echo "\$full_list" | grep "/\$name "\` ; do
+  for patchset in "\`echo "\$full_list" | grep "/\$name "\`" ; do
     \$patchset
   done
   popd
