@@ -41,8 +41,6 @@ docker ps -a
 cat >build.sh <<EOF
 #!/bin/bash -ex
 export OPENSTACK_VERSION=$OPENSTACK_VERSION
-full_list=\`cat /root/patches\`
-
 cd /root/contrail-dev-env
 make sync
 make fetch_packages
@@ -54,8 +52,8 @@ for repoc in \`find . | grep ".git/config\$" | grep -v "\.repo"\` ; do
   url=\`grep "url =" \$repoc | cut -d '=' -f 2 | sed -e 's/ //g'\`
   name=\`echo \$url | rev | cut -d '/' -f 1 | rev\`
   pushd \$repo
-  for patchset in "\`echo "\$full_list" | grep "/\$name "\`" ; do
-    \$patchset
+  for patchset in "\`grep "/\$name " /root/patches\`" ; do
+    eval \$patchset
   done
   popd
 done
