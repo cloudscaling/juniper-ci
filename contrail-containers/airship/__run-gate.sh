@@ -52,6 +52,7 @@ else
 $HOSTS
 EOF
 fi
+chmod 400 /etc/hosts
 
 export HOSTIP=$LOCAL_IP
 # x/32 will work for CEPH in a single node deploy.
