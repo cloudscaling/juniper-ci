@@ -94,7 +94,7 @@ function attach_docker_vol() {
 mkfs.ext4 /dev/vdb1
 mkdir -p /var/lib/docker
 echo '/dev/vdb1  /var/lib/docker  auto  defaults,auto  0  0' >> /etc/fstab
-mount /var/lib/docker"
+mount /var/lib/docker
 EOF
 }
 
