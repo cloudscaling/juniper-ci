@@ -770,7 +770,7 @@ EOF
 fi
 
 ssl_opts=''
-if [[ "$TLS" != 'off' ]] ; then
+if [[ "$TLS" != 'off' && "$FREE_IPA" != 'true' ]] ; then
   # prepare for certificates creation
   ssl_working_dir="$(pwd)/contrail_ssl_gen"
   csr_file="${ssl_working_dir}/server.pem.csr"
@@ -891,6 +891,7 @@ EOF
   else
     if [[ "$FREE_IPA" == 'true' ]] ; then
       endpoints_file='tripleo-heat-templates/environments/ssl/tls-everywhere-endpoints-dns.yaml'
+      ssl_opts+='-e tripleo-heat-templates/environments/services/haproxy-public-tls-certmonger.yaml'
     else
       endpoints_file='tripleo-heat-templates/environments/ssl/tls-endpoints-public-ip.yaml'
     fi
