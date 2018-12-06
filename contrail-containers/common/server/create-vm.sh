@@ -90,10 +90,10 @@ function define_node() {
 function attach_docker_vol() {
   local ip=$1
   cat <<EOF | ssh $SSH_OPTS root@${ip}
-(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | fdisk /dev/vdf
-mkfs.ext4 /dev/vdf1
+(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | fdisk /dev/vdb
+mkfs.ext4 /dev/vdb1
 mkdir -p /var/lib/docker
-echo '/dev/vdf1  /var/lib/docker  auto  defaults,auto  0  0' >> /etc/fstab
+echo '/dev/vdb1  /var/lib/docker  auto  defaults,auto  0  0' >> /etc/fstab
 mount /var/lib/docker"
 EOF
 }
