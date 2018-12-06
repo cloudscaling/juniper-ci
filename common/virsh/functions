@@ -243,12 +243,9 @@ function define_machine() {
   local os=$4
   local net=$5
   local disk_path=$6
-  local disk_size=${7:-''}
+  shift 6
   NET_DRIVER=${NET_DRIVER:-'e1000'}
   local disk_opts="path=${disk_path},device=disk,cache=writeback,bus=virtio,format=qcow2"
-  if [[ -n "$disk_size" ]] ; then
-    disk_opts+=",size=${disk_size}"
-  fi
   local net_opts=''
   local i=''
   for i in $(echo $net | tr ',' ' ') ; do
@@ -259,6 +256,10 @@ function define_machine() {
       net_opts+=",mac=${mac}"
     fi
   done
+  local more_disks=''
+  for path in "$@" ; do
+    more_disks+=' --disk path=${path},device=disk,cache=writeback,bus=virtio,format=qcow2'
+  done
   virt-install --name $name \
     --ram $mem \
     --memorybacking hugepages=on \
@@ -266,6 +267,7 @@ function define_machine() {
     --cpu host \
     --os-variant $os \
     --disk $disk_opts \
+    $more_disks \
     $net_opts \
     --boot hd \
     --noautoconsole \

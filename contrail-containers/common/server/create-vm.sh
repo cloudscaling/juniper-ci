@@ -71,14 +71,31 @@ function define_node() {
   local vcpus=$2
   local mem=$3
   local mac_octet=$4
+
   local vol_name="$vm_name.qcow2"
   delete_volume $vol_name $POOL_NAME
   local vol_path=$(create_volume_from $vol_name $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
+
+  local vol_docker_name="$vm_name-docker.qcow2"
+  delete_volume $vol_docker_name $POOL_NAME
+  local vol_docker_path=$(create_new_volume $vol_docker_name $POOL_NAME $DISK_DOCKER_SIZE)
+
   local net="$NET_NAME/52:54:10:${NET_BASE_PREFIX}:${JOB_RND}:$mac_octet"
   for ((j=1; j<NET_COUNT; ++j)); do
     net="$net,${NET_NAME}_$j/52:54:10:$((NET_BASE_PREFIX+j)):${JOB_RND}:$mac_octet"
   done
-  define_machine $vm_name $vcpus $mem $OS_VARIANT $net $vol_path $DISK_SIZE
+  define_machine $vm_name $vcpus $mem $OS_VARIANT $net $vol_path $vol_docker_path
+}
+
+function attach_docker_vol() {
+  local ip=$1
+  cat <<EOF | ssh $SSH_OPTS root@${ip}
+(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | fdisk /dev/vdf
+mkfs.ext4 /dev/vdf1
+mkdir -p /var/lib/docker
+echo '/dev/vdf1  /var/lib/docker  auto  defaults,auto  0  0' >> /etc/fstab
+mount /var/lib/docker"
+EOF
 }
 
 build_vm=0
@@ -149,6 +166,7 @@ elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; t
   cat /etc/os-release.original > /etc/os-release
 fi
 EOF
+  attach_docker_vol $build_ip
 fi
 
 for ip in ${ips[@]} ; do
@@ -169,6 +187,7 @@ for ip in ${ips[@]} ; do
   fi
 
   # prepare node: set hostname, fill /etc/hosts, configure ssh, configure second iface if needed, install software, reboot
+  attach_docker_vol $ip
   cat <<EOF | ssh $SSH_OPTS root@${ip}
 hname="node-\$(echo $ip | tr '.' '-')"
 echo \$hname > /etc/hostname

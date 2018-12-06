@@ -28,6 +28,7 @@ function delete_node() {
     rhel_unregister_system $vol_path/$vol_name || true
   fi
   delete_volume $vol_name $POOL_NAME
+  delete_volume "$vm_name-docker.qcow2" $POOL_NAME
 }
 
 # source default values
