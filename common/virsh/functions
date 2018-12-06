@@ -257,8 +257,10 @@ function define_machine() {
     fi
   done
   local more_disks=''
-  for path in "$@" ; do
-    more_disks+=' --disk path=${path},device=disk,cache=writeback,bus=virtio,format=qcow2'
+  while (($# > 1)) ; do
+    local path=$1 ; shift
+    local size=${1:-60} ; shift
+    more_disks+=" --disk path=${path},device=disk,cache=writeback,bus=virtio,format=qcow2,size=${size}"
   done
   virt-install --name $name \
     --ram $mem \

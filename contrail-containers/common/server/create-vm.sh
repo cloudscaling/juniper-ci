@@ -84,7 +84,7 @@ function define_node() {
   for ((j=1; j<NET_COUNT; ++j)); do
     net="$net,${NET_NAME}_$j/52:54:10:$((NET_BASE_PREFIX+j)):${JOB_RND}:$mac_octet"
   done
-  define_machine $vm_name $vcpus $mem $OS_VARIANT $net $vol_path $vol_docker_path
+  define_machine $vm_name $vcpus $mem $OS_VARIANT $net $vol_path $vol_docker_path $DISK_DOCKER_SIZE
 }
 
 function attach_docker_vol() {
