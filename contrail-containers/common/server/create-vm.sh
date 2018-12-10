@@ -106,6 +106,7 @@ mkdir -p ${path}
 echo '/dev/vd${letter}1  ${path}  auto  defaults,auto  0  0' >> /etc/fstab
 mount ${path}
 EOF
+  done
 }
 
 build_vm=0
