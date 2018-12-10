@@ -78,11 +78,11 @@ function define_node() {
 
   local opt_disks=''
   local index=0
-  for ((; index<${#ADDITIONAL_DISK[*]}; ++index)); do
+  for ((; index<${#ADDITIONAL_DISKS[*]}; ++index)); do
     local opt_vol_name="$vm_name-$index.qcow2"
     delete_volume $opt_vol_name $POOL_NAME
     local opt_vol_path=$(create_new_volume $opt_vol_name $POOL_NAME $ADDITIONAL_DISK_SIZE)
-    opt_disks+=" ${ADDITIONAL_DISK[index]} $ADDITIONAL_DISK_SIZE"
+    opt_disks+=" ${ADDITIONAL_DISKS[index]} $ADDITIONAL_DISK_SIZE"
   done
 
   local net="$NET_NAME/52:54:10:${NET_BASE_PREFIX}:${JOB_RND}:$mac_octet"
@@ -95,10 +95,10 @@ function define_node() {
 function attach_opt_vols() {
   local ip=$1
   local index=0
-  for ((; index<${#ADDITIONAL_DISK[*]}; ++index)); do
+  for ((; index<${#ADDITIONAL_DISKS[*]}; ++index)); do
     # 98 - char 'b'
     local letter=`printf "\\$(printf '%03o' "$((98+index))")"`
-    local path=${ADDITIONAL_DISK[index]}
+    local path=${ADDITIONAL_DISKS[index]}
     cat <<EOF | ssh $SSH_OPTS root@${ip}
 (echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | fdisk /dev/vd${letter}
 mkfs.ext4 /dev/vd${letter}1
