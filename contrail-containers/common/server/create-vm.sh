@@ -76,25 +76,35 @@ function define_node() {
   delete_volume $vol_name $POOL_NAME
   local vol_path=$(create_volume_from $vol_name $POOL_NAME $BASE_IMAGE_NAME $BASE_IMAGE_POOL)
 
-  local vol_docker_name="$vm_name-docker.qcow2"
-  delete_volume $vol_docker_name $POOL_NAME
-  local vol_docker_path=$(create_new_volume $vol_docker_name $POOL_NAME $DISK_DOCKER_SIZE)
+  local opt_disks=''
+  local index=0
+  for ((; index<${#ADDITIONAL_DISK[*]}; ++index)); do
+    local opt_vol_name="$vm_name-$index.qcow2"
+    delete_volume $opt_vol_name $POOL_NAME
+    local opt_vol_path=$(create_new_volume $opt_vol_name $POOL_NAME $ADDITIONAL_DISK_SIZE)
+    opt_disks+=" ${ADDITIONAL_DISK[index]} $ADDITIONAL_DISK_SIZE"
+  done
 
   local net="$NET_NAME/52:54:10:${NET_BASE_PREFIX}:${JOB_RND}:$mac_octet"
   for ((j=1; j<NET_COUNT; ++j)); do
     net="$net,${NET_NAME}_$j/52:54:10:$((NET_BASE_PREFIX+j)):${JOB_RND}:$mac_octet"
   done
-  define_machine $vm_name $vcpus $mem $OS_VARIANT $net $vol_path $vol_docker_path $DISK_DOCKER_SIZE
+  define_machine $vm_name $vcpus $mem $OS_VARIANT $net $vol_path $opt_disks
 }
 
-function attach_docker_vol() {
+function attach_opt_vols() {
   local ip=$1
-  cat <<EOF | ssh $SSH_OPTS root@${ip}
-(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | fdisk /dev/vdb
-mkfs.ext4 /dev/vdb1
-mkdir -p /var/lib/docker
-echo '/dev/vdb1  /var/lib/docker  auto  defaults,auto  0  0' >> /etc/fstab
-mount /var/lib/docker
+  local index=0
+  for ((; index<${#ADDITIONAL_DISK[*]}; ++index)); do
+    # 98 - char 'b'
+    local letter=`printf "\\$(printf '%03o' "$((98+index))")"`
+    local path=${ADDITIONAL_DISK[index]}
+    cat <<EOF | ssh $SSH_OPTS root@${ip}
+(echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | fdisk /dev/vd${letter}
+mkfs.ext4 /dev/vd${letter}1
+mkdir -p ${path}
+echo '/dev/vd${letter}1  ${path}  auto  defaults,auto  0  0' >> /etc/fstab
+mount ${path}
 EOF
 }
 
@@ -166,7 +176,7 @@ elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; t
   cat /etc/os-release.original > /etc/os-release
 fi
 EOF
-  attach_docker_vol $build_ip
+  attach_opt_vols $build_ip
 fi
 
 for ip in ${ips[@]} ; do
@@ -187,7 +197,7 @@ for ip in ${ips[@]} ; do
   fi
 
   # prepare node: set hostname, fill /etc/hosts, configure ssh, configure second iface if needed, install software, reboot
-  attach_docker_vol $ip
+  attach_opt_vols $ip
   cat <<EOF | ssh $SSH_OPTS root@${ip}
 hname="node-\$(echo $ip | tr '.' '-')"
 echo \$hname > /etc/hostname
