@@ -82,7 +82,7 @@ function define_node() {
     local opt_vol_name="$vm_name-$index.qcow2"
     delete_volume $opt_vol_name $POOL_NAME
     local opt_vol_path=$(create_new_volume $opt_vol_name $POOL_NAME $ADDITIONAL_DISK_SIZE)
-    opt_disks+=" ${ADDITIONAL_DISKS[index]} $ADDITIONAL_DISK_SIZE"
+    opt_disks+=" $opt_vol_path $ADDITIONAL_DISK_SIZE"
   done
 
   local net="$NET_NAME/52:54:10:${NET_BASE_PREFIX}:${JOB_RND}:$mac_octet"
