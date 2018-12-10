@@ -29,7 +29,7 @@ function delete_node() {
   fi
   delete_volume $vol_name $POOL_NAME
   local index=0
-  for ((; index<${#ADDITIONAL_DISK[*]}; ++index)); do
+  for ((; index<10; ++index)); do
     delete_volume "$vm_name-$index.qcow2" $POOL_NAME
   done
 }

@@ -93,11 +93,12 @@ function define_node() {
 }
 
 function attach_opt_vols() {
+  local letters=(b c d e f g h)
   local ip=$1
   local index=0
   for ((; index<${#ADDITIONAL_DISKS[*]}; ++index)); do
     # 98 - char 'b'
-    local letter=`printf "\\$(printf '%03o' "$((98+index))")"`
+    local letter=${letters[index]}
     local path=${ADDITIONAL_DISKS[index]}
     cat <<EOF | ssh $SSH_OPTS root@${ip}
 (echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | fdisk /dev/vd${letter}
