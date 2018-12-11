@@ -3,12 +3,18 @@ export NET_BASE_PREFIX=15
 
 if [[ "$HA" == 'ha' ]]; then
   export CONT_NODES=3
+  export COMP_NODES=2
+  # overrides
+  export CONT_NODE_MEM=8192
 elif [[ "$HA" == 'nonha' ]]; then
   export CONT_NODES=1
+  export COMP_NODES=2
+  # overrides
+  export CONT_NODE_MEM=8192
+elif [[ "$HA" == 'aio' ]]; then
+  export CONT_NODES=1
+  export COMP_NODES=0
 else
-  echo "ERROR: AIO deployment is not supported"
+  echo "ERROR: \"$HA\" deployment is not supported"
   exit 1
 fi
-export COMP_NODES=2
-# overrides
-export CONT_NODE_MEM=8192
