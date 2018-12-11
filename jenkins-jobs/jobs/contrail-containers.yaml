@@ -95,13 +95,6 @@
           regexp: "DESCRIPTION (.*)"
       - shell: |
           #!/bin/bash -e
-          if [[ -n "$CCB_REPO" ]]; then
-            pushd contrail-container-builder
-            git remote add custom $CCB_REPO
-            git fetch custom
-            git checkout custom/master
-            popd
-          fi
           if [[ -n "$CCB_PATCHSET" ]]; then
             pushd contrail-container-builder
             eval "$CCB_PATCHSET"
