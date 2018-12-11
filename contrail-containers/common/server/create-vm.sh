@@ -258,7 +258,7 @@ EOM
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
   apt-get -y update &>>$logs_dir/apt.log
   apt-get -y purge unattended-upgrades &>>$logs_dir/apt.log
-  if [[ $AGENT_MODE == 'dpdk' ]]; then
+  if [[ "$AGENT_MODE" == 'dpdk' ]]; then
     if [[ "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
       dpdk_req="linux-modules-extra-\$(uname -r)"
     else
@@ -298,7 +298,7 @@ fi
 EOF
 done
 
-if [[ $AGENT_MODE == 'dpdk' ]]; then
+if [[ "$AGENT_MODE" == 'dpdk' ]]; then
   for ip in ${ips_comp[@]} ; do
     if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
       ssh $SSH_OPTS root@${ip} "sed -i 's/tty0 /tty0 default_hugepagesz=2M hugepagesz=2M hugepages=2048 /g' /boot/grub2/grub.cfg"
