@@ -19,6 +19,12 @@
             - always
             - on_success
             - never
+      - validating-string:
+          name: NUM
+          default: "10"
+          description: "Used to identificate the deployment on physical servers"
+          regex: '^[1-9][0-9]$'
+          msg: "Value must be in range from 10 to 99"
       - choice:
           name: CONTAINER_REGISTRY
           choices:
@@ -142,7 +148,6 @@
               export SSL_ENABLE=false
               ;;
           esac
-          export JOB_RND=$((RANDOM % 90 + 10))
           env|sort
           ./juniper-ci/contrail-containers/$WAY/run.sh
     publishers:

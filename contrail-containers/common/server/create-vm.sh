@@ -3,6 +3,14 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
+if [[ -z "$NUM" ]]; then
+  echo "NUM variable is expected"
+  exit -1
+fi
+if [[ -z "$(echo $NUM | grep '^[1-9][0-9]$')" ]]; then
+  echo "NUM value must be in range from 10 to 99"
+  exit -1
+fi
 if [[ -z "$WORKSPACE" ]] ; then
   echo "WORKSPACE variable is expected"
   exit -1
@@ -57,10 +65,10 @@ done
 
 # re-create networks
 delete_network_dhcp $NET_NAME
-create_network_dhcp $NET_NAME 10.$NET_BASE_PREFIX.$JOB_RND.${NET_GW_OCTET:-1} $BRIDGE_NAME
+create_network_dhcp $NET_NAME 10.$NET_BASE_PREFIX.$NUM.${NET_GW_OCTET:-1} $BRIDGE_NAME
 for ((j=1; j<NET_COUNT; ++j)); do
   delete_network_dhcp ${NET_NAME}_$j
-  create_network_dhcp ${NET_NAME}_$j 10.$((NET_BASE_PREFIX+j)).$JOB_RND.${NET_GW_OCTET:-1} ${BRIDGE_NAME}_$j
+  create_network_dhcp ${NET_NAME}_$j 10.$((NET_BASE_PREFIX+j)).$NUM.${NET_GW_OCTET:-1} ${BRIDGE_NAME}_$j
 done
 
 # create pool
@@ -85,9 +93,9 @@ function define_node() {
     opt_disks+=" $opt_vol_path $ADDITIONAL_DISK_SIZE"
   done
 
-  local net="$NET_NAME/52:54:10:${NET_BASE_PREFIX}:${JOB_RND}:$mac_octet"
+  local net="$NET_NAME/52:54:10:${NET_BASE_PREFIX}:${NUM}:$mac_octet"
   for ((j=1; j<NET_COUNT; ++j)); do
-    net="$net,${NET_NAME}_$j/52:54:10:$((NET_BASE_PREFIX+j)):${JOB_RND}:$mac_octet"
+    net="$net,${NET_NAME}_$j/52:54:10:$((NET_BASE_PREFIX+j)):${NUM}:$mac_octet"
   done
   define_machine $vm_name $vcpus $mem $OS_VARIANT $net $vol_path $opt_disks
 }
@@ -133,18 +141,18 @@ done
 all_nodes_count=$((build_vm + CONT_NODES + COMP_NODES))
 _ips=( $(wait_dhcp $NET_NAME $all_nodes_count ) )
 if [[ $CONTAINER_REGISTRY == 'build' || $CONTAINER_REGISTRY == 'fullbuild' ]]; then
-  build_ip=`get_ip_by_mac $NET_NAME 52:54:10:${NET_BASE_PREFIX}:${JOB_RND}:ff`
+  build_ip=`get_ip_by_mac $NET_NAME 52:54:10:${NET_BASE_PREFIX}:${NUM}:ff`
 fi
 # collect controller ips first and compute ips next
 declare -a ips ips_cont ips_comp
 for (( i=0; i<${CONT_NODES}; ++i )); do
-  ip=`get_ip_by_mac $NET_NAME 52:54:10:${NET_BASE_PREFIX}:${JOB_RND}:0$i`
+  ip=`get_ip_by_mac $NET_NAME 52:54:10:${NET_BASE_PREFIX}:${NUM}:0$i`
   echo "INFO: controller node #$i, IP $ip (network $NET_NAME)"
   ips=( ${ips[@]} $ip )
   ips_cont=( ${ips_cont[@]} $ip )
 done
 for (( i=0; i<${COMP_NODES}; ++i )); do
-  ip=`get_ip_by_mac $NET_NAME 52:54:10:${NET_BASE_PREFIX}:${JOB_RND}:1$i`
+  ip=`get_ip_by_mac $NET_NAME 52:54:10:${NET_BASE_PREFIX}:${NUM}:1$i`
   echo "INFO: compute node #$i, IP $ip (network $NET_NAME)"
   ips=( ${ips[@]} $ip )
   ips_comp=( ${ips_comp[@]} $ip )
@@ -322,21 +330,21 @@ for ip in ${ips[@]} ; do
   fi
 done
 
-echo "nodes_net=10.$NET_BASE_PREFIX.$JOB_RND.0/24" >> $ENV_FILE
-echo "nodes_gw=10.$NET_BASE_PREFIX.$JOB_RND.1" >> $ENV_FILE
-echo "nodes_vip=10.$NET_BASE_PREFIX.$JOB_RND.254" >> $ENV_FILE
+echo "nodes_net=10.$NET_BASE_PREFIX.$NUM.0/24" >> $ENV_FILE
+echo "nodes_gw=10.$NET_BASE_PREFIX.$NUM.1" >> $ENV_FILE
+echo "nodes_vip=10.$NET_BASE_PREFIX.$NUM.254" >> $ENV_FILE
 
 # update env file with IP-s from other interfaces
 for ((j=1; j<NET_COUNT; ++j)); do
   declare -a ips ips_cont ips_comp ; ips=() ; ips_cont=() ; ips_comp=()
   for (( i=0; i<${CONT_NODES}; ++i )); do
-    ip=`get_ip_by_mac ${NET_NAME}_$j 52:54:10:$((NET_BASE_PREFIX+j)):${JOB_RND}:0$i`
+    ip=`get_ip_by_mac ${NET_NAME}_$j 52:54:10:$((NET_BASE_PREFIX+j)):${NUM}:0$i`
     echo "INFO: controller node #$i, IP $ip (network ${NET_NAME}_$j)"
     ips=( ${ips[@]} $ip )
     ips_cont=( ${ips_cont[@]} $ip )
   done
   for (( i=0; i<${COMP_NODES}; ++i )); do
-    ip=`get_ip_by_mac ${NET_NAME}_$j 52:54:10:$((NET_BASE_PREFIX+j)):${JOB_RND}:1$i`
+    ip=`get_ip_by_mac ${NET_NAME}_$j 52:54:10:$((NET_BASE_PREFIX+j)):${NUM}:1$i`
     echo "INFO: compute node #$i, IP $ip (network ${NET_NAME}_$j)"
     ips=( ${ips[@]} $ip )
     ips_comp=( ${ips_comp[@]} $ip )
@@ -356,9 +364,9 @@ EOF
 nodes_ips_${j}="${ips[@]}"
 nodes_cont_ips_${j}="${ips_cont[@]}"
 nodes_comp_ips_${j}="${ips_comp[@]}"
-nodes_net_${j}=10.$((NET_BASE_PREFIX+j)).$JOB_RND.0/24
-nodes_gw_${j}=10.$((NET_BASE_PREFIX+j)).$JOB_RND.1
-nodes_vip_${j}=10.$((NET_BASE_PREFIX+j)).$JOB_RND.254
+nodes_net_${j}=10.$((NET_BASE_PREFIX+j)).$NUM.0/24
+nodes_gw_${j}=10.$((NET_BASE_PREFIX+j)).$NUM.1
+nodes_vip_${j}=10.$((NET_BASE_PREFIX+j)).$NUM.254
 EOF
 done
 
