@@ -67,15 +67,15 @@ done
 popd
 
 sudo /usr/bin/contrail-status |& tee logs/contrail/contrail-status.log
-
+url=$(hostname -f)
 function save_introspect_info() {
   if ! lsof -i ":$2" &>/dev/null ; then
     return
   fi
   echo "INFO: saving introspect output for $1"
-  timeout -s 9 30 curl $ssl_opts -s ${proto}://localhost:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - | grep -P "state|<type|<status" > logs/contrail/$1-introspect.log
+  timeout -s 9 30 curl $ssl_opts -s ${proto}://${url}:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - | grep -P "state|<type|<status" > logs/contrail/$1-introspect.log
   echo '' >> logs/contrail/$1-introspect.log
-  timeout -s 9 30 curl $ssl_opts -s ${proto}://localhost:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - >> logs/contrail/$1-introspect.log
+  timeout -s 9 30 curl $ssl_opts -s ${proto}://${url}:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - >> logs/contrail/$1-introspect.log
 }
 
 save_introspect_info HttpPortConfigNodemgr 8100

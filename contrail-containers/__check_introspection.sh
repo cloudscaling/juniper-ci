@@ -10,7 +10,7 @@ if [[ "${SSL_ENABLE,,}" == 'true' ]] ; then
   proto='https'
   ssl_opts="--key ${SERVER_KEYFILE} --cert ${SERVER_CERTFILE} --cacert ${SERVER_CA_CERTFILE}"
 fi
-curl_ip=$(hostname -i | cut -d ' ' -f 1)
+curl_ip=$(hostname -f | cut -d ' ' -f 1)
 
 declare -A port_map
 port_map['agent-vrouter']=8085
@@ -66,24 +66,23 @@ function get_introspect_state() {
 count=0
 err=0
 skip=0
-node=$(hostname)
 for s in ${!port_map[@]} ; do
   state=$(get_introspect_state $s)
   case $state in
     skip)
-      echo "INFO: $node: $s $state"
+      echo "INFO: $curl_ip: $s $state"
       (( skip+=1 ))
       ;;
     Functional)
-      echo "INFO: $node: $s $state"
+      echo "INFO: $curl_ip: $s $state"
       (( count+=1 ))
       ;;
     Non-Functional)
-      echo "ERROR: $node: $s $state"
+      echo "ERROR: $curl_ip: $s $state"
       (( err+=1 ))
       ;;
     *)
-      echo "ERROR: $node: $s $state"
+      echo "ERROR: $curl_ip: $s $state"
       (( err+=1 ))
       ;;
   esac
