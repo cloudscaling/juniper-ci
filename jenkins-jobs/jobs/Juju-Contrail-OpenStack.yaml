@@ -162,6 +162,13 @@
       - string:
           name: CHARMS_BRANCH
           default: 'R5'
+      - string:
+          name: CONTAINER_REGISTRY
+          default: opencontrailnightly
+      - string:
+          name: CONTRAIL_VERSION
+          default: master-latest
+          description: "Tag's suffix for images from opencontrailnightly. Prefix is a OPENSTACK_VERSION"
       - bool:
           name: RUN_TEMPEST
           description: "Run neutron tests from tempest"
@@ -194,6 +201,8 @@
           regexp: "DESCRIPTION (.*)"
       - shell: |
           #!/bin/bash -e
+          # build CONTRAIL_VERSION as a tag for opencontrailnightly
+          export CONTRAIL_VERSION="$VERSION-$CONTRAIL_VERSION"
           export SERIES='xenial'
           if [[ "$VERSION" == "queens" ]] ; then
             export SERIES='bionic'

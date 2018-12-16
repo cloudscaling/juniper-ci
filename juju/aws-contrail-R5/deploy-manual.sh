@@ -89,17 +89,18 @@ juju-expose neutron-api
 juju-deploy $PLACE/contrail-keystone-auth contrail5-keystone-auth --to $m6
 
 juju-deploy $PLACE/contrail-controller contrail5-controller --to $m6
-juju-set contrail5-controller auth-mode=$AAA_MODE "log-level=SYS_DEBUG" cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
+juju-set contrail5-controller auth-mode=$AAA_MODE "log-level=SYS_DEBUG" cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION
 juju-expose contrail5-controller
 juju-deploy $PLACE/contrail-analyticsdb contrail5-analyticsdb --to $m6
-juju-set contrail5-analyticsdb "log-level=SYS_DEBUG" cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
+juju-set contrail5-analyticsdb "log-level=SYS_DEBUG" cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION
 juju-deploy $PLACE/contrail-analytics contrail5-analytics --to $m6
-juju-set contrail5-analytics "log-level=SYS_DEBUG"
+juju-set contrail5-analytics "log-level=SYS_DEBUG" docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION
 juju-expose contrail5-analytics
 
 juju-deploy $PLACE/contrail-openstack contrail5-openstack
+juju-set contrail5-openstack docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION
 juju-deploy $PLACE/contrail-agent contrail5-agent
-juju-set contrail5-agent "log-level=SYS_DEBUG"
+juju-set contrail5-agent "log-level=SYS_DEBUG" docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION
 
 if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then
   juju-set contrail5-controller control-network=$subnet_cidr
