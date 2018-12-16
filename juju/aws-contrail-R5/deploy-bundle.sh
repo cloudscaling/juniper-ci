@@ -23,15 +23,10 @@ echo "---------------------------------------------------- From: $JUJU_REPO  Ver
 
 # change bundles' variables
 echo "INFO: Change variables in bundle..."
-rm -f "$BUNDLE.tmp"
-cp "$BUNDLE" "$BUNDLE.tmp"
-BUNDLE="$BUNDLE.tmp"
-sed -i -e "s/%SERIES%/$SERIES/m" $BUNDLE
-sed -i -e "s/%OPENSTACK_ORIGIN%/$OPENSTACK_ORIGIN/m" $BUNDLE
-sed -i -e "s/%PASSWORD%/$PASSWORD/m" $BUNDLE
-sed -i -e "s|%JUJU_REPO%|$JUJU_REPO|m" $BUNDLE
-sed -i -e "s|%AUTH_MODE%|$AAA_MODE|m" $BUNDLE
-sed -i "s/\r/\n/g" $BUNDLE
+templ=$(cat ${BUNDLE}.tmpl)
+content=$(eval "echo \"$templ\"")
+#sed -i "s/\r/\n/g" $BUNDLE
+echo "$content" > $BUNDLE
 cp $BUNDLE "$log_dir/"
 
 echo "INFO: Deploy bundle $(date)"
