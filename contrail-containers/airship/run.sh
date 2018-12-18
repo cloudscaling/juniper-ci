@@ -32,12 +32,15 @@ function catch_errors() {
   exit $exit_code
 }
 
+cat <<EOF >>$WORKSPACE/cloudrc
+JOB_RND=$JOB_RND
+NET_BASE_PREFIX=$NET_BASE_PREFIX
+OPENSTACK_VERSION=$OPENSTACK_VERSION
+AGENT_MODE=$AGENT_MODE
+EOF
 $SCP "$WORKSPACE/cloudrc" $SSH_USER@$master_ip:cloudrc
 $SCP "$my_dir/__run-gate.sh" $SSH_USER@$master_ip:run-gate.sh
-run_env+=" JOB_RND=$JOB_RND NET_BASE_PREFIX=$NET_BASE_PREFIX"
-run_env+=" OPENSTACK_VERSION=$OPENSTACK_VERSION"
-run_env+=" AGENT_MODE=$AGENT_MODE"
-timeout -s 9 120m $SSH_CMD $SSH_USER@$master_ip "$run_env ./run-gate.sh"
+timeout -s 9 120m $SSH_CMD $SSH_USER@$master_ip "docker run -i --network host --priveleged --name airship-deploy -v /root/cloudrc:/root/cloudrc -v /root/run-gate.sh:/root/run-gate.sh --entrypoint /bin/bash ubuntu -c /root/run-gate.sh"
 
 trap - ERR
 if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
