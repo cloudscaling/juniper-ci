@@ -30,7 +30,7 @@ fi
 
 export TARGET_SITE="demo"
 
-if [[ ${VROUTER_ON_DEFAULT_IFACE:-'True'} == 'True' ]]; then
+if [[ ${VROUTER_ON_DEFAULT_IFACE:-'True'} == 'False' ]]; then
   export NODE_NET_IFACE="ens3"
   export NODE_NET_IFACE_GATEWAY_IP="10.$NET_BASE_PREFIX.$JOB_RND.1"
   export NODE_SUBNETS="10.$NET_BASE_PREFIX.$JOB_RND.0/24"
