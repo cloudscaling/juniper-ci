@@ -23,10 +23,8 @@ echo "---------------------------------------------------- From: $JUJU_REPO  Ver
 
 # change bundles' variables
 echo "INFO: Change variables in bundle..."
-templ=$(cat ${BUNDLE}.tmpl)
-content=$(eval "echo \"$templ\"")
-echo "$content" > $BUNDLE
-sed -i "s/\r/\n/g" $BUNDLE
+envsubst <${BUNDLE}.tmpl >$BUNDLE
+#sed -i "s/\r/\n/g" $BUNDLE
 cp $BUNDLE "$log_dir/"
 
 echo "INFO: Deploy bundle $(date)"

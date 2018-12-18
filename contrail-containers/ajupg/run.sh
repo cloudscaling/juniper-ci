@@ -56,9 +56,7 @@ METADATA_IP='127.0.0.1'
 METADATA_PROXY_SECRET=`juju ssh 0 sudo grep metadata_proxy_secret /etc/contrail/contrail-vrouter-agent.conf 2>/dev/null | cut -d '=' -f 2 | tr -d ' '`
 
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
-templ=$(cat $my_dir/instances.yaml.${HA}.tmpl)
-content=$(eval "echo \"$templ\"")
-echo "$content" > $config
+envsubst <$my_dir/instances.yaml.${HA}.tmpl >$config
 echo "INFO: cloud config ------------------------- $(date)"
 cat $config
 cp $config $WORKSPACE/logs/

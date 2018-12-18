@@ -75,9 +75,7 @@ fi
 VROUTER_GW=10.$((NET_BASE_PREFIX+2)).$JOB_RND.1
 
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
-templ=$(cat $my_dir/instances.yaml.${HA}.tmpl)
-content=$(eval "echo \"$templ\"")
-echo "$content" > $config
+envsubst <$my_dir/instances.yaml.${HA}.tmpl >$config
 echo "INFO: cloud config ------------------------- $(date)"
 cat $config
 cp $config $WORKSPACE/logs/

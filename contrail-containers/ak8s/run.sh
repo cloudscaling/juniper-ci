@@ -49,9 +49,7 @@ IP_COMP_01=`echo $nodes_comp_ips | cut -d ' ' -f 1`
 IP_COMP_02=`echo $nodes_comp_ips | cut -d ' ' -f 2`
 
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
-templ=$(cat $my_dir/instances.yaml.${HA}.tmpl)
-content=$(eval "echo \"$templ\"")
-echo "$content" > $config
+envsubst <$my_dir/instances.yaml.${HA}.tmpl >$config
 echo "INFO: cloud config ------------------------- $(date)"
 cat $config
 cp $config $WORKSPACE/logs/
