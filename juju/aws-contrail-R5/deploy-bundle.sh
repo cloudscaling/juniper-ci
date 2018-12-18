@@ -17,7 +17,7 @@ function catch_errors_ce() {
 }
 
 # version 2
-JUJU_REPO="$WORKSPACE/contrail-charms"
+export JUJU_REPO="$WORKSPACE/contrail-charms"
 
 echo "---------------------------------------------------- From: $JUJU_REPO  Version: $VERSION"
 
