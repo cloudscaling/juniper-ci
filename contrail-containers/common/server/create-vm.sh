@@ -251,10 +251,8 @@ EOM
   done
   yum update -y &>>$logs_dir/yum.log
   yum install -y epel-release &>>$logs_dir/yum.log
-  yum install -y mc git wget ntp ntpdate iptables iproute libxml2-utils python2.7 lsof python-pip python-devel gcc&>>$logs_dir/yum.log
+  yum install -y mc git wget iptables iproute libxml2-utils python2.7 lsof python-pip python-devel gcc&>>$logs_dir/yum.log
   yum remove -y python-requests cloud-init
-  systemctl disable chronyd.service
-  systemctl enable ntpd.service && systemctl start ntpd.service
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
   apt-get -y update &>>$logs_dir/apt.log
   apt-get -y purge unattended-upgrades &>>$logs_dir/apt.log

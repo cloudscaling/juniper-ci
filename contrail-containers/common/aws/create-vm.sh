@@ -163,8 +163,7 @@ function run_instance() {
   echo "INFO: Update packages on machine and install additional packages $(date)"
   if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
     $ssh "sudo yum install -y epel-release" &>>yum.log
-    $ssh "sudo yum install -y mc git wget ntp ntpdate iptables iproute libxml2-utils python2.7" &>>yum.log
-    $ssh "sudo systemctl disable chronyd.service && sudo systemctl enable ntpd.service && sudo systemctl start ntpd.service"
+    $ssh "sudo yum install -y mc git wget iptables iproute libxml2-utils python2.7" &>>yum.log
     $ssh "sudo yum remove -y python-requests PyYAML" &>>yum.log
   elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
     $ssh "sudo apt-get -y update" &>>$HOME/apt.log
