@@ -30,12 +30,12 @@
           wipe-workspace: true
           skip-tag: true
 
-# Repository in Cloudscaling github
+# Repository in progmaticlab github
 - scm:
     name: cspgithub
     scm:
       - git:
-          url: 'https://github.com/cloudscaling/{repo}.git'
+          url: 'https://github.com/progmaticlab/{repo}.git'
           basedir: '{repo}'
           branches:
             - '*/master'
@@ -91,7 +91,7 @@
     name: contrail-build-poc
     scm:
       - github:
-          organization: cloudscaling
+          organization: progmaticlab
           repo: contrail-build-poc
 - scm:
     name: contrail-container-builder

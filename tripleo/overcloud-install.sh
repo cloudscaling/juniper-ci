@@ -291,9 +291,9 @@ else
   git_branch_ccb='master'
 fi
 if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
-  git_repo_ctp="cloudscaling"
-  git_repo_pc="cloudscaling"
-  git_repo_ccb='cloudscaling'
+  git_repo_ctp="progmaticlab"
+  git_repo_pc="progmaticlab"
+  git_repo_ccb='progmaticlab'
 else
   git_repo_ctp="Juniper"
   git_repo_pc="Juniper"
@@ -388,7 +388,7 @@ fi
 git_branch_tht="stable/${OPENSTACK_VERSION}"
 git_repo_ctht="juniper"
 if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
-  git_repo_ctht="cloudscaling"
+  git_repo_ctht="progmaticlab"
 fi
 rm -rf ~/tripleo-heat-templates
 cp -r /usr/share/openstack-tripleo-heat-templates/ ~/tripleo-heat-templates

@@ -23,7 +23,7 @@ ${prefix} apt-get install -fy juju awscli mc joe git jq curl virtualenv python g
 mkdir -p "$HOME"
 cd "$HOME"
 rm -rf juniper-ci
-git clone https://github.com/cloudscaling/juniper-ci.git
+git clone https://github.com/progmaticlab/juniper-ci.git
 if [ -n "$CI_SHA" ] ; then
   cd juniper-ci
   git checkout "$CI_SHA"

@@ -81,7 +81,7 @@ pip install -U "ansible<2.5.0"
 
 # TODO: switch to openstack's repo when work is done
 #pip install kolla-ansible
-git clone https://github.com/cloudscaling/kolla-ansible
+git clone https://github.com/progmaticlab/kolla-ansible
 cd kolla-ansible
 pip install -r requirements.txt
 python setup.py install
