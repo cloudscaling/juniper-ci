@@ -80,6 +80,8 @@ echo "INFO: cloud config ------------------------- $(date)"
 cat $config
 cp $config $WORKSPACE/logs/
 
+trap
+
 prepare_image centos-soft
 
 if echo "$PATCHSET_LIST" | grep -q "/contrail-kolla-ansible " ; then
