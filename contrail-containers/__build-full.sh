@@ -61,7 +61,7 @@ done
 cd /root/contrail-dev-env
 make dep
 make rpm
-make containers
+make containers || /bin/true
 EOF
 chmod a+x ./build.sh
 docker cp /root/patches contrail-developer-sandbox:/root/patches
