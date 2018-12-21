@@ -120,7 +120,6 @@ function run_instance() {
     echo "WARNING: Machine isn't accessible yet"
     sleep 2
   done
-  scp -i $HOME/.ssh/id_rsa $SSH_OPTS $SSH_USER@$public_ip:kp
 
   if [[ "$cloud_vm" == 'true' ]] && ((NET_COUNT > 1)) ; then
     echo "INFO: Configure additional interfaces for cloud VM"
