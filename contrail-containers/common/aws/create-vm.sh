@@ -57,7 +57,7 @@ sleep 2
 
 declare -a subnet_ids
 for ((i=1; i<NET_COUNT; ++i)); do
-  cidr_name="${VM_CIDR}_${i}"
+  cidr_name="VM_CIDR_${i}"
   cmd="aws ${AWS_FLAGS} ec2 create-subnet --vpc-id $vpc_id --cidr-block ${!cidr_name} --availability-zone $az"
   subnet_id_next=$(get_value_from_json "$cmd" ".Subnet.SubnetId")
   echo "INFO: SUBNET_ID_$i: $subnet_id_next"
