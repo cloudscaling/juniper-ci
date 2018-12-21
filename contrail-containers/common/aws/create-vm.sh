@@ -209,21 +209,21 @@ for ((net=1; net<NET_COUNT; ++net)) ; do
   cont_ips=( )
   comp_ips=( )
   for ip in ${ips_cont[@]} ; do
-    var="IF$((net+1))"
-    ip=`ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_USER@$ip ip addr show dev ${!var} 2>/dev/null | awk '/inet/{print $2}' | cut -d '/' -f 1`
+    var="IF${net}"
+    ip=`ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_USER@$ip ip addr show dev ${!var} 2>/dev/null | awk '/inet /{print $2}' | cut -d '/' -f 1`
     ips=( ${ips[@]} $ip )
     cont_ips=( ${cont_ips[@]} $ip )
   done
   for ip in ${ips_comp[@]} ; do
-    var="IF$((i+1))"
-    ip=`ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_USER@$ip ip addr show dev ${!var} 2>/dev/null | awk '/inet/{print $2}' | cut -d '/' -f 1`
+    var="IF${net}"
+    ip=`ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_USER@$ip ip addr show dev ${!var} 2>/dev/null | awk '/inet /{print $2}' | cut -d '/' -f 1`
     ips=( ${ips[@]} $ip )
     comp_ips=( ${comp_ips[@]} $ip )
   done
   cat <<EOF >>$ENV_FILE
 nodes_ips_${net}="${ips[@]}"
-nodes_cont_ips_${net}="${ips_cont[@]}"
-nodes_comp_ips_${net}="${ips_comp[@]}"
+nodes_cont_ips_${net}="${cont_ips[@]}"
+nodes_comp_ips_${net}="${comp_ips[@]}"
 EOF
 done
 
