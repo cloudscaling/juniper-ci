@@ -770,6 +770,16 @@ EOF
 fi
 
 ssl_opts=''
+if if [[ "$TLS" != 'off' && "$FREE_IPA" == 'true' ]] ; then
+  ssl_opts+=' -e tripleo-heat-templates/environments/contrail/contrail-tls.yaml'
+
+  if [[  "$TLS" == 'all' ]] ; then
+    ssl_opts+=' -e tripleo-heat-templates/environments/ssl/tls-everywhere-endpoints-dns.yaml'
+    ssl_opts+=' -e tripleo-heat-templates/environments/services/haproxy-public-tls-certmonger.yaml'
+    ssl_opts+=' -e tripleo-heat-templates/environments/ssl/enable-internal-tls.yaml'
+  fi
+fi
+
 if [[ "$TLS" != 'off' && "$FREE_IPA" != 'true' ]] ; then
   # prepare for certificates creation
   ssl_working_dir="$(pwd)/contrail_ssl_gen"
@@ -889,12 +899,7 @@ EOF
   if [[ "$OPENSTACK_VERSION" == 'newton' ]] ; then
     endpoints_file='tripleo-heat-templates/environments/tls-endpoints-public-ip.yaml'
   else
-    if [[ "$FREE_IPA" == 'true' ]] ; then
-      endpoints_file='tripleo-heat-templates/environments/ssl/tls-everywhere-endpoints-dns.yaml'
-      ssl_opts+='-e tripleo-heat-templates/environments/services/haproxy-public-tls-certmonger.yaml'
-    else
-      endpoints_file='tripleo-heat-templates/environments/ssl/tls-endpoints-public-ip.yaml'
-    fi
+    endpoints_file='tripleo-heat-templates/environments/ssl/tls-endpoints-public-ip.yaml'
   fi
   
   ssl_opts+=" -e $endpoints_file"
@@ -916,14 +921,10 @@ resource_registry:
   OS::TripleO::Controller::ControlPlanePort: ctlplane-port.yaml
 EOF
 
-  if [[ "$FREE_IPA" == 'true' ]] ; then
-    ssl_opts+=" -e tripleo-heat-templates/environments/services/haproxy-public-tls-certmonger.yaml"
-  else
   cat <<EOF >> enable-tls.yaml
   OS::TripleO::NodeTLSData: tripleo-heat-templates/puppet/extraconfig/tls/tls-cert-inject.yaml
   OS::TripleO::NodeTLSCAData: tripleo-heat-templates/puppet/extraconfig/tls/ca-inject.yaml
 EOF
-  fi
 
   cat <<EOF >> enable-tls.yaml
 parameter_defaults:
@@ -965,12 +966,10 @@ EOF
     else
       # queens
       ssl_opts+=" -e tripleo-heat-templates/environments/ssl/enable-internal-tls.yaml"
-      if [[ "$FREE_IPA" != 'true' ]] ; then
-        cat <<EOF >> enable-tls.yaml
+      cat <<EOF >> enable-tls.yaml
   CertmongerCA: 'local'
   CertmongerVncCA: 'local'
 EOF
-      fi
     fi
   fi
 
