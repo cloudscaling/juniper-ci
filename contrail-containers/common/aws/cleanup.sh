@@ -31,7 +31,7 @@ aws ${AWS_FLAGS} ec2 delete-subnet --subnet-id $subnet_id
 [[ $? == 0 ]] || errors="1"
 sleep 2
 
-for ((i=1; i<NET_COUNT; ++i)); do
+for ((i=1; i<5; ++i)); do
   var="subnet_id_$i"
   val=${!val}
   if [[ -n "$val" ]]; then
