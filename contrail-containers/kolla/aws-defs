@@ -1,3 +1,4 @@
+export NET_COUNT=1
 if [[ "$HA" != 'aio' ]] ; then
   echo "ERROR: Only AIO deployment is supported"
   exit 1

@@ -1,3 +1,4 @@
+export NET_COUNT=3
 export BUILD_NODE_TYPE=m4.large
 
 if [[ "$HA" == 'ha' ]]; then

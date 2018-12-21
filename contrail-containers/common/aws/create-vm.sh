@@ -59,12 +59,18 @@ az=$(aws ${AWS_FLAGS} ec2 describe-subnets --subnet-id $subnet_id --query 'Subne
 echo "INFO: Availability zone for current deployment: $az"
 echo "az=$az" >> $ENV_FILE
 sleep 2
-cmd="aws ${AWS_FLAGS} ec2 create-subnet --vpc-id $vpc_id --cidr-block $VM_CIDR_EXT --availability-zone $az"
-subnet_ext_id=$(get_value_from_json "$cmd" ".Subnet.SubnetId")
-echo "INFO: SUBNET_EXT_ID: $subnet_ext_id"
-echo "subnet_ext_id=$subnet_ext_id" >> $ENV_FILE
-sleep 2
 
+declare -a subnet_ids
+for ((i=1; i<NET_COUNT; ++i)); do
+  cidr_name="${VM_CIDR}_${i}"
+  cmd="aws ${AWS_FLAGS} ec2 create-subnet --vpc-id $vpc_id --cidr-block ${!cidr_name} --availability-zone $az"
+  subnet_id_next=$(get_value_from_json "$cmd" ".Subnet.SubnetId")
+  echo "INFO: SUBNET_ID_$i: $subnet_id_next"
+  echo "subnet_id_$i=$subnet_id_next" >> $ENV_FILE
+  subnet_ids=( ${subnet_ids[@]} $subnet_id_next )
+done
+
+sleep 2
 cmd="aws ${AWS_FLAGS} ec2 create-internet-gateway"
 igw_id=$(get_value_from_json "$cmd" ".InternetGateway.InternetGatewayId")
 echo "INFO: IGW_ID: $igw_id"
@@ -129,12 +135,15 @@ function run_instance() {
   done
   scp -i $WORKSPACE/kp $SSH_OPTS $WORKSPACE/kp $SSH_USER@$public_ip:kp
 
-  if [[ "$cloud_vm" == 'true' ]]; then
-    echo "INFO: Configure additional interface for cloud VM"
-    eni_id=`aws ${AWS_FLAGS} ec2 create-network-interface --subnet-id $subnet_ext_id --query 'NetworkInterface.NetworkInterfaceId' --output text`
-    eni_attach_id=`aws ${AWS_FLAGS} ec2 attach-network-interface --network-interface-id $eni_id --instance-id $instance_id --device-index 1 --query 'AttachmentId' --output text`
-    aws ${AWS_FLAGS} ec2 modify-network-interface-attribute --network-interface-id $eni_id --attachment AttachmentId=$eni_attach_id,DeleteOnTermination=true
-    echo "INFO: additional interface $eni_id is attached: $eni_attach_id"
+  if [[ "$cloud_vm" == 'true' ]] && ((NET_COUNT > 1)) ; then
+    echo "INFO: Configure additional interfaces for cloud VM"
+    for ((i=1; i<NET_COUNT; ++i)); do
+      sid=${subnet_ids[i-1]}
+      eni_id=`aws ${AWS_FLAGS} ec2 create-network-interface --subnet-id $sid --query 'NetworkInterface.NetworkInterfaceId' --output text`
+      eni_attach_id=`aws ${AWS_FLAGS} ec2 attach-network-interface --network-interface-id $eni_id --instance-id $instance_id --device-index 1 --query 'AttachmentId' --output text`
+      aws ${AWS_FLAGS} ec2 modify-network-interface-attribute --network-interface-id $eni_id --attachment AttachmentId=$eni_attach_id,DeleteOnTermination=true
+      echo "INFO: additional interface $eni_id is attached: $eni_attach_id"
+    done
   fi
 
   if [[ "$ENVIRONMENT_OS" == 'centos' && $cloud_vm == 'true' ]]; then
@@ -157,7 +166,10 @@ function run_instance() {
   fi
 
   sleep 20
-  create_iface $IF2 $ssh
+  for ((i=1; i<NET_COUNT; ++i)); do
+    var="IF$((i+1))"
+    create_iface ${!var} $ssh
+  done
   $ssh "$IFCONFIG_PATH/ifconfig" 2>/dev/null | grep -A 1 "^[a-z].*" | grep -v "\-\-"
 
   echo "INFO: Update packages on machine and install additional packages $(date)"
@@ -189,12 +201,36 @@ ips=( ${ips_cont[@]} ${ips_comp[@]} )
 master_ip=${ips_cont[0]}
 
 cat <<EOF >>$ENV_FILE
+ssh_key_file=$WORKSPACE/kp
 build_ip=$build_ip
 master_ip=$master_ip
 nodes_ips="${ips[@]}"
 nodes_cont_ips="${ips_cont[@]}"
 nodes_comp_ips="${ips_comp[@]}"
 EOF
+
+for ((net=1; net<NET_COUNT; ++net)) ; do
+  ips=( )
+  cont_ips=( )
+  comp_ips=( )
+  for ip in ${ips_cont[@]} ; do
+    var="IF$((i+1))"
+    ip=`ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_USER@$ip ip addr show dev ${!var} 2>/dev/null | awk '/inet/{print $2}' | cut -d '/' -f 1`
+    ips=( ${ips[@]} $ip )
+    cont_ips=( ${cont_ips[@]} $ip )
+  done
+  for ip in ${ips_comp[@]} ; do
+    var="IF$((i+1))"
+    ip=`ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_USER@$ip ip addr show dev ${!var} 2>/dev/null | awk '/inet/{print $2}' | cut -d '/' -f 1`
+    ips=( ${ips[@]} $ip )
+    comp_ips=( ${comp_ips[@]} $ip )
+  done
+  cat <<EOF >>$ENV_FILE
+nodes_ips_$i="${ips[@]}"
+nodes_cont_ips_$i="${ips_cont[@]}"
+nodes_comp_ips_$i="${ips_comp[@]}"
+EOF
+done
 
 cat $ENV_FILE
 

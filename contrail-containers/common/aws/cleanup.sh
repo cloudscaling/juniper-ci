@@ -36,9 +36,17 @@ aws ${AWS_FLAGS} ec2 delete-internet-gateway --internet-gateway-id $igw_id
 aws ${AWS_FLAGS} ec2 delete-subnet --subnet-id $subnet_id
 [[ $? == 0 ]] || errors="1"
 sleep 2
-aws ${AWS_FLAGS} ec2 delete-subnet --subnet-id $subnet_ext_id
-[[ $? == 0 ]] || errors="1"
-sleep 2
+
+for ((i=1; i<NET_COUNT; ++i)); do
+  var="subnet_id_$i"
+  val=${!val}
+  if [[ -n "$val" ]]; then
+    aws ${AWS_FLAGS} ec2 delete-subnet --subnet-id $val
+    [[ $? == 0 ]] || errors="1"
+    sleep 2
+  fi
+done
+
 aws ${AWS_FLAGS} ec2 delete-vpc --vpc-id $vpc_id
 [[ $? == 0 ]] || errors="1"
 
