@@ -56,12 +56,12 @@ echo "az=$az" >> $ENV_FILE
 sleep 2
 
 declare -a subnet_ids
-for ((i=1; i<NET_COUNT; ++i)); do
-  cidr_name="VM_CIDR_${i}"
+for ((net=1; net<NET_COUNT; ++net)); do
+  cidr_name="VM_CIDR_${net}"
   cmd="aws ${AWS_FLAGS} ec2 create-subnet --vpc-id $vpc_id --cidr-block ${!cidr_name} --availability-zone $az"
   subnet_id_next=$(get_value_from_json "$cmd" ".Subnet.SubnetId")
-  echo "INFO: SUBNET_ID_$i: $subnet_id_next"
-  echo "subnet_id_$i=$subnet_id_next" >> $ENV_FILE
+  echo "INFO: SUBNET_ID_$net: $subnet_id_next"
+  echo "subnet_id_$net=$subnet_id_next" >> $ENV_FILE
   subnet_ids=( ${subnet_ids[@]} $subnet_id_next )
 done
 
@@ -161,8 +161,9 @@ function run_instance() {
   fi
 
   sleep 20
-  for ((i=1; i<NET_COUNT; ++i)); do
-    var="IF$((i+1))"
+  local net
+  for ((net=1; net<NET_COUNT; ++net)); do
+    var="IF$((net+1))"
     create_iface ${!var} $ssh
   done
   $ssh "$IFCONFIG_PATH/ifconfig" 2>/dev/null | grep -A 1 "^[a-z].*" | grep -v "\-\-"
