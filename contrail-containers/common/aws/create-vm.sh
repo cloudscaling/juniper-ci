@@ -170,7 +170,7 @@ function run_instance() {
     $ssh 'DEBIAN_FRONTEND=noninteractive sudo -E apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade' &>>$log_dir/$instance_id-apt.log
     $ssh "sudo apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 lsof python-pip python-dev gcc" &>>$log_dir/$instance_id-apt.log
   fi
-  $ssh "sudo pip install pip --upgrade && sudo hash -r && sudo pip install setuptools requests" &>>$log_dir/$instance_id-pip.log
+  $ssh "sudo pip install pip --upgrade && sudo pip install setuptools requests" &>>$log_dir/$instance_id-pip.log
 }
 
 if [[ "$CONTAINER_REGISTRY" == 'build' || "$CONTAINER_REGISTRY" == 'fullbuild' ]]; then
