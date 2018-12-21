@@ -46,7 +46,7 @@ aws ${AWS_FLAGS} ec2 wait vpc-available --vpc-id $vpc_id
 aws ${AWS_FLAGS} ec2 modify-vpc-attribute --vpc-id $vpc_id --enable-dns-hostnames
 aws ${AWS_FLAGS} ec2 modify-vpc-attribute --vpc-id $vpc_id --enable-dns-support
 
-cmd="aws ${AWS_FLAGS} ec2 create-subnet --vpc-id $vpc_id --cidr-block $VM_CIDR"
+cmd="aws ${AWS_FLAGS} ec2 create-subnet --vpc-id $vpc_id --cidr-block ${VM_NET_PREFIX}.0/24"
 subnet_id=$(get_value_from_json "$cmd" ".Subnet.SubnetId")
 echo "INFO: SUBNET_ID: $subnet_id"
 echo "subnet_id=$subnet_id" >> $ENV_FILE
@@ -57,8 +57,8 @@ sleep 2
 
 declare -a subnet_ids
 for ((net=1; net<NET_COUNT; ++net)); do
-  cidr_name="VM_CIDR_${net}"
-  cmd="aws ${AWS_FLAGS} ec2 create-subnet --vpc-id $vpc_id --cidr-block ${!cidr_name} --availability-zone $az"
+  cidr_name="VM_NET_PREFIX_${net}"
+  cmd="aws ${AWS_FLAGS} ec2 create-subnet --vpc-id $vpc_id --cidr-block ${!cidr_name}.0/24 --availability-zone $az"
   subnet_id_next=$(get_value_from_json "$cmd" ".Subnet.SubnetId")
   echo "INFO: SUBNET_ID_$net: $subnet_id_next"
   echo "subnet_id_$net=$subnet_id_next" >> $ENV_FILE
@@ -203,28 +203,35 @@ master_ip=$master_ip
 nodes_ips="${ips[@]}"
 nodes_cont_ips="${ips_cont[@]}"
 nodes_comp_ips="${ips_comp[@]}"
+nodes_net=${VM_NET_PREFIX}.0/24
+nodes_gw=${VM_NET_PREFIX}.1
+nodes_vip=${VM_NET_PREFIX}.254
 EOF
 
 for ((net=1; net<NET_COUNT; ++net)) ; do
   ips=( )
   cont_ips=( )
   comp_ips=( )
+  var="IF$((net+1))"
+  iface=${!var}
   for ip in ${ips_cont[@]} ; do
-    var="IF${net}"
-    ip=`ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_USER@$ip ip addr show dev ${!var} 2>/dev/null | awk '/inet /{print $2}' | cut -d '/' -f 1`
+    ip=`ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_USER@$ip ip addr show dev $iface 2>/dev/null | awk '/inet /{print $2}' | cut -d '/' -f 1`
     ips=( ${ips[@]} $ip )
     cont_ips=( ${cont_ips[@]} $ip )
   done
   for ip in ${ips_comp[@]} ; do
-    var="IF${net}"
-    ip=`ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_USER@$ip ip addr show dev ${!var} 2>/dev/null | awk '/inet /{print $2}' | cut -d '/' -f 1`
+    ip=`ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_USER@$ip ip addr show dev $iface 2>/dev/null | awk '/inet /{print $2}' | cut -d '/' -f 1`
     ips=( ${ips[@]} $ip )
     comp_ips=( ${comp_ips[@]} $ip )
   done
+  prefix_name="VM_NET_PREFIX_${net}"
   cat <<EOF >>$ENV_FILE
 nodes_ips_${net}="${ips[@]}"
 nodes_cont_ips_${net}="${cont_ips[@]}"
 nodes_comp_ips_${net}="${comp_ips[@]}"
+nodes_net_${net}=${!prefix_name}.0/24
+nodes_gw_${net}=${!prefix_name}.1
+nodes_vip_${net}=${!prefix_name}.254
 EOF
 done
 

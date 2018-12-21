@@ -323,6 +323,10 @@ for ip in ${ips[@]} ; do
   fi
 done
 
+echo "nodes_net=10.$NET_BASE_PREFIX.$JOB_RND.0/24" >> $ENV_FILE
+echo "nodes_gw=10.$NET_BASE_PREFIX.$JOB_RND.1" >> $ENV_FILE
+echo "nodes_vip=10.$NET_BASE_PREFIX.$JOB_RND.254" >> $ENV_FILE
+
 # update env file with IP-s from other interfaces
 for ((j=1; j<NET_COUNT; ++j)); do
   declare -a ips ips_cont ips_comp ; ips=() ; ips_cont=() ; ips_comp=()
@@ -353,6 +357,9 @@ EOF
 nodes_ips_${j}="${ips[@]}"
 nodes_cont_ips_${j}="${ips_cont[@]}"
 nodes_comp_ips_${j}="${ips_comp[@]}"
+nodes_net_${j}=10.$((NET_BASE_PREFIX+j)).$JOB_RND.0/24
+nodes_gw_${j}=10.$((NET_BASE_PREFIX+j)).$JOB_RND.1
+nodes_vip_${j}=10.$((NET_BASE_PREFIX+j)).$JOB_RND.254
 EOF
 done
 

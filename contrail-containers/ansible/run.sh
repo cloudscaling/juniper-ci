@@ -61,8 +61,8 @@ if [[ "$HA" == 'ha' ]] ; then
   IP1_CONT_03=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 3` ; IP1_CONT_03=`get_address $IP1_CONT_03`
   IP2_CONT_03=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 3` ; IP2_CONT_03=`get_address $IP2_CONT_03`
 
-  I_VIP=10.$NET_BASE_PREFIX.$JOB_RND.254
-  E_VIP=10.$((NET_BASE_PREFIX+1)).$JOB_RND.254
+  I_VIP="$nodes_vip"
+  E_VIP="$nodes_vip_1"
   CONTROLLER_NODES="${IP1_CONT_01},${IP1_CONT_02},${IP1_CONT_03}"
   CONTROL_NODES="${IP2_CONT_01},${IP2_CONT_02},${IP2_CONT_03}"
 else
@@ -70,7 +70,7 @@ else
   CONTROL_NODES="${IP2_CONT_01}"
 fi
 
-VROUTER_GW=10.$((NET_BASE_PREFIX+2)).$JOB_RND.1
+VROUTER_GW="$nodes_gw_2"
 
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
 envsubst <$my_dir/instances.yaml.${HA}.tmpl >$config

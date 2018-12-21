@@ -32,14 +32,14 @@ export TARGET_SITE="demo"
 
 if [[ ${VROUTER_ON_DEFAULT_IFACE:-'True'} == 'False' ]]; then
   export NODE_NET_IFACE="ens3"
-  export NODE_NET_IFACE_GATEWAY_IP="10.$NET_BASE_PREFIX.$JOB_RND.1"
-  export NODE_SUBNETS="10.$NET_BASE_PREFIX.$JOB_RND.0/24"
-  export DNS_SERVER="10.$NET_BASE_PREFIX.$JOB_RND.1"
+  export NODE_NET_IFACE_GATEWAY_IP="$nodes_gw"
+  export NODE_SUBNETS="$nodes_net"
+  export DNS_SERVER="$nodes_gw"
 else
   export NODE_NET_IFACE="ens4"
-  export NODE_NET_IFACE_GATEWAY_IP="10.$((NET_BASE_PREFIX+1)).$JOB_RND.1"
-  export NODE_SUBNETS="10.$((NET_BASE_PREFIX+1)).$JOB_RND.0/24"
-  export DNS_SERVER="10.$((NET_BASE_PREFIX+1)).$JOB_RND.1"
+  export NODE_NET_IFACE_GATEWAY_IP="$nodes_gw_1"
+  export NODE_SUBNETS="$nodes_net_1"
+  export DNS_SERVER="$nodes_gw_1"
 fi
 
 LOCAL_IP=`ip addr show ${NODE_NET_IFACE} | awk '/inet /{print $2}' | cut -d '/' -f 1`
