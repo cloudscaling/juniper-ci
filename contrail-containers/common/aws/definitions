@@ -1,3 +1,6 @@
+# id_rsa from master machine must be imported into jenkins
+KEY_NAME=jenkins
+
 VPC_CIDR="192.168.0.0/16"
 VM_NET_PREFIX="192.168.130"
 VM_NET_PREFIX_1="192.168.131"

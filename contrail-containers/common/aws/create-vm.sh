@@ -91,14 +91,6 @@ for port in 8180 8143 80 6080 ; do
   aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port $port
 done
 
-key_name="testkey-$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 8)"
-echo "key_name=$key_name" >> $ENV_FILE
-key_result=$(aws ${AWS_FLAGS} ec2 create-key-pair --key-name $key_name)
-
-kp=$(get_value_from_json "echo $key_result" ".KeyMaterial")
-echo $kp | sed 's/\\n/\'$'\n''/g' > "$WORKSPACE/kp"
-chmod 600 kp
-
 function run_instance() {
   local type=$1
   local env_var_suffix=$2
@@ -106,7 +98,7 @@ function run_instance() {
 
   # it means that additional disks must be created for VM
   local bdm='{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}}'
-  local cmd=$(aws ${AWS_FLAGS} ec2 run-instances --image-id $IMAGE_ID --key-name $key_name --instance-type $type --subnet-id $subnet_id --associate-public-ip-address --block-device-mappings "[${bdm}]")
+  local cmd=$(aws ${AWS_FLAGS} ec2 run-instances --image-id $IMAGE_ID --key-name $KEY_NAME --instance-type $type --subnet-id $subnet_id --associate-public-ip-address --block-device-mappings "[${bdm}]")
   local instance_id=$(get_value_from_json "echo $cmd" ".Instances[0].InstanceId")
   echo "INFO: $env_var_suffix INSTANCE_ID: $instance_id"
   echo "instance_id_${env_var_suffix}=$instance_id" >> $ENV_FILE
@@ -122,13 +114,13 @@ function run_instance() {
   # inner communication...
   aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr $public_ip/32 --protocol tcp --port 0-65535
 
-  local ssh="ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_USER@$public_ip"
+  local ssh="ssh -i $HOME/.ssh/id_rsa $SSH_OPTS $SSH_USER@$public_ip"
   echo "INFO: waiting for instance SSH"
   while ! $ssh uname -a 2>/dev/null ; do
     echo "WARNING: Machine isn't accessible yet"
     sleep 2
   done
-  scp -i $WORKSPACE/kp $SSH_OPTS $WORKSPACE/kp $SSH_USER@$public_ip:kp
+  scp -i $HOME/.ssh/id_rsa $SSH_OPTS $SSH_USER@$public_ip:kp
 
   if [[ "$cloud_vm" == 'true' ]] && ((NET_COUNT > 1)) ; then
     echo "INFO: Configure additional interfaces for cloud VM"
@@ -197,7 +189,7 @@ ips=( ${ips_cont[@]} ${ips_comp[@]} )
 master_ip=${ips_cont[0]}
 
 cat <<EOF >>$ENV_FILE
-ssh_key_file=$WORKSPACE/kp
+ssh_key_file=$HOME/.ssh/id_rsa
 build_ip=$build_ip
 master_ip=$master_ip
 nodes_ips="${ips[@]}"
@@ -215,12 +207,12 @@ for ((net=1; net<NET_COUNT; ++net)) ; do
   var="IF$((net+1))"
   iface=${!var}
   for ip in ${ips_cont[@]} ; do
-    ip=`ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_USER@$ip ip addr show dev $iface 2>/dev/null | awk '/inet /{print $2}' | cut -d '/' -f 1`
+    ip=`ssh -i $HOME/.ssh/id_rsa $SSH_OPTS $SSH_USER@$ip ip addr show dev $iface 2>/dev/null | awk '/inet /{print $2}' | cut -d '/' -f 1`
     ips=( ${ips[@]} $ip )
     cont_ips=( ${cont_ips[@]} $ip )
   done
   for ip in ${ips_comp[@]} ; do
-    ip=`ssh -i $WORKSPACE/kp $SSH_OPTS $SSH_USER@$ip ip addr show dev $iface 2>/dev/null | awk '/inet /{print $2}' | cut -d '/' -f 1`
+    ip=`ssh -i $HOME/.ssh/id_rsa $SSH_OPTS $SSH_USER@$ip ip addr show dev $iface 2>/dev/null | awk '/inet /{print $2}' | cut -d '/' -f 1`
     ips=( ${ips[@]} $ip )
     comp_ips=( ${comp_ips[@]} $ip )
   done

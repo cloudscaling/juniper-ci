@@ -1,6 +1,6 @@
 ENV_FILE="$WORKSPACE/cloudrc"
 SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
-SCP="scp -i $WORKSPACE/kp $SSH_OPTS"
-SSH_CMD="ssh -i $WORKSPACE/kp $SSH_OPTS"
+SCP="scp -i $HOME/.ssh/id_rsa $SSH_OPTS"
+SSH_CMD="ssh -i $HOME/.ssh/id_rsa $SSH_OPTS"
 
 source $ENV_FILE

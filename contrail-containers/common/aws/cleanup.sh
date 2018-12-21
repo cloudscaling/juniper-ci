@@ -22,12 +22,6 @@ for iid in `grep 'instance_id_' $ENV_FILE | cut -d '=' -f 2` ; do
   aws ${AWS_FLAGS} ec2 wait instance-terminated --instance-ids $iid
 done
 
-if [[ -f "$WORKSPACE/kp" ]] ; then
-  rm "$WORKSPACE/kp"
-  aws ${AWS_FLAGS} ec2 delete-key-pair --key-name $key_name
-  [[ $? == 0 ]] || errors="1"
-fi
-
 aws ${AWS_FLAGS} ec2 detach-internet-gateway --internet-gateway-id $igw_id --vpc-id $vpc_id
 [[ $? == 0 ]] || errors="1"
 aws ${AWS_FLAGS} ec2 delete-internet-gateway --internet-gateway-id $igw_id

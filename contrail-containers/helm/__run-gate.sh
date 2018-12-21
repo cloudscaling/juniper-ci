@@ -74,7 +74,7 @@ all:
   children:
 EOF
 
-key_file="$my_dir/kp"
+key_file="$HOME/.ssh/id_rsa"
 ips=($nodes_ips)
 ip="${ips[0]}"
 name=`echo node_$ip | tr '.' '_'`
