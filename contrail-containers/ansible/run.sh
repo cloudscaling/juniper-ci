@@ -33,8 +33,6 @@ function catch_errors() {
   exit $exit_code
 }
 
-set -x
-
 if [[ "$CONTAINER_REGISTRY" == 'build' || "$CONTAINER_REGISTRY" == 'fullbuild' ]]; then
   build_containers
   CONTAINER_REGISTRY="$build_ip:5000"
@@ -79,8 +77,6 @@ envsubst <$my_dir/instances.yaml.${HA}.tmpl >$config
 echo "INFO: cloud config ------------------------- $(date)"
 cat $config
 cp $config $WORKSPACE/logs/
-
-trap
 
 prepare_image centos-soft
 
