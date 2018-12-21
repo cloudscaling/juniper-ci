@@ -162,13 +162,14 @@ function run_instance() {
   echo "INFO: Update packages on machine and install additional packages $(date)"
   if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
     $ssh "sudo yum install -y epel-release" &>>yum.log
-    $ssh "sudo yum install -y mc git wget iptables iproute libxml2-utils python2.7" &>>yum.log
+    $ssh "sudo yum install -y mc git wget iptables iproute libxml2-utils python2.7 lsof python-pip python-devel gcc" &>>yum.log
     $ssh "sudo yum remove -y python-requests PyYAML" &>>yum.log
   elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
     $ssh "sudo apt-get -y update" &>>$HOME/apt.log
     $ssh 'DEBIAN_FRONTEND=noninteractive sudo -E apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade' &>>$HOME/apt.log
-    $ssh "sudo apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7" &>>$HOME/apt.log
+    $ssh "sudo apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 lsof python-pip python-dev gcc" &>>$HOME/apt.log
   fi
+  $ssh "pip install pip --upgrade && hash -r && pip install setuptools requests" &>>$HOME/pip.log
 }
 
 if [[ "$CONTAINER_REGISTRY" == 'build' || "$CONTAINER_REGISTRY" == 'fullbuild' ]]; then
