@@ -89,7 +89,7 @@ aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cid
 # docker port
 aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port 5000
 # contrail and openstack ports
-for port in 8180 8143 80 6080 35357 ; do
+for port in 8180 8143 80 6080 8774 8776 8788 5000 9696 8080 9292 35357 ; do
   aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port $port
 done
 
