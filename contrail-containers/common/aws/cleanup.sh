@@ -31,15 +31,11 @@ aws ${AWS_FLAGS} ec2 delete-subnet --subnet-id $subnet_id
 [[ $? == 0 ]] || errors="1"
 sleep 2
 
-for ((i=1; i<5; ++i)); do
-  var="subnet_id_$i"
-  val=${!val}
-  if [[ -n "$val" ]]; then
-    aws ${AWS_FLAGS} ec2 delete-subnet --subnet-id $val
-    [[ $? == 0 ]] || errors="1"
-    sleep 2
-  fi
+for iid in `grep 'subnet_id_' $ENV_FILE | cut -d '=' -f 2` ; do
+  aws ${AWS_FLAGS} ec2 delete-subnet --subnet-id $iid
+  [[ $? == 0 ]] || errors="1"
 done
+sleep 2
 
 aws ${AWS_FLAGS} ec2 delete-vpc --vpc-id $vpc_id
 [[ $? == 0 ]] || errors="1"

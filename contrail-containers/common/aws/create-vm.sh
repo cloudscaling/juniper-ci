@@ -33,6 +33,7 @@ if [ -f $ENV_FILE ]; then
 fi
 
 touch $ENV_FILE
+echo "ENV_BUILD_ID=${BUILD_ID}" > $ENV_FILE
 echo "AWS_FLAGS='${AWS_FLAGS}'" >> $ENV_FILE
 echo "SSH_USER='${SSH_USER}'" >> $ENV_FILE
 echo "INFO: -------------------------------------------------------------------------- $(date)"
