@@ -88,8 +88,8 @@ echo "INFO: Group ID: $group_id"
 aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port 22
 # docker port
 aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port 5000
-# contrail ports
-for port in 8180 8143 80 6080 ; do
+# contrail and openstack ports
+for port in 8180 8143 80 6080 35357 ; do
   aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr 0.0.0.0/0 --protocol tcp --port $port
 done
 
