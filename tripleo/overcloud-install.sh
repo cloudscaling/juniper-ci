@@ -770,7 +770,7 @@ EOF
 fi
 
 ssl_opts=''
-if if [[ "$TLS" != 'off' && "$FREE_IPA" == 'true' ]] ; then
+if [[ "$TLS" != 'off' && "$FREE_IPA" == 'true' ]] ; then
   ssl_opts+=' -e tripleo-heat-templates/environments/contrail/contrail-tls.yaml'
 
   if [[  "$TLS" == 'all' ]] ; then
