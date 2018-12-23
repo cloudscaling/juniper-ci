@@ -95,6 +95,7 @@ cat <<EOF > /etc/kolla/config/nova/nova-compute.conf
 virt_type = qemu
 cpu_mode = none
 EOF
+EOM
   done
 fi
 
