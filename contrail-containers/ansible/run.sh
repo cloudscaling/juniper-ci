@@ -84,21 +84,6 @@ if echo "$PATCHSET_LIST" | grep -q "/contrail-kolla-ansible " ; then
   patchset=`echo "$PATCHSET_LIST" | grep "/contrail-kolla-ansible "`
 fi
 
-# kolla requires to create nova-compute.conf for non kvm virt_driver
-if [[ "$HOST" == 'aws' ]] ; then
-  for ip in ${ips_comp[@]} ; do
-    cat <<EOM | ssh -i $HOME/.ssh/id_rsa $SSH_OPTS $SSH_USER@$ip
-sudo mkdir -p /etc/kolla/config/nova
-sudo chown -R \$USER /etc/kolla
-cat <<EOF > /etc/kolla/config/nova/nova-compute.conf
-[libvirt]
-virt_type = qemu
-cpu_mode = none
-EOF
-EOM
-  done
-fi
-
 mkdir -p $WORKSPACE/logs/deployer
 volumes="-v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer"
 volumes+=" -v $HOME/.ssh:/.ssh"
