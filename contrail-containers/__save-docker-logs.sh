@@ -14,7 +14,7 @@ fi
 
 # save contrail files
 mkdir -p logs
-sudo chown -R $USER logs
+chown -R $USER logs
 
 if [ -d /etc/contrail ]; then
   mkdir -p logs/contrail_etc
@@ -50,23 +50,23 @@ fi
 
 mkdir -p logs/contrail
 pushd logs/contrail
-for cnt in `sudo docker ps | grep contrail | grep -v pause | awk '{print $1}'` ; do
-  cnt_name=`sudo docker inspect $cnt | python -c "import json, sys; data=json.load(sys.stdin); print data[0]['Name']" | cut -d '_' -f $CNT_NAME_PATTERN | sed "s|/||g"`
+for cnt in `docker ps | grep contrail | grep -v pause | awk '{print $1}'` ; do
+  cnt_name=`docker inspect $cnt | python -c "import json, sys; data=json.load(sys.stdin); print data[0]['Name']" | cut -d '_' -f $CNT_NAME_PATTERN | sed "s|/||g"`
   echo "Collecting files from $cnt_name"
   mkdir -p "$cnt_name"
-  sudo docker cp $cnt:/etc/contrail $cnt_name/
-  sudo chown -R $USER $cnt_name
+  docker cp $cnt:/etc/contrail $cnt_name/
+  chown -R $USER $cnt_name
   mv $cnt_name/contrail $cnt_name/etc
 done
-for cnt in `sudo docker ps -a | grep contrail | grep -v pause | awk '{print $1}'` ; do
-  cnt_name=`sudo docker inspect $cnt | python -c "import json, sys; data=json.load(sys.stdin); print data[0]['Name']" | cut -d '_' -f $CNT_NAME_PATTERN | sed "s|/||g"`
+for cnt in `docker ps -a | grep contrail | grep -v pause | awk '{print $1}'` ; do
+  cnt_name=`docker inspect $cnt | python -c "import json, sys; data=json.load(sys.stdin); print data[0]['Name']" | cut -d '_' -f $CNT_NAME_PATTERN | sed "s|/||g"`
   mkdir -p "$cnt_name-$cnt"
-  sudo docker inspect $cnt > $cnt_name-$cnt/inspect.log
-  sudo docker logs $cnt &> $cnt_name-$cnt/docker.log
+  docker inspect $cnt > $cnt_name-$cnt/inspect.log
+  docker logs $cnt &> $cnt_name-$cnt/docker.log
 done
 popd
 
-sudo /usr/bin/contrail-status |& tee logs/contrail/contrail-status.log
+/usr/bin/contrail-status |& tee logs/contrail/contrail-status.log
 url=$(hostname -f)
 function save_introspect_info() {
   if ! lsof -i ":$2" &>/dev/null ; then

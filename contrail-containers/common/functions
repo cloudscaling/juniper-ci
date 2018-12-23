@@ -7,16 +7,16 @@ function save_logs() {
   local cnt_name_pattern="$1"
   source "$ccfmy_dir/${HOST}/ssh-defs"
   set +e
-  local ssl_opts=''
+  local save_opts=''
   if [[ -n "$SSL_ENABLE" ]] ; then
-    ssl_opts="SSL_ENABLE=$SSL_ENABLE"
+    save_opts="SSL_ENABLE=$SSL_ENABLE"
   fi
   # save common docker logs
   local dest=''
   for dest in $nodes_ips ; do
     timeout -s 9 20s $SCP "$ccfmy_dir/../__save-docker-logs.sh" ${SSH_USER}@${dest}:save-docker-logs.sh
     if [[ $? == 0 ]] ; then
-      $SSH_CMD ${SSH_USER}@${dest} "CNT_NAME_PATTERN='$cnt_name_pattern' $ssl_opts ./save-docker-logs.sh"
+      $SSH_CMD ${SSH_USER}@${dest} "CNT_NAME_PATTERN='$cnt_name_pattern' $save_opts ; sudo ./save-docker-logs.sh"
     fi
   done
 
