@@ -8,11 +8,11 @@ SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerA
 ENV_FILE="$WORKSPACE/cloudrc"
 log_dir="$WORKSPACE/logs"
 
-trap 'catch_errors_cvm $LINENO' ERR EXIT RETURN
+trap 'catch_errors_cvm $LINENO' ERR EXIT
 function catch_errors_cvm() {
   local exit_code=$?
   echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
-  trap - ERR EXIT RETURN
+  trap - ERR EXIT
   exit $exit_code
 }
 
@@ -231,6 +231,6 @@ done
 
 cat $ENV_FILE
 
-trap - ERR EXIT RETURN
+trap - ERR EXIT
 
 echo "INFO: Environment ready"

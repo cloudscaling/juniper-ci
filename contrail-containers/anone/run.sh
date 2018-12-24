@@ -21,7 +21,7 @@ source $my_dir/../common/check-functions
 $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
 
-trap 'catch_errors $LINENO' ERR RETURN
+trap 'catch_errors $LINENO' ERR
 function catch_errors() {
   local exit_code=$?
   echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
@@ -70,7 +70,7 @@ sleep 300
 check_introspection_cloud
 
 # save logs and exit
-trap - ERR RETURN
+trap - ERR
 save_logs '1-'
 if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
   $my_dir/../common/${HOST}/cleanup.sh

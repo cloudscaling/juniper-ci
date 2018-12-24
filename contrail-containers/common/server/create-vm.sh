@@ -35,10 +35,10 @@ export ENV_FILE="$WORKSPACE/cloudrc"
 source "$my_dir/definitions"
 source "$my_dir/${ENVIRONMENT_OS}"
 
-trap 'catch_errors_cvmb $LINENO' ERR RETURN
+trap 'catch_errors_cvmb $LINENO' ERR
 function catch_errors_cvmb() {
   local exit_code=$?
-  trap - ERR RETURN
+  trap - ERR
   echo "Line: $1  Error=$exit_code"
   echo "Command: '$(eval echo \"$BASH_COMMAND\")'"
   exit $exit_code
@@ -365,4 +365,4 @@ done
 echo "INFO: environment file:"
 cat $ENV_FILE
 
-trap - ERR RETURN
+trap - ERR

@@ -5,6 +5,7 @@ ccfmy_dir="$(dirname $ccfmy_file)"
 
 function save_logs() {
   local cnt_name_pattern="$1"
+  source "$ccfmy_dir/${HOST}/ssh-defs"
   set +e
   local save_opts=''
   if [[ -n "$SSL_ENABLE" ]] ; then
