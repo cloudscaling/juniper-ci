@@ -62,11 +62,15 @@ export HOSTIP=$LOCAL_IP
 # x/32 will work for CEPH in a single node deploy.
 export HOSTCIDR=$LOCAL_IP/32
 
+COMMON_CONFIG_FILE="../../deployment_files/site/$TARGET_SITE/networks/common-addresses.yaml"
 if grep -q "10.96.0.10" "/etc/resolv.conf"; then
   echo "INFO: Not changing DNS servers, /etc/resolv.conf already updated."
 else
-  DNS_CONFIG_FILE="../../deployment_files/site/$TARGET_SITE/networks/common-addresses.yaml"
-  sed -i "s/8.8.4.4/$DNS_SERVER/" $DNS_CONFIG_FILE
+  sed -i "s/8.8.4.4/$DNS_SERVER/" $COMMON_CONFIG_FILE
+fi
+domain=$(hostname -d)
+if [[ -n "$domain" ]] ; then
+  sed -i "s/cluster_domain: cluster.local/cluster_domain: $domain/" $COMMON_CONFIG_FILE
 fi
 
 export PEGLEG_IMAGE="quay.io/airshipit/pegleg:1ada48cc360ec52c7ab28b96c28a0c7df8bcee40"
