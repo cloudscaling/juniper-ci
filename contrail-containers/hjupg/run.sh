@@ -16,6 +16,7 @@ mkdir -p "$WORKSPACE/logs"
 # definition for job deployment
 source $my_dir/${HOST}-defs
 source $my_dir/../common/functions
+source $my_dir/../common/check-functions
 
 # it should fail if Juju deployment is not found
 source $my_dir/../../juju/bmc-contrail-R4/functions
@@ -84,31 +85,7 @@ timeout -s 9 120m $SSH_CMD $SSH_USER@$master_ip "$run_env ./run-gate.sh"
 # TODO: wait till cluster up and initialized
 sleep 30
 
-# Validate cluster's introspection ports
-for dest in $nodes_ips ; do
-  $SCP "$my_dir/../__check_introspection.sh" $SSH_USER@${dest}:./check_introspection.sh
-done
-source "$my_dir/../common/check-functions"
-res=0
-ips=($nodes_ips)
-dest_to_check="${SSH_USER}@${ips[0]}"
-for ip in ${ips[@]:1} ; do
-  dest_to_check="$dest_to_check,${SSH_USER}@$ip"
-done
-count=1
-limit=3
-while ! check_introspection "$dest_to_check" ; do
-  echo "INFO: check_introspection ${count}/${limit} failed"
-  if (( count == limit )) ; then
-    echo "ERROR: Cloud was not up during timeout"
-    res=1
-    break
-  fi
-  (( count+=1 ))
-  sleep 30
-done
-test $res == '0'
-
+check_introspection_cloud
 
 trap - ERR
 save_logs '2,3'

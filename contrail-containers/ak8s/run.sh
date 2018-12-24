@@ -16,6 +16,7 @@ mkdir -p "$WORKSPACE/logs"
 # definition for job deployment
 source $my_dir/${HOST}-defs
 source $my_dir/../common/functions
+source $my_dir/../common/check-functions
 
 $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
@@ -66,30 +67,7 @@ docker run -i --rm --entrypoint /bin/bash $volumes --network host centos-soft -c
 # TODO: wait till cluster up and initialized
 sleep 300
 
-# Validate cluster's introspection ports
-for dest in $nodes_ips ; do
-  $SCP "$my_dir/../__check_introspection.sh" $SSH_USER@${dest}:./check_introspection.sh
-done
-source "$my_dir/../common/check-functions"
-res=0
-ips=($nodes_ips)
-dest_to_check="${SSH_USER}@${ips[0]}"
-for ip in ${ips[@]:1} ; do
-  dest_to_check="$dest_to_check,${SSH_USER}@$ip"
-done
-count=1
-limit=3
-while ! check_introspection "$dest_to_check" ; do
-  echo "INFO: check_introspection ${count}/${limit} failed"
-  if (( count == limit )) ; then
-    echo "ERROR: Cloud was not up during timeout"
-    res=1
-    break
-  fi
-  (( count+=1 ))
-  sleep 30
-done
-test $res == '0'
+check_introspection_cloud
 
 function check_cluster() {
   cat <<EOM | ssh $SSH_OPTS root@${master_ip}

@@ -12,17 +12,36 @@ function check_rabbitmq_cluster() {
   return $err
 }
 
-function check_introspection() {
-  local dest=( $(echo $1 | sed 's/,/ /g') )
+function check_introspection_cloud() {
+  # Validate cluster's introspection ports
+  for dest in $nodes_ips ; do
+    $SCP "$my_dir/../__check_introspection.sh" $SSH_USER@${dest}:./check_introspection.sh
+  done
+  local res=0
+  local count=1
+  local limit=3
+  while ! check_introspection_nodes ; do
+    echo "INFO: check_introspection ${count}/${limit} failed"
+    if (( count == limit )) ; then
+      echo "ERROR: Cloud was not up during timeout"
+      res=1
+      break
+    fi
+    (( count+=1 ))
+    sleep 30
+  done
+  test $res == '0'
+}
+
+function check_introspection_nodes() {
   local err=0
-  local count=0
-  local ssl_opts=''
+  local save_opts=''
   if [[ -n "$SSL_ENABLE" ]] ; then
-    ssl_opts="SSL_ENABLE=$SSL_ENABLE"
+    save_opts="SSL_ENABLE=$SSL_ENABLE"
   fi
-  for d in ${dest[@]} ; do
-    if ! $SSH_CMD $d $ssl_opts ./check_introspection.sh ; then
-      echo "ERROR: check_introspection failed on dest=$d"
+  for dest in $nodes_ips ; do
+    if ! $SSH_CMD ${SSH_USER}@${dest} $save_opts ./check_introspection.sh ; then
+      echo "ERROR: check_introspection failed on dest=$dest"
       err=1
     fi
   done

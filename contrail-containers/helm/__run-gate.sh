@@ -227,7 +227,7 @@ helm install --name contrail-controller ${CHD_PATH}/contrail-controller --namesp
 helm install --name contrail-vrouter ${CHD_PATH}/contrail-vrouter --namespace=contrail --values=/tmp/contrail.yaml
 ${OSH_PATH}/tools/deployment/common/wait-for-pods.sh contrail
 
-# lets wait for services
+# let's wait for services
 sleep 60
 sudo contrail-status
 
