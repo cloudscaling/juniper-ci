@@ -208,14 +208,6 @@
           slavenode:
             - slave01
             - slave04
-#      - kolla-aws-centos:
-#          defaultha: aio
-#          slavenode:
-#            - master
-#      - kolla-aws-ubuntu16:
-#          defaultha: aio
-#          slavenode:
-#            - master
       - ajupg-server-ubuntu16:
           defaultha: nonha
           slavenode:
