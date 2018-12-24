@@ -21,7 +21,7 @@ source $my_dir/../common/check-functions
 $my_dir/../common/${HOST}/create-vm.sh
 source "$my_dir/../common/${HOST}/ssh-defs"
 
-trap 'catch_errors $LINENO' ERR
+trap 'catch_errors $LINENO' ERR RETURN
 function catch_errors() {
   local exit_code=$?
   echo "Line: $1  Error=$exit_code  Command: '$(eval echo $BASH_COMMAND)'"
@@ -106,6 +106,7 @@ check_introspection_cloud
 # validate openstack
 source $my_dir/../common/check-functions
 cd $WORKSPACE
+$SSH ${SSH_USER}@$master_ip "sudo chown -R \$USER /etc/kolla"
 $SCP ${SSH_USER}@$master_ip:/etc/kolla/kolla-toolbox/admin-openrc.sh $WORKSPACE/
 virtualenv $WORKSPACE/.venv
 source $WORKSPACE/.venv/bin/activate
@@ -122,7 +123,7 @@ fi
 deactivate
 
 # save logs and exit
-trap - ERR
+trap - ERR RETURN
 save_logs '1-'
 if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
   $my_dir/../common/${HOST}/cleanup.sh
