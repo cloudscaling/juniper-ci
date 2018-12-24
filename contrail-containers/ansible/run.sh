@@ -74,10 +74,8 @@ VROUTER_GW="$nodes_gw_2"
 
 if [[ "$HOST" == 'aws' ]]; then
   VIRT_TYPE=qemu
-  CPU_MODE=qemu
 else
   VIRT_TYPE=kvm
-  CPU_MODE=
 fi
 
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
