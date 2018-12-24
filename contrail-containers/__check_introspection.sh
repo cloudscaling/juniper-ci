@@ -38,7 +38,7 @@ function get_introspect_state() {
   local app=$1
   local port=${port_map[${app}]}
 
-  if ! sudo lsof -i ":${port}" > /dev/null 2>&1; then
+  if ! lsof -i ":${port}" > /dev/null 2>&1; then
     echo 'skip'
     return
   fi

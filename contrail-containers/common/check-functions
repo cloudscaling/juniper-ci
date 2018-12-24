@@ -40,7 +40,7 @@ function check_introspection_nodes() {
     save_opts="SSL_ENABLE=$SSL_ENABLE"
   fi
   for dest in $nodes_ips ; do
-    if ! $SSH_CMD ${SSH_USER}@${dest} $save_opts ./check_introspection.sh ; then
+    if ! $SSH_CMD ${SSH_USER}@${dest} "$save_opts ; sudo ./check_introspection.sh" ; then
       echo "ERROR: check_introspection failed on dest=$dest"
       err=1
     fi
