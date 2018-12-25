@@ -16,7 +16,7 @@ function save_logs() {
   for dest in $nodes_ips ; do
     timeout -s 9 20s $SCP "$ccfmy_dir/../__save-docker-logs.sh" ${SSH_USER}@${dest}:save-docker-logs.sh
     if [[ $? == 0 ]] ; then
-      $SSH_CMD ${SSH_USER}@${dest} "CNT_NAME_PATTERN='$cnt_name_pattern' $save_opts ; sudo ./save-docker-logs.sh"
+      $SSH_CMD ${SSH_USER}@${dest} "CNT_NAME_PATTERN='$cnt_name_pattern' $save_opts sudo -E ./save-docker-logs.sh"
     fi
   done
 
