@@ -101,7 +101,9 @@ docker run -i --rm --entrypoint /bin/bash $volumes --network host -e KOLLA_PATCH
 # TODO: wait till cluster up and initialized
 sleep 300
 
-check_introspection_cloud
+if ! check_introspection_cloud ; then
+  ls tptptptp
+fi
 
 # validate openstack
 source $my_dir/../common/check-functions
