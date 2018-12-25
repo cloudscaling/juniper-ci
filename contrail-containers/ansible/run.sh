@@ -108,7 +108,7 @@ fi
 # validate openstack
 source $my_dir/../common/check-functions
 cd $WORKSPACE
-$SSH ${SSH_USER}@$master_ip "sudo cat /etc/kolla/kolla-toolbox/admin-openrc.sh" > $WORKSPACE/admin-openrc.sh
+$SSH_CMD ${SSH_USER}@$master_ip "sudo cat /etc/kolla/kolla-toolbox/admin-openrc.sh" > $WORKSPACE/admin-openrc.sh
 virtualenv $WORKSPACE/.venv
 source $WORKSPACE/.venv/bin/activate
 source $WORKSPACE/admin-openrc.sh
