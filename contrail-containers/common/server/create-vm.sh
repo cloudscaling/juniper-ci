@@ -370,7 +370,7 @@ nodes_vip_${j}=10.$((NET_BASE_PREFIX+j)).$NUM.254
 EOF
 done
 
-echo "build_user=${BUILD_USER_ID:-jenkins}" >> $ENV_FILE
+echo "build_user_id=${BUILD_USER_ID:-jenkins}" >> $ENV_FILE
 echo "INFO: environment file:"
 cat $ENV_FILE
 

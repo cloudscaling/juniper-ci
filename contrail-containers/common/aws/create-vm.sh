@@ -230,7 +230,7 @@ nodes_vip_${net}=${!prefix_name}.254
 EOF
 done
 
-echo "build_user=${BUILD_USER_ID:-jenkins}" >> $ENV_FILE
+echo "build_user_id=${BUILD_USER_ID:-jenkins}" >> $ENV_FILE
 echo "INFO: environment file:"
 cat $ENV_FILE
 
