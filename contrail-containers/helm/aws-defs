@@ -1,5 +1,4 @@
 export NET_COUNT=2
-export BUILD_NODE_TYPE=m4.large
 
 if [[ "$HA" == 'ha' ]] ; then
   export CONT_NODES=3
@@ -8,6 +7,4 @@ else
   exit 1
 fi
 
-export CONT_NODE_TYPE=m4.xlarge
 export COMP_NODES=1
-export COMP_NODE_TYPE=c4.xlarge

@@ -1,3 +1,7 @@
+BUILD_NODE_TYPE=m4.large
+CONT_NODE_TYPE=m4.xlarge
+COMP_NODE_TYPE=c4.xlarge
+
 # id_rsa from master machine must be imported into jenkins
 KEY_NAME=jenkins
 

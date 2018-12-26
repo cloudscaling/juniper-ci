@@ -1,3 +1,15 @@
 export NET_COUNT=1
-echo "ERROR: aws deployment is not supported"
-exit 1
+
+if [[ "$HA" == 'ha' ]]; then
+  export CONT_NODES=3
+  export COMP_NODES=2
+elif [[ "$HA" == 'nonha' ]]; then
+  export CONT_NODES=1
+  export COMP_NODES=2
+elif [[ "$HA" == 'aio' ]]; then
+  export CONT_NODES=1
+  export COMP_NODES=0
+else
+  echo "ERROR: ${HA} deployment is not supported"
+  exit 1
+fi
