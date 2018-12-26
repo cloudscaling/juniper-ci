@@ -4,7 +4,6 @@
     defaults: global
     node: master
     parameters:
-      parameters:
       - node:
           name: SLAVE_NAME
           description: "Select slave: one for specific node or multiple for any node."
