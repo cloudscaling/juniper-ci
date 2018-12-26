@@ -1,2 +1,2 @@
 export ENV_FILE="$WORKSPACE/cloudrc.${NUM}"
-[ -f $ENV_FILE ] && source $ENV_FILE
+if [ -f $ENV_FILE ] ; then source $ENV_FILE ; fi
