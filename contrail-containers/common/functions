@@ -3,9 +3,10 @@
 ccfmy_file="${BASH_SOURCE[0]}"
 ccfmy_dir="$(dirname $ccfmy_file)"
 
+source "$ccfmy_dir/definitions"
+
 function save_logs() {
   local cnt_name_pattern="$1"
-  source "$ccfmy_dir/${HOST}/ssh-defs"
   set +e
   local save_opts=''
   if [[ -n "$SSL_ENABLE" ]] ; then
@@ -19,10 +20,6 @@ function save_logs() {
       $SSH_CMD ${SSH_USER}@${dest} "CNT_NAME_PATTERN='$cnt_name_pattern' $save_opts sudo -E ./save-docker-logs.sh"
     fi
   done
-
-  # save env host specific logs
-  # (should save into ~/logs folder on the SSH host)
-  $ccfmy_dir/${HOST}/save-logs.sh
 
   # save to workspace
   for dest in $nodes_ips ; do

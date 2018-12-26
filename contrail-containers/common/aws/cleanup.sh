@@ -1,13 +1,14 @@
 #!/bin/bash
 
-ENV_FILE="$WORKSPACE/cloudrc"
+my_file="$(readlink -e "$0")"
+my_dir="$(dirname $my_file)"
+
+source "$my_dir/setup-defs"
 
 if [ ! -f $ENV_FILE ]; then
-  echo "ERROR: There is no environment file. There is nothing to clean up."
+  echo "WARNING: There is no environment file. There is nothing to clean up."
   exit 1
 fi
-
-source $ENV_FILE
 
 errors="0"
 

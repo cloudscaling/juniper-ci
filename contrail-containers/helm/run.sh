@@ -19,7 +19,7 @@ source $my_dir/../common/functions
 source $my_dir/../common/check-functions
 
 $my_dir/../common/${HOST}/create-vm.sh
-source "$my_dir/../common/${HOST}/ssh-defs"
+source "$my_dir/../common/${HOST}/setup-defs"
 
 trap 'catch_errors $LINENO' ERR
 function catch_errors() {
@@ -60,7 +60,6 @@ for ip in $nodes_ips ; do
   done
 done
 
-$SCP "$WORKSPACE/cloudrc" $SSH_USER@$master_ip:cloudrc
 $SCP "$my_dir/../common/check-functions" $SSH_USER@$master_ip:check-functions
 $SCP "$my_dir/__run-gate.sh" $SSH_USER@$master_ip:run-gate.sh
 run_env+=" OPENSTACK_VERSION=$OPENSTACK_VERSION"

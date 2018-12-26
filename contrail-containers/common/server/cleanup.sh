@@ -24,6 +24,8 @@ export ENVIRONMENT_OS=${1:-${ENVIRONMENT_OS:-''}}
 export OPENSTACK_VERSION=${2:-${OPENSTACK_VERSION:-''}}
 
 source "$my_dir/../../../common/virsh/functions"
+source "$my_dir/setup-defs"
+source "$my_dir/definitions"
 
 function delete_node() {
   local vm_name=$1
@@ -40,8 +42,6 @@ function delete_node() {
   done
 }
 
-source "$my_dir/definitions"
-
 for i in `virsh list --all | grep $VM_NAME | awk '{print $2}'` ; do
   delete_node $i
 done
@@ -51,4 +51,4 @@ delete_network_dhcp ${NET_NAME}_2
 delete_network_dhcp ${NET_NAME}_3
 delete_network_dhcp ${NET_NAME}_4
 
-rm $WORKSPACE/cloudrc.$NUM
+rm -f $ENV_FILE

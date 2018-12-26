@@ -39,13 +39,10 @@ if (( NET_COUNT > 4 )); then
   exit 1
 fi
 
-export ENV_FILE="$WORKSPACE/cloudrc.$NUM"
+source "$my_dir/../definitions"
+source "$my_dir/setup-defs"
 source "$my_dir/definitions"
 source "$my_dir/${ENVIRONMENT_OS}"
-
-id_rsa="$(cat $HOME/.ssh/id_rsa)"
-id_rsa_pub="$(cat $HOME/.ssh/id_rsa.pub)"
-SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
 
 trap 'catch_errors_cvmb $LINENO' ERR
 function catch_errors_cvmb() {
@@ -167,7 +164,6 @@ master_ip=${ips[0]}
 # save env file
 cat <<EOF >$ENV_FILE
 SSH_USER=$SSH_USER
-ssh_key_file=/home/jenkins/.ssh/id_rsa
 build_ip=$build_ip
 master_ip=$master_ip
 nodes_ips="${ips[@]}"
@@ -197,6 +193,8 @@ for ip in ${ips[@]} ; do
   wait_ssh $ip
 done
 
+id_rsa="$(cat $HOME/.ssh/id_rsa)"
+id_rsa_pub="$(cat $HOME/.ssh/id_rsa.pub)"
 index=0
 for ip in ${ips[@]} ; do
   (( index+=1 ))

@@ -4,7 +4,6 @@ my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
 NET_COUNT=${NET_COUNT:-1}
-SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
 ENV_FILE="$WORKSPACE/cloudrc"
 log_dir="$WORKSPACE/logs"
 
@@ -16,6 +15,8 @@ function catch_errors_cvm() {
   exit $exit_code
 }
 
+source "$my_dir/../definitions"
+source "$my_dir/setup-defs"
 source "$my_dir/definitions"
 source "$my_dir/${ENVIRONMENT_OS}"
 
@@ -116,7 +117,7 @@ function run_instance() {
   # inner communication...
   aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr $public_ip/32 --protocol tcp --port 0-65535
 
-  local ssh="ssh -i $HOME/.ssh/id_rsa $SSH_OPTS $SSH_USER@$public_ip"
+  local ssh="$SSH $SSH_USER@$public_ip"
   echo "INFO: waiting for instance SSH"
   while ! $ssh uname -a 2>/dev/null ; do
     echo "WARNING: Machine isn't accessible yet"
@@ -191,7 +192,6 @@ ips=( ${ips_cont[@]} ${ips_comp[@]} )
 master_ip=${ips_cont[0]}
 
 cat <<EOF >>$ENV_FILE
-ssh_key_file=$HOME/.ssh/id_rsa
 build_ip=$build_ip
 master_ip=$master_ip
 nodes_ips="${ips[@]}"
@@ -210,12 +210,12 @@ for ((net=0; net<NET_COUNT; ++net)) ; do
   var="IF$((net+1))"
   iface=${!var}
   for ip in ${ips_cont[@]} ; do
-    ip=`ssh -i $HOME/.ssh/id_rsa $SSH_OPTS $SSH_USER@$ip ip addr show dev $iface 2>/dev/null | awk '/inet /{print $2}' | cut -d '/' -f 1`
+    ip=`$SSH $SSH_USER@$ip ip addr show dev $iface 2>/dev/null | awk '/inet /{print $2}' | cut -d '/' -f 1`
     ips=( ${ips[@]} $ip )
     cont_ips=( ${cont_ips[@]} $ip )
   done
   for ip in ${ips_comp[@]} ; do
-    ip=`ssh -i $HOME/.ssh/id_rsa $SSH_OPTS $SSH_USER@$ip ip addr show dev $iface 2>/dev/null | awk '/inet /{print $2}' | cut -d '/' -f 1`
+    ip=`$SSH $SSH_USER@$ip ip addr show dev $iface 2>/dev/null | awk '/inet /{print $2}' | cut -d '/' -f 1`
     ips=( ${ips[@]} $ip )
     comp_ips=( ${comp_ips[@]} $ip )
   done
@@ -235,7 +235,7 @@ echo "INFO: environment file:"
 cat $ENV_FILE
 
 # copy environment file to master_ip
-scp -i $HOME/.ssh/id_rsa $SSH_OPTS $ENV_FILE ${SSH_USER}@${master_ip}:
+$SCP $ENV_FILE ${SSH_USER}@${master_ip}:cloudrc
 
 trap - ERR EXIT
 

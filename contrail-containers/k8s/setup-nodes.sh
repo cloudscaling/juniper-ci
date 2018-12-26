@@ -3,7 +3,7 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
-source "$my_dir/../common/${HOST}/ssh-defs"
+source "$my_dir/../common/${HOST}/setup-defs"
 
 export KUBERNETES_API_SERVER=${master_ip}
 # here we define controller nodes as a ips[0:2]

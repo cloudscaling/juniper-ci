@@ -1,0 +1,3 @@
+export SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
+export SCP="scp $SSH_OPTS"
+export SSH_CMD="ssh $SSH_OPTS"

@@ -17,9 +17,14 @@ mkdir -p logs
 chown -R $USER logs
 
 if [ -d /etc/contrail ]; then
-  mkdir -p logs/contrail_etc
-  cp -R /etc/contrail logs/contrail_etc/
-  chown -R $USER logs/contrail_etc
+  mkdir -p logs/etc_contrail
+  cp -R /etc/contrail logs/etc_contrail/
+  chown -R $USER logs/etc_contrail
+fi
+if [ -d /etc/cni ]; then
+  mkdir -p logs/etc_cni
+  cp -R /etc/cni logs/etc_cni/
+  chown -R $USER logs/etc_cni
 fi
 if [ -d /etc/kolla ]; then
   mkdir -p logs/kolla_etc
@@ -47,6 +52,19 @@ if [ -d $cl_path ]; then
   chown -R $USER logs/contrail_logs
   chmod -R a+rw logs/contrail_logs
 fi
+
+if [[ -x $(command -v kubectl 2>/dev/null) ]] ; then
+  export PATH=${PATH}:/usr/sbin
+  mkdir -p logs/kube-info
+  kubectl get nodes -o wide > logs/kube-info/nodes 2>&1
+  kubectl get pods -o wide --all-namespaces=true > logs/kube-info/pods 2>&1
+  kubectl get all -o wide --all-namespaces=true > logs/kube-info/apps 2>&1
+fi
+for i in ~/my-contrail.yaml ~/test_app.yaml ; do
+  if [ -f $i ] ; then
+    cp $i logs/
+  fi
+done
 
 mkdir -p logs/contrail
 pushd logs/contrail

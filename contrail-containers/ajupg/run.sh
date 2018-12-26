@@ -24,7 +24,7 @@ juju-status-tabular
 # ==============================================
 
 $my_dir/../common/${HOST}/create-vm.sh
-source "$my_dir/../common/${HOST}/ssh-defs"
+source "$my_dir/../common/${HOST}/setup-defs"
 
 trap 'catch_errors $LINENO' ERR
 function catch_errors() {
