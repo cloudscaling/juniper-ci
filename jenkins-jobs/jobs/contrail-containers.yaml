@@ -196,6 +196,10 @@
           slavenode:
             - slave01
             - slave04
+      - ak8s-aws-ubuntu16:
+          defaultha: ha
+          slavenode:
+            - master
       - ak8s-server-centos:
           defaultha: ha
           slavenode:
