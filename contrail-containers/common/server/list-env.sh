@@ -13,11 +13,5 @@ for vm in $existed_vms ; do
 done
 
 echo
-echo "Virtual machines' dumps:"
-for vm in $existed_vms ; do
-    echo "Name: $vm"
-    echo "Dump:"
-    vm_dump=`virsh dumpxml $vm`
-    echo "$vm_dump"
-    echo
-done
+echo "/proc/meminfo"
+cat /proc/meminfo
