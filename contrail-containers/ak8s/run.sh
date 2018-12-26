@@ -61,7 +61,7 @@ envsubst <$my_dir/instances.yaml.${HA}.tmpl >$config
 echo "INFO: cloud config ------------------------- $(date)"
 cat $config
 cp $config $WORKSPACE/logs/
-$SCP $config root@${master_ip}:
+$SCP $config ${SSH_USER}@${master_ip}:
 
 prepare_image centos-soft
 
@@ -78,8 +78,9 @@ sleep 300
 check_introspection_cloud
 
 function check_cluster() {
-  cat <<EOM | ssh $SSH_OPTS root@${master_ip}
-set -x
+  tmpf=`mktemp`
+  cat <<EOM > $tmpf
+#!/bin/bash -x
 kubectl create serviceaccount --namespace kube-system tiller
 kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
 wget -nv https://storage.googleapis.com/kubernetes-helm/helm-v2.9.0-linux-amd64.tar.gz
@@ -98,6 +99,9 @@ kubectl get pods
 kubectl get svc wordpress-wordpress
 set +x
 EOM
+  $SCP $tmpf ${SSH_USER}@${master_ip}:check_k8s.sh
+  rm $tmpf
+  $SSH_CMD ${SSH_USER}@${master_ip} "sudo /bin/bash check_k8s.sh"
 
   # this is needed if we want to enable persistence
   # ? helm repo add nfs-provisioner https://raw.githubusercontent.com/IlyaSemenov/nfs-provisioner-chart/master/repo
