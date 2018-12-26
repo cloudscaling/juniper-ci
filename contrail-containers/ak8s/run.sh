@@ -49,6 +49,13 @@ IP_CONT_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
 IP_COMP_01=`echo $nodes_comp_ips | cut -d ' ' -f 1`
 IP_COMP_02=`echo $nodes_comp_ips | cut -d ' ' -f 2`
 
+# aws has different IP for internal and public purposes. while IP_* are public then they can't be used as services' IP-s.
+# containers can't find the public IP in local IP-s list and fail.
+# empty value was not tested - fill it always for HA (other templates do not use it).
+if [[ "$HA" == 'ha' ]]; then
+  CONTROLLER_NODES="$(echo $nodes_cont_ips_0 | tr ' ' ',')"
+fi
+
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
 envsubst <$my_dir/instances.yaml.${HA}.tmpl >$config
 echo "INFO: cloud config ------------------------- $(date)"
