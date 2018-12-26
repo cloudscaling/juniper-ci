@@ -1,0 +1,24 @@
+- job:
+    name: list-environments
+    description: "List the deployed environments"
+    defaults: global
+    node: master
+    parameters:
+      parameters:
+      - node:
+          name: SLAVE_NAME
+          description: "Select slave: one for specific node or multiple for any node."
+          default-slaves:
+            - slave01
+            - slave04
+          allowed-slaves:
+            - slave01
+            - slave04
+          ignore-offline-nodes: false
+          allowed-multiselect: true
+    scm:
+      - juniper-ci
+    builders:
+      - shell: |
+          #!/bin/bash -e
+          ./juniper-ci/contrail-containers/common/server/list-env.sh
