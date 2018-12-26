@@ -61,6 +61,7 @@ envsubst <$my_dir/instances.yaml.${HA}.tmpl >$config
 echo "INFO: cloud config ------------------------- $(date)"
 cat $config
 cp $config $WORKSPACE/logs/
+$SCP $config root@${master_ip}:
 
 prepare_image centos-soft
 

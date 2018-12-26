@@ -229,7 +229,12 @@ nodes_vip_${net}=${!prefix_name}.254
 EOF
 done
 
+echo "build_user=${BUILD_USER_ID:-jenkins}" >> $ENV_FILE
+echo "INFO: environment file:"
 cat $ENV_FILE
+
+# copy environment file to master_ip
+$SCP $ENV_FILE ${SSH_USER}@${master_ip}:
 
 trap - ERR EXIT
 

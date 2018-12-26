@@ -39,7 +39,7 @@ if (( NET_COUNT > 4 )); then
   exit 1
 fi
 
-export ENV_FILE="$WORKSPACE/cloudrc"
+export ENV_FILE="$WORKSPACE/cloudrc.$NUM"
 source "$my_dir/definitions"
 source "$my_dir/${ENVIRONMENT_OS}"
 
@@ -370,7 +370,11 @@ nodes_vip_${j}=10.$((NET_BASE_PREFIX+j)).$NUM.254
 EOF
 done
 
+echo "build_user=${BUILD_USER_ID:-jenkins}" >> $ENV_FILE
 echo "INFO: environment file:"
 cat $ENV_FILE
+
+# copy environment file to master_ip
+$SCP $ENV_FILE root@${master_ip}:cloudrc
 
 trap - ERR
