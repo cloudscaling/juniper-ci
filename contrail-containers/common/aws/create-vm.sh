@@ -202,7 +202,8 @@ nodes_gw=${VM_NET_PREFIX}.1
 nodes_vip=${VM_NET_PREFIX}.254
 EOF
 
-for ((net=1; net<NET_COUNT; ++net)) ; do
+# add all IP-s for all interfaces from internal settings
+for ((net=0; net<NET_COUNT; ++net)) ; do
   ips=( )
   cont_ips=( )
   comp_ips=( )

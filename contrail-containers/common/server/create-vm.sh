@@ -334,8 +334,8 @@ echo "nodes_net=10.$NET_BASE_PREFIX.$NUM.0/24" >> $ENV_FILE
 echo "nodes_gw=10.$NET_BASE_PREFIX.$NUM.1" >> $ENV_FILE
 echo "nodes_vip=10.$NET_BASE_PREFIX.$NUM.254" >> $ENV_FILE
 
-# update env file with IP-s from other interfaces
-for ((j=1; j<NET_COUNT; ++j)); do
+# update env file with IP-s from all interfaces
+for ((j=0; j<NET_COUNT; ++j)); do
   declare -a ips ips_cont ips_comp ; ips=() ; ips_cont=() ; ips_comp=()
   for (( i=0; i<${CONT_NODES}; ++i )); do
     ip=`get_ip_by_mac ${NET_NAME}_$j 52:54:10:$((NET_BASE_PREFIX+j)):${NUM}:0$i`
