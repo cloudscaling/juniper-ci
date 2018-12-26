@@ -3,6 +3,8 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
+source "$my_dir/../../../common/virsh/functions"
+
 existed_vms=`virsh -q list --all | awk '{print $2}' | sort`
 
 echo "Virtual machines:"
@@ -11,7 +13,7 @@ for vm in $existed_vms ; do
 done
 
 echo
-echo "Virtual machines\' dumps:"
+echo "Virtual machines' dumps:"
 for vm in $existed_vms ; do
     echo "Name: $vm"
     echo "Dump:"
