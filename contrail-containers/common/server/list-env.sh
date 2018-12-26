@@ -11,7 +11,7 @@ for vm in $existed_vms ; do
 done
 
 echo
-echo "Virtual machines\' dumps:""
+echo "Virtual machines\' dumps:"
 for vm in $existed_vms ; do
     echo "Name: $vm"
     echo "Dump:"
