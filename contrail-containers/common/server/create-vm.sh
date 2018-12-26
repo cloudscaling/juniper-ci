@@ -43,6 +43,10 @@ export ENV_FILE="$WORKSPACE/cloudrc.$NUM"
 source "$my_dir/definitions"
 source "$my_dir/${ENVIRONMENT_OS}"
 
+id_rsa="$(cat $HOME/.ssh/id_rsa)"
+id_rsa_pub="$(cat $HOME/.ssh/id_rsa.pub)"
+SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
+
 trap 'catch_errors_cvmb $LINENO' ERR
 function catch_errors_cvmb() {
   local exit_code=$?
@@ -193,10 +197,6 @@ for ip in ${ips[@]} ; do
   wait_ssh $ip
 done
 
-id_rsa="$(cat $HOME/.ssh/id_rsa)"
-id_rsa_pub="$(cat $HOME/.ssh/id_rsa.pub)"
-# prepare host name
-SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30"
 index=0
 for ip in ${ips[@]} ; do
   (( index+=1 ))
@@ -375,6 +375,6 @@ echo "INFO: environment file:"
 cat $ENV_FILE
 
 # copy environment file to master_ip
-$SCP $ENV_FILE root@${master_ip}:cloudrc
+scp $SSH_OPTS $ENV_FILE root@${master_ip}:cloudrc
 
 trap - ERR

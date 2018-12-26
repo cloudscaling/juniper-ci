@@ -235,7 +235,7 @@ echo "INFO: environment file:"
 cat $ENV_FILE
 
 # copy environment file to master_ip
-$SCP $ENV_FILE ${SSH_USER}@${master_ip}:
+scp -i $HOME/.ssh/id_rsa $SSH_OPTS $ENV_FILE ${SSH_USER}@${master_ip}:
 
 trap - ERR EXIT
 
