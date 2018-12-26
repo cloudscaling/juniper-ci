@@ -7,3 +7,5 @@
     properties:
       - build-discarder:
           num-to-keep: 30
+    wrappers:
+      - build-user-vars
