@@ -230,10 +230,5 @@
           slavenode:
             - slave01
             - slave04
-      - anone-server-ubuntu16:
-          defaultha: nonha
-          slavenode:
-            - slave01
-            - slave04
     jobs:
       - 'contrail-{project}'

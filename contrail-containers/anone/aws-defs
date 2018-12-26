@@ -1,3 +1,0 @@
-export NET_COUNT=1
-echo "ERROR: aws deployment is not supported"
-exit 1
