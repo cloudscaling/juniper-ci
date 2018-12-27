@@ -10,6 +10,7 @@ linux=$(awk -F"=" '/^ID=/{print $2}' /etc/os-release | tr -d '"')
 
 case "${linux}" in
   "ubuntu" )
+    apt-get update
     apt-get install -y docker.io
     ;;
   "centos" | "rhel" )
