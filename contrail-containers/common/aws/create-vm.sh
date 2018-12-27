@@ -118,7 +118,7 @@ function run_instance() {
   aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr $public_ip/32 --protocol tcp --port 0-65535
 
   local ssh="$SSH $SSH_USER@$public_ip"
-  echo "INFO: waiting for instance SSH"
+  echo "INFO: waiting for instance SSH with cmd: $ssh uname -a"
   while ! $ssh uname -a 2>/dev/null ; do
     echo "WARNING: Machine isn't accessible yet"
     sleep 2
