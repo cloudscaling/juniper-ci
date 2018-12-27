@@ -117,7 +117,7 @@ function run_instance() {
   # inner communication...
   aws ${AWS_FLAGS} ec2 authorize-security-group-ingress --group-id $group_id --cidr $public_ip/32 --protocol tcp --port 0-65535
 
-  local ssh="$SSH $SSH_USER@$public_ip"
+  local ssh="$SSH_CMD $SSH_USER@$public_ip"
   echo "INFO: waiting for instance SSH with cmd: $ssh uname -a"
   while ! $ssh uname -a 2>/dev/null ; do
     echo "WARNING: Machine isn't accessible yet"
@@ -210,12 +210,12 @@ for ((net=0; net<NET_COUNT; ++net)) ; do
   var="IF$((net+1))"
   iface=${!var}
   for ip in ${ips_cont[@]} ; do
-    ip=`$SSH $SSH_USER@$ip ip addr show dev $iface 2>/dev/null | awk '/inet /{print $2}' | cut -d '/' -f 1`
+    ip=`$SSH_CMD $SSH_USER@$ip ip addr show dev $iface 2>/dev/null | awk '/inet /{print $2}' | cut -d '/' -f 1`
     ips=( ${ips[@]} $ip )
     cont_ips=( ${cont_ips[@]} $ip )
   done
   for ip in ${ips_comp[@]} ; do
-    ip=`$SSH $SSH_USER@$ip ip addr show dev $iface 2>/dev/null | awk '/inet /{print $2}' | cut -d '/' -f 1`
+    ip=`$SSH_CMD $SSH_USER@$ip ip addr show dev $iface 2>/dev/null | awk '/inet /{print $2}' | cut -d '/' -f 1`
     ips=( ${ips[@]} $ip )
     comp_ips=( ${comp_ips[@]} $ip )
   done
