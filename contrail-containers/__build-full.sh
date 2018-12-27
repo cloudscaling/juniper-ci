@@ -10,11 +10,11 @@ linux=$(awk -F"=" '/^ID=/{print $2}' /etc/os-release | tr -d '"')
 
 case "${linux}" in
   "ubuntu" )
-    apt-get update
-    apt-get install -y docker.io
+    sudo apt-get update
+    sudo apt-get install -y docker.io
     ;;
   "centos" | "rhel" )
-    yum install -y docker
+    sudo yum install -y docker
     ;;
 esac
 
@@ -30,7 +30,7 @@ export REGISTRY_IP=`ip address show dev $default_interface | head -3 | tail -1 |
 export REGISTRY_PORT=6666
 
 sudo ./startup.sh
-docker ps -a
+sudo docker ps -a
 
 cat >build.sh <<EOF
 #!/bin/bash -e
@@ -58,9 +58,9 @@ make rpm
 make containers || /bin/true
 EOF
 chmod a+x ./build.sh
-docker cp /root/patches contrail-developer-sandbox:/root/patches
-docker cp ./build.sh contrail-developer-sandbox:/root/build.sh
-docker exec -i contrail-developer-sandbox /root/build.sh
+sudo docker cp $HOME/patches contrail-developer-sandbox:/root/patches
+sudo docker cp ./build.sh contrail-developer-sandbox:/root/build.sh
+sudo docker exec -i contrail-developer-sandbox /root/build.sh
 
 sudo docker images
 
