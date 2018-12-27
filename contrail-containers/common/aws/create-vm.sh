@@ -219,7 +219,11 @@ for ((net=0; net<NET_COUNT; ++net)) ; do
     ips=( ${ips[@]} $ip )
     comp_ips=( ${comp_ips[@]} $ip )
   done
-  prefix_name="VM_NET_PREFIX_${net}"
+  if [[ "$net" == 0 ]]; then
+    prefix_name="VM_NET_PREFIX"
+  else
+    prefix_name="VM_NET_PREFIX_${net}"
+  fi
   cat <<EOF >>$ENV_FILE
 nodes_ips_${net}="${ips[@]}"
 nodes_cont_ips_${net}="${cont_ips[@]}"

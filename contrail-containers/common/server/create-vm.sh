@@ -334,16 +334,21 @@ echo "nodes_vip=10.$NET_BASE_PREFIX.$NUM.254" >> $ENV_FILE
 
 # update env file with IP-s from all interfaces
 for ((j=0; j<NET_COUNT; ++j)); do
+  if [[ $j == 0 ]]; then
+    net_name=${NET_NAME}
+  else
+    net_name=${NET_NAME}_$j
+  fi
   declare -a ips ips_cont ips_comp ; ips=() ; ips_cont=() ; ips_comp=()
   for (( i=0; i<${CONT_NODES}; ++i )); do
-    ip=`get_ip_by_mac ${NET_NAME}_$j 52:54:10:$((NET_BASE_PREFIX+j)):${NUM}:0$i`
-    echo "INFO: controller node #$i, IP $ip (network ${NET_NAME}_$j)"
+    ip=`get_ip_by_mac $net_name 52:54:10:$((NET_BASE_PREFIX+j)):${NUM}:0$i`
+    echo "INFO: controller node #$i, IP $ip (network $net_name)"
     ips=( ${ips[@]} $ip )
     ips_cont=( ${ips_cont[@]} $ip )
   done
   for (( i=0; i<${COMP_NODES}; ++i )); do
-    ip=`get_ip_by_mac ${NET_NAME}_$j 52:54:10:$((NET_BASE_PREFIX+j)):${NUM}:1$i`
-    echo "INFO: compute node #$i, IP $ip (network ${NET_NAME}_$j)"
+    ip=`get_ip_by_mac $net_name 52:54:10:$((NET_BASE_PREFIX+j)):${NUM}:1$i`
+    echo "INFO: compute node #$i, IP $ip (network $net_name)"
     ips=( ${ips[@]} $ip )
     ips_comp=( ${ips_comp[@]} $ip )
   done
