@@ -19,16 +19,15 @@ esac
 
 echo "INFO: Start build $(date)"
 
+home=$HOME
 git clone https://github.com/Juniper/contrail-dev-env.git
 cd contrail-dev-env
 
-# hack contrail-dev-env for our configuration/settings.
-# TODO: make all of them configurable
 default_interface=`ip route show | grep "default via" | awk '{print $5}'`
 export REGISTRY_IP=`ip address show dev $default_interface | head -3 | tail -1 | tr "/" " " | awk '{print $2}'`
 export REGISTRY_PORT=6666
 
-sudo ./startup.sh
+./startup.sh
 docker ps -a
 
 cat >build.sh <<EOF
@@ -61,6 +60,6 @@ docker cp /root/patches contrail-developer-sandbox:/root/patches
 docker cp ./build.sh contrail-developer-sandbox:/root/build.sh
 docker exec -i contrail-developer-sandbox /root/build.sh
 
-sudo docker images
+docker images
 
 echo "INFO: Build finished  $(date)"

@@ -22,12 +22,12 @@ gpgcheck = 0
 EOF
 
 echo "INFO: Run build  $(date)"
-sudo -E ./build.sh || /bin/true
+./build.sh || /bin/true
 
-sudo docker images | grep "$CONTRAIL_VERSION"
+docker images | grep "$CONTRAIL_VERSION"
 
 # cause we use this machine for cloud after build process then we need to free port 80
-sudo systemctl stop lighttpd.service
-sudo systemctl disable lighttpd.service
+systemctl stop lighttpd.service
+systemctl disable lighttpd.service
 
 echo "INFO: Build finished  $(date)"
