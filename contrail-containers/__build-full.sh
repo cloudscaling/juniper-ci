@@ -25,15 +25,8 @@ cd contrail-dev-env
 # hack contrail-dev-env for our configuration/settings.
 # TODO: make all of them configurable
 default_interface=`ip route show | grep "default via" | awk '{print $5}'`
-registry_ip=`ip address show dev $default_interface | head -3 | tail -1 | tr "/" " " | awk '{print $2}'`
-sed -i -e "s/registry/${registry_ip}/g" common.env.tmpl
-sed -i -e "s/contrail-registry/${registry_ip}/g" vars.yaml.tmpl
-sed -i -e "s/registry/${registry_ip}/g" dev_config.yaml.tmpl
-sed -i -e "s/registry/${registry_ip}/g" daemon.json.tmpl
-sed -i -e "s/6666/5000/g" common.env.tmpl
-sed -i -e "s/6666/5000/g" vars.yaml.tmpl
-sed -i -e "s/6666/5000/g" daemon.json.tmpl
-sed -i -e "s/6666/5000/g" startup.sh
+export REGISTRY_IP=`ip address show dev $default_interface | head -3 | tail -1 | tr "/" " " | awk '{print $2}'`
+export REGISTRY_PORT=6666
 
 sudo ./startup.sh
 docker ps -a
