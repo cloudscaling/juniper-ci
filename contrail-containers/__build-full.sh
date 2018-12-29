@@ -29,7 +29,7 @@ default_interface=`ip route show | grep "default via" | awk '{print $5}'`
 export REGISTRY_IP=`ip address show dev $default_interface | head -3 | tail -1 | tr "/" " " | awk '{print $2}'`
 export REGISTRY_PORT=5000
 
-sudo ./startup.sh
+sudo -E ./startup.sh
 sudo docker ps -a
 
 cat >build.sh <<EOF
