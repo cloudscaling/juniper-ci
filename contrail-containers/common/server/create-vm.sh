@@ -281,6 +281,8 @@ elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; t
 auto ens3
 iface ens3 inet dhcp
 EOM
+  else
+    apt-get install ntp &>>$logs_dir/apt.log
   fi
   for ((j=1; j<$NET_COUNT; ++j)); do
     if_name="ens\$((3+j))"
