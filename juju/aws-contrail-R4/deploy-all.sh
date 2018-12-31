@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -eE
 
 inner_script="${1:-deploy-manual.sh}"
 if [[ $# != 0 ]] ; then

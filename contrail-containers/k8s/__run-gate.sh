@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -eE
 
 function log_info() {
   echo "INFO: $@"

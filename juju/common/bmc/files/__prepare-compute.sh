@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -eEx
 
 main_net_prefix=$1
 vhost_address=$2

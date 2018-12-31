@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -eE
 
 # first param of script is an ubuntu series
 

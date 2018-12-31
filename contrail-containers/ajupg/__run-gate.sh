@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -eEx
 
 mkdir -p /root/.ssh && cp /.ssh/* /root/.ssh/ && chown root:root /root/.ssh
 cd /root

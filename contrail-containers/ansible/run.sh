@@ -1,4 +1,4 @@
-#!/bin/bash -ea
+#!/bin/bash -eEa
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
@@ -100,11 +100,9 @@ volumes+=" -v $my_dir/__run-gate.sh:/root/run-gate.sh"
 docker run -i --rm --entrypoint /bin/bash $volumes --network host -e KOLLA_PATCHSET_CMD="$patchset" -e OPENSTACK_VERSION=$OPENSTACK_VERSION centos-soft -c "/root/run-gate.sh"
 
 # TODO: wait till cluster up and initialized
-sleep 300
+sleep 120
 
-if ! check_introspection_cloud ; then
-  ls tptptptp
-fi
+check_introspection_cloud
 
 # validate openstack
 source $my_dir/../common/check-functions

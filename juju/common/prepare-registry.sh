@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -eE
 
 repo_ip=$1
 docker_user=$2

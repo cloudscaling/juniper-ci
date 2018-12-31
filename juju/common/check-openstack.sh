@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -eE
 
 my_file="${BASH_SOURCE[0]}"
 my_dir="$(dirname $my_file)"

@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -eEa
 
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
