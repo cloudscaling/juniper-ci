@@ -7,7 +7,7 @@ provider_config:
 
 instances:
   server1:
-    ip: ${IP_CONT_01}
+    ip: ${IP_VM_01}
     provider: bms
     roles:
       analytics: null
@@ -19,14 +19,14 @@ instances:
       k8s_master: null
       kubemanager: null
   server4:
-    ip: ${IP_COMP_01}
+    ip: ${IP_VM_01}
     provider: bms
     roles:
       k8s_node: null
       vrouter:
         AGENT_MODE: ${AGENT_MODE}
   server5:
-    ip: ${IP_COMP_02}
+    ip: ${IP_VM_02}
     provider: bms
     roles:
       k8s_node: null

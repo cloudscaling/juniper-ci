@@ -38,7 +38,7 @@ function save_logs() {
 function get_address() {
   local ip="$1"
   if [[ ${USE_FQDN,,} == 'true' ]] ; then
-    echo "node-$(echo $ip | tr '.' '-').local"
+    $SSH_CMD ${SSH_USER}@$ip "host -4 $ip" 2>/dev/null | awk '{print substr($5,1,length($5)-1)}'
   else
     echo $ip
   fi

@@ -43,11 +43,22 @@ fi
 # deploy cloud
 source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
-IP_CONT_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
-IP_CONT_02=`echo $nodes_cont_ips | cut -d ' ' -f 2`
-IP_CONT_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
-IP_COMP_01=`echo $nodes_comp_ips | cut -d ' ' -f 1`
-IP_COMP_02=`echo $nodes_comp_ips | cut -d ' ' -f 2`
+IP_VM_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
+IP_VM_04=`echo $nodes_comp_ips | cut -d ' ' -f 1`
+IP_VM_05=`echo $nodes_comp_ips | cut -d ' ' -f 2`
+
+IP_CONT_01=`echo $nodes_cont_ips | cut -d ' ' -f 1` ; IP_CONT_01=`get_address $IP_CONT_01`
+if [[ "$HA" == 'ha' ]] ; then
+  IP_VM_02=`echo $nodes_cont_ips | cut -d ' ' -f 2`
+  IP_VM_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
+
+  IP_CONT_02=`echo $nodes_cont_ips | cut -d ' ' -f 2` ; IP_CONT_02=`get_address $IP_CONT_02`
+  IP_CONT_03=`echo $nodes_cont_ips | cut -d ' ' -f 3` ; IP_CONT_03=`get_address $IP_CONT_03`
+
+  CONTROLLER_NODES="${IP_CONT_01},${IP_CONT_02},${IP_CONT_03}"
+else
+  CONTROLLER_NODES="${IP_CONT_01}"
+fi
 
 # aws has different IP for internal and public purposes. while IP_* are public then they can't be used as services' IP-s.
 # containers can't find the public IP in local IP-s list and fail.
