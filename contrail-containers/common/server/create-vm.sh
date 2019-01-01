@@ -210,10 +210,10 @@ for ip in ${ips[@]} ; do
 hname="node-\$(echo $ip | tr '.' '-')"
 echo \$hname > /etc/hostname
 hostname \$hname
-domainname local
+domainname $(DOMAIN}
 for i in ${ips[@]} ; do
   hname="node-\$(echo \$i | tr '.' '-')"
-  echo \$i  \${hname}.local  \${hname} >> /etc/hosts
+  echo \$i  \${hname}.$(DOMAIN}  \${hname} >> /etc/hosts
 done
 
 cat <<EOM > /root/.ssh/config
@@ -360,7 +360,7 @@ for ((j=0; j<NET_COUNT; ++j)); do
     cat <<EOF | ssh $SSH_OPTS root@${ip}
 for i in ${ips[@]} ; do
   hname="node-\$(echo \$i | tr '.' '-')"
-  echo \$i  \${hname}.local  \${hname} >> /etc/hosts
+  echo \$i  \${hname}.$(DOMAIN}  \${hname} >> /etc/hosts
 done
 EOF
   done
