@@ -1,2 +1,4 @@
+export DOMAIN="localdomain"
+
 export ENV_FILE="$WORKSPACE/cloudrc.${NUM}"
 if [ -f $ENV_FILE ] ; then source $ENV_FILE ; fi
