@@ -282,7 +282,7 @@ auto ens3
 iface ens3 inet dhcp
 EOM
   else
-    apt-get install ntp &>>$logs_dir/apt.log
+    apt-get install -fy ntp &>>$logs_dir/apt.log
   fi
   for ((j=1; j<$NET_COUNT; ++j)); do
     if_name="ens\$((3+j))"
