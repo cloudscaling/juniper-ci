@@ -39,7 +39,13 @@ function get_address() {
   local ssh_ip="$1"
   local ip="$2"
   if [[ ${USE_FQDN,,} == 'true' ]] ; then
-    $SSH_CMD ${SSH_USER}@$ssh_ip "host -4 $ip" 2>/dev/null | awk '{print substr($5,1,length($5)-1)}'
+    cat <<EOF | $SSH_CMD ${SSH_USER}@$ssh_ip 2>/dev/null
+if host -4 $ip &>/dev/null ; then
+  host -4 $ip | awk '{print substr(\$5,1,length(\$5)-1)}'
+else
+  getent hosts $ip | awk '{print \$2}'
+fi
+EOF
   else
     echo $ip
   fi
