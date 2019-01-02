@@ -200,7 +200,7 @@ nodes_cont_ips="${ips_cont[@]}"
 nodes_comp_ips="${ips_comp[@]}"
 nodes_net=${VM_NET_PREFIX}.0/24
 nodes_gw=${VM_NET_PREFIX}.1
-nodes_vip=${VM_NET_PREFIX}.254
+nodes_vip=${ips_cont[0]}
 EOF
 
 # add all IP-s for all interfaces from internal settings
@@ -231,7 +231,7 @@ nodes_cont_ips_${net}="${cont_ips[@]}"
 nodes_comp_ips_${net}="${comp_ips[@]}"
 nodes_net_${net}=${!prefix_name}.0/24
 nodes_gw_${net}=${!prefix_name}.1
-nodes_vip_${net}=${!prefix_name}.254
+nodes_vip_${net}=${cont_ips[0]}
 EOF
 done
 
