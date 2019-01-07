@@ -62,8 +62,8 @@ if [[ "$HA" == 'ha' ]] ; then
   IP1_CONT_03=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 3` ; IP1_CONT_03=`get_address $IP_VM_03 $IP1_CONT_03`
   IP2_CONT_03=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 3` ; IP2_CONT_03=`get_address $IP_VM_03 $IP2_CONT_03`
 
-  I_VIP="$nodes_vip_0"
-  E_VIP="$nodes_vip_1"
+  E_VIP="$nodes_vip_0"
+  I_VIP="$nodes_vip_1"
   CONTROLLER_NODES="${IP1_CONT_01},${IP1_CONT_02},${IP1_CONT_03}"
   CONTROL_NODES="${IP2_CONT_01},${IP2_CONT_02},${IP2_CONT_03}"
 else
