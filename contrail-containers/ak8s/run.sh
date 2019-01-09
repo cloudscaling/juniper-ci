@@ -72,6 +72,7 @@ cp $config $WORKSPACE/logs/
 $SCP $config ${SSH_USER}@${master_ip}:
 
 prepare_image centos-soft
+clone_clean_and_patched_repo contrail-ansible-deployer
 
 mkdir -p $WORKSPACE/logs/deployer
 volumes="-v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer"

@@ -58,15 +58,9 @@
           name: USE_FQDN
           description: Use FQDN for services instead of IP-s. It's related not to all jobs.
           default: false
-      - string:
-          name: CCB_PATCHSET
-          description: "Additional command to fetch patchset for contrail-container-builer repo."
-      - string:
-          name: CAD_PATCHSET
-          description: "Additional command to fetch patchset for contrail-ansible-deployer. Ex: same as previous."
       - text:
           name: PATCHSET_LIST
-          description: "List of additional commands to fetch changes. Job will grep only required repo-s from list."
+          description: "List of additional commands to fetch(checkout or cherry-pick) changes. Job will grep only required repo-s from list."
       - node:
           name: SLAVE_NAME
           description: "Select slave: one for specific node or multiple for any node."
@@ -80,8 +74,6 @@
           description: "Build number that is stored on S3 now"
     scm:
       - juniper-ci
-      - contrail-container-builder
-      - contrail-ansible-deployer
     builders:
       - shell: |
           #!/bin/bash -e
@@ -99,16 +91,6 @@
           regexp: "DESCRIPTION (.*)"
       - shell: |
           #!/bin/bash -e
-          if [[ -n "$CCB_PATCHSET" ]]; then
-            pushd contrail-container-builder
-            eval "$CCB_PATCHSET"
-            popd
-          fi
-          if [[ -n "$CAD_PATCHSET" ]]; then
-            pushd contrail-ansible-deployer
-            eval "$CAD_PATCHSET"
-            popd
-          fi
           # build CONTRAIL_VERSION as a tag for opencontrailnightly
           export CONTRAIL_VERSION="$OPENSTACK_VERSION-$CONTRAIL_VERSION"
           # only centos images are supported now and thus only one archive with rpm-s is needed

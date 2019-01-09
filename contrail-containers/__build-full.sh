@@ -52,6 +52,14 @@ for repoc in \`find . | grep ".git/config\$" | grep -v "\.repo"\` ; do
   fi
 done
 
+ccb_dir=/root/src/review.opencontrail.org/Juniper/contrail-container-builder
+[ -d \${ccb_dir} ] || git clone https://github.com/Juniper/contrail-container-builder ${ccb_dir}
+if patchlist=\`grep "/contrail-container-builder " /root/patches\` ; then
+  pushd \$ccb_dir >/dev/nul
+  eval "\$patchlist"
+  popd >/dev/nul
+fi
+
 cd /root/contrail-dev-env
 make dep
 make rpm

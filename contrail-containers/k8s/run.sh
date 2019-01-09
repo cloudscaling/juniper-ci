@@ -34,6 +34,7 @@ function catch_errors() {
   exit $exit_code
 }
 
+clone_clean_and_patched_repo contrail-container-builder
 for dest in $nodes_ips ; do
   $SCP -r "$WORKSPACE/contrail-container-builder" $SSH_USER@${dest}:./
 done

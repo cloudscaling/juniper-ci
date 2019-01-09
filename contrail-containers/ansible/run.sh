@@ -87,6 +87,7 @@ cp $config $WORKSPACE/logs/
 $SCP $config ${SSH_USER}@${master_ip}:
 
 prepare_image centos-soft
+clone_clean_and_patched_repo contrail-ansible-deployer
 
 if echo "$PATCHSET_LIST" | grep -q "/contrail-kolla-ansible " ; then
   patchset=`echo "$PATCHSET_LIST" | grep "/contrail-kolla-ansible "`
