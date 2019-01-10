@@ -63,6 +63,8 @@ fi
 cd /root/contrail-dev-env
 make dep
 make rpm
+# make containers will not call prepare script if directory already exists
+cp tpc.repo.template common.env \$ccb_dir
 make containers || /bin/true
 EOF
 chmod a+x ./build.sh
