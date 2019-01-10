@@ -43,6 +43,9 @@ fi
 # deploy cloud
 source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
+prepare_image centos-soft
+clone_clean_and_patched_repo contrail-ansible-deployer
+
 IP_VM_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
 IP_VM_04=`echo $nodes_comp_ips | cut -d ' ' -f 1`
 IP_VM_05=`echo $nodes_comp_ips | cut -d ' ' -f 2`
@@ -85,9 +88,6 @@ echo "INFO: cloud config ------------------------- $(date)"
 cat $config
 cp $config $WORKSPACE/logs/
 $SCP $config ${SSH_USER}@${master_ip}:
-
-prepare_image centos-soft
-clone_clean_and_patched_repo contrail-ansible-deployer
 
 if echo "$PATCHSET_LIST" | grep -q "/contrail-kolla-ansible " ; then
   patchset=`echo "$PATCHSET_LIST" | grep "/contrail-kolla-ansible "`

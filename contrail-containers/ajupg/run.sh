@@ -48,6 +48,9 @@ fi
 # deploy cloud
 source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
+prepare_image centos-soft
+clone_clean_and_patched_repo contrail-ansible-deployer
+
 IP_CONT_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
 
 # from juju
@@ -62,9 +65,6 @@ echo "INFO: cloud config ------------------------- $(date)"
 cat $config
 cp $config $WORKSPACE/logs/
 $SCP $config ${SSH_USER}@${master_ip}:
-
-prepare_image centos-soft
-clone_clean_and_patched_repo contrail-ansible-deployer
 
 mkdir -p $WORKSPACE/logs/deployer
 volumes="-v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer"
