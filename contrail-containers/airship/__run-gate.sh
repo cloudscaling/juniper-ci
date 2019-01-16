@@ -43,7 +43,7 @@ else
 fi
 
 LOCAL_IP=`ip addr show ${NODE_NET_IFACE} | awk '/inet /{print $2}' | cut -d '/' -f 1`
-export SHORT_HOSTNAME=$(hostname -s)
+export SHORT_HOSTNAME=`getent hosts $LOCAL_IP | head -1 | awk '{print $2}' | cut -d '.' -f 1`
 
 # Updates the /etc/hosts file
 HOSTS="${LOCAL_IP} ${SHORT_HOSTNAME}"
