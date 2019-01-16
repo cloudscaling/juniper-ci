@@ -73,7 +73,7 @@ if [[ -n "$domain" ]] ; then
   sed -i "s/cluster_domain: cluster.local/cluster_domain: $domain/" $COMMON_CONFIG_FILE
 fi
 
-export PEGLEG_IMAGE="quay.io/airshipit/pegleg:1ada48cc360ec52c7ab28b96c28a0c7df8bcee40"
-export PROMENADE_IMAGE="quay.io/airshipit/promenade:77073ddd6f1a445deae741afe53d858ba39f0e76"
+#export PEGLEG_IMAGE="quay.io/airshipit/pegleg:1ada48cc360ec52c7ab28b96c28a0c7df8bcee40"
+#export PROMENADE_IMAGE="quay.io/airshipit/promenade:77073ddd6f1a445deae741afe53d858ba39f0e76"
 
 ../common/deploy-airship.sh demo
