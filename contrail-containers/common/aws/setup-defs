@@ -1,4 +1,4 @@
-export DOMAIN="us-west-2.compute.internal"
+export DOMAIN=${DOMAIN:-"us-west-2.compute.internal"}
 
 export ENV_FILE="$WORKSPACE/cloudrc"
 if [ -f $ENV_FILE ] ; then source $ENV_FILE ; fi

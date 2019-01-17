@@ -11,3 +11,5 @@ export COMP_NODES=0
 # overrides
 export CONT_NODE_VCPUS=8
 export CONT_NODE_MEM=32768
+
+export DOMAIN=cluster.local
