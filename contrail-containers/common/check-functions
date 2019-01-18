@@ -87,6 +87,15 @@ function get_ssh_cmd() {
   if [[ "$hip" == 'None' ]]; then
     # helm case
     hip=`getent hosts $1 | awk '{print $1}'`
+  elif [[ "$HOST" == 'aws' ]]; then
+    local i=0
+    local cip
+    for cip in $nodes_comp_ips_0 ; do
+      if [[ "$cip" == "$hip" ]]; then break; fi
+      ((++i))
+    done
+    local ips=( $nodes_comp_ips )
+    hip=${ips[$i]}
   fi
   local lip=`hostname -i | cut -d ' ' -f 1`
   if [[ "$hip" != "$lip" ]]; then
