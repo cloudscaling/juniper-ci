@@ -110,10 +110,14 @@ function prepare_for_ssh() {
   fi
 }
 
-function get_link_local_ip() {
+function get_vm_iface() {
   local iip=$1
   local if_name=`$ssh_cmd sudo vif --list 2>/dev/null| grep -B 1 $iip | awk '/^vif/{print $NF}'`
+  echo $if_name
+}
 
+function get_link_local_ip() {
+  local if_name=$1
   local curl_proto='http'
   local curl_ssl_opts=''
   if [[ "${SSL_ENABLE,,}" == 'true' ]] ; then
@@ -158,7 +162,9 @@ function check_simple_instance() {
   fi
   get_ssh_cmd $hhost
   prepare_for_ssh
-  local fip=`get_link_local_ip $iip $ssh_cmd`
+  local vm_iface=`get_vm_iface $iip $ssh_cmd`
+  echo "INFO: VM interface: $vm_iface"
+  local fip=`get_link_local_ip $vm_iface $ssh_cmd`
   if [[ -z "$fip" ]]; then
     echo "ERROR: there is no link-local IP for VM"
     $ssh_cmd "ip route ; ip addr"
@@ -211,7 +217,9 @@ function check_two_instances() {
 
   get_ssh_cmd $hhost1
   prepare_for_ssh
-  local fip1=`get_link_local_ip $iip1 $ssh_cmd`
+  local vm_iface1=`get_vm_iface $iip1 $ssh_cmd`
+  echo "INFO: VM interface: $vm_iface1"
+  local fip1=`get_link_local_ip $vm_iface1 $ssh_cmd`
   if [[ -z "$fip1" ]]; then
     echo "ERROR: there is no link-local IP for VM"
     $ssh_cmd "ip route ; ip addr"
