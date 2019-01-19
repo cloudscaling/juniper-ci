@@ -79,10 +79,10 @@ function prepare_openstack() {
 }
 
 # global vars
-ssh_opts="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5 -i ${HOME}/.ssh/id_rsa"
-ssh_cmd=""
+ssh_opts="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5 -i ./id_rsa"
+ssh_dest=""
 
-function get_ssh_cmd() {
+function get_ssh_dest() {
   local hip=`openstack hypervisor list -c "Hypervisor Hostname" -c "Host IP" | grep "$1" | awk '{print $4}'`
   if [[ "$hip" == 'None' ]]; then
     # helm case
@@ -99,20 +99,21 @@ function get_ssh_cmd() {
   fi
   local lip=`hostname -i | cut -d ' ' -f 1`
   if [[ "$hip" != "$lip" ]]; then
-    ssh_cmd="ssh ${SSH_USER:-root}@$hip"
+    ssh_dest="${SSH_USER:-root}@$hip"
   fi
 }
 
 function prepare_for_ssh() {
   if [[ "$AGENT_MODE" == "dpdk" ]]; then
-    $ssh_cmd 'printf "[DEFAULT]\nplatform=dpdk\n" > ./contrail-vrouter-agent.conf' 2>/dev/null
-    $ssh_cmd 'sudo mkdir -p /etc/contrail ; sudo cp -f ./contrail-vrouter-agent.conf /etc/contrail/' 2>/dev/null
+    ssh $ssh_dest 'printf "[DEFAULT]\nplatform=dpdk\n" > ./contrail-vrouter-agent.conf' 2>/dev/null
+    ssh $ssh_dest 'sudo mkdir -p /etc/contrail ; sudo cp -f ./contrail-vrouter-agent.conf /etc/contrail/' 2>/dev/null
   fi
+  scp $HOME/.ssh/id_rsa.pub $ssh_dest:id_rsa.pub
 }
 
 function get_vm_iface() {
   local iip=$1
-  local if_name=`$ssh_cmd sudo vif --list 2>/dev/null| grep -B 1 $iip | awk '/^vif/{print $NF}'`
+  local if_name=`ssh $ssh_dest sudo vif --list 2>/dev/null| grep -B 1 $iip | awk '/^vif/{print $NF}'`
   echo $if_name
 }
 
@@ -127,10 +128,10 @@ function get_link_local_ip() {
     curl_ssl_opts="--key $key --cert $cert --cacert $ca_cert"
     curl_proto='https'
   fi
-  local curl_ip=$($ssh_cmd hostname -f | cut -d ' ' -f 1)
-  local curl_cmd="curl $curl_ssl_opts -s ${curl_proto}://${curl_ip}:8085/Snh_ItfReq?name=$if_name"
+  local curl_ip=$(ssh $ssh_dest hostname -f | cut -d ' ' -f 1)
+  local curl_cmd="sudo curl $curl_ssl_opts -s ${curl_proto}://${curl_ip}:8085/Snh_ItfReq?name=$if_name"
 
-  local ip=`$ssh_cmd $curl_cmd 2>/dev/null | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'`
+  local ip=`ssh $ssh_dest $curl_cmd 2>/dev/null | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/'`
   echo $ip
 }
 
@@ -138,7 +139,7 @@ function wait_instance_ssh() {
   local ip=$1
   echo "INFO: Wait for instance's ssh is ready"
   local fail=0
-  while ! $ssh_cmd ssh $ssh_opts cirros@$ip whoami 2>/dev/null; do
+  while ! ssh $ssh_dest ssh $ssh_opts cirros@$ip whoami 2>/dev/null; do
     ((++fail))
     if ((fail > 12)); then
       echo "ERROR: Instance status wait timeout occured"
@@ -162,21 +163,21 @@ function check_simple_instance() {
   fi
   get_ssh_cmd $hhost
   prepare_for_ssh
-  local vm_iface=`get_vm_iface $iip $ssh_cmd`
+  local vm_iface=`get_vm_iface $iip`
   echo "INFO: VM interface: $vm_iface"
-  local fip=`get_link_local_ip $vm_iface $ssh_cmd`
+  local fip=`get_link_local_ip $vm_iface`
   if [[ -z "$fip" ]]; then
     echo "ERROR: there is no link-local IP for VM"
-    $ssh_cmd "ip route ; ip addr"
+    ssh $ssh_dest "ip route ; ip addr"
     return 1
   fi
 
-  $ssh_cmd ping -c 3 $fip
+  ssh $ssh_dest ping -c 3 $fip
 
   wait_instance_ssh $fip
 
   # test for outside world
-  $ssh_cmd ssh $ssh_opts cirros@$fip ping -q -c 1 -W 2 8.8.8.8 2>/dev/null || /bin/true
+  ssh $ssh_dest ssh $ssh_opts cirros@$fip ping -q -c 1 -W 2 8.8.8.8 2>/dev/null || /bin/true
   # Check the VM can reach the metadata server
   local curl_proto='http'
   local curl_ssl_opts=''
@@ -184,7 +185,7 @@ function check_simple_instance() {
     curl_proto='https'
     curl_ssl_opts='-k'
   fi
-  $ssh_cmd ssh $ssh_opts cirros@$fip curl $curl_ssl_opts -s --connect-timeout 5 ${curl_proto}://169.254.169.254/latest/meta-data/local-ipv4 2>/dev/null ; echo ''
+  ssh $ssh_dest ssh $ssh_opts cirros@$fip curl $curl_ssl_opts -s --connect-timeout 5 ${curl_proto}://169.254.169.254/latest/meta-data/local-ipv4 2>/dev/null ; echo ''
 
   openstack server delete demo1
   sleep 5
@@ -217,18 +218,18 @@ function check_two_instances() {
 
   get_ssh_cmd $hhost1
   prepare_for_ssh
-  local vm_iface1=`get_vm_iface $iip1 $ssh_cmd`
+  local vm_iface1=`get_vm_iface $iip1`
   echo "INFO: VM interface: $vm_iface1"
-  local fip1=`get_link_local_ip $vm_iface1 $ssh_cmd`
+  local fip1=`get_link_local_ip $vm_iface1`
   if [[ -z "$fip1" ]]; then
     echo "ERROR: there is no link-local IP for VM"
-    $ssh_cmd "ip route ; ip addr"
+    ssh $ssh_dest "ip route ; ip addr"
     return 1
   fi
 
   wait_instance_ssh $fip1
 
-  $ssh_cmd ssh $ssh_opts cirros@$fip1 ping -c 4 $iip2
+  ssh $ssh_dest ssh $ssh_opts cirros@$fip1 ping -c 4 $iip2
 
   openstack server delete demo11
   openstack server delete demo12
