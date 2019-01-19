@@ -108,7 +108,7 @@ function prepare_for_ssh() {
     ssh $ssh_dest 'printf "[DEFAULT]\nplatform=dpdk\n" > ./contrail-vrouter-agent.conf' 2>/dev/null
     ssh $ssh_dest 'sudo mkdir -p /etc/contrail ; sudo cp -f ./contrail-vrouter-agent.conf /etc/contrail/' 2>/dev/null
   fi
-  scp $HOME/.ssh/id_rsa.pub $ssh_dest:id_rsa.pub
+  scp $HOME/.ssh/id_rsa $ssh_dest:id_rsa
 }
 
 function get_vm_iface() {
@@ -161,7 +161,7 @@ function check_simple_instance() {
     echo "ERROR: instance is not ready"
     return 1
   fi
-  get_ssh_cmd $hhost
+  get_ssh_dest $hhost
   prepare_for_ssh
   local vm_iface=`get_vm_iface $iip`
   echo "INFO: VM interface: $vm_iface"
@@ -216,7 +216,7 @@ function check_two_instances() {
     return
   fi
 
-  get_ssh_cmd $hhost1
+  get_ssh_dest $hhost1
   prepare_for_ssh
   local vm_iface1=`get_vm_iface $iip1`
   echo "INFO: VM interface: $vm_iface1"
