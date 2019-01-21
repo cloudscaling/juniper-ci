@@ -112,14 +112,19 @@ $SSH_CMD ${SSH_USER}@$master_ip "sudo cat /etc/kolla/kolla-toolbox/admin-openrc.
 virtualenv $WORKSPACE/.venv
 source $WORKSPACE/.venv/bin/activate
 source $WORKSPACE/admin-openrc.sh
-pip install python-openstackclient || res=1
-
-if ! prepare_openstack ; then
-  echo "ERROR: OpenStack preparation failed"
+if ! command -v pip ; then
+  # TODO: move these checks with pip into container
+  echo "ERROR: please install python-pip manually to the deployer node"
   res=1
 else
-  check_simple_instance || res=1
-  check_two_instances || res=1
+  pip install python-openstackclient || res=1
+  if ! prepare_openstack ; then
+    echo "ERROR: OpenStack preparation failed"
+    res=1
+  else
+    check_simple_instance || res=1
+    check_two_instances || res=1
+  fi
 fi
 deactivate
 

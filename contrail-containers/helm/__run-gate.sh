@@ -232,13 +232,19 @@ make build-heat
 sudo apt-get install -fy virtualenv &>> $my_dir/logs/apt.log
 export OS_CLOUD=openstack_helm
 
+res=0
 cd $my_dir
 source $my_dir/check-functions
 virtualenv .venv
 source .venv/bin/activate
-pip install python-openstackclient &>> $my_dir/logs/pip.log || /bin/true
-
-prepare_openstack && check_simple_instance
+if ! command -v pip ; then
+  # TODO: move these checks with pip into container
+  echo "ERROR: please install python-pip manually to the deployer node"
+  res=1
+else
+  pip install python-openstackclient &>> $my_dir/logs/pip.log || /bin/true
+  prepare_openstack && check_simple_instance
+fi
 deactivate
 
-exit $err
+exit $res

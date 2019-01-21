@@ -257,7 +257,7 @@ EOM
   done
   yum update -y &>>$logs_dir/yum.log
   yum install -y epel-release &>>$logs_dir/yum.log
-  yum install -y mc git wget iptables iproute libxml2-utils python2.7 lsof python-pip python-devel gcc&>>$logs_dir/yum.log
+  yum install -y mc git wget iptables iproute libxml2-utils python2.7 lsof &>>$logs_dir/yum.log
   yum remove -y python-requests cloud-init
 elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
   apt-get -y update &>>$logs_dir/apt.log
@@ -270,7 +270,7 @@ elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; t
     fi
   fi
   DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$logs_dir/apt.log
-  DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" install -y --no-install-recommends mc git wget libxml2-utils python2.7 lsof python-pip python-dev gcc \$dpdk_req &>>$logs_dir/apt.log
+  DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" install -y --no-install-recommends mc git wget libxml2-utils python2.7 lsof \$dpdk_req &>>$logs_dir/apt.log
   echo "network: {config: disabled}" > /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
   if [[ "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
     apt-get install ifupdown &>>$logs_dir/apt.log
@@ -294,9 +294,6 @@ EOM
   mv /etc/os-release /etc/os-release.original
   cat /etc/os-release.original > /etc/os-release
 fi
-pip install pip --upgrade &>>$logs_dir/pip.log
-hash -r
-pip install setuptools requests &>>$logs_dir/pip.log
 if [[ "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
   rm /etc/resolv.conf
   ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf

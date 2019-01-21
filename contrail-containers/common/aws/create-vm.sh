@@ -166,14 +166,13 @@ function run_instance() {
   echo "INFO: Update packages on machine and install additional packages $(date)"
   if [[ "$ENVIRONMENT_OS" == 'centos' ]]; then
     $ssh "sudo yum install -y epel-release" &>>$log_dir/$instance_id-yum.log
-    $ssh "sudo yum install -y mc git wget iptables iproute libxml2-utils python2.7 lsof python-pip python-devel gcc" &>>$log_dir/$instance_id-yum.log
+    $ssh "sudo yum install -y mc git wget iptables iproute libxml2-utils python2.7 lsof" &>>$log_dir/$instance_id-yum.log
     $ssh "sudo yum remove -y python-requests PyYAML" &>>$log_dir/$instance_id-yum.log
   elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
     $ssh "sudo apt-get -y update" &>>$log_dir/$instance_id-apt.log
     $ssh 'DEBIAN_FRONTEND=noninteractive sudo -E apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade' &>>$log_dir/$instance_id-apt.log
-    $ssh "sudo apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 lsof python-pip python-dev gcc" &>>$log_dir/$instance_id-apt.log
+    $ssh "sudo apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 lsof" &>>$log_dir/$instance_id-apt.log
   fi
-  $ssh "sudo pip install pip --upgrade && sudo pip install setuptools requests" &>>$log_dir/$instance_id-pip.log
 }
 
 if [[ "$CONTAINER_REGISTRY" == 'build' || "$CONTAINER_REGISTRY" == 'fullbuild' ]]; then
