@@ -85,8 +85,8 @@ function clone_clean_and_patched_repo() {
   git clone https://github.com/Juniper/$cad "${cad_dir}"
   local patchlist=''
   if patchlist=`echo "$PATCHSET_LIST" | grep "/$cad "` ; then
-    pushd $cad_dir >/dev/nul
+    pushd $cad_dir >/dev/null
     eval "$patchlist"
-    popd >/dev/nul
+    popd >/dev/null
   fi
 }
