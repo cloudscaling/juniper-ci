@@ -171,7 +171,7 @@ function run_instance() {
   elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
     $ssh "sudo apt-get -y update" &>>$log_dir/$instance_id-apt.log
     $ssh 'DEBIAN_FRONTEND=noninteractive sudo -E apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade' &>>$log_dir/$instance_id-apt.log
-    $ssh "sudo apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python2.7 lsof" &>>$log_dir/$instance_id-apt.log
+    $ssh "sudo apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python-minimal lsof" &>>$log_dir/$instance_id-apt.log
   fi
 }
 
