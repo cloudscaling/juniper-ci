@@ -30,6 +30,9 @@
             - build
             - fullbuild
       - string:
+          name: CONTAINERS_BUILD_ENVS
+          description: "Aditional environment's variables to use during containers of full build"
+      - string:
           name: CONTRAIL_VERSION
           default: master-latest
           description: "Tag's suffix for images from opencontrailnightly. Prefix is a OPENSTACK_VERSION"
