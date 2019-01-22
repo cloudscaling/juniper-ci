@@ -35,6 +35,9 @@ sudo docker ps -a
 cat >build.sh <<EOF
 #!/bin/bash -e
 export OPENSTACK_VERSION=$OPENSTACK_VERSION
+for env in $BUILD_ENV; do
+  export $env
+done
 cd /root/contrail-dev-env
 make sync
 make fetch_packages

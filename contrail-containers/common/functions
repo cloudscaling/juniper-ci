@@ -73,7 +73,7 @@ function build_containers() {
   $SCP "$WORKSPACE/patches" ${SSH_USER}@$build_ip:patches
   ssh_env="CONTRAIL_VERSION=$CONTRAIL_VERSION OPENSTACK_VERSION=$OPENSTACK_VERSION"
   ssh_env+=" CONTRAIL_INSTALL_PACKAGES_URL=$CONTRAIL_INSTALL_PACKAGES_URL"
-  ssh_env+=" $CONTAINERS_BUILD_ENVS"
+  ssh_env+=" BUILD_ENV='$BUILD_ENV'"
   set -o pipefail
   $SSH_CMD ${SSH_USER}@$build_ip "$ssh_env timeout -s 9 180m ./build-containers.sh" |& tee $WORKSPACE/logs/build.log
   set +o pipefail

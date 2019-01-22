@@ -30,7 +30,7 @@
             - build
             - fullbuild
       - string:
-          name: CONTAINERS_BUILD_ENVS
+          name: BUILD_ENV
           description: "Aditional environment's variables to use during containers of full build"
       - string:
           name: CONTRAIL_VERSION
