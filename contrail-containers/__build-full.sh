@@ -18,6 +18,14 @@ case "${linux}" in
     ;;
 esac
 
+if [[ -n "$BUILD_NODE_SWAP" ]]; then
+  echo "Initializing swap"
+  let BLOCKS_COUNT=$BUILD_NODE_SWAP/64
+  sudo dd if=/dev/zero of=/swapfile bs=64M count=$BLOCKS_COUNT
+  sudo mkswap /swapfile
+  sudo swapon /swapfile
+fi
+
 echo "INFO: Start build $(date)"
 
 git clone https://github.com/Juniper/contrail-dev-env.git

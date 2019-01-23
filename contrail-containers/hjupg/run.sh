@@ -41,6 +41,7 @@ function catch_errors() {
 
 run_env=''
 if [[ "$CONTAINER_REGISTRY" == 'build' || "$CONTAINER_REGISTRY" == 'fullbuild' ]]; then
+  source "$my_dir/../common/${HOST}/definitions"
   build_containers
   run_env="CONTAINER_REGISTRY=$build_ip:5000 CONTRAIL_VERSION=$OPENSTACK_VERSION-$CONTRAIL_VERSION REGISTRY_INSECURE=1"
 else

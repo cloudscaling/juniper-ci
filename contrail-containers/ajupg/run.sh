@@ -40,6 +40,7 @@ function catch_errors() {
 }
 
 if [[ "$CONTAINER_REGISTRY" == 'build' || "$CONTAINER_REGISTRY" == 'fullbuild' ]]; then
+  source "$my_dir/../common/${HOST}/definitions"
   build_containers
   CONTAINER_REGISTRY="$build_ip:5000"
   CONTRAIL_VERSION="$OPENSTACK_VERSION-$CONTRAIL_VERSION"

@@ -6,6 +6,8 @@ suffix=${NUM:-10}
 
 # we always need to create machine for containers build if build is required
 export BUILD_NODE_MEM=${BUILD_NODE_MEM:-4096}
+let BUILD_NODE_SWAP_DEFAULT=$BUILD_NODE_MEM*2
+export BUILD_NODE_SWAP=${BUILD_NODE_SWAP:-$BUILD_NODE_SWAP_DEFAULT}
 export CONT_NODE_MEM=${CONT_NODE_MEM:-16384}
 export COMP_NODE_MEM=${COMP_NODE_MEM:-6144}
 
