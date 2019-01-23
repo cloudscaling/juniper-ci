@@ -30,6 +30,10 @@ function catch_errors() {
 }
 
 cd contrail-ansible-deployer
+cat >>ansible.cfg <<EOF
+[ssh_connection]
+ssh_args = -o ControlMaster=no
+EOF
 ansible-playbook -v -e orchestrator=openstack -e config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/configure_instances.yml
 ansible-playbook -v -e orchestrator=openstack -e config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/install_openstack.yml
 ansible-playbook -v -e orchestrator=openstack -e config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/install_contrail.yml
