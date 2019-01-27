@@ -495,6 +495,13 @@ touch $misc_opts
 # TODO: OSP13: for queens only 3 contrail controller nodes are for now
 # (no separate analytics and analytics db nodes)
 if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
+
+  # add sshd service for computes
+  pos_to_insert=`sed "=" $role_file | sed -n '/^- name: Compute/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
+  sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::Sshd" $role_file
+  pos_to_insert=`sed "=" $role_file | sed -n '/^- name: ContrailDpdk/,/^  ServicesDefault:/p' | grep -o '^[0-9]\+' | tail -n 1`
+  sed -i "${pos_to_insert} a\\    - OS::TripleO::Services::Sshd" $role_file
+
   # Create ports for Contrail Controller and/or Analytis if any is installed on own node.
   # In that case OS controller will host VIP and haproxy will forward requests.
   contrail_vip_env='contrail_controller_vip_env.yaml'
@@ -711,6 +718,17 @@ cat <<EOF >> $misc_opts
   CloudNameCtlplane: overcloud.ctlplane.$CLOUD_DOMAIN_NAME
 EOF
 fi
+
+  # Add ssh keys for enabling nova migration over ssh
+  cat <<EOF >> $misc_opts
+  MigrationSshKey:
+    private_key: |
+EOF
+  while read l ; do echo "      $l" ; done < ~/.ssh/id_rsa >> $misc_opts
+  cat <<EOF >> $misc_opts
+    public_key: |
+EOF
+  while read l ; do echo "      $l" ; done < ~/.ssh/id_rsa.pub >> $misc_opts
 
 # IMPORTANT: The DNS domain used for the hosts should match the dhcp_domain configured in the Undercloud neutron.
 if (( CONT_COUNT < 2 )) ; then
