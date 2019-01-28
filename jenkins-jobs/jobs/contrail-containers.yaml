@@ -73,7 +73,7 @@
           allowed-multiselect: true
       - string:
           name: BUILD_NUM
-          default: "5.1.0-462"
+          default: "5.1.0-493"
           description: "Build number that is stored on S3 now"
     scm:
       - juniper-ci
