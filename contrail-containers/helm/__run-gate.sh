@@ -205,6 +205,9 @@ global:
     DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
     VROUTER_GATEWAY: $nodes_gw_1
     VROUTER_ENCRYPTION: FALSE
+    ANALYTICS_ALARM_ENABLE: TRUE
+    ANALYTICS_SNMP_ENABLE: TRUE
+    ANALYTICSDB_ENABLE: TRUE
 manifests:
   configmap_vrouter_dpdk: true
   daemonset_dpdk: true
