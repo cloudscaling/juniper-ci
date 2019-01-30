@@ -38,7 +38,7 @@ if [[ "$SSH_USER" != 'root' ]]; then prefix='sudo -E' ; fi
 $SCP "$my_dir/__run-gate.sh" $SSH_USER@$master_ip:run-gate.sh
 run_env+=" OPENSTACK_VERSION=$OPENSTACK_VERSION"
 run_env+=" AGENT_MODE=$AGENT_MODE"
-#timeout -s 9 120m $SSH_CMD $SSH_USER@$master_ip "$run_env $prefix ./run-gate.sh"
+timeout -s 9 120m $SSH_CMD $SSH_USER@$master_ip "$run_env $prefix ./run-gate.sh"
 
 trap - ERR
 if [[ "$CLEAN_ENV" == 'always' || "$CLEAN_ENV" == 'on_success' ]] ; then
