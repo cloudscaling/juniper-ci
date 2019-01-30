@@ -1,6 +1,6 @@
-BUILD_NODE_TYPE=m4.large
-CONT_NODE_TYPE=m4.xlarge
-COMP_NODE_TYPE=c4.xlarge
+export BUILD_NODE_TYPE=${BUILD_NODE_TYPE:-m4.large}
+export CONT_NODE_TYPE=${CONT_NODE_TYPE:-m4.xlarge}
+export COMP_NODE_TYPE=${COMP_NODE_TYPE:-c4.xlarge}
 
 # id_rsa from master machine must be imported into jenkins
 KEY_NAME=jenkins

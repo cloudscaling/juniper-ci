@@ -8,3 +8,4 @@ fi
 export CONT_NODES=1
 export COMP_NODES=0
 export DOMAIN=cluster.local
+export CONT_NODE_TYPE=m4.2xlarge
