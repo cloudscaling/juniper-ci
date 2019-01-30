@@ -217,9 +217,13 @@
             - slave01
             - slave04
       - airship-server-ubuntu16:
-          defaultha: nonha
+          defaultha: aio
           slavenode:
             - slave01
             - slave04
+      - airship-aws-ubuntu16:
+          defaultha: aio
+          slavenode:
+            - master
     jobs:
       - 'contrail-{project}'

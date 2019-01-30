@@ -103,6 +103,10 @@ save_introspect_info HttpPortDatabaseNodemgr 8103
 save_introspect_info HttpPortAnalyticsNodemgr 8104
 save_introspect_info HttpPortKubeManager 8108
 #save_introspect_info HttpPortMesosManager 8109
+save_introspect_info HttpPortConfigDatabaseNodemgr 8112
+save_introspect_info HttpPortAnalyticsAlarmNodemgr 8113
+save_introspect_info HttpPortAnalyticsSNMPNodemgr 8114
+save_introspect_info HttpPortDeviceManagerNodemgr 8115
 
 save_introspect_info HttpPortControl 8083
 save_introspect_info HttpPortApiServer 8084

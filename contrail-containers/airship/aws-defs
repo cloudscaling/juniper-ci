@@ -1,3 +1,10 @@
 export NET_COUNT=2
-echo "ERROR: aws deployment is not supported"
-exit 1
+
+if [[ "$HA" != 'aio' ]]; then
+  echo "ERROR: ${HA} deployment is not supported"
+  exit 1
+fi
+
+export CONT_NODES=1
+export COMP_NODES=0
+export DOMAIN=cluster.local
