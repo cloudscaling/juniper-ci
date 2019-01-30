@@ -56,6 +56,7 @@ eval $run_env
 for dest in $nodes_comp_ips ; do
   cat <<EOF | $SSH_CMD ${SSH_USER}@$dest
 docker pull $CONTRAIL_REGISTRY/contrail-vrouter-agent:$CONTRAIL_CONTAINER_TAG
+docker images &>/dev/null
 docker pull $CONTRAIL_REGISTRY/contrail-vrouter-agent-dpdk:$CONTRAIL_CONTAINER_TAG
 docker pull $CONTRAIL_REGISTRY/contrail-vrouter-kernel-init:$CONTRAIL_CONTAINER_TAG
 docker pull $CONTRAIL_REGISTRY/contrail-vrouter-kernel-init-dpdk:$CONTRAIL_CONTAINER_TAG
