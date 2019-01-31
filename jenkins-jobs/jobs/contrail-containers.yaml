@@ -73,7 +73,7 @@
           allowed-multiselect: true
       - string:
           name: BUILD_NUM
-          default: "5.1.0-462"
+          default: "5.1.0-493"
           description: "Build number that is stored on S3 now"
     scm:
       - juniper-ci
@@ -81,13 +81,14 @@
       - shell: |
           #!/bin/bash -e
           if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
-            desc="cleanup"
+            desc="$NUM: cleanup"
           else
             bn="$CONTAINER_REGISTRY/$CONTRAIL_VERSION"
             if [[ "$CONTAINER_REGISTRY" == 'build' ]]; then bn="$CONTAINER_REGISTRY/$BUILD_NUM" ; fi
             if [[ "$CONTAINER_REGISTRY" == 'fullbuild' ]]; then bn="$CONTAINER_REGISTRY/master" ; fi
-            desc="$SLAVE_NAME $HA $bn $OPENSTACK_VERSION $AGENT_MODE"
+            desc="$NUM: $SLAVE_NAME $HA $bn $OPENSTACK_VERSION $AGENT_MODE"
             if [[ "$TLS" == "contrail" ]] ; then desc="$desc +SSL_C" ; fi
+            if [[ "${USE_FQDN,,}" == "true" ]] ; then desc="$desc +FQDN" ; fi
           fi
           echo "DESCRIPTION $desc"
       - description-setter:
@@ -103,6 +104,11 @@
             export CONTRAIL_INSTALL_PACKAGES_URL="https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_"$CONTRAIL_VERSION"-centos-"$OPENSTACK_VERSION".tgz"
           elif [[ "$CONTAINER_REGISTRY" == 'fullbuild' ]]; then
             export CONTRAIL_VERSION="dev"
+          fi
+          if [[ "${USE_FQDN,,}" == "true" ]] ; then
+            export SELFSIGNED_CERTS_WITH_IPS=False
+          else
+            export SELFSIGNED_CERTS_WITH_IPS=True
           fi
 
           export WAY=$(echo {project} | cut -d '-' -f 1)
@@ -211,9 +217,13 @@
             - slave01
             - slave04
       - airship-server-ubuntu16:
-          defaultha: nonha
+          defaultha: aio
           slavenode:
             - slave01
             - slave04
+      - airship-aws-ubuntu16:
+          defaultha: aio
+          slavenode:
+            - master
     jobs:
       - 'contrail-{project}'

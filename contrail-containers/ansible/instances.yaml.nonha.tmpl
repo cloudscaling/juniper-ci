@@ -12,6 +12,8 @@ instances:
   roles:
     openstack: null
     analytics: null
+    analytics_snmp: null
+    analytics_alarm: null
     analytics_database: null
     config: null
     config_database: null
@@ -52,6 +54,7 @@ contrail_configuration:
  VROUTER_ENCRYPTION: FALSE
  RABBITMQ_USER: contrail
  RABBITMQ_PASSWORD: astrophytum
+ SELFSIGNED_CERTS_WITH_IPS: ${SELFSIGNED_CERTS_WITH_IPS}
 
 kolla_config:
  kolla_globals:

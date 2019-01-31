@@ -20,6 +20,11 @@ port_map['control-nodemgr']=8101
 port_map['vrouter-nodemgr']=8102
 port_map['database-nodemgr']=8103
 port_map['analytics-nodemgr']=8104
+port_map['config-database-nodemgr']=8112
+port_map['analytics-alarm-nodemgr']=8113
+port_map['analytics-snmp-nodemgr']=8114
+port_map['device-manager-nodemgr']=8115
+
 port_map['analytics-alarm-gen']=5995
 #port_map['analytics-api']=
 port_map['analytics-snmp-collector']=5920

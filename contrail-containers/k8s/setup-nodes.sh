@@ -43,6 +43,9 @@ AGENT_NODES=$AGENT_NODES
 AGENT_MODE=$AGENT_MODE
 PHYSICAL_INTERFACE=\$(ip route get 1 | grep -o 'dev.*' | awk '{print(\$2)}')
 $ssl_opts
+ANALYTICS_ALARM_ENABLE=True
+ANALYTICS_SNMP_ENABLE=True
+ANALYTICSDB_ENABLE=True
 EOM
 cat common.env
 kubernetes/setup-k8s.sh $token_opts
