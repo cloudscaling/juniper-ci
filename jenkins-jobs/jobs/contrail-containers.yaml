@@ -41,6 +41,7 @@
           choices:
             - ocata
             - queens
+            - rocky
       - choice:
           name: AGENT_MODE
           choices:
