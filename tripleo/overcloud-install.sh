@@ -753,6 +753,12 @@ if [[ "$TSN" == 'true' ]] ; then
 EOF
 fi
 
+if [[ "$CONTRAIL_VERSION" =~ 5.0 ]] ; then
+  cat << EOF >>  $misc_opts
+  DockerContrailAnalyticsTopologyImageName: 'contrail-analytics-topology'
+EOF
+fi
+
 multi_nic_opts=''
 if [[ "$use_multi_nic" == 'yes' ]] ; then
   multi_nic_opts+=' -e tripleo-heat-templates/environments/network-management.yaml'
