@@ -82,12 +82,12 @@
       - shell: |
           #!/bin/bash -e
           if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
-            desc="$NUM: cleanup"
+            desc="$SLAVE_NAME:$NUM cleanup"
           else
             bn="$CONTAINER_REGISTRY/$CONTRAIL_VERSION"
             if [[ "$CONTAINER_REGISTRY" == 'build' ]]; then bn="$CONTAINER_REGISTRY/$BUILD_NUM" ; fi
             if [[ "$CONTAINER_REGISTRY" == 'fullbuild' ]]; then bn="$CONTAINER_REGISTRY/master" ; fi
-            desc="$NUM: $SLAVE_NAME $HA $bn $OPENSTACK_VERSION $AGENT_MODE"
+            desc="$SLAVE_NAME:$NUM $HA $bn $OPENSTACK_VERSION $AGENT_MODE"
             if [[ "$TLS" == "contrail" ]] ; then desc="$desc +SSL_C" ; fi
             if [[ "${USE_FQDN,,}" == "true" ]] ; then desc="$desc +FQDN" ; fi
           fi
