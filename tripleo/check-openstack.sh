@@ -84,6 +84,7 @@ source ${WORKSPACE}/stackrc
 for ctrl in `openstack server list | grep 'contrailcontroller-' | grep -o "ctlplane=[0-9\.]*" | cut -d '=' -f 2` ; do
   check_ui_ip $ctrl || ret=1
 done
-ha_ip=`cat ${WORKSPACE}/overcloudrc | grep OS_AUTH_URL | grep -o "[0-9][0-9\.]*:" | cut -d ':' -f 1`
+ha_ip=`cat ${WORKSPACE}/overcloudrc | grep OS_AUTH_URL | grep -o "http[s]*:[^:]*" | cut -d '/' -f 3`
 check_ui_ip $ha_ip || ret=1
 exit $ret
+
