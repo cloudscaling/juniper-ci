@@ -392,6 +392,11 @@ if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' ]] ; then
 fi
 rm -rf ~/tripleo-heat-templates
 cp -r /usr/share/openstack-tripleo-heat-templates/ ~/tripleo-heat-templates
+# apply patch: https://review.openstack.org/#/c/625877/
+#   for https://bugs.launchpad.net/tripleo/+bug/1808965
+sed -i 's/\/usr\/share\/openstack-tripleo-heat-templates\/extraconfig\/pre_deploy\/rhel-registration\/scripts/scripts/g' tripleo-heat-templates/extraconfig/pre_deploy/rhel-registration/rhel-registration.yaml
+#
+
 rm -rf ~/contrail-tripleo-heat-templates
 git clone https://github.com/${git_repo_ctht}/contrail-tripleo-heat-templates -b $git_branch_tht
 if [[ -n "$THT_PATCHSET" ]] ; then
