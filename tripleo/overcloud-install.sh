@@ -377,6 +377,14 @@ export LINUX_DISTR_VER=$LINUX_DISTR_VER
 [ -n "${GENERAL_EXTRA_RPMS+x}" ] && export GENERAL_EXTRA_RPMS="$GENERAL_EXTRA_RPMS"
 [ -n "${BASE_EXTRA_RPMS+x}" ] && export BASE_EXTRA_RPMS="$BASE_EXTRA_RPMS"
 EOF
+  # add TPC repo
+  cat <<EOF > contrail-container-builder/tpc.repo.template 
+[tpc]
+name = tpc
+baseurl = http://148.251.5.90/tpc
+enabled = 1
+gpgcheck = 0
+EOF
   pushd contrail-container-builder/containers
   # TODO: dont fail build because some containers like vcenter fails in our env
   ./build.sh || { echo "WARNING: some containers are failed." ; cat ./*.log || true ; }
