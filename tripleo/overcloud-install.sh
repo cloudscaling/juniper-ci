@@ -1161,28 +1161,47 @@ echo "INFO: overcloud nodes"
 overcloud_nodes=$(openstack server list)
 echo "$overcloud_nodes"
 
-echo "INFO: collecting Contrail status"
-for i in `echo "$overcloud_nodes" | awk '/contrail|compute|dpdk|tsn/ {print($8)}' | cut -d '=' -f 2` ; do
-    contrail_status=$(ssh heat-admin@${i} sudo contrail-status)
-    hostname=$(ssh heat-admin@${i} hostname)
-    echo ==== $i ====
-    echo "$contrail_status"
-    if [[ ! $hostname =~ 'contrailcontroller' ]] ; then
-      state=`echo "$contrail_status" | grep -v '==' |  awk '{print($2)}'`
-    else
-      state=`echo "$contrail_status" | grep -v '==' |  grep -v 'supervisor-database' | awk '{print($2)}'`
-    fi
-    # TODO: OSP13
-    # temporary disable check - it is needed to be fixed because of output format was changed
-    if [[ 'newton|ocata' =~ $OPENSTACK_VERSION ]] ; then
-      for st in $state; do
-        if  [[ ! "active timeout backup" =~ "$st" ]] ; then
-          echo "ERROR: some of contrail services are not in active state"
-          ((++errors))
+retry=0
+while (true) ; do
+  echo "INFO: collecting Contrail status, try $retry"
+  status_chek_res=0
+  for i in `echo "$overcloud_nodes" | awk '/contrail|compute|dpdk|tsn/ {print($8)}' | cut -d '=' -f 2` ; do
+      contrail_status="$(ssh heat-admin@${i} sudo contrail-status)"
+      hostname="$(ssh heat-admin@${i} hostname)"
+      echo "==== $i ===="
+      echo "$contrail_status"
+
+      if [[ 'newton|ocata' =~ $OPENSTACK_VERSION ]] ; then
+        if [[ ! $hostname =~ 'contrailcontroller' ]] ; then
+          state=`echo "$contrail_status" | grep -v '==' |  awk '{print($2)}'`
+        else
+          state=`echo "$contrail_status" | grep -v '==' |  grep -v 'supervisor-database' | awk '{print($2)}'`
         fi
-      done
-    fi
-done
+        for st in $state; do
+          if  [[ ! "active timeout backup" =~ "$st" ]] ; then
+            ((++status_chek_res))
+          fi
+        done
+      else
+        total_count=$(echo "$contrail_status" | awk '/^.*:/{print($2)}' | wc -l)
+        active_count=$(echo "$status" | awk '/^.*:/{print($2)}' | grep 'active' | wc -l)
+        if (( total_count !=  active_count )) ; then
+            ((++status_chek_res))
+        fi
+      fi
+  done
+  if (( status_chek_res == 0 )) ; then
+    break
+  fi
+  ((++retry))
+  if (( retry == 5 )) ; then
+    echo "ERROR: some of contrail services are not in active state:"
+    ((++errors))
+    break
+  fi
+  sleep 10
+fi
+
 
 echo "INFO: collecting HEAT logs"
 
