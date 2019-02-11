@@ -1200,7 +1200,7 @@ while (true) ; do
     break
   fi
   sleep 10
-fi
+done
 
 
 echo "INFO: collecting HEAT logs"
