@@ -149,6 +149,13 @@
             - '3'
             - 'controller'
       - choice:
+          name: COMPUTE_COUNT
+          description:  Count of Compute/Dpdk nodes.
+          choices:
+            - '2'
+            - '1'
+            - '0'
+      - choice:
           name: CONTRAIL_ISSU_COUNT
           description:  Count of additional nodes for ISSU upgrade
                         Non zero value  means ISSUE enabled.

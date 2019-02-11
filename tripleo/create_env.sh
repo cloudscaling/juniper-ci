@@ -164,9 +164,16 @@ function define_overcloud_vms() {
 
 CTRL_MEM=8192
 COMP_MEM=4096
+ANALYTICS_MEM=4096
+ANALYTICSDB_MEM=8192
 if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
   CTRL_MEM=24576
-  COMP_MEM=8192
+  COMP_MEM=6144
+  if (( CONTRAIL_ANALYTICS_COUNT > 0 && CONTRAIL_ANALYTICSDB_COUNT > 0 )) ; then
+    CTRL_MEM=16384
+    ANALYTICS_MEM=8192
+    ANALYTICSDB_MEM=8192
+  fi
 fi
 ISSU_MEM=24576
 
@@ -180,9 +187,9 @@ define_overcloud_vms 'stor' $STORAGE_COUNT 4096 $vbmc_port
 (( vbmc_port+=STORAGE_COUNT ))
 define_overcloud_vms 'ctrlcont' $CONTRAIL_CONTROLLER_COUNT $CTRL_MEM $vbmc_port 4
 (( vbmc_port+=CONTRAIL_CONTROLLER_COUNT ))
-define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT 4096 $vbmc_port
+define_overcloud_vms 'ctrlanalytics' $CONTRAIL_ANALYTICS_COUNT $ANALYTICS_MEM $vbmc_port
 (( vbmc_port+=CONTRAIL_ANALYTICS_COUNT ))
-define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT 8192 $vbmc_port
+define_overcloud_vms 'ctrlanalyticsdb' $CONTRAIL_ANALYTICSDB_COUNT $ANALYTICSDB_MEM $vbmc_port
 (( vbmc_port+=CONTRAIL_ANALYTICSDB_COUNT ))
 define_overcloud_vms 'issu' $CONTRAIL_ISSU_COUNT $ISSU_MEM $vbmc_port 4
 (( vbmc_port+=CONTRAIL_ISSU_COUNT ))
