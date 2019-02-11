@@ -8,7 +8,8 @@ export PATH=${PATH}:/usr/sbin
 
 echo "INFO: Run setup-for-build  $(date)"
 
-ccb_dir=/root/src/review.opencontrail.org/Juniper/contrail-container-builder
+git config --global user.email john@google.com
+ccb_dir=/root/contrail-container-builder
 [ -d ${ccb_dir} ] || git clone https://github.com/Juniper/contrail-container-builder ${ccb_dir}
 if patchlist=`grep "/contrail-container-builder " /root/patches` ; then
   pushd $ccb_dir >/dev/nul

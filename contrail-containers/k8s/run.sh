@@ -34,12 +34,6 @@ function catch_errors() {
   exit $exit_code
 }
 
-clone_clean_and_patched_repo contrail-container-builder
-for dest in $nodes_ips ; do
-  $SCP -r "$WORKSPACE/contrail-container-builder" $SSH_USER@${dest}:./
-done
-$my_dir/setup-nodes.sh
-
 run_env=''
 if [[ "$CONTAINER_REGISTRY" == 'build' || "$CONTAINER_REGISTRY" == 'fullbuild' ]]; then
   source "$my_dir/../common/${HOST}/definitions"
@@ -50,6 +44,12 @@ else
   run_env="CONTRAIL_REGISTRY=$CONTAINER_REGISTRY REGISTRY_INSECURE=0"
   run_env+=" CONTRAIL_CONTAINER_TAG=$CONTRAIL_VERSION"
 fi
+
+clone_clean_and_patched_repo contrail-container-builder
+for dest in $nodes_ips ; do
+  $SCP -r "$WORKSPACE/contrail-container-builder" $SSH_USER@${dest}:./
+done
+$my_dir/setup-nodes.sh
 
 # when compute has only one interface dpdk images must be pre-pulled to avoid errors when network is not initialized yet
 eval $run_env
