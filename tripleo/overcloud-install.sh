@@ -421,8 +421,11 @@ case "$OPENSTACK_VERSION" in
   ocata|pike)
     role_file='tripleo-heat-templates/environments/contrail/roles_data_contrail.yaml'
     ;;
-  *)
+  *)    
     role_file='tripleo-heat-templates/roles_data_contrail_aio.yaml'
+    if (( ANALYTICSDB_COUNT > 0 && ANALYTICS_COUNT > 0 )) ; then
+      role_file='tripleo-heat-templates/roles_data_contrail_ffu.yaml'
+    fi
     ;;
 esac
 
