@@ -29,6 +29,14 @@ function catch_errors() {
   exit $exit_code
 }
 
+if [[ "$OPENSTACK_VERSION" == 'ocata' && "$VIRT_TYPE" == 'qemu' ]]; then
+  mkdir -p /etc/kolla/config/nova
+  cat << EOF > /etc/kolla/config/nova/nova-compute.conf
+[libvirt]
+virt_type=qemu
+EOF
+fi
+
 cd contrail-ansible-deployer
 cat >>ansible.cfg <<EOF
 [ssh_connection]
