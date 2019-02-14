@@ -1161,8 +1161,9 @@ echo "INFO: overcloud nodes"
 overcloud_nodes=$(openstack server list)
 echo "$overcloud_nodes"
 
-retry=0
+retry=1
 while (true) ; do
+  sleep 30
   echo "INFO: collecting Contrail status, try $retry"
   status_chek_res=0
   for i in `echo "$overcloud_nodes" | awk '/contrail|compute|dpdk|tsn/ {print($8)}' | cut -d '=' -f 2` ; do
@@ -1194,12 +1195,11 @@ while (true) ; do
     break
   fi
   ((++retry))
-  if (( retry == 5 )) ; then
+  if (( retry > 10 )) ; then
     echo "ERROR: some of contrail services are not in active state:"
     ((++errors))
     break
   fi
-  sleep 10
 done
 
 
