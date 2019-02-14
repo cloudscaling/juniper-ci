@@ -12,9 +12,9 @@ git config --global user.email john@google.com
 ccb_dir=$HOME/contrail-container-builder
 [ -d ${ccb_dir} ] || git clone https://github.com/Juniper/contrail-container-builder ${ccb_dir}
 if patchlist=`grep "/contrail-container-builder " $HOME/patches` ; then
-  pushd $ccb_dir >/dev/nul
+  pushd $ccb_dir >/dev/null
   eval "$patchlist"
-  popd >/dev/nul
+  popd >/dev/null
 fi
 
 cd $HOME/contrail-container-builder/containers
