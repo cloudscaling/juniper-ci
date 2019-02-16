@@ -120,7 +120,7 @@
     scm:
       - git:
           url: 'https://github.com/openstack/charm-{charm}.git'
-          basedir: 'juju-scaleio-tmp/trusty/{charm}'
+          basedir: 'charm-{charm}'
           branches:
             - '*/master'
           clean:
