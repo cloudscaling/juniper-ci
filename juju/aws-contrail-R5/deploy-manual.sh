@@ -75,7 +75,7 @@ juju-deploy cs:$SERIES/keystone --to $m3
 juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose keystone
 
-juju-deploy $WORKSPACE/charm-nova-compute --to $m2
+juju-deploy --series=$SERIES $WORKSPACE/charm-nova-compute --to $m2
 juju-add-unit nova-compute --to $m3
 juju-set nova-compute "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "virt-type=qemu" "enable-resize=True" "enable-live-migration=True" "migration-auth-type=ssh"
 
