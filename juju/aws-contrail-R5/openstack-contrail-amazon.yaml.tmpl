@@ -41,7 +41,7 @@ services:
     to:
       - "3"
   nova-compute:
-    charm: "cs:${SERIES}/nova-compute"
+    charm: "${WORKSPACE}/charm-nova-compute"
     num_units: 2
     options:
       debug: "true"
