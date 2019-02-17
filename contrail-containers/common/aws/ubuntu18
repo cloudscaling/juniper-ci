@@ -28,7 +28,7 @@ sudo bash -c 'echo "            match:" >> $if_path'
 sudo bash -c 'echo "                macaddress: $mac" >> $if_path'
 sudo bash -c 'echo "            set-name: $iface" >> $if_path'
 sudo mkdir -p /etc/systemd/network/
-sudo bash -c 'printf "[Match]\nMACAddress=$mac\nName=ens4\n[Network]\nDHCP=ipv4\n[DHCP]\nUseMTU=true\nRouteMetric=100\nUseRoutes=false\n" > /etc/systemd/network/10-netplan-$iface.network'
+sudo bash -c 'printf "[Match]\nMACAddress=$mac\nName=$iface\n[Network]\nDHCP=ipv4\n[DHCP]\nUseMTU=true\nRouteMetric=100\nUseRoutes=false\n" > /etc/systemd/network/10-netplan-$iface.network'
 sudo netplan apply
 EOF
 }
