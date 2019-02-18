@@ -12,6 +12,18 @@ if [ -z "$WORKSPACE" ] ; then
 fi
 
 export OVERCLOUD_TLS_OPTS=""
+export INTROSPECT_CURL_OPTS=""
+export INTROSPECT_CURL_PROTO="http"
+
+'/etc/ipa/ca.crt'
+
+SERVER_CA_CERTFILE_DEFAULT='/etc/contrail/ssl/certs/ca-cert.pem'
+[[ "$FREE_IPA" == 'true' ]] && SERVER_CA_CERTFILE_DEFAULT='/etc/ipa/ca.crt'
+
+export SERVER_KEYFILE=${SERVER_KEYFILE:-'/etc/contrail/ssl/private/server-privkey.pem'}
+export SERVER_CERTFILE=${SERVER_CERTFILE:-'/etc/contrail/ssl/certs/server.pem'}
+export SERVER_CA_CERTFILE=${SERVER_CA_CERTFILE:-${SERVER_CA_CERTFILE_DEFAULT}}
+
 if [[ "$TLS" != 'off' ]] ; then
   OVERCLOUD_TLS_OPTS="--insecure"
   if [[ -f /home/stack/ca.crt.pem && -f /home/stack/server.crt.pem && -f /home/stack/server.key.pem ]] ; then
@@ -22,6 +34,9 @@ if [[ "$TLS" != 'off' ]] ; then
     OVERCLOUD_TLS_OPTS+=" --os-cert /home/stack/server.crt.pem"
     OVERCLOUD_TLS_OPTS+=" --os-key /home/stack/server.key.pem"
   fi
+
+  INTROSPECT_CURL_OPTS="--key ${SERVER_KEYFILE} --cert ${SERVER_CERTFILE} --cacert ${SERVER_CA_CERTFILE}"
+  INTROSPECT_CURL_PROTO="https"
 fi
 
 source ${WORKSPACE}/stackrc

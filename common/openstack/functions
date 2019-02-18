@@ -368,11 +368,6 @@ function _get_instance_machine() {
   _get_machine_by_ip $ip
 }
 
-function _get_current_routes() {
-  local mch=$1
-  $SSH_CMD $mch "PATH=\$PATH:/usr/sbin ip route" 2>/dev/null | awk '/169.254/{print $1}'
-}
-
 function _check_new_route() {
   local mch=$1
   local route=$2
@@ -434,11 +429,6 @@ function check_instance_simple() {
   local net_id=$1
   local fip=$2
 
-  declare -A rts
-  for mch in `_get_machines_by_service nova-compute` ; do
-    rts[$mch]=`_get_current_routes $mch`
-  done
-
   local iname="instance_$flavor"
   if ! output=`openstack $OVERCLOUD_TLS_OPTS server create --flavor $flavor --nic net-id=$net_id --image cirros $iname` ; then
     echo "ERROR: Couldn't boot instance"
@@ -455,14 +445,10 @@ function check_instance_simple() {
 
     _check_instance_log $instance_id || ret=1
 
-    local routes_to_skip="${rts[${mch}]}"
-    local rt=`_get_current_routes $mch`
-    local new_route=''
-    for r in $rt ; do
-      echo "$routes_to_skip" | grep -q "$r" && continue
-      new_route="$r"
-      break
-    done
+    local instance_ip=$(openstack $OVERCLOUD_TLS_OPTS server show $instance_id | awk '/addresses/{print $4}' | cut -d '=' -f 2 | sed 's/,$//g')
+    local if_name=$($SSH_CMD $mch sudo vif --list | grep -B 1 $instance_ip | head -1 | awk '{print $3}' | sed 's/\r//g')
+    local new_route=$($SSH_CMD $mch curl $INTROSPECT_CURL_OPTS -s ${INTROSPECT_CURL_PROTO}://${mch}:8085/Snh_ItfReq?name=$if_name | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/')
+
     if [[ -n $new_route ]] ; then
       echo "INFO: Instance's new route is $new_route"
       _check_new_route $mch $new_route || ret=1
