@@ -76,7 +76,7 @@ juju-deploy cs:$SERIES/heat --to lxd:$cont0
 juju-set heat "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose heat
 
-juju-deploy cs:$SERIES/nova-compute --to $comp1
+juju-deploy --series=$SERIES $WORKSPACE/charm-nova-compute --to $comp1
 juju-add-unit nova-compute --to $comp2
 juju-set nova-compute "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "virt-type=kvm" "enable-resize=True" "enable-live-migration=True" "migration-auth-type=ssh"
 

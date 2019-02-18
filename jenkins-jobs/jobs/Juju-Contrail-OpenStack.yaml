@@ -177,6 +177,7 @@
       - juniper-contrail-charms-branch
       - juniper-ci
       - tempest
+      - charm-nova-compute
     builders:
       - shell: |
           #!/bin/bash -e
@@ -396,6 +397,7 @@
     scm:
       - juniper-contrail-charms-branch
       - juniper-ci
+      - charm-nova-compute
     builders:
       - shell: |
           #!/bin/bash -e

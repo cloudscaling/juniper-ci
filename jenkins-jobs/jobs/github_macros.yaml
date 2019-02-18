@@ -115,22 +115,22 @@
 
 
 # temporary definition while we use unreleased OpenStack charms
-#- scm:
-#    name: github-tmp
-#    scm:
-#      - git:
-#          url: 'https://github.com/openstack/charm-{charm}.git'
-#          basedir: 'juju-scaleio-tmp/trusty/{charm}'
-#          branches:
-#            - '*/master'
-#          clean:
-#              after: true
-#              before: true
-#          prune: true
-#          wipe-workspace: true
-#          skip-tag: true
-#- scm:
-#    name: charm-glance
-#    scm:
-#      - github-tmp:
-#          charm: glance
+- scm:
+    name: github-tmp
+    scm:
+      - git:
+          url: 'https://github.com/openstack/charm-{charm}.git'
+          basedir: 'charm-{charm}'
+          branches:
+            - '*/master'
+          clean:
+              after: true
+              before: true
+          prune: true
+          wipe-workspace: true
+          skip-tag: true
+- scm:
+    name: charm-nova-compute
+    scm:
+      - github-tmp:
+          charm: nova-compute

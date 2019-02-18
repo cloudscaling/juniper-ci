@@ -99,7 +99,7 @@ volumes="-v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer
 volumes+=" -v $HOME/.ssh:/.ssh"
 volumes+=" -v $WORKSPACE/logs/deployer:/root/logs"
 volumes+=" -v $my_dir/__run-gate.sh:/root/run-gate.sh"
-docker run -i --rm --entrypoint /bin/bash $volumes --network host -e KOLLA_PATCHSET_CMD="$patchset" -e OPENSTACK_VERSION=$OPENSTACK_VERSION centos-soft -c "/root/run-gate.sh"
+docker run -i --rm --entrypoint /bin/bash $volumes --network host -e KOLLA_PATCHSET_CMD="$patchset" -e OPENSTACK_VERSION=$OPENSTACK_VERSION -e VIRT_TYPE=$VIRT_TYPE centos-soft -c "/root/run-gate.sh"
 
 # TODO: wait till cluster up and initialized
 sleep 120

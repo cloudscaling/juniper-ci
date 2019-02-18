@@ -173,6 +173,10 @@
           defaultha: ha
           slavenode:
             - master
+      - ansible-aws-ubuntu18:
+          defaultha: ha
+          slavenode:
+            - master
       - ansible-server-centos:
           defaultha: ha
           slavenode:
