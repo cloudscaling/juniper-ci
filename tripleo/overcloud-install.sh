@@ -1185,8 +1185,8 @@ while (true) ; do
         done
       else
         total_count=$(echo "$contrail_status" | awk '/^.*:/{print($2)}' | wc -l)
-        active_count=$(echo "$status" | awk '/^.*:/{print($2)}' | grep 'active' | wc -l)
-        if (( total_count !=  active_count )) ; then
+        active_count=$(echo "$contrail_status" | awk '/^.*:/{print($2)}' | grep 'active' | wc -l)
+        if (( total_count != active_count )) ; then
             ((++status_chek_res))
         fi
       fi
