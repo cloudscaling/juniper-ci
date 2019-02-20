@@ -15,8 +15,6 @@ export OVERCLOUD_TLS_OPTS=""
 export INTROSPECT_CURL_OPTS=""
 export INTROSPECT_CURL_PROTO="http"
 
-'/etc/ipa/ca.crt'
-
 SERVER_CA_CERTFILE_DEFAULT='/etc/contrail/ssl/certs/ca-cert.pem'
 [[ "$FREE_IPA" == 'true' ]] && SERVER_CA_CERTFILE_DEFAULT='/etc/ipa/ca.crt'
 
