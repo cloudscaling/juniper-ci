@@ -1156,6 +1156,10 @@ openstack overcloud deploy --templates tripleo-heat-templates/ \
 
 errors=$?
 
+echo "Update /etc/hosts to resolve fqdn for overcloud VIP"
+
+sudo sed -e "/overcloud.${CLOUD_DOMAIN_NAME}/d" /etc/hosts
+sudo bash -c "echo \"${fixed_vip} overcloud.${CLOUD_DOMAIN_NAME}\" >> /etc/hosts"
 
 echo "INFO: overcloud nodes"
 overcloud_nodes=$(openstack server list)

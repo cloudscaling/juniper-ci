@@ -447,7 +447,7 @@ function check_instance_simple() {
 
     local instance_ip=$(openstack $OVERCLOUD_TLS_OPTS server show $instance_id | awk '/addresses/{print $4}' | cut -d '=' -f 2 | sed 's/,$//g')
     local if_name=$($SSH_CMD $mch sudo vif --list | grep -B 1 $instance_ip | head -1 | awk '{print $3}' | sed 's/\r//g')
-    local new_route=$($SSH_CMD $mch curl $INTROSPECT_CURL_OPTS -s ${INTROSPECT_CURL_PROTO}://${mch}:8085/Snh_ItfReq?name=$if_name | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/')
+    local new_route=$($SSH_CMD $mch sudo curl $INTROSPECT_CURL_OPTS -s "${INTROSPECT_CURL_PROTO}://\$(hostname -f):8085/Snh_ItfReq?name=$if_name" | sed 's/^.*<mdata_ip_addr.*>\([0-9\.]*\)<.mdata_ip_addr>.*$/\1/')
 
     if [[ -n $new_route ]] ; then
       echo "INFO: Instance's new route is $new_route"
