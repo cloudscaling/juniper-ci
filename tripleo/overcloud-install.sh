@@ -414,6 +414,13 @@ if [[ -n "$THT_PATCHSET" ]] ; then
 fi
 cp -r ~/contrail-tripleo-heat-templates/* ~/tripleo-heat-templates
 
+if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION && -f ~/tht_ipa.diff ]] ; then
+  # apply https://review.openstack.org/#/c/625693/
+  if patch --dry-run -p 1 -i ~/tht_ipa.diff -d ~/tripleo-heat-templates/ ; then
+    patch -p 1 -i ~/tht_ipa.diff -d ~/tripleo-heat-templates/
+  fi
+fi
+
 case "$OPENSTACK_VERSION" in
   newton)
     role_file='tripleo-heat-templates/environments/contrail/roles_data.yaml'

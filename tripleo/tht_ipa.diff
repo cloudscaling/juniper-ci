@@ -1,0 +1,41 @@
+From cbbf43b6181235eddc83f6c03b9565fa086866ac Mon Sep 17 00:00:00 2001
+From: Raildo Mascena <rmascena@redhat.com>
+Date: Thu, 6 Dec 2018 16:09:07 -0500
+Subject: [PATCH] Spliting compact services in multiples lines
+
+When we generate metadata for compact services, all of the compact
+services where joining in one single blob and we hit the size limit
+for it. Splitting compact services each one with per line with the
+compact service name and a list of their networks, so we will not hit
+this size limit anymore.
+
+Change-Id: I90d7bc73000352ad2c4b3f08f00d2a115f075a5e
+Depends-On: Ida39f5768c67f982b2fe316f6fae4988a74c8534
+(cherry picked from commit 12468acb11edf1715b54b3ab6839d98b94899c2c)
+---
+ extraconfig/nova_metadata/krb-service-principals.j2.yaml | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/extraconfig/nova_metadata/krb-service-principals.j2.yaml b/extraconfig/nova_metadata/krb-service-principals.j2.yaml
+index f8be39256..1095724fb 100644
+--- a/extraconfig/nova_metadata/krb-service-principals.j2.yaml
++++ b/extraconfig/nova_metadata/krb-service-principals.j2.yaml
+@@ -87,7 +87,7 @@ resources:
+     properties:
+       value:
+         yaql:
+-          expression: dict(coalesce($.data, []).where($ != null and $.type = 'node').select([$.service, $.network.replace('_', '')]).groupBy($[0], $[1]))
++          expression: dict(coalesce($.data, []).where($ != null and $.type = 'node').groupBy(concat('compact_service_', $.service), $.network.replace('_', '')))
+           data: {get_attr: [IncomingMetadataSettings, value]}
+ 
+ outputs:
+@@ -96,5 +96,5 @@ outputs:
+     value:
+       map_merge:
+         - {get_attr: [IndividualServices, value]}
+-        - compact_services: {get_attr: [CompactServices, value]}
++        - {get_attr: [CompactServices, value]}
+ 
+-- 
+2.17.2 (Apple Git-113)
+

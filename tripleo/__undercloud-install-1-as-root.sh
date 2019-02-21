@@ -240,10 +240,23 @@ env_opts+=" TLS=$TLS DPDK=$DPDK TSN=$TSN SRIOV=$SRIOV"
 env_opts+=" RHEL_CERT_TEST=$RHEL_CERT_TEST RHEL_ACCOUNT_FILE=$RHEL_ACCOUNT_FILE"
 env_opts+=" FREE_IPA=$FREE_IPA CLOUD_DOMAIN_NAME=$CLOUD_DOMAIN_NAME"
 
-
 if [[ "$FREE_IPA" == 'true' ]] ; then
-  # Pinned versions to avoid conflict with system PyYAML package
-  pip install novajoin==1.0.21 oslo.policy==1.33.2
+  if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
+    echo "ERROR: FreeIPA is not support for $OPENSTACK_VERSION. Minimum version is queens."
+    exit -1
+  fi
+
+  novajoin_ver=$(yum info python-novajoin | awk  '/Version/{print($3)}')
+  min_version=$(echo -e "1.0.22\n${novajoin_ver}" | sort  -V | head -n1)
+  if [[ "$min_version" == '1.0.22' ]] ; then
+    yum install --yes python-novajoin
+  else
+    # # Pinned versions to avoid conflict with system PyYAML package
+    # pip install novajoin==1.0.21 oslo.policy==1.33.2
+    # There should be plugins with fixed bug related to limit of nova metadata line limit
+    yum install --enablerepo=rhel-7-server-openstack-14-rpms --yes python-novajoin
+  fi
+
   yum install -y ipa-client
   if ! grep -q novajoin /etc/passwd ; then
     adduser -M novajoin

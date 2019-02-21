@@ -47,6 +47,7 @@ otp=''
 if [[ "$FREE_IPA" == 'true' ]] ; then
   freeipaip="192.168.${env_addr}.4"
   otp=$(ssh -T $ssh_opts root@$freeipaip cat undercloud_otp)
+  scp $ssh_opts "$my_dir/tht_ipa.diff" ${ssh_addr}:/home/stack/
 fi
 
 env_opts="NUM=$NUM NETDEV=$NETDEV OPENSTACK_VERSION=$OPENSTACK_VERSION"
