@@ -63,6 +63,16 @@ kolla_config:
    enable_ironic: "no"
    enable_swift: "no"
    nova_compute_virt_type: ${VIRT_TYPE}
+   default_project_domain_name: "admin_domain"
+   default_project_domain_id: "admin_domain"
+   default_user_domain_name: "admin_domain"
+   default_user_domain_id: "admin_domain"
+   openstack_auth:
+     auth_url: "http://${nodes_vip_0}:35357"
+     username: "admin"
+     password: "password"
+     project_name: "admin"
+     domain_name: "admin_domain"
  kolla_passwords:
    metadata_secret: c0ntrail123
    keystone_admin_password: password
