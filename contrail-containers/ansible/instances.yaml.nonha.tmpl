@@ -68,6 +68,10 @@ kolla_config:
    default_user_domain_name: "admin_domain"
    default_user_domain_id: "admin_domain"
    openstack_auth:
+     auth_url: "https://${nodes_vip_0}:35357"
+     username: "admin"
+     password: "password"
+     project_name: "admin"
      domain_name: "admin_domain"
  kolla_passwords:
    metadata_secret: c0ntrail123
