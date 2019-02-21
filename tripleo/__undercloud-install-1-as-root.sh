@@ -249,12 +249,12 @@ if [[ "$FREE_IPA" == 'true' ]] ; then
   novajoin_ver=$(yum info python-novajoin | awk  '/Version/{print($3)}')
   min_version=$(echo -e "1.0.22\n${novajoin_ver}" | sort  -V | head -n1)
   if [[ "$min_version" == '1.0.22' ]] ; then
-    yum install --yes python-novajoin
+    yum install -y python-novajoin
   else
     # # Pinned versions to avoid conflict with system PyYAML package
     # pip install novajoin==1.0.21 oslo.policy==1.33.2
     # There should be plugins with fixed bug related to limit of nova metadata line limit
-    yum install --enablerepo=rhel-7-server-openstack-14-rpms --yes python-novajoin
+    yum install --enablerepo=rhel-7-server-openstack-14-rpms -y python-novajoin
   fi
 
   yum install -y ipa-client
