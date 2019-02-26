@@ -162,12 +162,14 @@ function define_overcloud_vms() {
   fi
 }
 
+OS_MEM=8192
 CTRL_MEM=8192
 COMP_MEM=4096
 ANALYTICS_MEM=4096
 ANALYTICSDB_MEM=8192
 
 if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION || "$CONTRAIL_ISSU_COUNT" != "0" ]] ; then
+  OS_MEM=12288
   CTRL_MEM=24576
   COMP_MEM=6144
   if (( CONTRAIL_ANALYTICS_COUNT > 0 || CONTRAIL_ANALYTICSDB_COUNT > 0 )) ; then
@@ -180,7 +182,7 @@ ISSU_MEM=24576
 
 # just define overcloud machines
 vbmc_port=$VBMC_PORT_BASE
-define_overcloud_vms 'cont' $CONTROLLER_COUNT 8192 $vbmc_port 4
+define_overcloud_vms 'cont' $CONTROLLER_COUNT $OS_MEM $vbmc_port 4
 (( vbmc_port+=CONTROLLER_COUNT ))
 define_overcloud_vms $compute_machine_name $COMPUTE_COUNT $COMP_MEM $vbmc_port 4
 (( vbmc_port+=COMPUTE_COUNT ))
