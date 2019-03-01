@@ -762,7 +762,7 @@ cat <<EOF >> $misc_opts
   ContrailControlRNDCSecret: sHE1SM8nsySdgsoRxwARtA==
 EOF
 
-dpdk_core_mask="0x03"
+dpdk_core_mask="0x07"
 if [[ "$DPDK" != 'off' ]] ; then
   cat <<EOF >> $misc_opts
   ContrailDpdkCoremask: "$dpdk_core_mask"
