@@ -74,7 +74,7 @@
           allowed-multiselect: true
       - string:
           name: BUILD_NUM
-          default: "5.1.0-510"
+          default: "5.1.0-553"
           description: "Build number that is stored on S3 now"
     scm:
       - juniper-ci
@@ -102,7 +102,7 @@
           if [[ "$CONTAINER_REGISTRY" == 'build' ]]; then
             # hardcoded version of archive on S3
             export CONTRAIL_VERSION="$BUILD_NUM"
-            export CONTRAIL_INSTALL_PACKAGES_URL="https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_"$CONTRAIL_VERSION"-centos-"$OPENSTACK_VERSION".tgz"
+            export CONTRAIL_INSTALL_PACKAGES_URL="https://s3-us-west-2.amazonaws.com/contrailpkgs/contrail-install-packages_"$CONTRAIL_VERSION"-centos.tgz"
           elif [[ "$CONTAINER_REGISTRY" == 'fullbuild' ]]; then
             export CONTRAIL_VERSION="dev"
           fi
