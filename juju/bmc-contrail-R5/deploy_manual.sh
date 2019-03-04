@@ -69,7 +69,8 @@ juju-set glance "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose glance
 
 juju-deploy cs:$SERIES/keystone --to lxd:$cont0
-juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "preferred-api-version=3"
+juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+# "preferred-api-version=3"
 juju-expose keystone
 
 juju-deploy cs:$SERIES/heat --to lxd:$cont0
