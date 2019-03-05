@@ -63,7 +63,7 @@ done
 
 $SCP "$my_dir/../common/check-functions" $SSH_USER@$master_ip:check-functions
 $SCP "$my_dir/__run-gate.sh" $SSH_USER@$master_ip:run-gate.sh
-run_env+=" OPENSTACK_VERSION=$OPENSTACK_VERSION"
+run_env+=" OPENSTACK_VERSION=$OPENSTACK_VERSION DOMAIN=$DOMAIN"
 run_env+=" AGENT_MODE=$AGENT_MODE SSL_ENABLE=$SSL_ENABLE"
 timeout -s 9 120m $SSH_CMD $SSH_USER@$master_ip "$run_env ./run-gate.sh"
 

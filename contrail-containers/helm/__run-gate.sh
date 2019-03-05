@@ -44,7 +44,7 @@ kubernetes:
   cluster:
     cni: calico
     pod_subnet: 192.168.0.0/16
-    domain: cluster.local
+    domain: ${DOMAIN}
 EOF
 if [[ "$REGISTRY_INSECURE" == '1' ]] ; then
   cat <<EOF >> $OSH_INFRA_PATH/tools/gate/devel/multinode-vars.yaml
@@ -106,17 +106,17 @@ cd ${OSH_INFRA_PATH}
 make dev-deploy setup-host multinode
 make dev-deploy k8s multinode
 
-nslookup kubernetes.default.svc.cluster.local || /bin/true
+nslookup kubernetes.default.svc.$DOMAIN || /bin/true
 kubectl get nodes -o wide
 
 # names are assigned by kubernetes. use the same algorithm to generate name.
 for ip in $nodes_cont_ips ; do
-  name="node-$(echo $ip | tr '.' '-').local"
+  name="node-$(echo $ip | tr '.' '-').$DOMAIN"
   kubectl label node $name --overwrite openstack-compute-node=disable
   kubectl label node $name opencontrail.org/controller=enabled
 done
 for ip in $nodes_comp_ips ; do
-  name="node-$(echo $ip | tr '.' '-').local"
+  name="node-$(echo $ip | tr '.' '-').$DOMAIN"
   kubectl label node $name --overwrite openstack-control-plane=disable
   if [[ "$AGENT_MODE" == "dpdk" ]]; then
     kubectl label node $name opencontrail.org/vrouter-dpdk=enabled
