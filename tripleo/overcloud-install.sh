@@ -349,6 +349,7 @@ else
     repo_dir="/var/www/html/${CONTRAIL_VERSION}-${OPENSTACK_VERSION}"
     sudo rm -f $repo_dir/contrail-tripleo-puppet*.rpm
     sudo cp -f RPMS/noarch/*.rpm $repo_dir
+    sudo ln -s $repo_dir "/var/www/html/${CONTRAIL_VERSION}"
     pushd $repo_dir
     sudo createrepo --update -v $repo_dir
     popd
