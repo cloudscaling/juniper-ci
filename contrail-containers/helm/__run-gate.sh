@@ -111,7 +111,7 @@ kubectl get nodes -o wide
 
 # names are assigned by kubernetes. use the same algorithm to generate name.
 for ip in $nodes_cont_ips ; do
-  name="node-$(echo $ip | tr '.' '-').$DOMAIN"
+  name=`kubectl get nodes -o custom-columns=C1:.status.addresses[0].address,C2:.status.addresses[1].address | grep $ip | awk '{print $2}'`
   kubectl label node $name --overwrite openstack-compute-node=disable
   kubectl label node $name opencontrail.org/controller=enabled
 done
