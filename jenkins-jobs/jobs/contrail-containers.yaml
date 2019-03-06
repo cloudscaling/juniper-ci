@@ -149,11 +149,10 @@
 - project:
     name: contrail-containers
     project:
-# helm on aws - need to fix domain suffix at node labeling stage
-#      - helm-aws-ubuntu16:
-#          defaultha: ha
-#          slavenode:
-#            - master
+      - helm-aws-ubuntu16:
+          defaultha: ha
+          slavenode:
+            - master
       - helm-server-ubuntu16:
           defaultha: ha
           slavenode:
