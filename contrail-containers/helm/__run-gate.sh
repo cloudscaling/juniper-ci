@@ -104,7 +104,7 @@ done
 set -x
 cd ${OSH_INFRA_PATH}
 make dev-deploy setup-host multinode
-sudo make dev-deploy k8s multinode
+make dev-deploy k8s multinode
 
 nslookup kubernetes.default.svc.$DOMAIN || /bin/true
 kubectl get nodes -o wide
