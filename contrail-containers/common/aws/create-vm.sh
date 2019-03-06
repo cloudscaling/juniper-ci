@@ -124,6 +124,13 @@ function run_instance() {
     sleep 2
   done
 
+  echo "INFO: copy ssh key to machine"
+  $ssh "mkdir -p /home/$SSH_USER/.ssh ; printf 'Host *\n  StrictHostKeyChecking no\n  UserKnownHostsFile=/dev/null' > /home/$SSH_USER/.ssh/config"
+  local id_rsa="$(cat $HOME/.ssh/id_rsa)"
+  $ssh "echo '$id_rsa' > /home/$SSH_USER/.ssh/id_rsa && chmod 600 /home/$SSH_USER/.ssh/id_rsa"
+  local id_rsa_pub="$(cat $HOME/.ssh/id_rsa.pub)"
+  $ssh "echo '$id_rsa_pub' > /home/$SSH_USER/.ssh/id_rsa.pub && chmod 600 /home/$SSH_USER/.ssh/id_rsa.pub"
+
   if [[ "$cloud_vm" == 'true' ]] && ((NET_COUNT > 1)) ; then
     echo "INFO: Configure additional interfaces for cloud VM"
     local net=''
