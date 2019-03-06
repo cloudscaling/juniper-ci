@@ -153,13 +153,15 @@ if [[ 'newton|ocata' =~ $OPENSTACK_VERSION  ]] ; then
   # Before queens there is RPM based deployement,
   # so prepare RPM repo for contrail
   repo_dir='/var/www/html/contrail'
+  mkdir -p $repo_dir
 else
   default_contrail_ver=$(ls -1 /root/contrail_packages | grep -o '\([0-9]\+\.\{0,1\}\)\{1,5\}-[0-9]\+' | sort -nr  | head -n 1)
   CONTRAIL_VERSION=${CONTRAIL_VERSION:-${default_contrail_ver}}
-  repo_dir="/var/www/html/${CONTRAIL_VERSION}-${OPENSTACK_VERSION}"
+  repo_dir="/var/www/html/${CONTRAIL_VERSION}"
+  mkdir -p $repo_dir
+  ln -s $repo_dir "${repo_dir}-${OPENSTACK_VERSION}"
 fi
 
-mkdir -p $repo_dir
 
 # prepare contrail packages
 rpms=`ls /root/contrail_packages/ | grep "\.rpm"` || true
