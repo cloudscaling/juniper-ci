@@ -108,15 +108,17 @@ make dev-deploy k8s multinode
 
 nslookup kubernetes.default.svc.$DOMAIN || /bin/true
 kubectl get nodes -o wide
+kubectl get nodes -o custom-columns=C1:.status.addresses[0].address,C2:.status.addresses[1].address
+kubectl get nodes -o yaml &> $my_dir/logs/nodes.yaml
 
 # names are assigned by kubernetes. use the same algorithm to generate name.
-for ip in $nodes_cont_ips ; do
+for ip in $nodes_cont_ips_0 ; do
   name=`kubectl get nodes -o custom-columns=C1:.status.addresses[0].address,C2:.status.addresses[1].address | grep $ip | awk '{print $2}'`
   kubectl label node $name --overwrite openstack-compute-node=disable
   kubectl label node $name opencontrail.org/controller=enabled
 done
-for ip in $nodes_comp_ips ; do
-  name="node-$(echo $ip | tr '.' '-').$DOMAIN"
+for ip in $nodes_comp_ips_0 ; do
+  name=`kubectl get nodes -o custom-columns=C1:.status.addresses[0].address,C2:.status.addresses[1].address | grep $ip | awk '{print $2}'`
   kubectl label node $name --overwrite openstack-control-plane=disable
   if [[ "$AGENT_MODE" == "dpdk" ]]; then
     kubectl label node $name opencontrail.org/vrouter-dpdk=enabled
