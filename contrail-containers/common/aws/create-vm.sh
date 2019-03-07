@@ -101,7 +101,8 @@ function run_instance() {
 
   # it means that additional disks must be created for VM
   local bdm='{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}}'
-  local cmd=$(aws ${AWS_FLAGS} ec2 run-instances --image-id $IMAGE_ID --key-name $KEY_NAME --instance-type $type --subnet-id $subnet_id --associate-public-ip-address --block-device-mappings "[${bdm}]")
+  local iname="jj-$WAY-$BUILD_NUMBER-$env_var_suffix"
+  local cmd=$(aws ${AWS_FLAGS} ec2 run-instances --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$iname}]" --image-id $IMAGE_ID --key-name $KEY_NAME --instance-type $type --subnet-id $subnet_id --associate-public-ip-address --block-device-mappings "[${bdm}]")
   local instance_id=$(get_value_from_json "echo $cmd" ".Instances[0].InstanceId")
   echo "INFO: $env_var_suffix INSTANCE_ID: $instance_id"
   echo "instance_id_${env_var_suffix}=$instance_id" >> $ENV_FILE
