@@ -101,7 +101,8 @@ function run_instance() {
 
   # it means that additional disks must be created for VM
   local bdm='{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}}'
-  local cmd=$(aws ${AWS_FLAGS} ec2 run-instances --image-id $IMAGE_ID --key-name $KEY_NAME --instance-type $type --subnet-id $subnet_id --associate-public-ip-address --block-device-mappings "[${bdm}]")
+  local iname="jj-$WAY-$BUILD_NUMBER-$env_var_suffix"
+  local cmd=$(aws ${AWS_FLAGS} ec2 run-instances --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$iname}]" --image-id $IMAGE_ID --key-name $KEY_NAME --instance-type $type --subnet-id $subnet_id --associate-public-ip-address --block-device-mappings "[${bdm}]")
   local instance_id=$(get_value_from_json "echo $cmd" ".Instances[0].InstanceId")
   echo "INFO: $env_var_suffix INSTANCE_ID: $instance_id"
   echo "instance_id_${env_var_suffix}=$instance_id" >> $ENV_FILE
@@ -123,6 +124,13 @@ function run_instance() {
     echo "WARNING: Machine isn't accessible yet"
     sleep 2
   done
+
+  echo "INFO: copy ssh key to machine"
+  $ssh "mkdir -p /home/$SSH_USER/.ssh ; printf 'Host *\n  StrictHostKeyChecking no\n  UserKnownHostsFile=/dev/null' > /home/$SSH_USER/.ssh/config"
+  local id_rsa="$(cat $HOME/.ssh/id_rsa)"
+  $ssh "echo '$id_rsa' > /home/$SSH_USER/.ssh/id_rsa && chmod 600 /home/$SSH_USER/.ssh/id_rsa"
+  local id_rsa_pub="$(cat $HOME/.ssh/id_rsa.pub)"
+  $ssh "echo '$id_rsa_pub' > /home/$SSH_USER/.ssh/id_rsa.pub && chmod 600 /home/$SSH_USER/.ssh/id_rsa.pub"
 
   if [[ "$cloud_vm" == 'true' ]] && ((NET_COUNT > 1)) ; then
     echo "INFO: Configure additional interfaces for cloud VM"
