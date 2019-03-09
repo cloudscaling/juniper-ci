@@ -712,13 +712,34 @@ parameter_defaults:
   RabbitPassword: contrail
   ContrailInsecure: true
   AdminPassword: qwe123QWE
-  AAAMode: $AAA_MODE
-  AAAModeAnalytics: $AAA_MODE_ANALYTICS
   ContrailWebuiHttp: 8180
   ContrailConfigDBMinDiskGB: 4
   ContrailAnalyticsDBMinDiskGB: 4
   ContrailAuthVersion: $KEYSTONE_API_VERSION
 EOF
+
+
+if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION  ]] ; then
+  cat <<EOF >> $misc_opts
+  AAAMode: $AAA_MODE
+  AAAModeAnalytics: $AAA_MODE_ANALYTICS
+EOF
+else
+  if [[ "$AAA_MODE" != "$AAA_MODE_ANALYTICS" ]] ; then
+    cat <<EOF >> $misc_opts
+  ContrailControllerParameters:
+    AAAMode: $AAA_MODE
+  ContrailAnalyticsParameters:
+    AAAMode: $AAA_MODE_ANALYTICS
+EOF
+  else
+  cat <<EOF >> $misc_opts
+  AAAMode: $AAA_MODE
+EOF
+  fi
+fi
+
+
 if [[ "$CONTRAIL_VERSION" =~ '3.2' ]] ; then
 cat <<EOF >> $misc_opts
   ContrailVersion: 3
