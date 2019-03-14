@@ -139,7 +139,12 @@ function create_stackrc() {
   if [[ "$USE_SSL_OS" != "true" ]] ; then
     local proto="http"
   fi
-  local kver=`juju-get keystone preferred-api-version`
+  local kver=''
+  if [[ "$SERIES" == 'bionic' ]]; then
+    kver='3'
+  else
+    kver=`juju-get keystone preferred-api-version`
+  fi
   echo "INFO: detected keystone version is $kver"
   echo "# created by CI" > $WORKSPACE/stackrc
   if [[ "$kver" == '3' ]] ; then
