@@ -44,7 +44,7 @@ kubernetes:
   cluster:
     cni: calico
     pod_subnet: 192.168.0.0/16
-    domain: ${DOMAIN}
+    domain: cluster.local
 EOF
 if [[ "$REGISTRY_INSECURE" == '1' ]] ; then
   cat <<EOF >> $OSH_INFRA_PATH/tools/gate/devel/multinode-vars.yaml
@@ -106,7 +106,7 @@ cd ${OSH_INFRA_PATH}
 make dev-deploy setup-host multinode
 make dev-deploy k8s multinode
 
-nslookup kubernetes.default.svc.$DOMAIN || /bin/true
+nslookup kubernetes.default.svc.cluster.local || /bin/true
 kubectl get nodes -o wide
 kubectl get nodes -o custom-columns=C1:.status.addresses[0].address,C2:.status.addresses[1].address
 kubectl get nodes -o yaml &> $my_dir/logs/nodes.yaml
