@@ -184,7 +184,7 @@ global:
       analytics_alarm_gen: "$CONTAINER_REGISTRY/contrail-analytics-alarm-gen:$tag"
       analytics_query_engine: "$CONTAINER_REGISTRY/contrail-analytics-query-engine:$tag"
       analytics_snmp_collector: "$CONTAINER_REGISTRY/contrail-analytics-snmp-collector:$tag"
-      contrail_topology: "$CONTAINER_REGISTRY/contrail-analytics-topology:$tag"
+      contrail_topology: "$CONTAINER_REGISTRY/contrail-analytics-snmp-topology:$tag"
       build_driver_init: "$CONTAINER_REGISTRY/contrail-vrouter-kernel-build-init:$tag"
       vrouter_agent: "$CONTAINER_REGISTRY/contrail-vrouter-agent:$tag"
       vrouter_init_kernel: "$CONTAINER_REGISTRY/contrail-vrouter-kernel-init:$tag"
