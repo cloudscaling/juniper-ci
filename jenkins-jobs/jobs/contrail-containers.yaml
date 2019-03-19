@@ -229,8 +229,8 @@
           defaultha: aio
           slavenode:
             - master
-      - vm-server-ubuntu16:
-          defaultha: nonha
+      - vm-server-centos:
+          defaultha: ha
           slavenode:
             - slave01
             - slave04
