@@ -64,11 +64,11 @@ juju-set openstack-dashboard "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose openstack-dashboard
 
 juju-deploy cs:$SERIES/nova-cloud-controller --to $m4
-juju-set nova-cloud-controller "console-access-protocol=novnc" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+juju-set nova-cloud-controller "console-access-protocol=novnc" "region=NonDefault" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose nova-cloud-controller
 
 juju-deploy cs:$SERIES/glance --to $m2
-juju-set glance "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+juju-set glance "region=NonDefault" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose glance
 
 juju-deploy cs:$SERIES/keystone --to $m3
@@ -81,7 +81,7 @@ juju-set nova-compute "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "virt-ty
 
 # Neutron
 juju-deploy cs:$SERIES/neutron-api --to $m5
-juju-set neutron-api "debug=true" "manage-neutron-plugin-legacy-mode=false" "openstack-origin=$OPENSTACK_ORIGIN" "neutron-security-groups=true"
+juju-set neutron-api "region=NonDefault" "debug=true" "manage-neutron-plugin-legacy-mode=false" "openstack-origin=$OPENSTACK_ORIGIN" "neutron-security-groups=true"
 juju-set nova-cloud-controller "network-manager=Neutron"
 juju-expose neutron-api
 
