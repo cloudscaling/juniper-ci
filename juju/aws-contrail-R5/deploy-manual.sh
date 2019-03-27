@@ -72,7 +72,7 @@ juju-set glance "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose glance
 
 juju-deploy cs:$SERIES/keystone --to $m3
-juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "region=NonDefault" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose keystone
 
 juju-deploy --series=$SERIES $WORKSPACE/charm-nova-compute --to $m2
