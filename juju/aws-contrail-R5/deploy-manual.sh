@@ -75,7 +75,7 @@ juju-deploy cs:$SERIES/keystone --to $m3
 juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "region=NonDefault" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose keystone
 
-juju-deploy cs:$SERIES/heat --to lxd:$cont0
+juju-deploy cs:$SERIES/heat --to $m6
 juju-set heat "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose heat
 
