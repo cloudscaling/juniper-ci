@@ -74,7 +74,7 @@
           allowed-multiselect: true
       - string:
           name: BUILD_NUM
-          default: "5.1.0-553"
+          default: "5.1.0-580"
           description: "Build number that is stored on S3 now"
     scm:
       - juniper-ci
@@ -229,8 +229,8 @@
           defaultha: aio
           slavenode:
             - master
-      - vm-server-ubuntu16:
-          defaultha: nonha
+      - vm-server-centos:
+          defaultha: ha
           slavenode:
             - slave01
             - slave04

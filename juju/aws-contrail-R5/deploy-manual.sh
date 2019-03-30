@@ -64,16 +64,20 @@ juju-set openstack-dashboard "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose openstack-dashboard
 
 juju-deploy cs:$SERIES/nova-cloud-controller --to $m4
-juju-set nova-cloud-controller "console-access-protocol=novnc" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+juju-set nova-cloud-controller "console-access-protocol=novnc" "region=NonDefault" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose nova-cloud-controller
 
 juju-deploy cs:$SERIES/glance --to $m2
-juju-set glance "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+juju-set glance "region=NonDefault" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose glance
 
 juju-deploy cs:$SERIES/keystone --to $m3
-juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "region=NonDefault" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose keystone
+
+juju-deploy cs:$SERIES/heat --to $m6
+juju-set heat "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+juju-expose heat
 
 juju-deploy --series=$SERIES $WORKSPACE/charm-nova-compute --to $m2
 juju-add-unit nova-compute --to $m3
@@ -81,7 +85,7 @@ juju-set nova-compute "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "virt-ty
 
 # Neutron
 juju-deploy cs:$SERIES/neutron-api --to $m5
-juju-set neutron-api "debug=true" "manage-neutron-plugin-legacy-mode=false" "openstack-origin=$OPENSTACK_ORIGIN" "neutron-security-groups=true"
+juju-set neutron-api "region=NonDefault" "debug=true" "manage-neutron-plugin-legacy-mode=false" "openstack-origin=$OPENSTACK_ORIGIN" "neutron-security-groups=true"
 juju-set nova-cloud-controller "network-manager=Neutron"
 juju-expose neutron-api
 
@@ -117,6 +121,9 @@ echo "INFO: Add relations $(date)"
 juju-add-relation "keystone:shared-db" "mysql:shared-db"
 juju-add-relation "glance:shared-db" "mysql:shared-db"
 juju-add-relation "keystone:identity-service" "glance:identity-service"
+juju-add-relation "heat:shared-db" "mysql:shared-db"
+juju-add-relation "heat:amqp" "rabbitmq-server:amqp"
+juju-add-relation "heat" "keystone"
 juju-add-relation "nova-cloud-controller:image-service" "glance:image-service"
 juju-add-relation "nova-cloud-controller:identity-service" "keystone:identity-service"
 juju-add-relation "nova-cloud-controller:cloud-compute" "nova-compute:cloud-compute"
@@ -143,6 +150,8 @@ juju-add-relation "contrail5-analytics" "contrail5-analyticsdb"
 juju-add-relation "contrail5-openstack" "neutron-api"
 juju-add-relation "contrail5-openstack" "nova-compute"
 juju-add-relation "contrail5-openstack" "contrail5-controller"
+juju-add-relation "contrail5-openstack" "heat"
+
 
 juju-add-relation "contrail5-agent:juju-info" "nova-compute:juju-info"
 juju-add-relation "contrail5-agent" "contrail5-controller"

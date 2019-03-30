@@ -44,7 +44,7 @@ kubernetes:
   cluster:
     cni: calico
     pod_subnet: 192.168.0.0/16
-    domain: ${DOMAIN}
+    domain: cluster.local
 EOF
 if [[ "$REGISTRY_INSECURE" == '1' ]] ; then
   cat <<EOF >> $OSH_INFRA_PATH/tools/gate/devel/multinode-vars.yaml
@@ -106,7 +106,7 @@ cd ${OSH_INFRA_PATH}
 make dev-deploy setup-host multinode
 make dev-deploy k8s multinode
 
-nslookup kubernetes.default.svc.$DOMAIN || /bin/true
+nslookup kubernetes.default.svc.cluster.local || /bin/true
 kubectl get nodes -o wide
 kubectl get nodes -o custom-columns=C1:.status.addresses[0].address,C2:.status.addresses[1].address
 kubectl get nodes -o yaml &> $my_dir/logs/nodes.yaml
@@ -184,7 +184,7 @@ global:
       analytics_alarm_gen: "$CONTAINER_REGISTRY/contrail-analytics-alarm-gen:$tag"
       analytics_query_engine: "$CONTAINER_REGISTRY/contrail-analytics-query-engine:$tag"
       analytics_snmp_collector: "$CONTAINER_REGISTRY/contrail-analytics-snmp-collector:$tag"
-      contrail_topology: "$CONTAINER_REGISTRY/contrail-analytics-topology:$tag"
+      contrail_topology: "$CONTAINER_REGISTRY/contrail-analytics-snmp-topology:$tag"
       build_driver_init: "$CONTAINER_REGISTRY/contrail-vrouter-kernel-build-init:$tag"
       vrouter_agent: "$CONTAINER_REGISTRY/contrail-vrouter-agent:$tag"
       vrouter_init_kernel: "$CONTAINER_REGISTRY/contrail-vrouter-kernel-init:$tag"
