@@ -91,7 +91,7 @@ juju-expose neutron-api
 juju-deploy $PLACE/contrail-keystone-auth --to lxd:$cont1
 
 if [ "$DEPLOY_MODE" == 'ha' ] ; then
-  juju-deploy cs:~containers/keepalived --config virtual_ip=$addr.254
+  juju-deploy --series $SERIES cs:~containers/keepalived --config virtual_ip=$addr.254
   juju-deploy cs:$SERIES/haproxy --to $cont1 --config peering_mode=active-active
   juju-add-unit haproxy --to $cont2
   juju-add-unit haproxy --to $cont3
