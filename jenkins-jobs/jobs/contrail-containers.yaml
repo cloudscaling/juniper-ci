@@ -42,6 +42,10 @@
             - ocata
             - queens
             - rocky
+      - string:
+          name: K8S_VERSION
+          default: "1.12.7"
+          description: "Version of k8s to install if present in job"
       - choice:
           name: AGENT_MODE
           choices:
