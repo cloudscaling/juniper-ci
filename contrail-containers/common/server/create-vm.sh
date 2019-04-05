@@ -270,7 +270,7 @@ elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; t
     fi
   fi
   DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade &>>$logs_dir/apt.log
-  DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" install -y --no-install-recommends mc git wget libxml2-utils python-minimal python-setuptools lsof \$dpdk_req &>>$logs_dir/apt.log
+  DEBIAN_FRONTEND=noninteractive apt-get -fy -o Dpkg::Options::="--force-confnew" install -y --no-install-recommends mc git wget libxml2-utils python-minimal python-setuptools lsof python-requests \$dpdk_req &>>$logs_dir/apt.log
   echo "network: {config: disabled}" > /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
   if [[ "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
     apt-get install ifupdown &>>$logs_dir/apt.log
