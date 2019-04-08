@@ -49,19 +49,18 @@ aws ${AWS_FLAGS} ec2 wait vpc-available --vpc-id $vpc_id
 aws ${AWS_FLAGS} ec2 modify-vpc-attribute --vpc-id $vpc_id --enable-dns-hostnames
 aws ${AWS_FLAGS} ec2 modify-vpc-attribute --vpc-id $vpc_id --enable-dns-support
 
-cmd="aws ${AWS_FLAGS} ec2 create-subnet --vpc-id $vpc_id --cidr-block ${VM_NET_PREFIX}.0/24"
+cmd="aws ${AWS_FLAGS} ec2 create-subnet --availability-zone ${AWS_AZ} --vpc-id $vpc_id --cidr-block ${VM_NET_PREFIX}.0/24"
 subnet_id=$(get_value_from_json "$cmd" ".Subnet.SubnetId")
 echo "INFO: SUBNET_ID: $subnet_id"
 echo "subnet_id=$subnet_id" >> $ENV_FILE
-az=$(aws ${AWS_FLAGS} ec2 describe-subnets --subnet-id $subnet_id --query 'Subnets[*].AvailabilityZone' --output text)
-echo "INFO: Availability zone for current deployment: $az"
-echo "az=$az" >> $ENV_FILE
+echo "INFO: Availability zone for current deployment: $AWS_AZ"
+echo "az=$AWS_AZ" >> $ENV_FILE
 sleep 2
 
 declare -a subnet_ids
 for ((net=1; net<NET_COUNT; ++net)); do
   cidr_name="VM_NET_PREFIX_${net}"
-  cmd="aws ${AWS_FLAGS} ec2 create-subnet --vpc-id $vpc_id --cidr-block ${!cidr_name}.0/24 --availability-zone $az"
+  cmd="aws ${AWS_FLAGS} ec2 create-subnet --availability-zone ${AWS_AZ} --vpc-id $vpc_id --cidr-block ${!cidr_name}.0/24"
   subnet_id_next=$(get_value_from_json "$cmd" ".Subnet.SubnetId")
   echo "INFO: SUBNET_ID_$net: $subnet_id_next"
   echo "subnet_id_$net=$subnet_id_next" >> $ENV_FILE
