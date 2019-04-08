@@ -145,7 +145,7 @@ function run_instance() {
 
   if [[ "$ENVIRONMENT_OS" == 'centos' && $cloud_vm == 'true' ]]; then
     # there are some cases when AWS image has strange kernel version and vrouter couldn't be loaded
-    $ssh "sudo yum -y update &>>$log_dir/$instance_id-yum.log"
+    $ssh "sudo yum -y update" &>>$log_dir/$instance_id-yum.log
     $ssh "sudo reboot" || /bin/true
     echo "INFO: reboot & waiting for instance SSH"
     while ! $ssh uname -a 2>/dev/null ; do
