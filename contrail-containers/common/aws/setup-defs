@@ -1,3 +1,7 @@
+export AWS_FLAGS="--region us-west-2"
+# need to define zone - flavors can be different across zones
+export AWS_AZ="us-west-2c"
+
 export DOMAIN=${DOMAIN:-"us-west-2.compute.internal"}
 
 export ENV_FILE="$WORKSPACE/cloudrc"
