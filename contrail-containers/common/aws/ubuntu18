@@ -1,6 +1,5 @@
 #!/bin/bash
 
-export AWS_FLAGS="--region us-west-2"
 export SSH_USER=ubuntu
 # ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20180426.2
 # us-west-2 : ami-22741f5a

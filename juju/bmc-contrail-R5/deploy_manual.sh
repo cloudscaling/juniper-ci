@@ -92,12 +92,12 @@ juju-deploy $PLACE/contrail-keystone-auth --to lxd:$cont1
 
 if [ "$DEPLOY_MODE" == 'ha' ] ; then
   juju-deploy --series $SERIES cs:~containers/keepalived --config virtual_ip=$addr.254
-  juju-deploy cs:$SERIES/haproxy --to $cont1 --config peering_mode=active-active
+  juju-deploy cs:$SERIES/haproxy --to $cont1 --config peering_mode=active-active --config ssl_cert=SELFSIGNED
   juju-add-unit haproxy --to $cont2
   juju-add-unit haproxy --to $cont3
   juju-expose haproxy
   juju-add-relation haproxy:juju-info keepalived:juju-info
-  controller_params="--config vip=$addr.254"
+  controller_params="--config vip=$addr.254 --config haproxy-https-mode=http"
 fi
 
 juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params --config log-level=SYS_DEBUG

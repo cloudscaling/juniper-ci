@@ -49,19 +49,18 @@ aws ${AWS_FLAGS} ec2 wait vpc-available --vpc-id $vpc_id
 aws ${AWS_FLAGS} ec2 modify-vpc-attribute --vpc-id $vpc_id --enable-dns-hostnames
 aws ${AWS_FLAGS} ec2 modify-vpc-attribute --vpc-id $vpc_id --enable-dns-support
 
-cmd="aws ${AWS_FLAGS} ec2 create-subnet --vpc-id $vpc_id --cidr-block ${VM_NET_PREFIX}.0/24"
+cmd="aws ${AWS_FLAGS} ec2 create-subnet --availability-zone ${AWS_AZ} --vpc-id $vpc_id --cidr-block ${VM_NET_PREFIX}.0/24"
 subnet_id=$(get_value_from_json "$cmd" ".Subnet.SubnetId")
 echo "INFO: SUBNET_ID: $subnet_id"
 echo "subnet_id=$subnet_id" >> $ENV_FILE
-az=$(aws ${AWS_FLAGS} ec2 describe-subnets --subnet-id $subnet_id --query 'Subnets[*].AvailabilityZone' --output text)
-echo "INFO: Availability zone for current deployment: $az"
-echo "az=$az" >> $ENV_FILE
+echo "INFO: Availability zone for current deployment: $AWS_AZ"
+echo "az=$AWS_AZ" >> $ENV_FILE
 sleep 2
 
 declare -a subnet_ids
 for ((net=1; net<NET_COUNT; ++net)); do
   cidr_name="VM_NET_PREFIX_${net}"
-  cmd="aws ${AWS_FLAGS} ec2 create-subnet --vpc-id $vpc_id --cidr-block ${!cidr_name}.0/24 --availability-zone $az"
+  cmd="aws ${AWS_FLAGS} ec2 create-subnet --availability-zone ${AWS_AZ} --vpc-id $vpc_id --cidr-block ${!cidr_name}.0/24"
   subnet_id_next=$(get_value_from_json "$cmd" ".Subnet.SubnetId")
   echo "INFO: SUBNET_ID_$net: $subnet_id_next"
   echo "subnet_id_$net=$subnet_id_next" >> $ENV_FILE
@@ -102,7 +101,7 @@ function run_instance() {
   # it means that additional disks must be created for VM
   local bdm='{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}},{"DeviceName":"/dev/xvdf","Ebs":{"VolumeSize":60,"DeleteOnTermination":true}}'
   local iname="jj-$WAY-$BUILD_NUMBER-$env_var_suffix"
-  local cmd=$(aws ${AWS_FLAGS} ec2 run-instances --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$iname}]" --image-id $IMAGE_ID --key-name $KEY_NAME --instance-type $type --subnet-id $subnet_id --associate-public-ip-address --block-device-mappings "[${bdm}]")
+  local cmd=$(aws ${AWS_FLAGS} ec2 run-instances --placement "AvailabilityZone=${AWS_AZ}" --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$iname}]" --image-id $IMAGE_ID --key-name $KEY_NAME --instance-type $type --subnet-id $subnet_id --associate-public-ip-address --block-device-mappings "[${bdm}]")
   local instance_id=$(get_value_from_json "echo $cmd" ".Instances[0].InstanceId")
   echo "INFO: $env_var_suffix INSTANCE_ID: $instance_id"
   echo "instance_id_${env_var_suffix}=$instance_id" >> $ENV_FILE
@@ -145,8 +144,8 @@ function run_instance() {
   fi
 
   if [[ "$ENVIRONMENT_OS" == 'centos' && $cloud_vm == 'true' ]]; then
-    # there are some cases when AWS image has strange kernel version and vrouter can't be loaded
-    $ssh "sudo yum -y update"
+    # there are some cases when AWS image has strange kernel version and vrouter couldn't be loaded
+    $ssh "sudo yum -y update" &>>$log_dir/$instance_id-yum.log
     $ssh "sudo reboot" || /bin/true
     echo "INFO: reboot & waiting for instance SSH"
     while ! $ssh uname -a 2>/dev/null ; do
@@ -179,7 +178,7 @@ function run_instance() {
   elif [[ "$ENVIRONMENT_OS" == 'ubuntu16' || "$ENVIRONMENT_OS" == 'ubuntu18' ]]; then
     $ssh "sudo apt-get -y update" &>>$log_dir/$instance_id-apt.log
     $ssh 'DEBIAN_FRONTEND=noninteractive sudo -E apt-get -fy -o Dpkg::Options::="--force-confnew" upgrade' &>>$log_dir/$instance_id-apt.log
-    $ssh "sudo apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python-minimal python-setuptools lsof" &>>$log_dir/$instance_id-apt.log
+    $ssh "sudo apt-get install -y --no-install-recommends mc git wget ntp ntpdate libxml2-utils python-minimal python-setuptools lsof python-requests" &>>$log_dir/$instance_id-apt.log
   fi
 }
 
