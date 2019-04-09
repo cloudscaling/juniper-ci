@@ -750,11 +750,6 @@ cat <<EOF >> $misc_opts
   ContrailContainerTag: $BUILD_TAG
 EOF
 fi
-if [[ "$DPDK" != 'off' ]] ; then
-cat <<EOF >> $misc_opts
-  ContrailDpdkHugepages1GB: 2
-EOF
-fi
 if [[ "$FREE_IPA" == 'true' ]] ; then
 cat <<EOF >> $misc_opts
   CloudName: overcloud.$CLOUD_DOMAIN_NAME
@@ -787,7 +782,11 @@ dpdk_core_mask="0x07"
 if [[ "$DPDK" != 'off' ]] ; then
   cat <<EOF >> $misc_opts
   ContrailDpdkCoremask: "$dpdk_core_mask"
+  # 3.x/4.x
   ContrailDpdkHugePages: '1000'
+  # 5.x
+  ContrailDpdkHugepages1GB: 2
+  ContrailDpdkHugepages2MB: 1000
 EOF
 fi
 
@@ -1088,6 +1087,7 @@ if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
   sed -i "s/.*ContrailRegistry:.*/  ContrailRegistry: $CONTRAIL_REGISTRY/g" $contrail_services_file
   sed -i "s/.*ContrailImageTag:.*/  ContrailImageTag: $CONTRAIL_TAG/g" $contrail_services_file
   sed -i "s/.*ContrailRegistryInsecure:.*/  ContrailRegistryInsecure: True/g" $contrail_services_file
+  sed -i "s/.*ContrailRegistryCertUrl:.*/  ContrailRegistryCertUrl: ''/g" $contrail_services_file
 
   image_namespace="docker.io/tripleo${OPENSTACK_VERSION}"
   tag_opts='--tag current-tripleo-rdo'
