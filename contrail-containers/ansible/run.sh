@@ -75,8 +75,8 @@ else
   CONTROL_NODES="${IP2_CONT_01}"
 fi
 
-#TODO: gateway should have suitable default value in container  
-# VROUTER_GW="$nodes_gw_2"
+# TODO: remove it later when review get merged https://review.opencontrail.org/#/c/50519/
+VROUTER_GW="$nodes_gw_2"
 
 if [[ "$HOST" == 'aws' ]]; then
   VIRT_TYPE=qemu
