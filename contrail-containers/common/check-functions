@@ -104,10 +104,6 @@ function get_ssh_dest() {
 }
 
 function prepare_for_ssh() {
-  if [[ "$AGENT_MODE" == "dpdk" ]]; then
-    ssh $ssh_dest 'printf "[DEFAULT]\nplatform=dpdk\n" > ./contrail-vrouter-agent.conf' 2>/dev/null
-    ssh $ssh_dest 'sudo mkdir -p /etc/contrail ; sudo cp -f ./contrail-vrouter-agent.conf /etc/contrail/' 2>/dev/null
-  fi
   scp $HOME/.ssh/id_rsa $ssh_dest:id_rsa
 }
 
