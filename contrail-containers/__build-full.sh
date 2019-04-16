@@ -47,6 +47,10 @@ for env in $BUILD_ENV; do
   export $env
 done
 cd /root/contrail-dev-env
+
+# temporary solution while sandbox is old on dockerhub
+yum install -y python36
+
 make sync
 make fetch_packages
 make setup
