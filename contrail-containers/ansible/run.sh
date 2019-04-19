@@ -103,7 +103,7 @@ volumes+=" -v $my_dir/__run-gate.sh:/root/run-gate.sh"
 docker run -i --rm --entrypoint /bin/bash $volumes --network host -e KOLLA_PATCHSET_CMD="$patchset" -e OPENSTACK_VERSION=$OPENSTACK_VERSION -e VIRT_TYPE=$VIRT_TYPE centos-soft -c "/root/run-gate.sh"
 
 # TODO: wait till cluster up and initialized
-sleep 120
+sleep 60
 
 check_introspection_cloud
 

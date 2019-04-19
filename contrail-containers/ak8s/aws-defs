@@ -1,4 +1,4 @@
-export NET_COUNT=1
+export NET_COUNT=3
 
 if [[ "$HA" == 'ha' ]]; then
   export CONT_NODES=3

@@ -51,22 +51,31 @@ IP_VM_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
 IP_VM_04=`echo $nodes_comp_ips | cut -d ' ' -f 1`
 IP_VM_05=`echo $nodes_comp_ips | cut -d ' ' -f 2`
 
-IP_CONT_01=`echo $nodes_cont_ips_0 | cut -d ' ' -f 1` ; IP_CONT_01=`get_address $IP_VM_01 $IP_CONT_01`
+IP0_CONT_01=`echo ${nodes_cont_ips_0} | cut -d ' ' -f 1` ; IP0_CONT_01=`get_address $IP_VM_01 $IP0_CONT_01`
+IP1_CONT_01=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 1` ; IP1_CONT_01=`get_address $IP_VM_01 $IP1_CONT_01`
+IP2_CONT_01=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 1` ; IP2_CONT_01=`get_address $IP_VM_01 $IP2_CONT_01`
 if [[ "$HA" == 'ha' ]] ; then
   IP_VM_02=`echo $nodes_cont_ips | cut -d ' ' -f 2`
   IP_VM_03=`echo $nodes_cont_ips | cut -d ' ' -f 3`
-  IP_CONT_02=`echo $nodes_cont_ips_0 | cut -d ' ' -f 2` ; IP_CONT_02=`get_address $IP_VM_02 $IP_CONT_02`
-  IP_CONT_03=`echo $nodes_cont_ips_0 | cut -d ' ' -f 3` ; IP_CONT_03=`get_address $IP_VM_03 $IP_CONT_03`
 
-  CONTROLLER_NODES="${IP_CONT_01},${IP_CONT_02},${IP_CONT_03}"
+  IP0_CONT_02=`echo ${nodes_cont_ips_0} | cut -d ' ' -f 2` ; IP0_CONT_02=`get_address $IP_VM_02 $IP0_CONT_02`
+  IP1_CONT_02=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 2` ; IP1_CONT_02=`get_address $IP_VM_02 $IP1_CONT_02`
+  IP2_CONT_02=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 2` ; IP2_CONT_02=`get_address $IP_VM_02 $IP2_CONT_02`
+
+  IP0_CONT_03=`echo ${nodes_cont_ips_0} | cut -d ' ' -f 3` ; IP0_CONT_03=`get_address $IP_VM_03 $IP0_CONT_03`
+  IP1_CONT_03=`echo ${nodes_cont_ips_1} | cut -d ' ' -f 3` ; IP1_CONT_03=`get_address $IP_VM_03 $IP1_CONT_03`
+  IP2_CONT_03=`echo ${nodes_cont_ips_2} | cut -d ' ' -f 3` ; IP2_CONT_03=`get_address $IP_VM_03 $IP2_CONT_03`
+
+  CONTROLLER_NODES="${IP1_CONT_01},${IP1_CONT_02},${IP1_CONT_03}"
+  CONTROL_NODES="${IP2_CONT_01},${IP2_CONT_02},${IP2_CONT_03}"
 else
-  CONTROLLER_NODES="${IP_CONT_01}"
+  CONTROLLER_NODES="${IP1_CONT_01}"
+  CONTROL_NODES="${IP2_CONT_01}"
 fi
 
-# aws has different IP for internal and public purposes. while IP_* are public then they can't be used as services' IP-s.
-# containers can't find the public IP in local IP-s list and fail.
-# empty value was not tested - fill it always
-CONTROLLER_NODES="$(echo $nodes_cont_ips_0 | tr ' ' ',')"
+# TODO: remove it later when review get merged https://review.opencontrail.org/#/c/50519/
+VROUTER_GW="$nodes_gw_2"
+
 
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
 envsubst <$my_dir/instances.yaml.${HA}.tmpl >$config
@@ -83,7 +92,7 @@ volumes+=" -v $my_dir/__run-gate.sh:/root/run-gate.sh"
 docker run -i --rm --entrypoint /bin/bash $volumes --network host centos-soft -c "/root/run-gate.sh"
 
 # TODO: wait till cluster up and initialized
-sleep 120
+sleep 60
 
 check_introspection_cloud
 

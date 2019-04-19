@@ -32,6 +32,9 @@ global_configuration:
 contrail_configuration:
  CONTRAIL_CONTAINER_TAG: ${CONTRAIL_VERSION}
  CONTROLLER_NODES: ${CONTROLLER_NODES}
+ CONTROL_NODES: ${CONTROL_NODES}
+# TODO: remove it later when review get merged https://review.opencontrail.org/#/c/50519/
+ VROUTER_GATEWAY: ${VROUTER_GW}
  CONFIG_DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
  DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
  SSL_ENABLE: ${SSL_ENABLE}

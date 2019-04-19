@@ -1,4 +1,4 @@
-export NET_COUNT=1
+export NET_COUNT=3
 export NET_BASE_PREFIX=15
 
 if [[ "$HA" == 'ha' ]]; then
