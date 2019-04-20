@@ -8,8 +8,8 @@ source "$my_dir/cloudrc"
 
 mkdir -p /root/deploy && cd /root/deploy
 git clone https://github.com/progmaticlab/airship-in-a-bottle
-git clone https://git.openstack.org/openstack/airship-pegleg.git
-git clone https://git.openstack.org/openstack/airship-shipyard.git
+git clone https://opendev.org/airship/pegleg.git
+git clone https://opendev.org/airship/shipyard.git
 
 sed -i 's/-it/-i/g' airship-pegleg/tools/pegleg.sh
 
