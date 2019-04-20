@@ -275,6 +275,9 @@ parameter_defaults:
 
   OvercloudCephStorageFlavor: storage
   CephPoolDefaultSize: 1
+
+  InternalTLSCRLPEMFile: ''
+  DefaultCRLURL: ''
 EOF
 
 
