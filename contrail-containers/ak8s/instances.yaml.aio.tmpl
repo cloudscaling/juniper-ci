@@ -31,10 +31,22 @@ global_configuration:
 
 contrail_configuration:
  CONTRAIL_CONTAINER_TAG: ${CONTRAIL_VERSION}
- CONTROLLER_NODES: ${CONTROLLER_NODES}
- CONTROL_NODES: ${CONTROL_NODES}
+######## TODO DBG #########
+ CONTROLLER_NODES: ${IP_VM_01}
+ CONTROL_NODES: ${IP_VM_01}
+  KUBERNETES_PUBLIC_FIP_POOL:
+   domain: default-domain
+   name: __fip_pool_public__
+   network: __public__
+   project: k8s-default
+ RABBITMQ_NODE_PORT: 5673
+#######  TODO DBG ##########
+# CONTROLLER_NODES: ${CONTROLLER_NODES}
+# CONTROL_NODES: ${CONTROL_NODES}
 # TODO: remove it later when review get merged https://review.opencontrail.org/#/c/50519/
- VROUTER_GATEWAY: ${VROUTER_GW}
+#######  TODO DBG ##########
+# VROUTER_GATEWAY: ${VROUTER_GW}
+#######  TODO DBG ##########
  CONFIG_DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
  DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "2"
  SSL_ENABLE: ${SSL_ENABLE}
