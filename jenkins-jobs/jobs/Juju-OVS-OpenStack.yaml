@@ -2,10 +2,20 @@
     name: Juju-OVS-OpenStack-KVM
     description: 'OVS+OpenStack on KVM by Juju'
     defaults: global
-    node: slave01
     concurrent: true
     #disabled: true
     parameters:
+      - node:
+          name: SLAVE_NAME
+          description: "Select slave: one for specific node or multiple for any node."
+          default-slaves:
+            - slave01
+            - slave04
+          allowed-slaves:
+            - slave01
+            - slave04
+          ignore-offline-nodes: false
+          allowed-multiselect: true
       - choice:
           name: CLEAN_BEFORE
           choices:
