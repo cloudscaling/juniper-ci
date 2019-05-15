@@ -35,6 +35,15 @@ ssh-keygen -q
 cp .ssh/id_rsa.pub .ssh/authorized_keys2
 ```
 
+- configure firewall
+```
+ufw allow ssh
+ufw allow from 192.0.0.0/8 to any
+ufw allow from 10.0.0.0/8 to any
+ufw allow from 172.0.0.0/8 to any
+ufw enable
+```
+
 - Allow ssh to skip cert-check and don't save host signatures in the known host file:
       Example of ssh config:
       cat /home/jenkins/.ssh/config
