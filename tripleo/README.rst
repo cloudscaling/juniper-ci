@@ -6,13 +6,34 @@ This repository provides scripts for installing TripleO with OpenContrail on hos
 =============
 KVM Host (it is usually a jenkins slave)
 - Install packages
-      apt-get install -y git qemu-kvm iptables-persistent ufw virtinst uuid-runtime
+      apt-get install -y git qemu-kvm iptables-persistent ufw virtinst uuid-runtime \
+        qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils virt-manager awscli
+
+      curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+      python get-pip.py 
+      pip install virtualbmc
 
 - Enable firewall with allowing ssh ports
 
 - Prepare jenkins user to access from Jenkins master server:
       Create jenkins user with certificate authentication only
       Add the pub-key of master jenkins server into jenkins's user authorized_keys file (/home/jenkins/.ssh/authorized_keys)
+```
+yes | adduser --disabled-password jenkins
+usermod -aG libvirt jenkins
+usermod -aG docker jenkins
+usermod -aG libvirt-qemu jenkins
+usermod -aG kvm jenkins
+
+yes | adduser --disabled-password stack
+usermod -aG libvirt stack
+usermod -aG docker stack
+usermod -aG libvirt-qemu stack
+usermod -aG kvm stack
+su - stack 
+ssh-keygen -q
+cp .ssh/id_rsa.pub .ssh/authorized_keys2
+```
 
 - Allow ssh to skip cert-check and don't save host signatures in the known host file:
       Example of ssh config:
@@ -20,6 +41,8 @@ KVM Host (it is usually a jenkins slave)
       Host *
       StrictHostKeyChecking no
       UserKnownHostsFile=/dev/null
+
+- setup aws access for jenkins user
 
 - Allow jenkins user to run deploy under privileged user, add to sudoers file:
 
@@ -52,6 +75,49 @@ KVM Host (it is usually a jenkins slave)
       ${dir}/clean_env.sh
 ```
 
+- Download  net-snmp packages
+/home/jenkins/net-snmp
+net-snmp-5.7.2-32.el7.x86_64.rpm             net-snmp-libs-5.7.2-32.el7.x86_64.rpm    net-snmp-utils-5.7.2-32.el7.x86_64.rpm
+net-snmp-agent-libs-5.7.2-32.el7.x86_64.rpm  net-snmp-python-5.7.2-32.el7.x86_64.rpm  README
+
+- Download images:
+alexm@ns316780:~$ ls -lh /home/root/images/
+total 6.5G
+-rw-r--r-- 1 root root 836M May 15 12:29 centos-7_4.qcow2
+lrwxrwxrwx 1 root root   18 May 15 12:36 centos.qcow2 -> ./centos-7_4.qcow2
+-rw-r--r-- 1 root root 531M May 15 12:30 rhel-server-7.4-x86_64-kvm.qcow2
+-rw-r--r-- 1 root root 660M May 15 12:29 rhel-server-7.5-x86_64-kvm.qcow2
+-rw-r--r-- 1 root root 323M May 15 12:29 ubuntu-bionic.qcow2
+-rw-r--r-- 1 root root 842M May 15 12:30 ubuntu-trusty.qcow2
+-rw-r--r-- 1 root root 921M May 15 12:30 ubuntu-xenial.qcow2
+-rw-r--r-- 1 root root 1.2G May 15 12:30 undercloud-rhel-7_4.qcow2
+lrwxrwxrwx 1 root root   27 May 15 12:34 undercloud-rhel-7_5-newton.qcow2 -> ./undercloud-rhel-7_5.qcow2
+lrwxrwxrwx 1 root root   27 May 15 12:34 undercloud-rhel-7_5-ocata.qcow2 -> ./undercloud-rhel-7_5.qcow2
+-rw-r--r-- 1 root root 1.4G May 15 12:29 undercloud-rhel-7_5.qcow2
+lrwxrwxrwx 1 root root   27 May 15 12:34 undercloud-rhel-7_5-queens.qcow2 -> ./undercloud-rhel-7_5.qcow2
+ 
+- create images pool:
+```
+cat <<EOF > images.xml
+<pool type='dir'>
+  <name>images</name>
+  <source>
+  </source>
+  <target>
+    <path>/var/lib/libvirt/images</path>
+    <permissions>
+      <mode>0711</mode>
+      <owner>0</owner>
+      <group>0</group>
+    </permissions>
+  </target>
+</pool>
+EOF
+virsh pool-define --file images.xml
+virsh pool-autostart images
+virsh pool-start images
+
+```
 - On the Jenkins master add new builder, with options:
   * limit number of executor processess with reasonable number, e.g. 3 for the server with 128GB RAM, 32 logical CPUs and a RAID on 2 SSD disks.
   * root of remote filesystem: /home/jenkins
@@ -83,6 +149,7 @@ export RHEL_USER=user-cert
 export RHEL_PASSWORD=password-cert
 EOF
 ```
+
 
 Undercloud images:
 For RHEL undercloud image must be changed before usage - resize is required.
