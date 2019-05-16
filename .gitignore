@@ -7,5 +7,6 @@ vagrant
 .buildpath
 .pydevproject
 .idea
+.vscode
 jenkins-jobs/generated_xml/*
 jenkins-jobs/.venv/*
