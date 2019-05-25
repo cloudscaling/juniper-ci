@@ -579,10 +579,24 @@ function get_ip_by_mac() {
   virsh net-dhcp-leases $net | sed 1,2d | grep "$filter" | awk '{print($5)}' | cut -d '/' -f 1
 }
 
+function ensure_vbmcd(){
+  if ! ps aux | grep -q vbmcd ; then
+    vbmcd
+  fi
+}
+
+function call_vbmc() {
+  local cmd=$1
+  shift
+  local opts="$@"
+  vbmc $cmd --verbose  --no-daemon $opts
+}
+
 function delete_vbmc() {
   local domain=$1
-  vbmc stop $domain || true
-  vbmc delete $domain || true
+  call_vbmc stop  $domain || true
+  sleep 2
+  call_vbmc delete $domain || true
 }
 
 function start_vbmc() {
@@ -591,8 +605,10 @@ function start_vbmc() {
   local ipmi_address=$3
   local ipmi_user=$4
   local ipmi_password=$5
-  vbmc add --port $port --address $ipmi_address \
+  ensure_vbmcd
+  call_vbmc add --port $port --address $ipmi_address \
             --username $ipmi_user --password $ipmi_password \
             $domain
-  vbmc start $domain
+  sleep 2
+  call_vbmc start $domain
 }
