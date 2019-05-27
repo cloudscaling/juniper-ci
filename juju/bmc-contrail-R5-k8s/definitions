@@ -1,0 +1,27 @@
+#!/bin/bash
+
+job_prefix="jc5"
+juju_controller_name="${job_prefix}-cloud"
+export juju_model_arg="-m ${juju_controller_name}:default"
+
+poolname="${job_prefix}images"
+net_driver=${net_driver:-e1000}
+nname="$job_prefix"
+addr="10.0.12"
+nname_vm="${job_prefix}_vm"
+addr_vm="10.0.13"
+
+mac_base='52:54:12:10:00'
+mac_base_vm='52:54:13:11:00'
+
+# juju controller
+cont_idx='99'
+# openstack compute
+os_comp_1_idx='30'
+os_comp_2_idx='31'
+# openstack components (controllers + rabbit + db)
+os_cont_0_idx='10'
+# contrail controllers
+os_cont_1_idx='20'
+os_cont_2_idx='21'
+os_cont_3_idx='22'

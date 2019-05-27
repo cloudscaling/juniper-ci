@@ -1,0 +1,9 @@
+#!/bin/bash
+
+fcmy_file="${BASH_SOURCE[0]}"
+fcmy_dir="$(dirname $fcmy_file)"
+source $fcmy_dir/definitions
+source $fcmy_dir/../common/functions
+source $fcmy_dir/../common/functions-bmc
+source $fcmy_dir/../common/functions-contrail
+source $fcmy_dir/../common/functions-aws
