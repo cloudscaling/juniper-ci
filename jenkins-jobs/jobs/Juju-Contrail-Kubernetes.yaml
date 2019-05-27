@@ -52,7 +52,7 @@
       - string:
           name: DOCKER_PASSWORD
     scm:
-      - progmatic-contrail-charms-branch
+      - progmaticlab-contrail-charms-branch
       - juniper-ci
       - charm-nova-compute
     builders:
