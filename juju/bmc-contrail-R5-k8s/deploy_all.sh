@@ -27,13 +27,13 @@ fi
 
 export JOB_VERSION=R5
 export SERIES="${SERIES:-xenial}"
-export VERSION="${VERSION:-ocata}"
-if [[ "$SERIES" == 'bionic' ]]; then
-  export OPENSTACK_ORIGIN="distro"
-else
-  export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
-fi
-export DEPLOY_MODE="${DEPLOY_MODE:-two}"
+#export VERSION="${VERSION:-ocata}"
+#if [[ "$SERIES" == 'bionic' ]]; then
+#  export OPENSTACK_ORIGIN="distro"
+#else
+#  export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
+#fi
+export DEPLOY_MODE="${DEPLOY_MODE:-one}"
 export USE_SSL_OS="${USE_SSL_OS:-false}"
 export USE_SSL_CONTRAIL="false"
 export USE_DPDK="${USE_DPDK:-false}"
@@ -85,7 +85,7 @@ juju-status-tabular
 "$my_dir"/deploy_manual.sh
 
 #check it
-$my_dir/../common/check-openstack.sh
+#$my_dir/../common/check-openstack.sh
 
 $my_dir/../save-logs.sh
 
