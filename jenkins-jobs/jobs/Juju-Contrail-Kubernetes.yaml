@@ -27,12 +27,6 @@
             - always
             - on_success
             - never
-#      - choice:
-#          name: VERSION
-#          description: "Version of the OpenStack. ocata -> xenial, queens -> bionic."
-#          choices:
-#            - ocata
-#            - queens
       - choice:
           name: DEPLOY_MODE
           description: |
@@ -43,21 +37,6 @@
             - one
             - two
             - ha
-#      - choice:
-#          name: AAA_MODE
-#          description: "aaa-mode for Contrail"
-#          choices:
-#            - cloud-admin
-#            - rbac
-#            - no-auth
-#      - bool:
-#          name: USE_SSL_OS
-#          description: "Deploy OpenStack with certificates"
-#          default: false
-#      - bool:
-#          name: USE_DPDK
-#          description: "Deploy Contrail's vrouter in DPDK mode"
-#          default: false
       - string:
           name: CHARMS_BRANCH
           default: 'R5-kubernetes'
@@ -83,9 +62,6 @@
             desc="cleanup"
           else
             desc="$SLAVE_NAME $VERSION $CONTRAIL_BUILD $DEPLOY_TYPE mode=$DEPLOY_MODE"
-#            if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
-#            if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
-#            if [[ "$USE_DPDK" == "true" ]] ; then desc="$desc +DPDK" ; fi
           fi
           echo "DESCRIPTION $desc"
       - description-setter:
@@ -95,9 +71,6 @@
           # build CONTRAIL_VERSION as a tag for opencontrailnightly
           export CONTRAIL_VERSION="$VERSION-$CONTRAIL_VERSION"
           export SERIES='xenial'
-#          if [[ "$VERSION" == "queens" ]] ; then
-#            export SERIES='bionic'
-#          fi
           ./juniper-ci/juju/bmc-contrail-R5-k8s/deploy_all.sh
     publishers:
       - archive:
