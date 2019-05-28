@@ -25,21 +25,10 @@ if [[ "$jver" == 1 ]] ; then
   exit 1
 fi
 
-export JOB_VERSION=R5
+export JOB_VERSION=R8
 export SERIES="${SERIES:-xenial}"
-#export VERSION="${VERSION:-ocata}"
-#if [[ "$SERIES" == 'bionic' ]]; then
-#  export OPENSTACK_ORIGIN="distro"
-#else
-#  export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
-#fi
 export DEPLOY_MODE="${DEPLOY_MODE:-one}"
-export USE_SSL_OS="${USE_SSL_OS:-false}"
 export USE_SSL_CONTRAIL="false"
-export USE_DPDK="${USE_DPDK:-false}"
-export AAA_MODE=${AAA_MODE:-rbac}
-
-export PASSWORD=${PASSWORD:-'password'}
 
 if [[ "$SERIES" == 'xenial' || "$SERIES" == 'bionic' ]]; then
   export IF1='ens3'

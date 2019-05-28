@@ -25,18 +25,17 @@ echo "INFO: compute 2: $comp2 / $comp2_ip"
 
 cont0_ip="$addr.$os_cont_0_idx"
 cont0=`get_machine_by_ip $cont0_ip`
-echo "INFO: controller 0 (OpenStack): $cont0 / $cont0_ip"
-
-cont1_ip="$cont0_ip"
-cont1="$cont0"
-
-echo "INFO: controller 1 (Contrail): $cont1 / $cont1_ip"
+echo "INFO: controller 0: $cont0 / $cont0_ip"
 
 ( set -o posix ; set ) > $log_dir/env
 echo "INFO: Deploy all $(date)"
 
-detect_machines
-wait_for_machines $m1 $m2 $m3 $m4 $m5
+# deploy
+
+m4=$cont0
+m2=$comp1
+m3=$comp2
+wait_for_machines $m2 $m3 $m4
 echo "INFO: Apply SSL flag if set $(date)"
 apply_ssl contrail
 
@@ -55,9 +54,6 @@ if [[ "$SERIES" == 'bionic' ]]; then
     test $res -eq 0 || { echo "ERROR: Machine $mmch is not accessible"; exit 1; }
   done
 fi
-
-# aio bundle
-juju deploy $PLACE/bundles/contrail_k8s_v4.yaml
 
 post_deploy
 

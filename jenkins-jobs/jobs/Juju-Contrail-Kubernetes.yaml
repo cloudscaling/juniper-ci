@@ -28,15 +28,16 @@
             - on_success
             - never
       - choice:
+          name: SERIES
+          choices:
+            - xenial
+            - bionic
+      - choice:
           name: DEPLOY_MODE
           description: |
-            one: Deploy OpenStack and Kubernetes to one machine
-            two: Deploy OpenStack and Kubernetes to different machines
-            ha: Deploy one machine for Kubernetes and three machines for Contrail
+            one: Deploy k8s master and Contrail to one machine and two machines for worker
           choices:
             - one
-            - two
-            - ha
       - string:
           name: CHARMS_BRANCH
           default: 'R5-kubernetes'
@@ -54,7 +55,6 @@
     scm:
       - progmaticlab-contrail-charms-branch
       - juniper-ci
-      - charm-nova-compute
     builders:
       - shell: |
           #!/bin/bash -e
@@ -68,9 +68,6 @@
           regexp: "DESCRIPTION (.*)"
       - shell: |
           #!/bin/bash -e
-          # build CONTRAIL_VERSION as a tag for opencontrailnightly
-          export CONTRAIL_VERSION="$VERSION-$CONTRAIL_VERSION"
-          export SERIES='xenial'
           ./juniper-ci/juju/bmc-contrail-R5-k8s/deploy_all.sh
     publishers:
       - archive:
