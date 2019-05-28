@@ -32,6 +32,10 @@ echo "INFO: Deploy all $(date)"
 
 # deploy
 
+# contrail-kubernetes
+juju-deploy $PLACE/contrail-kubernetes-master contrail-kubernetes-master --to 2
+juju-deploy $PLACE/contrail-kubernetes-node contrail-kubernetes-node 
+
 m4=$cont0
 m2=$comp1
 m3=$comp2
