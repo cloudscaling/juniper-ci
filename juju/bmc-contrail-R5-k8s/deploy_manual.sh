@@ -30,11 +30,76 @@ echo "INFO: controller 0: $cont0 / $cont0_ip"
 ( set -o posix ; set ) > $log_dir/env
 echo "INFO: Deploy all $(date)"
 
-# deploy
+### deploy applications
+
+# kubernetes
+
+juju-deploy cs:~containers/easyrsa-235 easyrsa --to lxd:2
+
+juju-deploy cs:~containers/etcd-415 etcd --to 2 \
+    --resource etcd=3 \
+    --resource snapshot=0
+juju-set etcd channel="3.2/stable"
+
+juju-deploy cs:~containers/kubernetes-master-654 kubernetes-master --to 2 \
+    --resource cdk-addons=0 \
+    --resource kube-apiserver=0 \
+    --resource kube-controller-manager=0 \
+    --resource kube-proxy=0 \
+    --resource kube-scheduler=0 \
+    --resource kubectl=0
+juju-set kubernetes-master channel="1.14/stable" \
+    enable-dashboard-addons="false" \
+    enable-metrics="false" \
+    dns-provider="none"
+juju-expose kubernetes-master
+
+juju-deploy cs:~containers/kubernetes-worker-519 kubernetes-worker --to 2 \
+    --resource cni-amd64="154" \
+    --resource cni-arm64="146" \
+    --resource cni-s390x="152" \
+    --resource kube-proxy="0" \
+    --resource kubectl="0" \
+    --resource kubelet="0"
+juju-set kubernetes-worker channel="1.14/stable" \
+    ingress="false"
+juju-expose kubernetes-worker
 
 # contrail-kubernetes
-juju-deploy $PLACE/contrail-kubernetes-master contrail-kubernetes-master --to 2
-juju-deploy $PLACE/contrail-kubernetes-node contrail-kubernetes-node 
+
+juju-deploy $PLACE/contrail-kubernetes-master contrail-kubernetes-master --config log-level=SYS_DEBUG --to 2
+juju-set contrail-kubernetes-master docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
+    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
+
+juju-deploy $PLACE/contrail-kubernetes-node contrail-kubernetes-node --config log-level=SYS_DEBUG
+juju-set contrail-kubernetes-node docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
+    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
+
+# contrail
+
+juju-deploy $PLACE/contrail-agent contrail-agent --config log-level=SYS_DEBUG
+juju-set contrail-kubernetes-node docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
+    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
+
+juju-deploy $PLACE/contrail-analytics contrail-analytics --config log-level=SYS_DEBUG --to 2
+juju-set contrail-analytics docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
+    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
+juju-expose contrail-analytics
+
+juju-deploy $PLACE/contrail-analyticsdb contrail-analyticsdb --config log-level=SYS_DEBUG --to 2
+juju-set contrail-analyticsdb docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
+    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD \
+    cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
+
+juju-deploy $PLACE/contrail-controller contrail-controller --config log-level=SYS_DEBUG --to 2
+juju-set contrail-controller docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
+    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD \
+    cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" auth-mode="cloud-admin"
+juju-expose contrail-controller
+
+# misc
+
+juju-deploy cs:xenial/ntp ntp
 
 m4=$cont0
 m2=$comp1
@@ -58,6 +123,32 @@ if [[ "$SERIES" == 'bionic' ]]; then
     test $res -eq 0 || { echo "ERROR: Machine $mmch is not accessible"; exit 1; }
   done
 fi
+
+### add charms relations
+
+# kubernetes
+
+juju-add-relation "kubernetes-master:kube-api-endpoint" "kubernetes-worker:kube-api-endpoint"
+juju-add-relation "kubernetes-master:kube-control" "kubernetes-worker:kube-control"
+juju-add-relation "kubernetes-master:certificates" "easyrsa:client"
+juju-add-relation "kubernetes-master:etcd" "etcd:db"
+juju-add-relation "kubernetes-worker:certificates" "easyrsa:client"
+juju-add-relation "etcd:certificates" "easyrsa:client"
+
+# contrail-kubernetes
+
+juju-add-relation "contrail-kubernetes-node:cni" "kubernetes-master:cni"
+juju-add-relation "contrail-kubernetes-node:cni" "kubernetes-worker:cni"
+juju-add-relation "contrail-kubernetes-master:contrail-controller" "contrail-controller:contrail-controller"
+juju-add-relation "contrail-agent:juju-info" "contrail-kubernetes-node:juju-info"
+
+# contrail
+
+juju-add-relation "contrail-controller" "contrail-analytics"
+juju-add-relation "contrail-controller" "contrail-analyticsdb"
+juju-add-relation "contrail-analytics" "contrail-analyticsdb"
+juju-add-relation "contrail-agent" "contrail-controller"
+juju-add-relation "contrail-controller" "ntp"
 
 post_deploy
 
