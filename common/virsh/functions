@@ -287,6 +287,7 @@ function start_vm() {
 function ensure_vbmcd(){
   if ! ps aux | grep -v grep | grep -q vbmcd ; then
     vbmcd
+    sleep 5
   fi
 }
 
