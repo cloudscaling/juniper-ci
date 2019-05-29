@@ -1,0 +1,75 @@
+- job:
+    name: Juju-Contrail-R5-Kubernetes-KVM
+    description: 'Contrail R5 + Kubernetes on KVM by Juju'
+    defaults: global
+    concurrent: true
+    parameters:
+      - node:
+          name: SLAVE_NAME
+          description: "Select slave: one for specific node or multiple for any node."
+          default-slaves:
+            - slave01
+            - slave04
+          allowed-slaves:
+            - slave01
+            - slave04
+          ignore-offline-nodes: false
+          allowed-multiselect: true
+      - choice:
+          name: CLEAN_BEFORE
+          choices:
+            - 'false'
+            - 'true'
+            - clean_and_exit
+      - choice:
+          name: CLEAN_ENV
+          choices:
+            - always
+            - on_success
+            - never
+      - choice:
+          name: SERIES
+          choices:
+            - xenial
+            - bionic
+      - choice:
+          name: DEPLOY_MODE
+          description: |
+            one: Deploy k8s master and Contrail to one machine and two machines for worker
+          choices:
+            - one
+      - string:
+          name: CHARMS_BRANCH
+          default: 'R5-kubernetes'
+      - string:
+          name: CONTAINER_REGISTRY
+          default: opencontrailnightly
+      - string:
+          name: CONTRAIL_VERSION
+          default: master-latest
+          description: "Tag's suffix for images from opencontrailnightly. Prefix is a OPENSTACK_VERSION"
+      - string:
+          name: DOCKER_USERNAME
+      - string:
+          name: DOCKER_PASSWORD
+    scm:
+      - progmaticlab-contrail-charms-branch
+      - juniper-ci
+    builders:
+      - shell: |
+          #!/bin/bash -e
+          if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
+            desc="cleanup"
+          else
+            desc="$SLAVE_NAME $VERSION $CONTRAIL_BUILD $DEPLOY_TYPE mode=$DEPLOY_MODE"
+          fi
+          echo "DESCRIPTION $desc"
+      - description-setter:
+          regexp: "DESCRIPTION (.*)"
+      - shell: |
+          #!/bin/bash -e
+          ./juniper-ci/juju/bmc-contrail-R5-k8s/deploy_all.sh
+    publishers:
+      - archive:
+          artifacts: 'logs/**'
+          allow-empty: 'true'

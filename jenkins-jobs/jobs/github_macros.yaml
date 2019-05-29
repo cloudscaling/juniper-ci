@@ -113,6 +113,14 @@
           repo: contrail-charms
           branch: ${CHARMS_BRANCH}
 
+- scm:
+    name: progmaticlab-contrail-charms-branch
+    scm:
+      - github-branch:
+          organization: progmaticlab
+          repo: contrail-charms
+          branch: ${CHARMS_BRANCH}
+
 
 # temporary definition while we use unreleased OpenStack charms
 - scm:

@@ -84,6 +84,7 @@ ssh_dest=""
 
 function get_ssh_dest() {
   local hip=`openstack hypervisor list -c "Hypervisor Hostname" -c "Host IP" | grep "$1" | awk '{print $4}'`
+  echo "INFO: detect ssh dest - Host: $1 IP: $hip"
   if [[ "$hip" == 'None' ]]; then
     # helm case
     hip=`getent hosts $1 | awk '{print $1}'`
