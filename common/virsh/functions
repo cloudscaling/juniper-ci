@@ -284,6 +284,20 @@ function start_vm() {
   virsh start $name --force-boot
 }
 
+function ensure_vbmcd(){
+  if ! ps aux | grep -v grep | grep -q vbmcd ; then
+    vbmcd
+  fi
+}
+
+function call_vbmc() {
+  local cmd=$1
+  shift
+  local opts="$@"
+  ensure_vbmcd
+  vbmc $cmd --no-daemon $opts 
+}
+
 function delete_domain() {
   local name=$1
   if virsh dominfo $name 2>/dev/null ; then
@@ -304,7 +318,7 @@ function delete_domains() {
   delete_domain rd-undercloud-$NUM-cert-test
   delete_domain rd-undercloud-$NUM-freeipa
 
-  for name in $(vbmc list | grep "$domname" | awk '{print($2)}') ; do
+  for name in $(call_vbmc list | grep "$domname" | awk '{print($2)}') ; do
     delete_vbmc $name
   done
 }
@@ -579,19 +593,6 @@ function get_ip_by_mac() {
   virsh net-dhcp-leases $net | sed 1,2d | grep "$filter" | awk '{print($5)}' | cut -d '/' -f 1
 }
 
-function ensure_vbmcd(){
-  if ! ps aux | grep -q vbmcd ; then
-    vbmcd
-  fi
-}
-
-function call_vbmc() {
-  local cmd=$1
-  shift
-  local opts="$@"
-  vbmc $cmd --verbose  --no-daemon $opts
-}
-
 function delete_vbmc() {
   local domain=$1
   call_vbmc stop  $domain || true
@@ -605,7 +606,6 @@ function start_vbmc() {
   local ipmi_address=$3
   local ipmi_user=$4
   local ipmi_password=$5
-  ensure_vbmcd
   call_vbmc add --port $port --address $ipmi_address \
             --username $ipmi_user --password $ipmi_password \
             $domain
