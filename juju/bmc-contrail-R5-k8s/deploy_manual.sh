@@ -55,7 +55,7 @@ juju-set kubernetes-master channel="1.14/stable" \
     docker_runtime="custom" \
     docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
     docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
-    docker_runtime_package="docker-ce=18.03.1~ce-0~ubuntu"
+    docker_runtime_package="docker-ce"
 
 juju-expose kubernetes-master
 
@@ -71,7 +71,7 @@ juju-set kubernetes-worker channel="1.14/stable" \
     docker_runtime="custom" \
     docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
     docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
-    docker_runtime_package="docker-ce=18.03.1~ce-0~ubuntu"
+    docker_runtime_package="docker-ce"
 juju-expose kubernetes-worker
 
 # contrail-kubernetes
@@ -149,7 +149,7 @@ juju-add-relation "etcd:certificates" "easyrsa:client"
 juju-add-relation "contrail-kubernetes-node:cni" "kubernetes-master:cni"
 juju-add-relation "contrail-kubernetes-node:cni" "kubernetes-worker:cni"
 juju-add-relation "contrail-kubernetes-master:contrail-controller" "contrail-controller:contrail-controller"
-juju-add-relation "contrail-agent:juju-info" "contrail-kubernetes-node:juju-info"
+juju-add-relation "contrail-agent:juju-info" "kubernetes-worker:juju-info"
 
 # contrail
 
