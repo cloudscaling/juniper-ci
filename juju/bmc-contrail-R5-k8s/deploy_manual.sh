@@ -34,14 +34,14 @@ echo "INFO: Deploy all $(date)"
 
 # kubernetes
 
-juju-deploy cs:~containers/easyrsa-235 easyrsa --to lxd:2
+juju-deploy cs:~containers/easyrsa easyrsa --to lxd:2
 
-juju-deploy cs:~containers/etcd-415 etcd --to 2 \
+juju-deploy cs:~containers/etcd etcd --to 2 \
     --resource etcd=3 \
     --resource snapshot=0
 juju-set etcd channel="3.2/stable"
 
-juju-deploy cs:~containers/kubernetes-master-654 kubernetes-master --to 2 \
+juju-deploy cs:~containers/kubernetes-master kubernetes-master --to 2 \
     --resource cdk-addons=0 \
     --resource kube-apiserver=0 \
     --resource kube-controller-manager=0 \
@@ -54,7 +54,7 @@ juju-set kubernetes-master channel="1.14/stable" \
     dns-provider="none"
 juju-expose kubernetes-master
 
-juju-deploy cs:~containers/kubernetes-worker-519 kubernetes-worker --to 2 \
+juju-deploy cs:~containers/kubernetes-worker kubernetes-worker --to 2 \
     --resource cni-amd64="154" \
     --resource cni-arm64="146" \
     --resource cni-s390x="152" \
