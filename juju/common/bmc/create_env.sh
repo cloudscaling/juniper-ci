@@ -115,10 +115,9 @@ function run_cloud_machine() {
   # apply hostname for machine
   juju-ssh $mch "sudo bash -c 'echo $name > /etc/hostname ; hostname $name'" 2>/dev/null
   # try to fix /etc/hosts
-  local default_interface=$(ip route get 1 | grep -o 'dev.*' | awk '{print($2)}')
-  local default_ip=$(ip addr show dev $default_interface | grep 'inet ' | awk '{print $2}' | head -n 1 | cut -d '/' -f 1)
-  sudo sh -c "echo >> /etc/hosts"
-  sudo sh -c "echo '$default_ip $name' >> /etc/hosts"
+  local default_interface=$(juju-ssh $mch "ip route get 1 | grep -o 'dev.*' | awk '{print($2)}'")
+  local default_ip=$(juju-ssh $mch "ip addr show dev $default_interface | grep 'inet ' | awk '{print $2}' | head -n 1 | cut -d '/' -f 1")
+  juju-ssh $mch "sudo sh -c 'echo $default_ip $name >> /etc/hosts'"
   # after first boot we must remove cloud-init
   juju-ssh $mch "sudo rm -rf /etc/systemd/system/cloud-init.target.wants /lib/systemd/system/cloud*"
   juju-ssh $mch "sudo apt-get -y purge unattended-upgrades" &>>$log_dir/apt.log
