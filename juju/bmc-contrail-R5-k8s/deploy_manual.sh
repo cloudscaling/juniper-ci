@@ -149,6 +149,7 @@ juju-add-relation "etcd:certificates" "easyrsa:client"
 juju-add-relation "contrail-kubernetes-node:cni" "kubernetes-master:cni"
 juju-add-relation "contrail-kubernetes-node:cni" "kubernetes-worker:cni"
 juju-add-relation "contrail-kubernetes-master:contrail-controller" "contrail-controller:contrail-controller"
+juju-add-relation "contrail-kubernetes-master:kube-api-endpoint" "kubernetes-master:kube-api-endpoint"
 juju-add-relation "contrail-agent:juju-info" "kubernetes-worker:juju-info"
 
 # contrail
