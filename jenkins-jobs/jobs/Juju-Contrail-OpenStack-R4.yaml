@@ -1,0 +1,212 @@
+- job:
+    name: Juju-Contrail-OpenStack-AWS
+    description: "Deploys cluster(manual) with OpenStack/Contrail and checks it. Can be used for debug purposes."
+    defaults: global
+    node: master
+    parameters:
+      - choice:
+          name: CLEAN_BEFORE
+          choices:
+            - 'false'
+            - 'true'
+            - clean_and_exit
+      - choice:
+          name: CLEAN_ENV
+          choices:
+            - always
+            - on_success
+            - never
+      - choice:
+          name: CONTRAIL_BUILD
+          choices:
+            - 4.1.2.0-16
+            - 4.1.1.0-12
+            - 4.1.0.0-8
+            - 4.0.2.0-34
+            - 4.0.1.0-32
+      - choice:
+          name: VERSION
+          description: "Version of the OpenStack. mitaka implies trusty and newton/ocata implies xenial."
+          choices:
+            - ocata
+            - newton
+            - mitaka
+      - choice:
+          name: DEPLOY_TYPE
+          description: "A method of deployment"
+          choices:
+            - manual
+            - bundle
+      - choice:
+          name: AAA_MODE
+          description: "aaa-mode for Contrail"
+          choices:
+            - cloud-admin
+            - rbac
+            - no-auth
+      - bool:
+          name: USE_SSL_OS
+          description: "Deploy OpenStack with certificates"
+          default: false
+      - bool:
+          name: USE_SSL_CONTRAIL
+          description: "Deploy Contrail with certificates"
+          default: false
+      - bool:
+          name: USE_ADDITIONAL_INTERFACE
+          description: "Deploy Contrail with additional interfaces that is used for control-network"
+          default: false
+      - bool:
+          name: USE_EXTERNAL_RABBITMQ
+          description: "Use external RabbitMQ"
+          default: false
+      - string:
+          name: CHARMS_BRANCH
+          default: 'master'
+      - bool:
+          name: RUN_TEMPEST
+          description: "Run neutron tests from tempest"
+          default: false
+    scm:
+      - juniper-contrail-charms-branch
+      - juniper-ci
+      - tempest
+    builders:
+      - shell: |
+          #!/bin/bash -e
+          if [[ "$CHARMS_BRANCH" != "master" ]]; then
+            cd contrail-charms
+            git checkout "$CHARMS_BRANCH"
+            cd ..
+          fi
+      - shell: |
+          #!/bin/bash -e
+          if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
+            desc="cleanup"
+          else
+            desc="$VERSION $CONTRAIL_BUILD $DEPLOY_TYPE $AAA_MODE"
+            if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
+            if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
+            if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
+            if [[ "$USE_EXTERNAL_RABBITMQ" == "true" ]] ; then desc="$desc +EXT_MQ" ; fi
+            if [[ "$RUN_TEMPEST" == "true" ]] ; then desc="$desc +Tempest" ; fi
+          fi
+          echo "DESCRIPTION $desc"
+      - description-setter:
+          regexp: "DESCRIPTION (.*)"
+      - shell: |
+          #!/bin/bash -e
+          export SERIES='xenial'
+          if [[ "$VERSION" == "mitaka" ]] ; then
+            export SERIES='trusty'
+          fi
+          ./juniper-ci/juju/aws-contrail-R4/deploy-all.sh deploy-$DEPLOY_TYPE.sh
+    publishers:
+      - archive:
+          artifacts: 'logs/**'
+          allow-empty: true
+      - junit:
+          results: tempest/test_result.xml
+          allow-empty-results: true
+
+
+- job:
+    name: Juju-Contrail-OpenStack-KVM
+    description: 'Contrail+OpenStack on KVM by Juju'
+    defaults: global
+    concurrent: true
+    parameters:
+      - node:
+          name: SLAVE_NAME
+          description: "Select slave: one for specific node or multiple for any node."
+          default-slaves:
+            - slave01
+            - slave04
+          allowed-slaves:
+            - slave01
+            - slave04
+          ignore-offline-nodes: false
+          allowed-multiselect: true
+      - choice:
+          name: CLEAN_BEFORE
+          choices:
+            - 'false'
+            - 'true'
+            - clean_and_exit
+      - choice:
+          name: CLEAN_ENV
+          choices:
+            - always
+            - on_success
+            - never
+      - choice:
+          name: CONTRAIL_BUILD
+          choices:
+            - 4.1.2.0-16
+            - 4.1.1.0-12
+            - 4.1.0.0-8
+            - 4.0.2.0-34
+            - 4.0.1.0-32
+      - choice:
+          name: VERSION
+          description: "Version of the OpenStack. mitaka implies trusty and newton/ocata implies xenial."
+          choices:
+            - ocata
+            - newton
+            - mitaka
+      - choice:
+          name: DEPLOY_MODE
+          description: |
+            one: Deploy OpenStack and Contrail to one machine
+            two: Deploy OpenStack and Contrail to different machines
+            ha: Deploy one machine for OpenStack and three machines for Contrail
+          choices:
+            - two
+            - one
+            - ha
+      - choice:
+          name: AAA_MODE
+          description: "aaa-mode for Contrail"
+          choices:
+            - cloud-admin
+            - rbac
+            - no-auth
+      - bool:
+          name: USE_SSL_OS
+          description: "Deploy OpenStack with certificates"
+          default: false
+      - bool:
+          name: USE_DPDK
+          description: "Deploy Contrail's vrouter in DPDK mode"
+          default: false
+      - string:
+          name: CHARMS_BRANCH
+          default: 'master'
+    scm:
+      - juniper-contrail-charms-branch
+      - juniper-ci
+    builders:
+      - shell: |
+          #!/bin/bash -e
+          if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
+            desc="cleanup"
+          else
+            desc="$SLAVE_NAME $VERSION $CONTRAIL_BUILD $DEPLOY_TYPE mode=$DEPLOY_MODE $AAA_MODE"
+            if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
+            if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
+            if [[ "$USE_DPDK" == "true" ]] ; then desc="$desc +DPDK" ; fi
+          fi
+          echo "DESCRIPTION $desc"
+      - description-setter:
+          regexp: "DESCRIPTION (.*)"
+      - shell: |
+          #!/bin/bash -e
+          export SERIES='xenial'
+          if [[ "$VERSION" == "mitaka" ]] ; then
+            export SERIES='trusty'
+          fi
+          ./juniper-ci/juju/bmc-contrail-R4/deploy_all.sh
+    publishers:
+      - archive:
+          artifacts: 'logs/**'
+          allow-empty: 'true'
