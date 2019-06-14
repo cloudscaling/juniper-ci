@@ -78,7 +78,12 @@ juju-expose kubernetes-worker
 
 juju-deploy $PLACE/contrail-kubernetes-master contrail-kubernetes-master --config log-level=SYS_DEBUG --to 2
 juju-set contrail-kubernetes-master docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
-    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
+    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD \
+    docker_runtime="custom" \
+    docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
+    docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
+    docker_runtime_package="docker-ce"
+
 
 juju-deploy $PLACE/contrail-kubernetes-node contrail-kubernetes-node --config log-level=SYS_DEBUG
 juju-set contrail-kubernetes-node docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
