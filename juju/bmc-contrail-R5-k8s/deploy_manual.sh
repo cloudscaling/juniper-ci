@@ -67,11 +67,12 @@ juju-deploy cs:~containers/kubernetes-worker kubernetes-worker --to 2 \
     --resource kubectl="0" \
     --resource kubelet="0"
 juju-set kubernetes-worker channel="1.14/stable" \
-    ingress="false" \
-    docker_runtime="custom" \
-    docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
-    docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
-    docker_runtime_package="docker-ce"
+    ingress="false"
+#\
+#    docker_runtime="custom" \
+#    docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
+#    docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
+#    docker_runtime_package="docker-ce"
 juju-expose kubernetes-worker
 
 # contrail-kubernetes
