@@ -67,23 +67,23 @@ juju-deploy cs:~containers/kubernetes-worker kubernetes-worker --to 2 \
     --resource kubectl="0" \
     --resource kubelet="0"
 juju-set kubernetes-worker channel="1.14/stable" \
-    ingress="false"
-#\
-#    docker_runtime="custom" \
-#    docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
-#    docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
-#    docker_runtime_package="docker-ce"
+    ingress="false" \
+    docker_runtime="custom" \
+    docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
+    docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
+    docker_runtime_package="docker-ce"
 juju-expose kubernetes-worker
 
 # contrail-kubernetes
 
 juju-deploy $PLACE/contrail-kubernetes-master contrail-kubernetes-master --config log-level=SYS_DEBUG --to 2
 juju-set contrail-kubernetes-master docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
-    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD \
-    docker_runtime="custom" \
-    docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
-    docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
-    docker_runtime_package="docker-ce"
+    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
+#\
+#    docker_runtime="custom" \
+#    docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
+#    docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
+#    docker_runtime_package="docker-ce"
 
 
 juju-deploy $PLACE/contrail-kubernetes-node contrail-kubernetes-node --config log-level=SYS_DEBUG
