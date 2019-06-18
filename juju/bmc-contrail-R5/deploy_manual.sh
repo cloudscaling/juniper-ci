@@ -97,7 +97,7 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   juju-add-unit haproxy --to $cont3
   juju-expose haproxy
   juju-add-relation haproxy:juju-info keepalived:juju-info
-  controller_params="--config vip=$addr.254 --config haproxy-https-mode=http --confog haproxy-http-mode=https"
+  controller_params="--config vip=$addr.254 --config haproxy-https-mode=http --config haproxy-http-mode=https"
 fi
 
 juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params --config log-level=SYS_DEBUG
