@@ -7,7 +7,7 @@ mkdir -p $my_dir/logs
 source "$my_dir/cloudrc"
 
 mkdir -p /root/deploy && cd /root/deploy
-git clone https://github.com/OlegBravo/airship-in-a-bottle
+git clone https://github.com/OlegBravo/treasuremap
 git clone https://opendev.org/airship/pegleg.git airship-pegleg
 git clone https://opendev.org/airship/shipyard.git airship-shipyard
 
@@ -15,20 +15,21 @@ sed -i 's/-it/-i/g' airship-pegleg/tools/pegleg.sh
 
 cd ./airship-in-a-bottle/manifests/dev_single_node
 
-echo "INFO: The minimum recommended size of the Ubuntu 16.04 VM is 4 vCPUs, 20GB of RAM with 32GB disk space. $(date)"
 CPU_COUNT=$(grep -c processor /proc/cpuinfo)
 RAM_TOTAL=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
+# Blindly assume that all storage on this VM is under root FS
+DISK_SIZE=$(df --output=source,size / | awk '/dev/ {print $2}')
 source /etc/os-release
-if [[ $CPU_COUNT -lt 4 || $RAM_TOTAL -lt 20000000 || $NAME != "Ubuntu" || $VERSION_ID != "16.04" ]]; then
-  echo "ERROR: minimum VM recommendations are not met. Exiting."
+if [[ $CPU_COUNT -lt 4 || $RAM_TOTAL -lt 20000000 || $DISK_SIZE -lt 30000000 || $NAME != "Ubuntu" || $VERSION_ID != "16.04" ]]; then
+  echo "Error: minimum VM recommendations are not met. Exiting."
   exit 1
 fi
 if [[ $(id -u) -ne 0 ]]; then
-  echo "ERROR: Please execute this script as root!"
+  echo "Please execute this script as root!"
   exit 1
 fi
 
-export TARGET_SITE="demo"
+export TARGET_SITE="aiab"
 
 if [[ ${VROUTER_ON_DEFAULT_IFACE:-'true'} == 'true' ]]; then
   export NODE_NET_IFACE="ens3"
@@ -36,7 +37,7 @@ if [[ ${VROUTER_ON_DEFAULT_IFACE:-'true'} == 'true' ]]; then
   export NODE_SUBNETS="$nodes_net"
   export DNS_SERVER="$nodes_gw"
 else
-  export NODE_NET_IFACE="ens4"
+  export NODE_NET_IFACE="ens4"  
   export NODE_NET_IFACE_GATEWAY_IP="$nodes_gw_1"
   export NODE_SUBNETS="$nodes_net_1"
   export DNS_SERVER="$nodes_gw_1"
@@ -64,7 +65,7 @@ export HOSTIP=$LOCAL_IP
 # x/32 will work for CEPH in a single node deploy.
 export HOSTCIDR=$LOCAL_IP/32
 
-COMMON_CONFIG_FILE="../../deployment_files/site/$TARGET_SITE/networks/common-addresses.yaml"
+COMMON_CONFIG_FILE="../../site/$TARGET_SITE/networks/common-addresses.yaml"
 if grep -q "10.96.0.10" "/etc/resolv.conf"; then
   echo "INFO: Not changing DNS servers, /etc/resolv.conf already updated."
 else
