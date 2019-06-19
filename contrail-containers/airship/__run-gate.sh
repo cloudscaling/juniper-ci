@@ -65,7 +65,7 @@ export HOSTIP=$LOCAL_IP
 # x/32 will work for CEPH in a single node deploy.
 export HOSTCIDR=$LOCAL_IP/32
 
-COMMON_CONFIG_FILE="../../site/$TARGET_SITE/networks/common-addresses.yaml"
+COMMON_CONFIG_FILE="../../../site/$TARGET_SITE/networks/common-addresses.yaml "
 if grep -q "10.96.0.10" "/etc/resolv.conf"; then
   echo "INFO: Not changing DNS servers, /etc/resolv.conf already updated."
 else
