@@ -98,8 +98,7 @@ juju-set contrail-kubernetes-node docker-registry=$CONTAINER_REGISTRY image-tag=
 
 juju-deploy $PLACE/contrail-analytics contrail-analytics --config log-level=SYS_DEBUG --to 2
 juju-set contrail-analytics docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
-    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD \
-    auth-mode="noauth"
+    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 juju-expose contrail-analytics
 
 juju-deploy $PLACE/contrail-analyticsdb contrail-analyticsdb --config log-level=SYS_DEBUG --to 2
