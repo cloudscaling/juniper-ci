@@ -52,7 +52,10 @@ juju-set kubernetes-master channel="1.14/stable" \
     enable-dashboard-addons="false" \
     enable-metrics="false" \
     dns-provider="none" \
-    docker_runtime=$DOCKER_RUNTIME
+    docker_runtime="custom" \
+    docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
+    docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
+    docker_runtime_package="docker-ce"   
 
 juju-expose kubernetes-master
 
@@ -65,39 +68,43 @@ juju-deploy cs:~containers/kubernetes-worker kubernetes-worker --to 2 \
     --resource kubelet="0"
 juju-set kubernetes-worker channel="1.14/stable" \
     ingress="false" \
-    docker_runtime=$DOCKER_RUNTIME
+    docker_runtime="custom" \
+    docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
+    docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
+    docker_runtime_package="docker-ce"
+   
 juju-expose kubernetes-worker
 
 # contrail-kubernetes
 
 juju-deploy $PLACE/contrail-kubernetes-master contrail-kubernetes-master --config log-level=SYS_DEBUG --to 2
 juju-set contrail-kubernetes-master docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
-    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD docker_runtime=$DOCKER_RUNTIME
+    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 
 juju-deploy $PLACE/contrail-kubernetes-node contrail-kubernetes-node --config log-level=SYS_DEBUG
 juju-set contrail-kubernetes-node docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
-    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD docker_runtime=$DOCKER_RUNTIME
+    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 
 # contrail
 
 juju-deploy $PLACE/contrail-agent contrail-agent --config log-level=SYS_DEBUG
 juju-set contrail-kubernetes-node docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
-    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD docker_runtime=$DOCKER_RUNTIME
+    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 
 juju-deploy $PLACE/contrail-analytics contrail-analytics --config log-level=SYS_DEBUG --to 2
 juju-set contrail-analytics docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
-    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD docker_runtime=$DOCKER_RUNTIME
+    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 juju-expose contrail-analytics
 
 juju-deploy $PLACE/contrail-analyticsdb contrail-analyticsdb --config log-level=SYS_DEBUG --to 2
 juju-set contrail-analyticsdb docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
-    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD docker_runtime=$DOCKER_RUNTIME \
+    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD \
     cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
 
 juju-deploy $PLACE/contrail-controller contrail-controller --config log-level=SYS_DEBUG --to 2
 juju-set contrail-controller docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
-    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD docker_runtime=$DOCKER_RUNTIME \
-    cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" auth-mode="no-auth"
+    docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD \
+    cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" auth-mode="no-auth" bgp-asn=64256
 juju-expose contrail-controller
 
 # misc
