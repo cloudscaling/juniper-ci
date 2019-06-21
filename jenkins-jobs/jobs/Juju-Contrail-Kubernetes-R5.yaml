@@ -52,6 +52,13 @@
           name: DOCKER_USERNAME
       - string:
           name: DOCKER_PASSWORD
+      - choice:
+          name: DOCKER_RUNTIME
+          choices:
+            - upstream
+            - apt
+            - auto
+          description: Valid values are "upstream" (Docker PPA), "apt" (Ubuntu archive), "auto" (Ubuntu archive)
     scm:
       - progmaticlab-contrail-charms-branch
       - juniper-ci
