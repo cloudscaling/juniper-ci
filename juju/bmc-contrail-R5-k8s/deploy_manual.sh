@@ -41,7 +41,7 @@ juju-deploy cs:~containers/etcd etcd --to 2 \
     --resource snapshot=0
 juju-set etcd channel="3.2/stable"
 
-juju-deploy cs:~containers/kubernetes-master kubernetes-master \
+juju-deploy cs:~containers/kubernetes-master kubernetes-master --to 2 \
     --resource cdk-addons=0 \
     --resource kube-apiserver=0 \
     --resource kube-controller-manager=0 \
@@ -77,7 +77,7 @@ juju-expose kubernetes-worker
 
 # contrail-kubernetes
 
-juju-deploy $PLACE/contrail-kubernetes-master contrail-kubernetes-master --config log-level=SYS_DEBUG --to 2
+juju-deploy $PLACE/contrail-kubernetes-master contrail-kubernetes-master --config log-level=SYS_DEBUG
 juju-set contrail-kubernetes-master docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
     docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 
