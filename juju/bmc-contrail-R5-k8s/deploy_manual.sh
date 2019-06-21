@@ -41,7 +41,7 @@ juju-deploy cs:~containers/etcd etcd --to 2 \
     --resource snapshot=0
 juju-set etcd channel="3.2/stable"
 
-juju-deploy cs:~containers/kubernetes-master kubernetes-master --to 2 \
+juju-deploy cs:~containers/kubernetes-master kubernetes-master \
     --resource cdk-addons=0 \
     --resource kube-apiserver=0 \
     --resource kube-controller-manager=0 \
@@ -104,7 +104,7 @@ juju-set contrail-analyticsdb docker-registry=$CONTAINER_REGISTRY image-tag=$CON
 juju-deploy $PLACE/contrail-controller contrail-controller --config log-level=SYS_DEBUG --to 2
 juju-set contrail-controller docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
     docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD \
-    cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" auth-mode="no-auth" bgp-asn=64256
+    cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" auth-mode="no-auth"
 juju-expose contrail-controller
 
 # misc
