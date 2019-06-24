@@ -77,7 +77,7 @@ juju-expose kubernetes-worker
 
 # contrail-kubernetes
 
-juju-deploy $PLACE/contrail-kubernetes-master contrail-kubernetes-master --config log-level=SYS_DEBUG
+juju-deploy $PLACE/contrail-kubernetes-master contrail-kubernetes-master --config log-level=SYS_DEBUG --to 2
 juju-set contrail-kubernetes-master docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
     docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 
