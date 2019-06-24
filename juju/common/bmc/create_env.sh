@@ -114,8 +114,6 @@ function run_cloud_machine() {
   wait_kvm_machine $mch juju-ssh
   # apply hostname for machine
   juju-ssh $mch "sudo bash -c 'echo $name > /etc/hostname ; hostname $name'" 2>/dev/null
-  # try to fix /etc/hosts
-  juju-ssh $mch "sudo bash -c 'echo $ip $name >> /etc/hosts'" 2>/dev/null
   # after first boot we must remove cloud-init
   juju-ssh $mch "sudo rm -rf /etc/systemd/system/cloud-init.target.wants /lib/systemd/system/cloud*"
   juju-ssh $mch "sudo apt-get -y purge unattended-upgrades" &>>$log_dir/apt.log
