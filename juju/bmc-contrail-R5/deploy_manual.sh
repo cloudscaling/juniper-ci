@@ -124,7 +124,8 @@ fi
 juju-deploy $PLACE/contrail-openstack
 juju-set contrail-openstack docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 juju-deploy $PLACE/contrail-agent --config log-level=SYS_DEBUG
-juju-set contrail-agent physical-interface=$IF2 vhost-gateway=$addr_vm.1 docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
+# TODO physical-interface must be $IF2
+juju-set contrail-agent physical-interface=$IF1 vhost-gateway=$addr_vm.1 docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 if [[ "$USE_DPDK" == "true" ]] ; then
   juju-set contrail-agent dpdk=True dpdk-coremask=1,2 dpdk-main-mempool-size=16384
 fi
