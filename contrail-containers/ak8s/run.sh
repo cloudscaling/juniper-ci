@@ -73,10 +73,6 @@ else
   CONTROL_NODES="${IP2_CONT_01}"
 fi
 
-# TODO: remove it later when review get merged https://review.opencontrail.org/#/c/50519/
-VROUTER_GW="$nodes_gw_2"
-
-
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
 envsubst <$my_dir/instances.yaml.${HA}.tmpl >$config
 echo "INFO: cloud config ------------------------- $(date)"
