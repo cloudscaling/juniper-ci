@@ -33,7 +33,7 @@ echo "INFO: Deploy all $(date)"
 juju-deploy cs:~containers/easyrsa --to lxd:$cont0
 juju-deploy cs:~containers/etcd --to lxd:$cont0 --config channel="3.2/stable"
 
-juju-deploy cs:~containers/kubernetes-master --to $cont0 \
+juju-deploy cs:~containers/kubernetes-master-696 --to $cont0 \
   --config channel="1.14/stable" \
   --config enable-dashboard-addons="false" \
   --config enable-metrics="false" \
@@ -44,7 +44,7 @@ juju-deploy cs:~containers/kubernetes-master --to $cont0 \
 
 juju-expose kubernetes-master
 
-juju-deploy cs:~containers/kubernetes-worker --to $comp0 \
+juju-deploy cs:~containers/kubernetes-worker-550 --to $comp0 \
   --config channel="1.14/stable" \
   --config docker_runtime="custom" \
   --config docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
