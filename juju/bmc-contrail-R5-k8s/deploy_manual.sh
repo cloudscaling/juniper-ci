@@ -16,14 +16,11 @@ function catch_errors_ce() {
 # version 2
 PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
 
-comp1_ip="$addr.$os_comp_1_idx"
+comp1_ip="$addr.$comp_1_idx"
 comp1=`get_machine_by_ip $comp1_ip`
 echo "INFO: compute 1: $comp1 / $comp1_ip"
-comp2_ip="$addr.$os_comp_2_idx"
-comp2=`get_machine_by_ip $comp2_ip`
-echo "INFO: compute 2: $comp2 / $comp2_ip"
 
-cont0_ip="$addr.$os_cont_0_idx"
+cont0_ip="$addr.$cont_0_idx"
 cont0=`get_machine_by_ip $cont0_ip`
 echo "INFO: controller 0: $cont0 / $cont0_ip"
 
@@ -55,7 +52,7 @@ juju-set kubernetes-master channel="1.14/stable" \
     docker_runtime="custom" \
     docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
     docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
-    docker_runtime_package="docker-ce"   
+    docker_runtime_package="docker-ce"
 
 juju-expose kubernetes-master
 
@@ -72,7 +69,7 @@ juju-set kubernetes-worker channel="1.14/stable" \
     docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
     docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
     docker_runtime_package="docker-ce"
-   
+
 juju-expose kubernetes-worker
 
 # contrail-kubernetes
@@ -113,8 +110,7 @@ juju-deploy cs:xenial/ntp ntp
 
 m4=$cont0
 m2=$comp1
-m3=$comp2
-wait_for_machines $m2 $m3 $m4
+wait_for_machines $m2 $m4
 echo "INFO: Apply SSL flag if set $(date)"
 apply_ssl contrail
 

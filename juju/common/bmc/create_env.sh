@@ -91,12 +91,12 @@ function wait_kvm_machine() {
   done
 }
 
-cont_ip="$addr.$cont_idx"
-run_machine ${job_prefix}-cont 1 2048 $cont_idx $cont_ip
-wait_kvm_machine $image_user@$cont_ip
+juju_cont_ip="$addr.$juju_cont_idx"
+run_machine ${job_prefix}-cont 1 2048 $juju_cont_idx $juju_cont_ip
+wait_kvm_machine $image_user@$juju_cont_ip
 
 echo "INFO: bootstraping juju controller $(date)"
-juju bootstrap manual/$image_user@$cont_ip $juju_controller_name
+juju bootstrap manual/$image_user@$juju_cont_ip $juju_controller_name
 
 function run_cloud_machine() {
   local name=${job_prefix}-$1
@@ -126,7 +126,7 @@ function run_cloud_machine() {
 
 function run_compute() {
   local index=$1
-  local mac_var_name="os_comp_${index}_idx"
+  local mac_var_name="comp_${index}_idx"
   local mac_suffix=${!mac_var_name}
   echo "INFO: creating compute $index (mac suffix $mac_suffix) $(date)"
   local ip="$addr.$mac_suffix"
@@ -145,7 +145,7 @@ function run_controller() {
   local index=$1
   local mem=$2
   local prepare_for_openstack=$3
-  local mac_var_name="os_cont_${index}_idx"
+  local mac_var_name="cont_${index}_idx"
   local mac_suffix=${!mac_var_name}
   echo "INFO: creating controller $index (mac suffix $mac_suffix) $(date)"
   local ip="$addr.$mac_suffix"
@@ -174,8 +174,9 @@ function run_controller() {
   juju-ssh $mch "cat ./lxd-default.yaml | sudo lxc profile edit default"
 }
 
-run_compute 1
-run_compute 2
+for ((i=1; i<=comp_count; ++i)); do
+  run_compute $i
+done
 
 case "$DEPLOY_MODE" in
   "one")

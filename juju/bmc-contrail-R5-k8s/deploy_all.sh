@@ -74,7 +74,7 @@ juju-status-tabular
 "$my_dir"/deploy_manual.sh
 
 #check it
-#$my_dir/../common/check-openstack.sh
+#TODO
 
 $my_dir/../save-logs.sh
 

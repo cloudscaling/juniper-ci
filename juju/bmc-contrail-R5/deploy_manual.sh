@@ -16,14 +16,14 @@ function catch_errors_ce() {
 # version 2
 PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
 
-comp1_ip="$addr.$os_comp_1_idx"
+comp1_ip="$addr.$comp_1_idx"
 comp1=`get_machine_by_ip $comp1_ip`
 echo "INFO: compute 1: $comp1 / $comp1_ip"
-comp2_ip="$addr.$os_comp_2_idx"
+comp2_ip="$addr.$comp_2_idx"
 comp2=`get_machine_by_ip $comp2_ip`
 echo "INFO: compute 2: $comp2 / $comp2_ip"
 
-cont0_ip="$addr.$os_cont_0_idx"
+cont0_ip="$addr.$cont_0_idx"
 cont0=`get_machine_by_ip $cont0_ip`
 echo "INFO: controller 0 (OpenStack): $cont0 / $cont0_ip"
 
@@ -31,16 +31,16 @@ if [[ "$DEPLOY_MODE" == "one" ]] ; then
   cont1_ip="$cont0_ip"
   cont1="$cont0"
 else
-  cont1_ip="$addr.$os_cont_1_idx"
+  cont1_ip="$addr.$cont_1_idx"
   cont1=`get_machine_by_ip $cont1_ip`
 fi
 echo "INFO: controller 1 (Contrail): $cont1 / $cont1_ip"
 
 if [ "$DEPLOY_MODE" == 'ha' ] ; then
-  cont2_ip="$addr.$os_cont_2_idx"
+  cont2_ip="$addr.$cont_2_idx"
   cont2=`get_machine_by_ip $cont2_ip`
   echo "INFO: controller 2 (Contrail): $cont2 / $cont3_ip"
-  cont3_ip="$addr.$os_cont_3_idx"
+  cont3_ip="$addr.$cont_3_idx"
   cont3=`get_machine_by_ip $cont3_ip`
   echo "INFO: controller 3 (Contrail): $cont3 / $cont3_ip"
 fi
