@@ -40,7 +40,7 @@
             - one
       - string:
           name: CHARMS_BRANCH
-          default: 'R5-kubernetes'
+          default: 'R5'
       - string:
           name: CONTAINER_REGISTRY
           default: opencontrailnightly
@@ -60,7 +60,7 @@
             - auto
           description: Valid values are "upstream" (Docker PPA), "apt" (Ubuntu archive), "auto" (Ubuntu archive)
     scm:
-      - progmaticlab-contrail-charms-branch
+      - juniper-contrail-charms-branch
       - juniper-ci
     builders:
       - shell: |
