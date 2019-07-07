@@ -35,9 +35,9 @@
       - choice:
           name: DEPLOY_MODE
           description: |
-            one: Deploy k8s master and Contrail to one machine and two machines for worker
+            two: Deploy k8s master and Contrail separately and one machines for worker
           choices:
-            - one
+            - two
       - string:
           name: CHARMS_BRANCH
           default: 'R5'

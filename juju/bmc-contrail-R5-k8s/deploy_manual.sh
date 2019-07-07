@@ -23,6 +23,9 @@ echo "INFO: compute 1: $comp1 / $comp1_ip"
 cont0_ip="$addr.$cont_0_idx"
 cont0=`get_machine_by_ip $cont0_ip`
 echo "INFO: controller 0: $cont0 / $cont0_ip"
+cont1_ip="$addr.$cont_1_idx"
+cont1=`get_machine_by_ip $cont1_ip`
+echo "INFO: controller 1: $cont1 / $cont1_ip"
 
 ( set -o posix ; set ) > $log_dir/env
 echo "INFO: Deploy all $(date)"
@@ -35,13 +38,13 @@ juju-deploy --series $SERIES cs:~containers/etcd --to $cont0 --config channel="3
 
 juju-deploy --series $SERIES cs:~containers/kubernetes-master-696 --to $cont0 \
   --config channel="1.14/stable" \
-  --config enable-dashboard-addons="false" \
-  --config enable-metrics="false" \
-  --config dns-provider="none" \
   --config docker_runtime="custom" \
   --config docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
   --config docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
   --config docker_runtime_package="docker-ce"
+#  --config enable-dashboard-addons="false" \
+#  --config enable-metrics="false" \
+#  --config dns-provider="none" \
 
 juju-expose kubernetes-master
 
@@ -51,7 +54,6 @@ juju-deploy --series $SERIES cs:~containers/kubernetes-worker-550 --to $comp1 \
   --config docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
   --config docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
   --config docker_runtime_package="docker-ce"
-#  --config ingress="false" \
 
 juju-expose kubernetes-worker
 
@@ -69,17 +71,17 @@ juju-deploy $PLACE/contrail-agent --config log-level=SYS_DEBUG
 juju-set contrail-kubernetes-node docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
     docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 
-juju-deploy $PLACE/contrail-analytics --config log-level=SYS_DEBUG --to $cont0
+juju-deploy $PLACE/contrail-analytics --config log-level=SYS_DEBUG --to $cont1
 juju-set contrail-analytics docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
     docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 juju-expose contrail-analytics
 
-juju-deploy $PLACE/contrail-analyticsdb --config log-level=SYS_DEBUG --to $cont0
+juju-deploy $PLACE/contrail-analyticsdb --config log-level=SYS_DEBUG --to $cont1
 juju-set contrail-analyticsdb docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
     docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD \
     cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
 
-juju-deploy $PLACE/contrail-controller --config log-level=SYS_DEBUG --to $cont0
+juju-deploy $PLACE/contrail-controller --config log-level=SYS_DEBUG --to $cont1
 juju-set contrail-controller docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
     docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD \
     cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" auth-mode="no-auth"
@@ -88,9 +90,7 @@ juju-expose contrail-controller
 # misc
 juju-deploy cs:$SERIES/ntp
 
-m4=$cont0
-m2=$comp1
-wait_for_machines $m2 $m4
+wait_for_machines $cont0 $cont1 $comp1
 echo "INFO: Apply SSL flag if set $(date)"
 apply_ssl contrail
 
@@ -134,6 +134,7 @@ juju-add-relation "contrail-kubernetes-node:cni" "kubernetes-master:cni"
 juju-add-relation "contrail-kubernetes-node:cni" "kubernetes-worker:cni"
 juju-add-relation "contrail-kubernetes-master:contrail-controller" "contrail-controller:contrail-controller"
 juju-add-relation "contrail-kubernetes-master:kube-api-endpoint" "kubernetes-master:kube-api-endpoint"
+juju-add-relation "contrail-agent:juju-info" "kubernetes-master:juju-info"
 juju-add-relation "contrail-agent:juju-info" "kubernetes-worker:juju-info"
 juju-add-relation "contrail-kubernetes-master:contrail-kubernetes-config" "contrail-kubernetes-node:contrail-kubernetes-config"
 
