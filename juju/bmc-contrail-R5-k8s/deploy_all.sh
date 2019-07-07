@@ -25,7 +25,7 @@ if [[ "$jver" == 1 ]] ; then
   exit 1
 fi
 
-export JOB_VERSION=R8
+export JOB_VERSION=R5
 export SERIES="${SERIES:-xenial}"
 export DEPLOY_MODE="${DEPLOY_MODE:-one}"
 export USE_SSL_CONTRAIL="false"
