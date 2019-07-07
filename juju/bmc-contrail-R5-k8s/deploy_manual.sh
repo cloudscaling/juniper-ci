@@ -130,7 +130,7 @@ juju-add-relation "contrail-analytics" "contrail-analyticsdb"
 juju-add-relation "contrail-agent" "contrail-controller"
 
 # contrail-kubernetes
-juju-add-relation "contrail-kubernetes-node:cni" "kubernetes-master:cni"
+#juju-add-relation "contrail-kubernetes-node:cni" "kubernetes-master:cni"
 juju-add-relation "contrail-kubernetes-node:cni" "kubernetes-worker:cni"
 juju-add-relation "contrail-kubernetes-master:contrail-controller" "contrail-controller:contrail-controller"
 juju-add-relation "contrail-kubernetes-master:kube-api-endpoint" "kubernetes-master:kube-api-endpoint"
