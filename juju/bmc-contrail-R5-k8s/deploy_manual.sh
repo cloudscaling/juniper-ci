@@ -37,6 +37,7 @@ juju-deploy --series $SERIES cs:~containers/kubernetes-master-696 --to $cont0 \
   --config channel="1.14/stable" \
   --config enable-dashboard-addons="false" \
   --config enable-metrics="false" \
+  --config dns-provider="none" \
   --config docker_runtime="custom" \
   --config docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
   --config docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
