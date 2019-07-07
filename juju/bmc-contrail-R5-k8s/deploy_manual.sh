@@ -44,7 +44,7 @@ juju-deploy cs:~containers/kubernetes-master-696 --to $cont0 \
 
 juju-expose kubernetes-master
 
-juju-deploy cs:~containers/kubernetes-worker-550 --to $comp0 \
+juju-deploy cs:~containers/kubernetes-worker-550 --to $comp1 \
   --config channel="1.14/stable" \
   --config docker_runtime="custom" \
   --config docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
