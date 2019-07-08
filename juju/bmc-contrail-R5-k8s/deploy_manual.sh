@@ -38,6 +38,7 @@ juju-deploy --series $SERIES cs:~containers/etcd --to $cont0 --config channel="3
 
 juju-deploy --series $SERIES cs:~containers/kubernetes-master-696 --to $cont0 \
   --config channel="1.14/stable" \
+  --config service-cidr="10.96.0.0/12" \
   --config docker_runtime="custom" \
   --config docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
   --config docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
@@ -58,7 +59,7 @@ juju-deploy --series $SERIES cs:~containers/kubernetes-worker-550 --to $comp1 \
 juju-expose kubernetes-worker
 
 # contrail-kubernetes
-juju-deploy $PLACE/contrail-kubernetes-master --config log-level=SYS_DEBUG
+juju-deploy $PLACE/contrail-kubernetes-master --config log-level=SYS_DEBUG --config "service_subnets=10.96.0.0/12"
 juju-set contrail-kubernetes-master docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
     docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 
@@ -111,9 +112,9 @@ if [[ "$SERIES" == 'bionic' ]]; then
 fi
 
 ### add charms relations
-
 juju-add-relation "kubernetes-master" "ntp"
 juju-add-relation "kubernetes-worker" "ntp"
+juju-add-relation "contrail-controller" "ntp"
 
 # kubernetes
 juju-add-relation "kubernetes-master:kube-api-endpoint" "kubernetes-worker:kube-api-endpoint"
@@ -134,7 +135,6 @@ juju-add-relation "contrail-kubernetes-node:cni" "kubernetes-master:cni"
 juju-add-relation "contrail-kubernetes-node:cni" "kubernetes-worker:cni"
 juju-add-relation "contrail-kubernetes-master:contrail-controller" "contrail-controller:contrail-controller"
 juju-add-relation "contrail-kubernetes-master:kube-api-endpoint" "kubernetes-master:kube-api-endpoint"
-juju-add-relation "contrail-agent:juju-info" "kubernetes-master:juju-info"
 juju-add-relation "contrail-agent:juju-info" "kubernetes-worker:juju-info"
 juju-add-relation "contrail-kubernetes-master:contrail-kubernetes-config" "contrail-kubernetes-node:contrail-kubernetes-config"
 
