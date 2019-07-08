@@ -1,0 +1,36 @@
+#!/bin/bash
+
+function check_k8s_cluster() {
+  tmpf=`mktemp`
+  cat <<EOM > $tmpf
+#!/bin/bash -x
+kubectl create serviceaccount --namespace kube-system tiller
+kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+wget -nv https://storage.googleapis.com/kubernetes-helm/helm-v2.9.0-linux-amd64.tar.gz
+tar -xvf helm-v2.9.0-linux-amd64.tar.gz
+mv linux-amd64/helm /usr/bin/
+helm init
+kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller", "automountServiceAccountToken": true}}}}'
+helm init --service-account tiller --upgrade
+sleep 60
+helm version
+kubectl get pods --all-namespaces
+helm repo update
+helm install --name wordpress --set mariadb.master.persistence.enabled=false --set persistence.enabled=false stable/wordpress
+sleep 90
+kubectl get pods
+kubectl get svc wordpress-wordpress
+set +x
+EOM
+
+  # ???
+  $SCP $tmpf ${SSH_USER}@${master_ip}:check_k8s.sh
+  rm $tmpf
+  $SSH_CMD ${SSH_USER}@${master_ip} "sudo /bin/bash check_k8s.sh"
+
+  # this is needed if we want to enable persistence
+  # ? helm repo add nfs-provisioner https://raw.githubusercontent.com/IlyaSemenov/nfs-provisioner-chart/master/repo
+  # ? helm install --name nfs-provisioner --namespace nfs-provisioner nfs-provisioner/nfs-provisioner && sleep 5
+  # ? kubectl patch storageclass local-nfs -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+}
+
