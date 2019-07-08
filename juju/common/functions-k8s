@@ -12,7 +12,8 @@ mv linux-amd64/helm /usr/bin/
 helm init
 kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller", "automountServiceAccountToken": true}}}}'
 helm init --service-account tiller --upgrade
-sleep 60
+# 'helm version' hangs if it's not ready
+sleep 30
 helm version
 kubectl get pods --all-namespaces
 helm repo update
