@@ -1,4 +1,86 @@
 - job:
+    name: Juju-Contrail-R5-Kubernetes-AWS
+    description: "Deploys cluster with Kubernetes + Contrail R5 and checks it. Can be used for debug purposes."
+    defaults: global
+    node: master
+    parameters:
+      - choice:
+          name: CLEAN_BEFORE
+          choices:
+            - 'false'
+            - 'true'
+            - clean_and_exit
+      - choice:
+          name: CLEAN_ENV
+          choices:
+            - always
+            - on_success
+            - never
+      - choice:
+          name: SERIES
+          choices:
+            - xenial
+            - bionic
+      - choice:
+          name: DEPLOY_TYPE
+          description: "A method of deployment"
+          choices:
+            - manual
+            - bundle
+      - string:
+          name: CHARMS_BRANCH
+          default: 'R5'
+      - string:
+          name: CONTAINER_REGISTRY
+          default: opencontrailnightly
+      - string:
+          name: CONTRAIL_VERSION
+          default: master-latest
+          description: "Tag's suffix for images from opencontrailnightly. Prefix is a OPENSTACK_VERSION"
+      - bool:
+          name: RUN_TEMPEST
+          description: "Run neutron tests from tempest"
+          default: false
+    scm:
+      - juniper-contrail-charms-branch
+      - juniper-ci
+    builders:
+      - shell: |
+          #!/bin/bash -e
+          if [[ "$CHARMS_BRANCH" != "master" ]]; then
+            cd contrail-charms
+            git checkout "$CHARMS_BRANCH"
+            cd ..
+          fi
+      - shell: |
+          #!/bin/bash -e
+          if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
+            desc="cleanup"
+          else
+            desc="$VERSION $CONTRAIL_BUILD $DEPLOY_TYPE"
+          fi
+          echo "DESCRIPTION $desc"
+      - description-setter:
+          regexp: "DESCRIPTION (.*)"
+      - shell: |
+          #!/bin/bash -e
+          # build CONTRAIL_VERSION as a tag for opencontrailnightly
+          export CONTRAIL_VERSION="$VERSION-$CONTRAIL_VERSION"
+          export SERIES='xenial'
+          if [[ "$VERSION" == "queens" ]] ; then
+            export SERIES='bionic'
+          fi
+          ./juniper-ci/juju/aws-contrail-R5-k8s/deploy-all.sh deploy-$DEPLOY_TYPE.sh
+    publishers:
+      - archive:
+          artifacts: 'logs/**'
+          allow-empty: true
+      - junit:
+          results: tempest/test_result.xml
+          allow-empty-results: true
+
+
+- job:
     name: Juju-Contrail-R5-Kubernetes-KVM
     description: 'Contrail R5 + Kubernetes on KVM by Juju'
     defaults: global
