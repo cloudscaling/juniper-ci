@@ -19,6 +19,8 @@ PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
 comp1_ip="$addr.$comp_1_idx"
 comp1=`get_machine_by_ip $comp1_ip`
 echo "INFO: compute 1: $comp1 / $comp1_ip"
+### TODO: remove it when second will be used for vhost0. currently virsh loses DNS record for compute when vhost0 is come up
+juju-ssh $comp1 "sudo bash -c 'echo $comp1_ip $job_prefix-comp-1 >> /etc/hosts'" 2>/dev/null
 
 cont0_ip="$addr.$cont_0_idx"
 cont0=`get_machine_by_ip $cont0_ip`
@@ -31,7 +33,6 @@ echo "INFO: controller 1: $cont1 / $cont1_ip"
 echo "INFO: Deploy all $(date)"
 
 ### deploy applications
-
 # kubernetes
 juju-deploy --series $SERIES cs:~containers/easyrsa --to lxd:$cont0
 juju-deploy --series $SERIES cs:~containers/etcd --to $cont0 --config channel="3.2/stable"
@@ -43,10 +44,6 @@ juju-deploy --series $SERIES cs:~containers/kubernetes-master-696 --to $cont0 \
   --config docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
   --config docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
   --config docker_runtime_package="docker-ce"
-#  --config enable-dashboard-addons="false" \
-#  --config enable-metrics="false" \
-#  --config dns-provider="none" \
-
 juju-expose kubernetes-master
 
 juju-deploy --series $SERIES cs:~containers/kubernetes-worker-550 --to $comp1 \
@@ -55,8 +52,6 @@ juju-deploy --series $SERIES cs:~containers/kubernetes-worker-550 --to $comp1 \
   --config docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
   --config docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
   --config docker_runtime_package="docker-ce"
-
-juju-expose kubernetes-worker
 
 # contrail-kubernetes
 juju-deploy $PLACE/contrail-kubernetes-master --config log-level=SYS_DEBUG --config "service_subnets=10.96.0.0/12"

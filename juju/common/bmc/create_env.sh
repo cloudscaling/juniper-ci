@@ -70,7 +70,7 @@ function run_machine() {
   virsh define --file /tmp/oc-$name.xml
   virsh net-update $nname add ip-dhcp-host "<host mac='$mac_base:$mac_suffix' name='$name' ip='$ip' />"
   if [[ -n "$ip_vm" ]] ; then
-    virsh net-update $nname_vm add ip-dhcp-host "<host mac='$mac_base_vm:$mac_suffix' name='$name' ip='$ip_vm' />"
+    virsh net-update $nname_vm add ip-dhcp-host "<host mac='$mac_base_vm:$mac_suffix' name='$name-vm' ip='$ip_vm' />"
   fi
   virsh start $name --force-boot
   echo "INFO: machine $name run $(date)"
