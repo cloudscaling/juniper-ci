@@ -35,8 +35,8 @@
             large: Deploy HA Contrail and HA Kubernetes cluster (6 machines)
           choices:
             - three
-            - one
             - ha
+            - large
       - string:
           name: CHARMS_BRANCH
           default: 'R5'

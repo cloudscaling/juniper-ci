@@ -144,9 +144,9 @@ services:
       log-level: 'SYS_DEBUG'
       docker-registry: "${CONTAINER_REGISTRY}"
       image-tag: "${CONTRAIL_VERSION}"
-      vip: '172.30.30.30'
-      haproxy-https-mode: 'http'
-      haproxy-http-mode: 'https'
+      #vip: '172.30.30.30'
+      #haproxy-https-mode: 'http'
+      #haproxy-http-mode: 'https'
     to:
       - "2"
       - "3"
@@ -154,24 +154,24 @@ services:
 
   # ha
 
-  keepalived:
-    series: ${SERIES}
-    charm: cs:~containers/keepalived
-    options:
-      virtual_ip: '172.30.30.30'
+#  keepalived:
+#    series: ${SERIES}
+#    charm: cs:~containers/keepalived
+#    options:
+#      virtual_ip: '172.30.30.30'
 
-  haproxy:
-    series: ${SERIES}
-    charm: cs:${SERIES}/haproxy
-    num_units: 3
-    expose: true
-    options:
-      peering_mode: 'active-active'
-      ssl_cert: 'SELFSIGNED'
-    to:
-      - "2"
-      - "3"
-      - "4"
+#  haproxy:
+#    series: ${SERIES}
+#    charm: cs:${SERIES}/haproxy
+#    num_units: 3
+#    expose: true
+#    options:
+#      peering_mode: 'active-active'
+#      ssl_cert: 'SELFSIGNED'
+#    to:
+#      - "2"
+#      - "3"
+#      - "4"
 
   # misc
 
@@ -230,11 +230,11 @@ relations:
 
 # ha
 
-- - haproxy:juju-info
-  - keepalived:juju-info
-- - contrail-analytics
-  - haproxy
-- - contrail-controller:http-services
-  - haproxy
-- - contrail-controller:https-services
-  - haproxy
+#- - haproxy:juju-info
+#  - keepalived:juju-info
+#- - contrail-analytics
+#  - haproxy
+#- - contrail-controller:http-services
+#  - haproxy
+#- - contrail-controller:https-services
+#  - haproxy
