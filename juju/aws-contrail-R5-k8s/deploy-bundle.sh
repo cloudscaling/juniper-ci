@@ -42,7 +42,7 @@ for node in $(get_machines_index_by_service kubernetes-worker); do
   #juju-ssh $node sudo docker restart vrouter_vrouter-agent_1
 done
 
-cleanup_computes
+#cleanup_computes
 #echo "INFO: Set endpoints $(date)"
 #hack_openstack
 #echo "INFO: Apply SSL flag if set $(date)"

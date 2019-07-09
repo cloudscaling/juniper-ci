@@ -37,6 +37,10 @@
             - three
             - ha
             - large
+      - bool:
+          name: USE_SSL_CONTRAIL
+          description: "Deploy Contrail with certificates"
+          default: false
       - string:
           name: CHARMS_BRANCH
           default: 'R5'
@@ -67,7 +71,8 @@
           if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
             desc="cleanup"
           else
-            desc="$CONTRAIL_BUILD $DEPLOY_TYPE"
+            desc="$CONTRAIL_BUILD $DEPLOY_TYPE mode=$DEPLOY_MODE"
+            if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
           fi
           echo "DESCRIPTION $desc"
       - description-setter:
@@ -126,6 +131,10 @@
             two: Deploy k8s master and Contrail separately and one machines for worker
           choices:
             - two
+      - bool:
+          name: USE_SSL_CONTRAIL
+          description: "Deploy Contrail with certificates"
+          default: false
       - string:
           name: CHARMS_BRANCH
           default: 'R5'
@@ -157,6 +166,7 @@
             desc="cleanup"
           else
             desc="$SLAVE_NAME $CONTRAIL_BUILD $CONTRAIL_VERSION $DEPLOY_TYPE mode=$DEPLOY_MODE"
+            if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
           fi
           echo "DESCRIPTION $desc"
       - description-setter:
