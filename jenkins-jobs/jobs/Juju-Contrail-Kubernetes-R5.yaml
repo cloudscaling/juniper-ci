@@ -27,6 +27,16 @@
           choices:
             - manual
             - bundle
+      - choice:
+          name: DEPLOY_MODE
+          description: |
+            three: Deploy Contrail, Kubernetes master and Kubernetes node to separate nodes
+            ha: Deploy HA Contrail and Single Kubernetes (5 machines)
+            large: Deploy HA Contrail and HA Kubernetes cluster (6 machines)
+          choices:
+            - three
+            - one
+            - ha
       - string:
           name: CHARMS_BRANCH
           default: 'R5'
