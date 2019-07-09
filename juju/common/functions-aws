@@ -73,6 +73,5 @@ function hack_openstack() {
 }
 
 function fix_aws_hostname() {
-  echo juju-ssh $1 sudo bash -c `! grep -q $(hostname -i) /etc/hosts && echo -e "\n$(hostname -i) $(hostname -f) $(hostname -s)" >> /etc/hosts`
-  juju-ssh $1 sudo bash -c `! grep -q $(hostname -i) /etc/hosts && echo -e "\n$(hostname -i) $(hostname -f) $(hostname -s)" >> /etc/hosts`
+  juju-ssh $1 'sudo bash -c "! grep -q $(hostname -i) /etc/hosts && echo -e \"\n$(hostname -i) $(hostname -f) $(hostname -s)\" >> /etc/hosts"'
 }
