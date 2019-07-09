@@ -71,3 +71,7 @@ function hack_openstack() {
   # open port for vnc console
   open_port $m4 6080
 }
+
+function fix_aws_hostname() {
+  juju-ssh $1 sudo bash -c '! grep -q $(hostname -i) /etc/hosts && echo -e "\n$(hostname -i) $(hostname -f) $(hostname -s)" >> /etc/hosts'
+}

@@ -31,7 +31,13 @@ echo "INFO: Deploy bundle $(date)"
 juju-deploy-bundle $BUNDLE
 
 echo "INFO: Detect machines $(date)"
-detect_machines
+#detect_machines
+
+for node in $(get_machines_index_by_service kubernetes-worker); do
+  fix_aws_hostname $node
+  juju-ssh $node sudo docker restart vrouter_vrouter-agent_1
+done
+
 cleanup_computes
 #echo "INFO: Set endpoints $(date)"
 #hack_openstack
