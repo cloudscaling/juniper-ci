@@ -144,7 +144,7 @@ services:
       log-level: 'SYS_DEBUG'
       docker-registry: "${CONTAINER_REGISTRY}"
       image-tag: "${CONTRAIL_VERSION}"
-      #vip: $addr.254
+      vip: '172.30.30.30'
       haproxy-https-mode: 'http'
       haproxy-http-mode: 'https'
     to:
@@ -158,7 +158,7 @@ services:
     series: ${SERIES}
     charm: cs:~containers/keepalived
     options:
-      #virtual_ip: $addr.254
+      virtual_ip: '172.30.30.30'
 
   haproxy:
     series: ${SERIES}
