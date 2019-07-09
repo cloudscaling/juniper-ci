@@ -5,7 +5,7 @@ series: ${SERIES}
 
 machines:
 
-  # contrail components
+  # kubernetes pods
   "0":
     series: ${SERIES}
     constraints: mem=8G cores=2 root-disk=32G
@@ -15,7 +15,7 @@ machines:
     series: ${SERIES}
     constraints: mem=8G cores=2 root-disk=32G
 
-  # kubernetes pods
+  # contrail components
   "2":
     series: ${SERIES}
     constraints: mem=16G cores=4 root-disk=32G
@@ -66,7 +66,7 @@ services:
       docker_runtime_key_url: 'https://download.docker.com/linux/ubuntu/gpg'
       docker_runtime_package: 'docker-ce'
     to:
-    - '2'
+    - '0'
 
   # contrail-kubernetes
 
@@ -107,7 +107,7 @@ services:
       docker-registry: "${CONTAINER_REGISTRY}"
       image-tag: "${CONTRAIL_VERSION}"
     to:
-      - "0"
+      - "2"
 
   contrail-analyticsdb:
     series: ${SERIES}
@@ -120,7 +120,7 @@ services:
       docker-registry: "${CONTAINER_REGISTRY}"
       image-tag: "${CONTRAIL_VERSION}"
     to:
-      - "0"
+      - "2"
 
   contrail-controller:
     series: ${SERIES}
@@ -135,14 +135,12 @@ services:
       docker-registry: "${CONTAINER_REGISTRY}"
       image-tag: "${CONTRAIL_VERSION}"
     to:
-      - "0"
+      - "2"
 
   # misc
 
   ntp:
     charm: cs:${SERIES}/ntp
-    options:
-      source: 169.254.169.123
 
 relations:
 
