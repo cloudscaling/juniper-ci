@@ -33,7 +33,9 @@ juju-deploy-bundle $BUNDLE
 echo "INFO: Detect machines $(date)"
 #detect_machines
 
+echo 'DBG: Fix /etc/hosts'
 for node in $(get_machines_index_by_service kubernetes-worker); do
+  echo "DBG, node: $node"
   fix_aws_hostname $node
   juju-ssh $node sudo docker restart vrouter_vrouter-agent_1
 done
