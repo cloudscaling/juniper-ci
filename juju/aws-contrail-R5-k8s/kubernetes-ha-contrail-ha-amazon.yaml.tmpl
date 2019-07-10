@@ -46,7 +46,7 @@ services:
   etcd:
     series: ${SERIES}
     charm: cs:~containers/etcd
-    num_units: 1
+    num_units: 3
     options:
       channel: 3.2/stable
     to:
@@ -68,7 +68,7 @@ services:
     series: ${SERIES}
     charm: cs:~containers/kubernetes-master-696
     expose: true
-    num_units: 1
+    num_units: 3
     options:
       channel: '1.14/stable'
       service-cidr: '10.96.0.0/12'
