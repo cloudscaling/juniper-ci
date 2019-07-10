@@ -14,6 +14,14 @@ machines:
   "1":
     series: ${SERIES}
     constraints: mem=8G cores=2 root-disk=32G
+  # kubernetes master
+  "5":
+    series: ${SERIES}
+    constraints: mem=8G cores=2 root-disk=32G
+  # kubernetes master
+  "6":
+    series: ${SERIES}
+    constraints: mem=8G cores=2 root-disk=32G
 
   # contrail components
   "2":
@@ -45,6 +53,18 @@ services:
       channel: 3.2/stable
     to:
     - '1'
+    - '5'
+    - '6'
+
+  kubeapi-load-balancer:
+    charm: cs:~containers/kubeapi-load-balancer-647
+    expose: true
+    num_units: 3
+    resources: {}
+    to:
+    - '1'
+    - '5'
+    - '6'
 
   kubernetes-master:
     series: ${SERIES}
@@ -60,6 +80,8 @@ services:
       docker_runtime_package: 'docker-ce'
     to:
     - '1'
+    - '5'
+    - '6'
 
   kubernetes-worker:
     series: ${SERIES}
@@ -179,6 +201,15 @@ relations:
 - - kubernetes-worker:certificates
   - easyrsa:client
 - - etcd:certificates
+  - easyrsa:client
+
+- - kubernetes-master:kube-api-endpoint
+  - kubeapi-load-balancer:apiserver
+- - kubernetes-master:loadbalancer
+  - kubeapi-load-balancer:loadbalancer
+- - kubernetes-worker:kube-api-endpoint
+  - kubeapi-load-balancer:website
+- - kubeapi-load-balancer:certificates
   - easyrsa:client
 
 # contrail

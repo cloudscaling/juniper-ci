@@ -8,6 +8,7 @@ source "$my_dir/functions"
 log_dir="$WORKSPACE/logs"
 BUNDLE="$my_dir/kubernetes-contrail-amazon.yaml"
 [[ $DEPLOY_MODE == 'ha' ]] && BUNDLE="$my_dir/kubernetes-contrail-ha-amazon.yaml"
+[[ $DEPLOY_MODE == 'large' ]] && BUNDLE="$my_dir/kubernetes-ha-contrail-ha-amazon.yaml"
 
 trap 'catch_errors_ce $LINENO' ERR EXIT
 function catch_errors_ce() {
