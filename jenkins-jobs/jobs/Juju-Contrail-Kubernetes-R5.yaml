@@ -80,7 +80,7 @@
       - shell: |
           #!/bin/bash -e
           # build CONTRAIL_VERSION as a tag for opencontrailnightly
-          export SERIES='xenial'
+          #export SERIES='xenial'
           ./juniper-ci/juju/aws-contrail-R5-k8s/deploy-all.sh deploy-$DEPLOY_TYPE.sh
     publishers:
       - archive:
