@@ -3,6 +3,7 @@
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 source "$my_dir/../common/functions"
+source "$my_dir/../common/functions-k8s"
 source "$my_dir/functions"
 
 log_dir="$WORKSPACE/logs"
