@@ -183,7 +183,7 @@
       - bool:
           name: USE_DEVELOPMENT_PUPPETS
           description: Clone puppets from internal repositories or use build's version
-          default: true
+          default: false
       - text:
           name: CCB_PATCHSET
           description: "Additional command to fetch patchset for contrail-container-builder repo."
