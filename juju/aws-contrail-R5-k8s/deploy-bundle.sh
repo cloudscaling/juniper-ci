@@ -54,4 +54,10 @@ sleep 120
 # and then wait for result
 post_deploy
 
+SCP='juju scp'
+SSH_CMD='juju ssh'
+SSH_USER=ubuntu
+master_ip=0
+check_k8s_cluster
+
 trap - ERR EXIT
