@@ -16,8 +16,8 @@ cp ~/nested-mode-test.yaml ~/contrail-charms/examples/nested-mode-test.yaml
 sudo snap install juju --classic
 
 juju bootstrap manual/ubuntu@192.168.1.4 cont
-juju add-machine ssh:ubuntu@$192.168.1.5
-juju add-machine ssh:ubuntu@$192.168.1.6
+juju add-machine ssh:ubuntu@192.168.1.5
+juju add-machine ssh:ubuntu@192.168.1.6
 
 cd ~/contrail-charms
 juju deploy ./examples/nested-mode-test.yaml --map-machines=existing
