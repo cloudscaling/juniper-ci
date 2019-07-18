@@ -70,10 +70,19 @@ if [[ "$HA" == 'ha' ]] ; then
   I_VIP="$nodes_vip_1"
   CONTROLLER_NODES="${IP1_CONT_01},${IP1_CONT_02},${IP1_CONT_03}"
   CONTROL_NODES="${IP2_CONT_01},${IP2_CONT_02},${IP2_CONT_03}"
+
+  # we use the same name for vrouter as hypervisor...
+  HOSTNAME_VM_04=`$SSH_CMD ${SSH_USER}@${IP_VM_04} "getent hosts ${IP1_VM_04}" | awk '{print $2}'`
+  HOSTNAME_VM_05=`$SSH_CMD ${SSH_USER}@${IP_VM_05} "getent hosts ${IP1_VM_05}" | awk '{print $2}'`
 else
   CONTROLLER_NODES="${IP1_CONT_01}"
   CONTROL_NODES="${IP2_CONT_01}"
+
+  # we use the same name for vrouter as hypervisor...
+  HOSTNAME_VM_04=`$SSH_CMD ${SSH_USER}@${IP_VM_04} "getent hosts ${IP0_VM_04}" | awk '{print $2}'`
+  HOSTNAME_VM_05=`$SSH_CMD ${SSH_USER}@${IP_VM_05} "getent hosts ${IP0_VM_05}" | awk '{print $2}'`
 fi
+
 
 if [[ "$HOST" == 'aws' ]]; then
   VIRT_TYPE=qemu
