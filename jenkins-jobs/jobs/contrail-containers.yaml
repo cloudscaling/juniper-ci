@@ -64,6 +64,7 @@
           default-value: '{defaultha}'
       - bool:
           name: USE_FQDN
+          
           description: Use FQDN for services instead of IP-s. It's related not to all jobs.
           default: false
       - text:
@@ -234,6 +235,10 @@
             - slave01
             - slave04
       - airship-aws-ubuntu16:
+          defaultha: aio
+          slavenode:
+            - master
+      - airship-aws-ubuntu16-notf:
           defaultha: aio
           slavenode:
             - master
