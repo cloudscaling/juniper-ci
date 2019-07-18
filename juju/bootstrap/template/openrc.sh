@@ -1,0 +1,7 @@
+export OS_AUTH_URL=http://$OS_KEYSTONE_IP:$OS_KEYSTONE_PORT/v2.0
+export OS_IDENTITY_API_VERSION=2
+export VGW_DOMAIN=default-domain
+export OS_USERNAME=$OS_USERNAME
+export OS_TENANT_NAME=admin
+export OS_PROJECT_NAME=admin
+export OS_PASSWORD=$OS_PASSWORD
