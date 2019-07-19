@@ -1174,6 +1174,13 @@ fi
 # script will handle errors below
 set +e
 
+# for queens+ run process script that generates some yamls for TLS
+if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
+  python ~/tripleo-heat-templates/tools/process-templates.py  --safe \
+    -r ~/tripleo-heat-templates/roles_data_contrail_aio.yaml \
+    -p ~/tripleo-heat-templates/
+fi
+
 openstack overcloud deploy --templates tripleo-heat-templates/ \
   --roles-file $role_file \
   $rhel_reg_opts \
