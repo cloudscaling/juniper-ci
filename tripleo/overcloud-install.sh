@@ -717,6 +717,8 @@ parameter_defaults:
   ContrailConfigDBMinDiskGB: 4
   ContrailAnalyticsDBMinDiskGB: 4
   ContrailAuthVersion: $KEYSTONE_API_VERSION
+  InternalTLSCRLPEMFile: ''
+  DefaultCRLURL: ''
 EOF
 
 
