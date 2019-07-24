@@ -18,7 +18,7 @@
             - never
       - choice:
           name: VERSION
-          description: "Version of the OpenStack. ocata -> xenial, queens -> bionic."
+          description: "Version of the OpenStack. ocata -> xenial, queens -> bionic. ocata -> keystone v2, bionic -> keystone v3"
           choices:
             - ocata
             - queens

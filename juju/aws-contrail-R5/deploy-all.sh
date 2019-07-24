@@ -32,6 +32,11 @@ fi
 export JOB_VERSION=R5
 export SERIES="${SERIES:-xenial}"
 export VERSION="${VERSION:-ocata}"
+if [[ "$VERSION" == 'ocata' ]]; then
+  export KEYSTONE_VERSION=2
+else
+  export KEYSTONE_VERSION=3
+fi
 if [[ "$SERIES" == 'bionic' ]]; then
   export OPENSTACK_ORIGIN="distro"
 else

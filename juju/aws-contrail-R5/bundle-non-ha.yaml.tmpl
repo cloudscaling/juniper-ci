@@ -99,7 +99,7 @@ services:
       admin-role: "admin"
       debug: "true"
       openstack-origin: "${OPENSTACK_ORIGIN}"
-      preferred-api-version: 3
+      preferred-api-version: "${KEYSTONE_VERSION}"
       region: NonDefault
     expose: true
     to:
