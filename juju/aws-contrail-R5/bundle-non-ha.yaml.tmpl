@@ -4,6 +4,33 @@
 # should be placed separately because they rewrite haproxy configuration
 
 series: ${SERIES}
+
+machines:
+  # dashboard
+  "0":
+    series: ${SERIES}
+    constraints: mem=8G cores=2 root-disk=40G
+  # glance
+  "1":
+    series: ${SERIES}
+    constraints: mem=7G cores=4 root-disk=40G
+  # keystone
+  "2":
+    series: ${SERIES}
+    constraints: mem=7G cores=4 root-disk=40G
+  # nova-api
+  "3":
+    series: ${SERIES}
+    constraints: mem=8G cores=2 root-disk=40G
+  # neutron and contrail analyticsdb
+  "4":
+    series: ${SERIES}
+    constraints: mem=15G cores=2 root-disk=300G
+  # heat and contrail controller/analytics
+  "5":
+    series: ${SERIES}
+    constraints: mem=15G cores=2 root-disk=300G
+
 services:
   ntp:
     charm: "cs:${SERIES}/ntp"
@@ -36,7 +63,7 @@ services:
       console-access-protocol: "novnc"
       debug: "true"
       openstack-origin: "${OPENSTACK_ORIGIN}"
-      network-manager: "Neutron"
+      region: NonDefault
     expose: true
     to:
       - "3"
@@ -60,6 +87,7 @@ services:
     options:
       debug: "true"
       openstack-origin: "${OPENSTACK_ORIGIN}"
+      region: NonDefault
     expose: true
     to:
       - "1"
@@ -72,6 +100,7 @@ services:
       debug: "true"
       openstack-origin: "${OPENSTACK_ORIGIN}"
       preferred-api-version: 3
+      region: NonDefault
     expose: true
     to:
       - "2"
@@ -83,9 +112,20 @@ services:
       openstack-origin: "${OPENSTACK_ORIGIN}"
       manage-neutron-plugin-legacy-mode: false
       neutron-security-groups: "true"
+      region: NonDefault
     expose: true
     to:
       - "4"
+  heat:
+    charm: "cs:${SERIES}/heat"
+    num_units: 1
+    options:
+      debug: "true"
+      openstack-origin: "${OPENSTACK_ORIGIN}"
+      region: NonDefault
+    expose: true
+    to:
+      - "5"
 
   contrail-keystone-auth:
     charm: "${JUJU_REPO}/contrail-keystone-auth"
@@ -119,7 +159,7 @@ services:
       image-tag: "${CONTRAIL_VERSION}"
     expose: true
     to:
-      - "5"
+      - "4"
   contrail-analytics:
     charm: "${JUJU_REPO}/contrail-analytics"
     series: ${SERIES}
@@ -159,6 +199,9 @@ relations:
   - [ "nova-compute:amqp", "rabbitmq-server:amqp" ]
   - [ "nova-compute", "glance" ]
   - [ "openstack-dashboard:identity-service", "keystone" ]
+  - [ "heat:shared-db", "mysql:shared-db"]
+  - [ "heat:amqp", "rabbitmq-server:amqp"]
+  - [ "heat", "keystone"]
 
   - [ "neutron-api", "mysql" ]
   - [ "neutron-api", "rabbitmq-server" ]
@@ -176,27 +219,8 @@ relations:
   - [ "contrail-analytics", "contrail-analyticsdb" ]
 
   - [ "contrail-openstack", "neutron-api"]
+  - [ "contrail-openstack", "heat"]
   - [ "contrail-openstack", "nova-compute"]
   - [ "contrail-openstack", "contrail-controller" ]
   - [ "contrail-agent:juju-info", "nova-compute:juju-info" ]
   - [ "contrail-agent", "contrail-controller"]
-
-machines:
-  "0":
-    series: ${SERIES}
-    constraints: mem=8G cores=2 root-disk=40G
-  "1":
-    series: ${SERIES}
-    constraints: mem=7G cores=4 root-disk=40G
-  "2":
-    series: ${SERIES}
-    constraints: mem=7G cores=4 root-disk=40G
-  "3":
-    series: ${SERIES}
-    constraints: mem=8G cores=2 root-disk=40G
-  "4":
-    series: ${SERIES}
-    constraints: mem=8G cores=2 root-disk=40G
-  "5":
-    series: ${SERIES}
-    constraints: mem=15G cores=2 root-disk=300G

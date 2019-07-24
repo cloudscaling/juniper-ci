@@ -38,9 +38,6 @@ for node in $(get_machines_index_by_service kubernetes-worker); do
   fix_aws_hostname $node
 done
 
-echo "INFO: Apply SSL flag if set $(date)"
-apply_ssl contrail
-
 # wait a bit to avoid catching errors with apt-get install
 sleep 120
 # and then wait for result

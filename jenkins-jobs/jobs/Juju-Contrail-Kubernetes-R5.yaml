@@ -36,10 +36,6 @@
             - non-ha
             - contrail-ha
             - all-ha
-      - bool:
-          name: USE_SSL_CONTRAIL
-          description: "Deploy Contrail with certificates"
-          default: false
       - string:
           name: CHARMS_BRANCH
           default: 'R5'
@@ -124,10 +120,6 @@
             non_ha: Deploy k8s master and Contrail separately and one machines for worker
           choices:
             - non_ha
-      - bool:
-          name: USE_SSL_CONTRAIL
-          description: "Deploy Contrail with certificates"
-          default: false
       - string:
           name: CHARMS_BRANCH
           default: 'R5'
