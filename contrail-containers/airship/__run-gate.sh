@@ -13,7 +13,7 @@ git clone https://opendev.org/airship/shipyard.git airship-shipyard
 
 sed -i 's/-it/-i/g' airship-pegleg/tools/pegleg.sh
 
-cd ./treasuremap/tools/deployment/aiab
+cd ./treasuremap/tools/deployment/aiab-tf
 
 CPU_COUNT=$(grep -c processor /proc/cpuinfo)
 RAM_TOTAL=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
