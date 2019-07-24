@@ -6,7 +6,7 @@ source "$my_dir/../common/functions"
 source "$my_dir/functions"
 
 log_dir="$WORKSPACE/logs"
-BUNDLE="$my_dir/bundle-${BUNDLE_FILE}.yaml"
+BUNDLE="$my_dir/bundle-${DEPLOY_BUNDLE}.yaml"
 
 trap 'catch_errors_ce $LINENO' ERR EXIT
 function catch_errors_ce() {
