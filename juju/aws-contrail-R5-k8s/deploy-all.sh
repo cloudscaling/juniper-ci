@@ -77,7 +77,12 @@ function catch_errors() {
 echo "--------------------------------------------- Run deploy script: $inner_script"
 $my_dir/$inner_script $script_params
 
-#$my_dir/../common/check-openstack.sh
+# TODO: rework this...
+SCP='juju scp'
+SSH_CMD='juju ssh'
+SSH_USER=ubuntu
+master_ip=0
+check_k8s_cluster
 
 $my_dir/../save-logs.sh
 if [ -f $my_dir/save-logs.sh ] ; then

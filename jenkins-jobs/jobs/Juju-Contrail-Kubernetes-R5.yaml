@@ -19,24 +19,23 @@
       - choice:
           name: SERIES
           choices:
-            - xenial
             - bionic
+            - xenial
       - choice:
           name: DEPLOY_TYPE
           description: "A method of deployment"
           choices:
-            - manual
             - bundle
       - choice:
-          name: DEPLOY_MODE
+          name: DEPLOY_BUNDLE
           description: |
-            three: Deploy Contrail, Kubernetes master and Kubernetes node to separate nodes
-            ha: Deploy HA Contrail and Single Kubernetes (5 machines)
-            large: Deploy HA Contrail and HA Kubernetes cluster (6 machines)
+            non-ha: Deploy Contrail, Kubernetes master and Kubernetes node to separate nodes
+            contrail-ha: Deploy HA Contrail and Single Kubernetes (5 machines)
+            all-ha: Deploy HA Contrail and HA Kubernetes cluster (6 machines)
           choices:
-            - three
-            - ha
-            - large
+            - non-ha
+            - contrail-ha
+            - all-ha
       - bool:
           name: USE_SSL_CONTRAIL
           description: "Deploy Contrail with certificates"
@@ -51,10 +50,6 @@
           name: CONTRAIL_VERSION
           default: master-latest
           description: "Tag's suffix for images from opencontrailnightly"
-      - bool:
-          name: RUN_TEMPEST
-          description: "Run neutron tests from tempest"
-          default: false
     scm:
       - juniper-contrail-charms-branch
       - juniper-ci
@@ -79,8 +74,6 @@
           regexp: "DESCRIPTION (.*)"
       - shell: |
           #!/bin/bash -e
-          # build CONTRAIL_VERSION as a tag for opencontrailnightly
-          #export SERIES='xenial'
           ./juniper-ci/juju/aws-contrail-R5-k8s/deploy-all.sh deploy-$DEPLOY_TYPE.sh
     publishers:
       - archive:
@@ -128,9 +121,9 @@
       - choice:
           name: DEPLOY_MODE
           description: |
-            two: Deploy k8s master and Contrail separately and one machines for worker
+            non_ha: Deploy k8s master and Contrail separately and one machines for worker
           choices:
-            - two
+            - non_ha
       - bool:
           name: USE_SSL_CONTRAIL
           description: "Deploy Contrail with certificates"
