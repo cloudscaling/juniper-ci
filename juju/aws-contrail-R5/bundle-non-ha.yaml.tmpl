@@ -60,6 +60,7 @@ services:
     charm: "cs:${SERIES}/nova-cloud-controller"
     num_units: 1
     options:
+      network-manager: "Neutron"
       console-access-protocol: "novnc"
       debug: "true"
       openstack-origin: "${OPENSTACK_ORIGIN}"
@@ -112,7 +113,6 @@ services:
       openstack-origin: "${OPENSTACK_ORIGIN}"
       manage-neutron-plugin-legacy-mode: false
       neutron-security-groups: "true"
-      network-manager: "Neutron"
       region: NonDefault
     expose: true
     to:
