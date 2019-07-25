@@ -20,7 +20,7 @@ comp1_ip="$addr.$comp_1_idx"
 comp1=`get_machine_by_ip $comp1_ip`
 echo "INFO: compute 1: $comp1 / $comp1_ip"
 ### TODO: remove it when second will be used for vhost0. currently virsh loses DNS record for compute when vhost0 is come up
-juju-ssh $comp1 "sudo bash -c 'echo $comp1_ip $job_prefix-comp-1 >> /etc/hosts'" 2>/dev/null
+#juju-ssh $comp1 "sudo bash -c 'echo $comp1_ip $job_prefix-comp-1 >> /etc/hosts'" 2>/dev/null
 
 cont0_ip="$addr.$cont_0_idx"
 cont0=`get_machine_by_ip $cont0_ip`
