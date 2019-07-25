@@ -44,6 +44,10 @@
           description: "Deploy Contrail with certificates"
           default: false
       - string:
+          name: REGION
+          description: "OpenStack region to check non default value"
+          default: RegionOne
+      - string:
           name: CHARMS_BRANCH
           default: 'R5'
       - string:
@@ -74,7 +78,7 @@
           if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
             desc="cleanup"
           else
-            desc="$VERSION $CONTRAIL_VERSION $DEPLOY_TYPE $AAA_MODE"
+            desc="$VERSION $CONTRAIL_VERSION $DEPLOY_TYPE $AAA_MODE $REGION"
             if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
             if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
             if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
@@ -157,6 +161,10 @@
           name: USE_SSL_OS
           description: "Deploy OpenStack with certificates"
           default: false
+      - string:
+          name: REGION
+          description: "OpenStack region to check non default value"
+          default: RegionOne
       - bool:
           name: USE_DPDK
           description: "Deploy Contrail's vrouter in DPDK mode"
@@ -184,7 +192,7 @@
           if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
             desc="cleanup"
           else
-            desc="$SLAVE_NAME $VERSION $CONTRAIL_BUILD $DEPLOY_TYPE mode=$DEPLOY_MODE $AAA_MODE"
+            desc="$SLAVE_NAME $VERSION $CONTRAIL_BUILD $DEPLOY_TYPE mode=$DEPLOY_MODE $AAA_MODE $REGION"
             if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
             if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
             if [[ "$USE_DPDK" == "true" ]] ; then desc="$desc +DPDK" ; fi
