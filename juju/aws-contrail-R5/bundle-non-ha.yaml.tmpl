@@ -64,7 +64,7 @@ services:
       console-access-protocol: "novnc"
       debug: "true"
       openstack-origin: "${OPENSTACK_ORIGIN}"
-      region: NonDefault
+      region: ${REGION}
     expose: true
     to:
       - "3"
@@ -88,7 +88,7 @@ services:
     options:
       debug: "true"
       openstack-origin: "${OPENSTACK_ORIGIN}"
-      region: NonDefault
+      region: ${REGION}
     expose: true
     to:
       - "1"
@@ -101,7 +101,7 @@ services:
       debug: "true"
       openstack-origin: "${OPENSTACK_ORIGIN}"
       preferred-api-version: "${KEYSTONE_VERSION}"
-      region: NonDefault
+      region: ${REGION}
     expose: true
     to:
       - "2"
@@ -113,7 +113,7 @@ services:
       openstack-origin: "${OPENSTACK_ORIGIN}"
       manage-neutron-plugin-legacy-mode: false
       neutron-security-groups: "true"
-      region: NonDefault
+      region: ${REGION}
     expose: true
     to:
       - "4"
@@ -123,7 +123,7 @@ services:
     options:
       debug: "true"
       openstack-origin: "${OPENSTACK_ORIGIN}"
-      region: NonDefault
+      region: ${REGION}
     expose: true
     to:
       - "5"

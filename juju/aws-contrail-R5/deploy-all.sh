@@ -48,6 +48,7 @@ export USE_ADDITIONAL_INTERFACE="${USE_ADDITIONAL_INTERFACE:-false}"
 export AAA_MODE=${AAA_MODE:-rbac}
 export CONTAINER_REGISTRY=${CONTAINER_REGISTRY:-"opencontrailnightly"}
 export CONTRAIL_VERSION=${CONTRAIL_VERSION:-"master-latest"}
+export REGION=RegionOne
 
 export PASSWORD=${PASSWORD:-'password'}
 
