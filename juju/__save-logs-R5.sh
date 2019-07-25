@@ -55,13 +55,13 @@ tar -rf logs.tar $DL 2>/dev/null
 
 host_ip=`hostname -i | cut -d ' ' -f 1`
 function save_introspect_info() {
-  if ! lsof -i ":$2" &>/dev/null ; then
+  if ! netstat -ln46 | grep -q ":$2 " &>/dev/null ; then
     return
   fi
   echo "INFO: saving introspect output for $1"
-  timeout -s 9 30 curl $ssl_opts -s ${proto}://$host_ip:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - | grep -P "state|<type|<status" > $1-introspect.log
+  timeout -s 9 30 sudo curl $ssl_opts -s ${proto}://$host_ip:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - | grep -P "state|<type|<status" > $1-introspect.log
   echo '' >> $1-introspect.log
-  timeout -s 9 30 curl $ssl_opts -s ${proto}://$host_ip:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - >> $1-introspect.log
+  timeout -s 9 30 sudo curl $ssl_opts -s ${proto}://$host_ip:$2/Snh_SandeshUVECacheReq?x=NodeStatus | xmllint --format - >> $1-introspect.log
   tar -rf logs.tar $1-introspect.log 2>/dev/null
 }
 
