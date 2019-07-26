@@ -165,6 +165,12 @@
           name: REGION
           description: "OpenStack region to check non default value"
           default: RegionOne
+      - choice:
+          name: PHYS_INT
+          description: Interface for vhost0. Right now it's passed as a name to vrouter and will be passed as CONTROL_NODES.
+          choices:
+            - ens3
+            - ens4
       - bool:
           name: USE_DPDK
           description: "Deploy Contrail's vrouter in DPDK mode"
@@ -192,7 +198,7 @@
           if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
             desc="cleanup"
           else
-            desc="$SLAVE_NAME $VERSION $CONTRAIL_BUILD $DEPLOY_TYPE mode=$DEPLOY_MODE $AAA_MODE $REGION"
+            desc="$SLAVE_NAME $VERSION $CONTRAIL_BUILD $DEPLOY_TYPE mode=$DEPLOY_MODE $AAA_MODE $REGION $PHYS_INT"
             if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
             if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
             if [[ "$USE_DPDK" == "true" ]] ; then desc="$desc +DPDK" ; fi

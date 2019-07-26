@@ -120,6 +120,12 @@
             two: Deploy k8s master and Contrail separately and one machines for worker
           choices:
             - two
+      - choice:
+          name: PHYS_INT
+          description: Interface for vhost0. Right now it's passed as a name to vrouter and will be passed as CONTROL_NODES.
+          choices:
+            - ens3
+            - ens4
       - string:
           name: CHARMS_BRANCH
           default: 'R5'
@@ -150,7 +156,7 @@
           if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
             desc="cleanup"
           else
-            desc="$SLAVE_NAME $CONTRAIL_BUILD $CONTRAIL_VERSION $DEPLOY_TYPE mode=$DEPLOY_MODE"
+            desc="$SLAVE_NAME $CONTRAIL_BUILD $CONTRAIL_VERSION $DEPLOY_TYPE mode=$DEPLOY_MODE $PHYS_INT"
             if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
           fi
           echo "DESCRIPTION $desc"

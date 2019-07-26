@@ -37,17 +37,10 @@ export DEPLOY_MODE="${DEPLOY_MODE:-two}"
 export USE_SSL_OS="${USE_SSL_OS:-false}"
 export USE_SSL_CONTRAIL="false"
 export USE_DPDK="${USE_DPDK:-false}"
+export PHYS_INT="${PHYS_INT:-}"
 export AAA_MODE=${AAA_MODE:-rbac}
 
 export PASSWORD=${PASSWORD:-'password'}
-
-if [[ "$SERIES" == 'xenial' || "$SERIES" == 'bionic' ]]; then
-  export IF1='ens3'
-  export IF2='ens4'
-else
-  echo "ERROR: only xenial/bionic is supported now"
-  exit 1
-fi
 
 # check if environment is present
 if $virsh_cmd list --all | grep -q "${job_prefix}-cont" ; then

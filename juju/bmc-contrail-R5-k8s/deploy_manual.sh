@@ -63,7 +63,7 @@ juju-set contrail-kubernetes-node docker-registry=$CONTAINER_REGISTRY image-tag=
     docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 
 # contrail
-juju-deploy $PLACE/contrail-agent --config log-level=SYS_DEBUG
+juju-deploy $PLACE/contrail-agent --config log-level=SYS_DEBUG --config physical-interface=$PHYS_INT
 juju-set contrail-kubernetes-node docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
     docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 

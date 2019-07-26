@@ -29,14 +29,7 @@ export JOB_VERSION=R5
 export SERIES="${SERIES:-xenial}"
 export DEPLOY_MODE="${DEPLOY_MODE:-one}"
 export USE_SSL_CONTRAIL="false"
-
-if [[ "$SERIES" == 'xenial' || "$SERIES" == 'bionic' ]]; then
-  export IF1='ens3'
-  export IF2='ens4'
-else
-  echo "ERROR: only xenial/bionic is supported now"
-  exit 1
-fi
+export PHYS_INT="${PHYS_INT:-}"
 
 # check if environment is present
 if $virsh_cmd list --all | grep -q "${job_prefix}-cont" ; then
