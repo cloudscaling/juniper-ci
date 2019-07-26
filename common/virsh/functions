@@ -607,17 +607,21 @@ function start_vbmc() {
   local ipmi_address=$3
   local ipmi_user=$4
   local ipmi_password=$5
-  call_vbmc add --port $port --address $ipmi_address \
-            --username $ipmi_user --password $ipmi_password \
-            $domain
   local i=''
   for i in {1..5} ; do
-    call_vbmc start $domain
-    # use space after domain in below awk to see diff blabla1 vs blabla11
-    local status=$(call_vbmc list | awk "/$domain /{print(\$4)}")
-    if [[ "$status" == 'running' ]] ; then
-      break
-    fi
+    call_vbmc add --port $port --address $ipmi_address \
+      --username $ipmi_user --password $ipmi_password \
+      $domain
     sleep 2
+    local status=$(call_vbmc show -f value $domain | awk '/status /{print($2)}')
+    [[ "$status" == 'running' ]] && break
+    # try start 
+    call_vbmc start $domain
+    sleep 2
+    status=$(call_vbmc show -f value $domain | awk '/status /{print($2)}')
+    [[ "$status" == 'running' ]] && break
+    sleep 2
+    # delete and try re-create
+    delete_vbmc $domain
   done
 }
