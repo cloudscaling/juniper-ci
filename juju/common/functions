@@ -162,6 +162,7 @@ function create_stackrc() {
   echo "export OS_TENANT_NAME=admin" >> $WORKSPACE/stackrc
   echo "export OS_PROJECT_NAME=admin" >> $WORKSPACE/stackrc
   echo "export OS_PASSWORD=${PASSWORD:-password}" >> $WORKSPACE/stackrc
+  echo "export OS_REGION_NAME=${REGION:-RegionOne}" >> $WORKSPACE/stackrc
 }
 
 function post_deploy() {
