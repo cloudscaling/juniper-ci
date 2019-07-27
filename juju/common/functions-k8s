@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 
 function check_k8s_cluster() {
   tmpf=`mktemp`
