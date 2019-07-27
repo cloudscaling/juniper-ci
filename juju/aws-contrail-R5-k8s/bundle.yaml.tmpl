@@ -3,18 +3,18 @@ series: "{{ SERIES }}"
 machines:
 
   # kubernetes pods
-  "0":
+  0:
     series: "{{ SERIES }}"
     constraints: mem=8G cores=2 root-disk=60G
 {%- set compute_nodes = [0] %}
 
   # kubernetes master
-  "2":
+  2:
     series: "{{ SERIES }}"
     constraints: mem=8G cores=2 root-disk=60G
 {%- if KUBERNETES_HA == 'true' %}
 {%- for i in [3, 4] %}
-  "{{ i }}":
+  {{ i }}:
     series: "{{ SERIES }}"
     constraints: mem=8G cores=2 root-disk=60G
 {%- endfor %}
@@ -24,12 +24,12 @@ machines:
 {%- endif %}
 
   # contrail components
-  "5":
+  5:
     series: "{{ SERIES }}"
     constraints: mem=16G cores=4 root-disk=60G
 {%- if CONTRAIL_HA == 'true' %}
 {%- for i in [6, 7] %}
-  "{{ i }}":
+  {{ i }}:
     series: "{{ SERIES }}"
     constraints: mem=16G cores=4 root-disk=60G
 {%- endfor %}
@@ -52,7 +52,7 @@ services:
   etcd:
     series: "{{ SERIES }}"
     charm: cs:~containers/etcd
-    num_units: "{{ k8s_nodes | count }}"
+    num_units: {{ k8s_nodes | count }}
     options:
       channel: 3.2/stable
     to: {{ k8s_nodes }}
@@ -61,7 +61,7 @@ services:
     series: "{{ SERIES }}"
     charm: cs:~containers/kubernetes-master-696
     expose: true
-    num_units: "{{ k8s_nodes | count }}"
+    num_units: {{ k8s_nodes | count }}
     options:
       channel: '1.14/stable'
       service-cidr: '10.96.0.0/12'
@@ -74,7 +74,7 @@ services:
   kubernetes-worker:
     series: "{{ SERIES }}"
     charm: cs:~containers/kubernetes-worker-550
-    num_units: "{{ compute_nodes | count }}"
+    num_units: {{ compute_nodes | count }}
     options:
       channel: '1.14/stable'
       docker_runtime: 'custom'
@@ -116,7 +116,7 @@ services:
     series: "{{ SERIES }}"
     charm: {{ JUJU_REPO }}/contrail-analytics
     expose: true
-    num_units: "{{ contrail_nodes | count }}"
+    num_units: {{ contrail_nodes | count }}
     options:
       log-level: 'SYS_DEBUG'
       docker-registry: "{{ CONTAINER_REGISTRY }}"
@@ -126,7 +126,7 @@ services:
   contrail-analyticsdb:
     series: "{{ SERIES }}"
     charm: {{ JUJU_REPO }}/contrail-analyticsdb
-    num_units: "{{ contrail_nodes | count }}"
+    num_units: {{ contrail_nodes | count }}
     options:
       cassandra-minimum-diskgb: '4'
       cassandra-jvm-extra-opts: '-Xms1g -Xmx2g'
@@ -139,7 +139,7 @@ services:
     series: "{{ SERIES }}"
     charm: {{ JUJU_REPO }}/contrail-controller
     expose: true
-    num_units: "{{ contrail_nodes | count }}"
+    num_units: {{ contrail_nodes | count }}
     options:
       auth-mode: 'no-auth'
       cassandra-minimum-diskgb: '4'
