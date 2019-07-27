@@ -4,6 +4,7 @@ famy_file="${BASH_SOURCE[0]}"
 famy_dir="$(dirname $famy_file)"
 source $famy_dir/../common/functions-aws
 source $famy_dir/../common/functions-contrail
+source $famy_dir/../common/functions-k8s
 
 # aws-functions that are not specific to sandbox
 source $famy_dir/../common/aws/functions
