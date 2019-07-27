@@ -26,16 +26,14 @@
           description: "A method of deployment"
           choices:
             - bundle
-      - choice:
-          name: DEPLOY_BUNDLE
-          description: |
-            non-ha: Deploy Contrail, Kubernetes master and Kubernetes node to separate nodes
-            contrail-ha: Deploy HA Contrail and Single Kubernetes (5 machines)
-            all-ha: Deploy HA Contrail and HA Kubernetes cluster (6 machines)
-          choices:
-            - non-ha
-            - contrail-ha
-            - all-ha
+      - bool:
+          name: CONTRAIL_HA
+          description: Deploy 3 nodes for contrail control plane in case of True
+          default: false
+      - bool:
+          name: KUBERNETES_HA
+          description: Deploy 3 nodes for kubernetes cluster in case of True
+          default: false
       - string:
           name: CHARMS_BRANCH
           default: 'R5'

@@ -6,7 +6,7 @@ source "$my_dir/../common/functions"
 source "$my_dir/functions"
 
 log_dir="$WORKSPACE/logs"
-BUNDLE="$my_dir/bundle-${DEPLOY_BUNDLE}.yaml"
+BUNDLE="$my_dir/bundle.yaml"
 
 trap 'catch_errors_ce $LINENO' ERR EXIT
 function catch_errors_ce() {
@@ -23,15 +23,19 @@ echo "---------------------------------------------------- From: $JUJU_REPO  Ver
 
 # change bundles' variables
 echo "INFO: Change variables in bundle..."
-envsubst <${BUNDLE}.tmpl >$BUNDLE
-#sed -i "s/\r/\n/g" $BUNDLE
-cp $BUNDLE "$log_dir/"
+python "$my_dir/../common/jinja2_render.py" <"$my_dir/bundle.yaml.tmpl" >"$my_dir/bundle.yaml"
+cp "$my_dir/bundle.yaml" "$log_dir/"
 
 echo "INFO: Deploy bundle $(date)"
-juju-deploy-bundle $BUNDLE
+juju-deploy-bundle "$my_dir/bundle.yaml"
 
 echo 'INFO: Fix /etc/hosts'
 for node in $(get_machines_index_by_service kubernetes-worker); do
+  echo "INFO: node: $node"
+  wait_for_machines $node
+  fix_aws_hostname $node
+done
+for node in $(get_machines_index_by_service kubernetes-master); do
   echo "INFO: node: $node"
   wait_for_machines $node
   fix_aws_hostname $node
