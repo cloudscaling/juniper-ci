@@ -61,7 +61,9 @@
             desc="cleanup"
           else
             desc="$CONTRAIL_BUILD $DEPLOY_TYPE mode=$DEPLOY_MODE"
-            if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
+            if [[ "$USE_SSL_CONTRAIL" == "true" ]]; then desc="$desc +SSL_C" ; fi
+            if [[ "$CONTRAIL_HA" == "true" ]]; then desc="$desc +HA_C" ; fi
+            if [[ "$KUBERNETES_HA" == "true" ]]; then desc="$desc +HA_K8S" ; fi
           fi
           echo "DESCRIPTION $desc"
       - description-setter:
