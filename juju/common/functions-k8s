@@ -3,7 +3,18 @@
 function check_k8s_cluster() {
   tmpf=`mktemp`
   cat <<EOM > $tmpf
-#!/bin/bash -x
+#!/bin/bash -ex
+
+echo "INFO: check NS create/delete"
+kubectl create ns jujuns
+sleep 2
+kubectl get ns jujuns -o yaml
+kubectl delete ns jujuns
+sleep 2
+if kubectl get ns jujuns -o yaml ; then
+  echo "ERROR: NS was not deleted"
+fi
+
 kubectl create serviceaccount --namespace kube-system tiller
 kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
 wget -nv https://storage.googleapis.com/kubernetes-helm/helm-v2.9.0-linux-amd64.tar.gz
@@ -21,7 +32,6 @@ helm install --name wordpress --set mariadb.master.persistence.enabled=false --s
 sleep 90
 kubectl get pods
 kubectl get svc wordpress
-set +x
 EOM
 
   # ???
