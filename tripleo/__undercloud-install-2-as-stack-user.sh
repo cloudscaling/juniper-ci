@@ -118,6 +118,12 @@ function install_images() {
     queens)
       os_num='13.0'
       ;;
+    rocky)
+      os_num='14.0'
+      ;;
+    stein)
+      os_num='15.0'
+      ;;
     *)
       echo "ERROR: unsupported OS $OPENSTACK_VERSION"
       exit 1

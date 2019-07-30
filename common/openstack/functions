@@ -462,7 +462,7 @@ function check_instance_simple() {
     # TODO: for now skip VGW cases:
     # - with DPDK
     # - OSP13, vgw is broken there
-    if [[ "$DPDK" == 'off' && "$OPENSTACK_VERSION" != 'queens' ]]; then
+    if [[ "$DPDK" == 'off' && 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]]; then
       # add VGW to second compute host and check ping/ssh from there
       local another_compute_host=`_get_machines_by_service nova-compute | grep -v $mch`
       echo "INFO: Adding vgw to another compute: $another_compute_host"

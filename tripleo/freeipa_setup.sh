@@ -50,8 +50,8 @@ yum -q install -y haveged
 if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   yum-config-manager --enable rhelosp-rhel-7-server-opt
 else
-  tripeo_repos=`python -c 'import requests;r = requests.get("https://trunk.rdoproject.org/centos7-queens/current"); print r.text ' | grep python2-tripleo-repos | awk -F"href=\"" '{print $2}' | awk -F"\"" '{print $1}'`
-  yum install -y https://trunk.rdoproject.org/centos7-queens/current/${tripeo_repos}
+  tripeo_repos=`python -c "import requests;r = requests.get('https://trunk.rdoproject.org/centos7-${OPENSTACK_VERSION}/current'); print r.text " | grep python2-tripleo-repos | awk -F"href=\"" '{print $2}' | awk -F"\"" '{print $1}'`
+  yum install -y https://trunk.rdoproject.org/centos7-${OPENSTACK_VERSION}/current/${tripeo_repos}
   tripleo-repos -b $OPENSTACK_VERSION current
   # in new centos a variable is introduced,
   # so it is needed to have it because  yum repos

@@ -352,21 +352,17 @@ function rhel_get_repos_for_os() {
     queens)
       enable_repo='13'
       ;;
+    rocky)
+      enable_repo='14'
+      ;;
+    stein)
+      enable_repo='15'
+      ;;
     *)
       echo "ERROR: unsupported OS $OPENSTACK_VERSION"
       exit 1
   esac
-  # ==== TODO: OSP13: begin ====
-  # if [[ "$enable_repo" == '13' ]] ; then
-  #   common_repos+=" rhel-7-server-openstack-beta-rpms"
-  #   common_repos+=" rhel-7-server-openstack-devtools-beta-rpms"
-  #   common_repos+=" rhel-server-rhscl-7-beta-rpms"
-  #   common_repos+=" rhel-server-rhscl-7-rpms"
-  #   echo $common_repos
-  #   return
-  # fi
   common_repos+=" rhel-server-rhscl-7-rpms"
-  # ==== TODO: OSP13: end ======
   common_repos+=" rhel-7-server-openstack-${enable_repo}-rpms"
   common_repos+=" rhel-7-server-openstack-${enable_repo}-devtools-rpms"
   echo $common_repos
@@ -431,21 +427,18 @@ function _rhel_repos() {
   return $ret
 }
 
-function _rhel_prepare_reg_file() {
-  # ==== TODO: OSP13: begin ====
-  local image_file=$1
-  # if [[ "$OPENSTACK_VERSION" == 'queens' ]] ; then
-    local reg_file_content="export REG_METHOD=portal\n"
-    reg_file_content+="export REG_USER=${RHEL_USER}\n"
-    reg_file_content+="export REG_PASSWORD=${RHEL_PASSWORD}\n"
-    [ -n "$RHEL_POOL_ID" ] && reg_file_content+="export REG_POOL_ID=${RHEL_POOL_ID}\n"
-    [ -n "$RHEL_ORG" ] && reg_file_content+="export REG_ORG=${RHEL_ORG}\n"
-    [ -n "$RHEL_ACTIVATION_KEY" ] && reg_file_content+="export REG_ACTIVATION_KEY=${RHEL_ACTIVATION_KEY}\n"
-    reg_file_content+="export RHEL_REPOS=$(rhel_get_repos_for_os | tr ' ' ',')\n"
-    virt-customize -a $image_file --run-command "echo -e '$reg_file_content' > $RHEL_ACCOUNT_FILE"
-  # fi
-  # ==== TODO: OSP13: end ====
-}
+# TODO: looks not needed anymore
+# function _rhel_prepare_reg_file() {
+#   local image_file=$1
+#   local reg_file_content="export REG_METHOD=portal\n"
+#   reg_file_content+="export REG_USER=${RHEL_USER}\n"
+#   reg_file_content+="export REG_PASSWORD=${RHEL_PASSWORD}\n"
+#   [ -n "$RHEL_POOL_ID" ] && reg_file_content+="export REG_POOL_ID=${RHEL_POOL_ID}\n"
+#   [ -n "$RHEL_ORG" ] && reg_file_content+="export REG_ORG=${RHEL_ORG}\n"
+#   [ -n "$RHEL_ACTIVATION_KEY" ] && reg_file_content+="export REG_ACTIVATION_KEY=${RHEL_ACTIVATION_KEY}\n"
+#   reg_file_content+="export RHEL_REPOS=$(rhel_get_repos_for_os | tr ' ' ',')\n"
+#   virt-customize -a $image_file --run-command "echo -e '$reg_file_content' > $RHEL_ACCOUNT_FILE"
+# }
 
 function rhel_customize() {
   local image_file=$1

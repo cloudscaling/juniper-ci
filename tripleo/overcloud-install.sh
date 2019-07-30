@@ -277,7 +277,7 @@ openstack baremetal node list
 git config --global user.name jenkins.progmaticlab
 git config --global user.email jenkins@progmaticlab.com
 
-# For queens there is no needs to use puppets
+# Starting from queens there is no needs to use puppets
 artifact_opts=""
 git_branch_ctp="stable/${OPENSTACK_VERSION}"
 if [[ "$CONTRAIL_VERSION" =~ 4.1 ]] ; then

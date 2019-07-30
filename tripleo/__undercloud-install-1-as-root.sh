@@ -110,8 +110,8 @@ if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
   yum-config-manager --enable rhelosp-rhel-7-server-opt
   yum install -y rhosp-director-images rhosp-director-images-ipa
 else
-  tripeo_repos=`python -c 'import requests;r = requests.get("https://trunk.rdoproject.org/centos7-queens/current"); print r.text ' | grep python2-tripleo-repos | awk -F"href=\"" '{print $2}' | awk -F"\"" '{print $1}'`
-  yum install -y https://trunk.rdoproject.org/centos7-queens/current/${tripeo_repos}
+  tripeo_repos=`python -c "import requests;r = requests.get('https://trunk.rdoproject.org/centos7-${OPENSTACK_VERSION}/current'); print r.text " | grep python2-tripleo-repos | awk -F"href=\"" '{print $2}' | awk -F"\"" '{print $1}'`
+  yum install -y https://trunk.rdoproject.org/centos7-${OPENSTACK_VERSION}/current/${tripeo_repos}
   tripleo-repos -b $OPENSTACK_VERSION current
   # in new centos a variable is introduced,
   # so it is needed to have it because  yum repos
@@ -149,7 +149,7 @@ fi
 # another hack to avoid 'sudo: require tty' error
 sed -i -e 's/Defaults[ \t]*requiretty.*/#Defaults    requiretty/g' /etc/sudoers
 
-if [[ 'newton|ocata' =~ $OPENSTACK_VERSION  ]] ; then
+if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION  ]] ; then
   # Before queens there is RPM based deployement,
   # so prepare RPM repo for contrail
   repo_dir='/var/www/html/contrail'
@@ -184,15 +184,8 @@ if [[ 'newton|ocata' =~ $OPENSTACK_VERSION  ]] ; then
 
   # hack: centos images don have openstack-utilities packages
   # TODO: OSP13: no openstack-utils available in beta
-  if [[ "$ENVIRONMENT_OS" == 'centos' || "$OPENSTACK_VERSION" == 'queens' ]] ; then
-    case $OPENSTACK_VERSION in
-      liberty|mitaka|newton|ocata|pike)
-        os_utils_url="http://mirror.comnet.uz/centos/7/cloud/x86_64/openstack-${OPENSTACK_VERSION}/common/openstack-utils-2017.1-1.el7.noarch.rpm"
-        ;;
-      *)
-        os_utils_url="http://mirror.comnet.uz/centos/7/cloud/x86_64/openstack-${OPENSTACK_VERSION}/openstack-utils-2017.1-1.el7.noarch.rpm"
-        ;;
-    esac
+  if [[ "$ENVIRONMENT_OS" == 'centos' ]] ; then
+    os_utils_url="http://mirror.comnet.uz/centos/7/cloud/x86_64/openstack-${OPENSTACK_VERSION}/common/openstack-utils-2017.1-1.el7.noarch.rpm"
     curl -o ${repo_dir}/openstack-utils-2017.1-1.el7.noarch.rpm $os_utils_url
     update_contrail_repo='yes'
   fi
