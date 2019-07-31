@@ -200,6 +200,10 @@
           defaultha: nonha
           slavenode:
             - master
+      - ak8s-aws-ubuntu18:
+          defaultha: nonha
+          slavenode:
+            - master
       - ak8s-aws-centos:
           defaultha: nonha
           slavenode:
@@ -219,21 +223,21 @@
           slavenode:
             - slave01
             - slave04
-      - ajupg-server-ubuntu16:
-          defaultha: nonha
-          slavenode:
-            - slave01
-            - slave04
-      - hjupg-server-ubuntu16:
-          defaultha: nonha
-          slavenode:
-            - slave01
-            - slave04
-      - airship-server-ubuntu16:
-          defaultha: aio
-          slavenode:
-            - slave01
-            - slave04
+#      - ajupg-server-ubuntu16:
+#          defaultha: nonha
+#          slavenode:
+#            - slave01
+#            - slave04
+#      - hjupg-server-ubuntu16:
+#          defaultha: nonha
+#          slavenode:
+#            - slave01
+#            - slave04
+#      - airship-server-ubuntu16:
+#          defaultha: aio
+#          slavenode:
+#            - slave01
+#            - slave04
       - airship-aws-ubuntu16:
           defaultha: aio
           slavenode:
