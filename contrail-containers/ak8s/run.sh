@@ -70,8 +70,7 @@ if [[ "$HA" == 'ha' ]] ; then
   CONTROL_NODES="${IP2_CONT_01},${IP2_CONT_02},${IP2_CONT_03}"
 else
   CONTROLLER_NODES="${IP1_CONT_01}"
-#  CONTROL_NODES="${IP2_CONT_01}"
-  CONTROL_NODES="${IP0_CONT_01}"
+  CONTROL_NODES="${IP2_CONT_01}"
 fi
 
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
