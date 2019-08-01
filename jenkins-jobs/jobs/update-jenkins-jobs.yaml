@@ -15,8 +15,8 @@
           description: "password for the user to access jenkins for update jobs"
     scm:
       - juniper-ci
-      - github:
-          organization: openstack-infra
+      - opendev:
+          organization: jjb
           repo: jenkins-job-builder
     builders:
       - shell: |

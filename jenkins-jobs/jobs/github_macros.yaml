@@ -14,6 +14,22 @@
           wipe-workspace: true
           skip-tag: true
 
+# Open repository in specified organization
+- scm:
+    name: opendev
+    scm:
+      - git:
+          url: 'https://opendev.org/{organization}/{repo}.git'
+          basedir: '{repo}'
+          branches:
+            - '*/master'
+          clean:
+              after: true
+              before: true
+          prune: true
+          wipe-workspace: true
+          skip-tag: true
+
 # Open repository in specified organization at branch
 - scm:
     name: github-branch
