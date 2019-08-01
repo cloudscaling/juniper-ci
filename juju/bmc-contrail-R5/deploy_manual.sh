@@ -60,20 +60,20 @@ juju-deploy cs:$SERIES/openstack-dashboard --to lxd:$cont0
 juju-set openstack-dashboard "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose openstack-dashboard
 
-juju-deploy cs:$SERIES/nova-cloud-controller --to lxd:$cont0
+juju-deploy cs:$SERIES/nova-cloud-controller --to lxd:$cont0 --config region=$REGION
 juju-set nova-cloud-controller "console-access-protocol=novnc" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose nova-cloud-controller
 
-juju-deploy cs:$SERIES/glance --to lxd:$cont0
+juju-deploy cs:$SERIES/glance --to lxd:$cont0 --config region=$REGION
 juju-set glance "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose glance
 
-juju-deploy cs:$SERIES/keystone --to lxd:$cont0
+juju-deploy cs:$SERIES/keystone --to lxd:$cont0 --config region=$REGION
 # by default preferred-api-version=3 for queens and above and =2 for previous versions
 juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose keystone
 
-juju-deploy cs:$SERIES/heat --to lxd:$cont0
+juju-deploy cs:$SERIES/heat --to lxd:$cont0 --config region=$REGION
 juju-set heat "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose heat
 
@@ -82,7 +82,7 @@ juju-add-unit nova-compute --to $comp2
 juju-set nova-compute "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "virt-type=kvm" "enable-resize=True" "enable-live-migration=True" "migration-auth-type=ssh"
 
 # Neutron
-juju-deploy cs:$SERIES/neutron-api --to lxd:$cont0
+juju-deploy cs:$SERIES/neutron-api --to lxd:$cont0 --config region=$REGION
 juju-set neutron-api "debug=true" "manage-neutron-plugin-legacy-mode=false" "openstack-origin=$OPENSTACK_ORIGIN" "neutron-security-groups=true"
 juju-set nova-cloud-controller "network-manager=Neutron"
 juju-expose neutron-api

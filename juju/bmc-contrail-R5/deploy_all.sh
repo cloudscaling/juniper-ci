@@ -39,6 +39,7 @@ export USE_SSL_CONTRAIL="false"
 export USE_DPDK="${USE_DPDK:-false}"
 export PHYS_INT="${PHYS_INT:-}"
 export AAA_MODE=${AAA_MODE:-rbac}
+export REGION=${REGION:-'RegionOne'}
 
 export PASSWORD=${PASSWORD:-'password'}
 
