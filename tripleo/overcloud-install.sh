@@ -1213,7 +1213,7 @@ while (true) ; do
       echo "==== $i ===="
       echo "$contrail_status"
 
-      if [[ 'newton|ocata' =~ $OPENSTACK_VERSION ]] ; then
+      if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
         if [[ ! $hostname =~ 'contrailcontroller' ]] ; then
           state=`echo "$contrail_status" | grep -v '==' |  awk '{print($2)}'`
         else
@@ -1226,7 +1226,7 @@ while (true) ; do
         done
       else
         total_count=$(echo "$contrail_status" | awk '/^.*:/{print($2)}' | wc -l)
-        active_count=$(echo "$contrail_status" | awk '/^.*:/{print($2)}' | grep 'active' | wc -l)
+        active_count=$(echo "$contrail_status" | awk '/^.*:/{print($2)}' | grep 'active\|timeout\|backup' | wc -l)
         if (( total_count != active_count )) ; then
             ((++status_chek_res))
         fi
