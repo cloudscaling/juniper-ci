@@ -35,6 +35,9 @@ else
   fi
 fi
 
+KEEP_VM_AFTER_TEST=${KEEP_VM_AFTER_TEST:-"false"}
+
+
 function activate_venv() {
   if [ -d "$WORKSPACE/.venv" ]; then
     source "$WORKSPACE/.venv/bin/activate"
@@ -278,7 +281,7 @@ function run_os_checks() {
   openstack $OVERCLOUD_TLS_OPTS catalog list || keystone catalog || /bin/true
   deactivate_venv
 
-  if [[ $ret == 0 ]]; then
+  if [[ $ret == 0 && "$KEEP_VM_AFTER_TEST" != 'true' ]]; then
     openstack $OVERCLOUD_TLS_OPTS floating ip delete 10.5.0.10
     openstack $OVERCLOUD_TLS_OPTS floating ip delete 10.5.0.11
     delete_network $netsfx
