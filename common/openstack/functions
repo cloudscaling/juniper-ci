@@ -482,7 +482,8 @@ function check_instance_simple() {
   fi
 
   openstack $OVERCLOUD_TLS_OPTS server show $instance_id
-  if (( ret == 0 )) ; then
+
+  if [[ $ret == 0 && "$KEEP_VM_AFTER_TEST" != 'true' ]]; then
     openstack $OVERCLOUD_TLS_OPTS server delete $instance_id
   fi
 
