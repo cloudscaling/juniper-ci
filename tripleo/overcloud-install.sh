@@ -386,6 +386,10 @@ enabled = 1
 gpgcheck = 0
 EOF
   pushd contrail-container-builder/containers
+  if [[ ! 'newton|ocata|pike|queens' =~ $OPENSTACK_VERSION  ]] ; then
+    # starting from rhosp14 no http on undercloud, so install own server for rpms
+    sudo package_root_dir="/var/www/html" ./install-http-server.sh
+  fi
   # TODO: dont fail build because some containers like vcenter fails in our env
   ./build.sh || { echo "WARNING: some containers are failed." ; cat ./*.log || true ; }
   popd
