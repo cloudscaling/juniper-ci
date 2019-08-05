@@ -53,16 +53,15 @@ network_cidr = $prov_ip.0/24
 network_gateway = $prov_ip.2
 discovery_iprange = $prov_ip.150,$prov_ip.170
 inspection_iprange = $prov_ip.150,$prov_ip.170
+undercloud_hostname = undercloud.my${NUM}domain
+overcloud_domain_name = $CLOUD_DOMAIN_NAME
+undercloud_nameservers = $dns_nameserver
 EOF
-
 
 if [[ "$FREE_IPA" == 'true' ]] ; then
   cat << EOF >> undercloud.conf
-undercloud_hostname: undercloud.my${NUM}domain
-undercloud_nameservers: ${prov_ip}.4 
-overcloud_domain_name: $CLOUD_DOMAIN_NAME
-enable_novajoin: True
-ipa_otp: "$FREE_IPA_OTP"
+enable_novajoin = True
+ipa_otp = "$FREE_IPA_OTP"
 EOF
 fi
 

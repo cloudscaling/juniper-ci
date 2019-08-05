@@ -271,24 +271,28 @@ fi
 
 sudo -u stack $env_opts /home/stack/__undercloud-install-2-as-stack-user.sh
 
-# increase timeouts due to virtual installation
-openstack-config --set /etc/nova/nova.conf DEFAULT rpc_response_timeout 600
-openstack-config --set /etc/nova/nova.conf DEFAULT dhcp_domain $CLOUD_DOMAIN_NAME
-openstack-config --set /etc/ironic/ironic.conf DEFAULT rpc_response_timeout 600
-openstack-config --set /etc/neutron/neutron.conf DEFAULT  dns_domain $CLOUD_DOMAIN_NAME
-openstack-config --set /etc/neutron/neutron.conf DEFAULT rpc_response_timeout 300
+# starting from rocky udnercloud is dockerized
+if [[ 'newton|ocata|pike|queens' =~ $OPENSTACK_VERSION  ]] ; then
 
-# despite the field is depricated it is still important to set it
-# https://bugs.launchpad.net/neutron/+bug/1657814
-if grep -q '^dhcp_domain.*=' /etc/neutron/dhcp_agent.ini ; then
-  sed -i "s/^dhcp_domain.*=.*/dhcp_domain = ${CLOUD_DOMAIN_NAME}/" /etc/neutron/dhcp_agent.ini
-else
-  sed -i "/^#.*dhcp_domain.*=/a dhcp_domain = ${CLOUD_DOMAIN_NAME}" /etc/neutron/dhcp_agent.ini
+  # increase timeouts due to virtual installation
+  openstack-config --set /etc/nova/nova.conf DEFAULT rpc_response_timeout 600
+  openstack-config --set /etc/nova/nova.conf DEFAULT dhcp_domain $CLOUD_DOMAIN_NAME
+  openstack-config --set /etc/ironic/ironic.conf DEFAULT rpc_response_timeout 600
+  openstack-config --set /etc/neutron/neutron.conf DEFAULT  dns_domain $CLOUD_DOMAIN_NAME
+  openstack-config --set /etc/neutron/neutron.conf DEFAULT rpc_response_timeout 300
+
+  # despite the field is depricated it is still important to set it
+  # https://bugs.launchpad.net/neutron/+bug/1657814
+  if grep -q '^dhcp_domain.*=' /etc/neutron/dhcp_agent.ini ; then
+    sed -i "s/^dhcp_domain.*=.*/dhcp_domain = ${CLOUD_DOMAIN_NAME}/" /etc/neutron/dhcp_agent.ini
+  else
+    sed -i "/^#.*dhcp_domain.*=/a dhcp_domain = ${CLOUD_DOMAIN_NAME}" /etc/neutron/dhcp_agent.ini
+  fi
+
+  openstack-service restart neutron
+  openstack-service restart ironic
+  openstack-service restart nova
 fi
-
-openstack-service restart neutron
-openstack-service restart ironic
-openstack-service restart nova
 
 # disable selinux
 setenforce 0 || true
