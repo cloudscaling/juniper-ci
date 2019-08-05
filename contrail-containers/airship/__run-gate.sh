@@ -13,7 +13,7 @@ git clone https://opendev.org/airship/shipyard.git airship-shipyard
 
 sed -i 's/-it/-i/g' airship-pegleg/tools/pegleg.sh
 
-cd ./treasuremap/tools/deployment/aiab-tf
+cd ./treasuremap/tools/deployment/aiab
 
 CPU_COUNT=$(grep -c processor /proc/cpuinfo)
 RAM_TOTAL=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
@@ -29,7 +29,7 @@ if [[ $(id -u) -ne 0 ]]; then
   exit 1
 fi
 
-export TARGET_SITE="aiab-tf"
+export TARGET_SITE="aiab"
 
 if [[ ${VROUTER_ON_DEFAULT_IFACE:-'true'} == 'true' ]]; then
   export NODE_NET_IFACE="ens3"
