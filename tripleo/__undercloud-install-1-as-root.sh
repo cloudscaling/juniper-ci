@@ -63,7 +63,8 @@ fi
 # (particulary neutron services may not work properly)
 # libguestfs-tools - is for virt-customize tool for overcloud image customization - enabling repos
 yum install -y  ntp wget yum-utils screen mc deltarpm createrepo bind-utils sshpass \
-                gcc make python-devel yum-plugin-priorities sshpass libguestfs-tools
+                gcc make python-devel yum-plugin-priorities sshpass libguestfs-tools \
+                libvirt-client \ 
 chkconfig ntpd on
 service ntpd start
 
