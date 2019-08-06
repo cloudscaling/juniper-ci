@@ -1101,9 +1101,9 @@ if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
   prefix_opts=''
   docker_opt=' -e docker_registry.yaml'
   if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-    # OSP13
-    # image_namespace="registry.access.redhat.com/rhosp13-beta"
-    image_namespace="registry.access.redhat.com/rhosp13"
+    # rhosp13, rhosp14, rhosp15
+    # image_namespace="registry.access.redhat.com/rhosp$(rhel_os2num)-beta"
+    image_namespace="registry.access.redhat.com/rhosp$(rhel_os2num)"
     tag_opts=''
     tag_from_label_opts='--tag-from-label {version}-{release}'
     prefix_opts="--prefix=openstack-"

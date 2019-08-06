@@ -103,31 +103,7 @@ function create_images() {
 }
 
 function install_images() {
-  local os_num=''
-  case "$OPENSTACK_VERSION" in
-    newton)
-      os_num='10.0'
-      ;;
-    ocata)
-      os_num='11.0'
-      ;;
-    pike)
-      os_num='12.0'
-      ;;
-    queens)
-      os_num='13.0'
-      ;;
-    rocky)
-      os_num='14.0'
-      ;;
-    stein)
-      os_num='15.0'
-      ;;
-    *)
-      echo "ERROR: unsupported OS $OPENSTACK_VERSION"
-      exit 1
-  esac
-
+  local os_num="$(rhel_os2num).0"
   local packages_install_dir='/usr/share/rhosp-director-images'
   local ret=0
   tar -xvf $packages_install_dir/overcloud-full-latest-${os_num}.tar || ret=1

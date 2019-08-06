@@ -331,13 +331,7 @@ function delete_volume() {
   virsh vol-delete $volname --pool $poolname 2>/dev/null || rm -f $pool_path/$volname 2>/dev/null
 }
 
-function rhel_get_repos_for_os() {
-  local common_repos="rhel-7-server-rpms rhel-7-server-extras-rpms"
-  common_repos+=" rhel-7-server-rh-common-rpms rhel-ha-for-rhel-7-server-rpms"
-  common_repos+=" rhel-7-server-optional-rpms"
-  if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
-    common_repos+=" rhel-7-server-cert-rpms"
-  fi
+function rhel_os2num() {
   local enable_repo=''
   case "$OPENSTACK_VERSION" in
     newton)
@@ -362,6 +356,17 @@ function rhel_get_repos_for_os() {
       echo "ERROR: unsupported OS $OPENSTACK_VERSION"
       exit 1
   esac
+  echo $enable_repo
+}
+
+function rhel_get_repos_for_os() {
+  local common_repos="rhel-7-server-rpms rhel-7-server-extras-rpms"
+  common_repos+=" rhel-7-server-rh-common-rpms rhel-ha-for-rhel-7-server-rpms"
+  common_repos+=" rhel-7-server-optional-rpms"
+  if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
+    common_repos+=" rhel-7-server-cert-rpms"
+  fi
+  local enable_repo=$(rhel_os2num)
   common_repos+=" rhel-server-rhscl-7-rpms"
   common_repos+=" rhel-7-server-openstack-${enable_repo}-rpms"
   common_repos+=" rhel-7-server-openstack-${enable_repo}-devtools-rpms"
