@@ -56,6 +56,7 @@ inspection_iprange = $prov_ip.150,$prov_ip.170
 undercloud_hostname = undercloud.my${NUM}domain
 overcloud_domain_name = $CLOUD_DOMAIN_NAME
 undercloud_nameservers = $dns_nameserver
+masquerade = true
 EOF
 
 if [[ "$FREE_IPA" == 'true' ]] ; then
