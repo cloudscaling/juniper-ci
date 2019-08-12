@@ -43,19 +43,23 @@ fi
 cat << EOF >> undercloud.conf
 [DEFAULT]
 local_ip = $prov_ip.2/24
-undercloud_public_vip = $prov_ip.10
-undercloud_admin_vip = $prov_ip.11
+undercloud_public_host = $prov_ip.10
+undercloud_admin_host = $prov_ip.11
 local_interface = $NETDEV
-masquerade_network = $prov_ip.0/24
-dhcp_start = $prov_ip.100
-dhcp_end = $prov_ip.149
-network_cidr = $prov_ip.0/24
-network_gateway = $prov_ip.2
-discovery_iprange = $prov_ip.150,$prov_ip.170
-inspection_iprange = $prov_ip.150,$prov_ip.170
-undercloud_hostname = undercloud.my${NUM}domain
 overcloud_domain_name = $CLOUD_DOMAIN_NAME
 undercloud_nameservers = $dns_nameserver
+undercloud_hostname = undercloud.my${NUM}domain
+discovery_iprange = $prov_ip.150,$prov_ip.170
+subnets = ctlplane-subnet
+inspection_interface = br-ctlplane
+
+
+[ctlplane-subnet]
+cidr = $prov_ip.0/24
+dhcp_start = $prov_ip.100
+dhcp_end = $prov_ip.149
+gateway = $prov_ip.2
+inspection_iprange = $prov_ip.150,$prov_ip.170
 masquerade = true
 EOF
 
