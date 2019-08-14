@@ -78,8 +78,10 @@ if [[ "$HA" == 'ha' ]] ; then
   HOSTNAME_VM_04=`$SSH_CMD ${SSH_USER}@${IP_VM_04} "getent hosts ${IP0_COMP_01}" 2>/dev/null | awk '{print $2}'`
   HOSTNAME_VM_05=`$SSH_CMD ${SSH_USER}@${IP_VM_05} "getent hosts ${IP0_COMP_02}" 2>/dev/null | awk '{print $2}'`
 else
-  CONTROLLER_NODES="${IP1_CONT_01}"
-  CONTROL_NODES="${IP2_CONT_01}"
+  CONTROLLER_NODES="${IP0_CONT_01}"
+  CONTROL_NODES="${IP0_CONT_01}"
+  #CONTROLLER_NODES="${IP1_CONT_01}"
+  #CONTROL_NODES="${IP2_CONT_01}"
 
   # we use the same name for vrouter as hypervisor...
   HOSTNAME_VM_04=`$SSH_CMD ${SSH_USER}@${IP_VM_04} "getent hosts ${IP0_COMP_01}" 2>/dev/null | awk '{print $2}'`
