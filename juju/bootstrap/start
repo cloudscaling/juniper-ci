@@ -20,9 +20,9 @@ openstack keypair delete mk
 openstack keypair create --public-key ~/.ssh/id_rsa.pub mk
 
 openstack flavor create --disk 10 --vcpus 2 --ram 512 --id 1 m1
-openstack flavor create --disk 30 --vcpus 2 --ram 1024 --id 2 m2
-openstack flavor create --disk 30 --vcpus 4 --ram 4096 --id 3 m3
-openstack flavor create --disk 30 --vcpus 4 --ram 3072 --id 4 m4
+openstack flavor create --disk 20 --vcpus 2 --ram 1024 --id 2 m2
+openstack flavor create --disk 30 --vcpus 2 --ram 4096 --id 3 m3
+openstack flavor create --disk 30 --vcpus 2 --ram 3072 --id 4 m4
 
 openstack server create --flavor 1 --nic net-id=demo-net --image ubuntu-bionic --key-name mk jclient
 openstack server create --flavor 2 --nic net-id=demo-net --image ubuntu-bionic --key-name mk jcont
@@ -37,6 +37,7 @@ openstack server delete jmaster
 openstack server delete jworker
 
 
+
 ssh root@10.30.10.148
 
 ssh ubuntu@169.254.0.3
@@ -47,6 +48,10 @@ sudo bash -c "cat >>/etc/hosts"
 192.168.1.3   jclient
 
 
+192.168.1.6   jcont
+192.168.1.5   jclient
+192.168.1.4   jworker
+192.168.1.3   jmaster
 
 
 
