@@ -93,16 +93,21 @@ function create_images() {
 
   local config_opts=''
   if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-    export OS_YAML="/usr/share/openstack-tripleo-common/image-yaml/overcloud-images-rhel7.yaml"
-    export REG_REPOS='rhel-7-server-rpms rhel-7-server-extras-rpms rhel-ha-for-rhel-7-server-rpms rhel-7-server-optional-rpms'
-    if [ -f /home/stack/overcloud-base-image.qcow2 ] ; then
-      export DIB_LOCAL_IMAGE='/home/stack/overcloud-base-image.qcow2'
-    fi
-    local rhel_account_file_name=$(echo $RHEL_ACCOUNT_FILE | awk -F '/' '{print($NF)}')
-    set +x
-    source ~/$rhel_account_file_name
-    set -x
-    config_opts="--config-file /usr/share/openstack-tripleo-common/image-yaml/overcloud-images.yaml --config-file $OS_YAML"
+    if [[ "$OPENSTACK_VERSION" == 'stein' ]] ; then
+      export OS_YAML="/usr/share/openstack-tripleo-common/image-yaml/overcloud-images-rhel8.yaml"
+      export REG_REPOS='rhel-8-for-x86_64-baseos-rpms rhel-8-for-x86_64-appstream-rpms rhel-8-for-x86_64-highavailability-rpms ansible-2.8-for-rhel-8-x86_64-rpms openstack-beta-for-rhel-8-x86_64-rpms fast-datapath-for-rhel-8-x86_64-rpms'
+    else 	    
+      export OS_YAML="/usr/share/openstack-tripleo-common/image-yaml/overcloud-images-rhel7.yaml"
+      export REG_REPOS='rhel-7-server-rpms rhel-7-server-extras-rpms rhel-ha-for-rhel-7-server-rpms rhel-7-server-optional-rpms'
+      if [ -f /home/stack/overcloud-base-image.qcow2 ] ; then
+        export DIB_LOCAL_IMAGE='/home/stack/overcloud-base-image.qcow2'
+      fi
+      local rhel_account_file_name=$(echo $RHEL_ACCOUNT_FILE | awk -F '/' '{print($NF)}')
+      set +x
+      source ~/$rhel_account_file_name
+      set -x
+      config_opts="--config-file /usr/share/openstack-tripleo-common/image-yaml/overcloud-images.yaml --config-file $OS_YAML"
+    fi  
   fi
   openstack overcloud image build $config_opts
 }

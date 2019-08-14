@@ -317,7 +317,7 @@ function _prepare_rhel_account() {
     local rhel_account_file_name=$(echo $RHEL_ACCOUNT_FILE | awk -F '/' '{print($NF)}')
     cp $RHEL_ACCOUNT_FILE $tmpdir/
     cat <<EOF >> $tmpdir/$rhel_account_file_name
-export RHEL_REPOS="$(rhel_get_repos_for_os | tr ' ' ',')"
+export RHEL_REPOS="$(rhel_get_repos_for_os $ENVIRONMENT_OS_VERSION | tr ' ' ',')"
 EOF
     chmod 644 $tmpdir/$rhel_account_file_name
     chmod +x $tmpdir/$rhel_account_file_name
@@ -349,10 +349,13 @@ function _prepare_host() {
   [ -n "$RHEL_ACTIVATION_KEY" ] && register_opts+=" --activationkey $RHEL_ACTIVATION_KEY"
   set -x
   local attach_opts='--auto'
+  if [[ "$OPENSTACK_VERSION" == 'stein' ]] ; then
+    RHEL_POOL_ID='8a85f99368b9397d01690f03afce5fe4'	   
+  fi	  
   if [[ -n "$RHEL_POOL_ID" ]] ; then
     attach_opts="--pool $RHEL_POOL_ID"
   fi
-  local repos_list=$(rhel_get_repos_for_os)
+  local repos_list=$(rhel_get_repos_for_os $ENVIRONMENT_OS_VERSION)
   local repos_opts=''
   declare r
   for r in $repos_list ; do

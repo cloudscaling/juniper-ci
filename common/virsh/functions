@@ -360,16 +360,29 @@ function rhel_os2num() {
 }
 
 function rhel_get_repos_for_os() {
-  local common_repos="rhel-7-server-rpms rhel-7-server-extras-rpms"
-  common_repos+=" rhel-7-server-rh-common-rpms rhel-ha-for-rhel-7-server-rpms"
-  common_repos+=" rhel-7-server-optional-rpms"
-  if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
-    common_repos+=" rhel-7-server-cert-rpms"
-  fi
-  local enable_repo=$(rhel_os2num)
-  common_repos+=" rhel-server-rhscl-7-rpms"
-  common_repos+=" rhel-7-server-openstack-${enable_repo}-rpms"
-  common_repos+=" rhel-7-server-openstack-${enable_repo}-devtools-rpms"
+  local os_version=$1
+  local os_major_version=${os_version:0:1}
+  case "$os_major_version" in\
+    7)	  
+     local common_repos="rhel-7-server-rpms rhel-7-server-extras-rpms"
+     common_repos+=" rhel-7-server-rh-common-rpms rhel-ha-for-rhel-7-server-rpms"
+     common_repos+=" rhel-7-server-optional-rpms"
+     if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
+       common_repos+=" rhel-7-server-cert-rpms"
+     fi
+     local enable_repo=$(rhel_os2num)
+     common_repos+=" rhel-server-rhscl-7-rpms"
+     common_repos+=" rhel-7-server-openstack-${enable_repo}-rpms"
+     common_repos+=" rhel-7-server-openstack-${enable_repo}-devtools-rpms"
+    ;; 
+    8) 
+     local common_repos="rhel-8-for-x86_64-baseos-rpms rhel-8-for-x86_64-appstream-rpms"
+     common_repos+=" rhel-8-for-x86_64-highavailability-rpms ansible-2.8-for-rhel-8-x86_64-rpms"
+     common_repos+=" openstack-beta-for-rhel-8-x86_64-rpms fast-datapath-for-rhel-8-x86_64-rpms"
+    ;;
+  *) 
+    return 1
+  esac    
   echo $common_repos
 }
 
