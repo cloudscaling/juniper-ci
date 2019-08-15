@@ -133,47 +133,49 @@ else
       echo centos > /etc/yum/vars/contentdir
     fi
   fi
-  
-  # install tripleo clients
-  #   osp10 has no preinstalled openstack-utils
-  yum -y install python-tripleoclient python-rdomanager-oscplugin  openstack-utils
-  
-  if [[ "$OPENSTACK_VERSION" == 'ocata' && "$ENVIRONMENT_OS" == 'centos' ]] ; then
-    yum update -y
-    # workaround for https://bugs.launchpad.net/tripleo/+bug/1692899
-    # correct fix is in the review
-    # (https://review.openstack.org/#/c/467248/1/heat-config-docker-cmd/os-refresh-config/configure.d/50-heat-config-docker-cmd)
-    mkdir -p /var/run/heat-config
-    echo "{}" > /var/run/heat-config/heat-config
-    if [[ -f /usr/share/openstack-heat-templates/software-config/elements/heat-config-docker-cmd/os-refresh-config/configure.d/50-heat-config-docker-cmd ]] ; then
-      sed -i 's/return 1/return 0/' /usr/share/openstack-heat-templates/software-config/elements/heat-config-docker-cmd/os-refresh-config/configure.d/50-heat-config-docker-cmd
-    fi
-    if [[ -f /usr/libexec/os-refresh-config/configure.d/50-heat-config-docker-cmd ]] ; then
-      sed -i 's/return 1/return 0/' /usr/libexec/os-refresh-config/configure.d/50-heat-config-docker-cmd
-    fi
+fi  
+
+# install tripleo clients
+#   osp10 has no preinstalled openstack-utils
+if [[ "${ENVIRONMENT_OS_VERSION:0:1}" == '7' ]] ; then
+   yum -y install python-tripleoclient python-rdomanager-oscplugin  openstack-utils
+fi
+
+if [[ "$OPENSTACK_VERSION" == 'ocata' && "$ENVIRONMENT_OS" == 'centos' ]] ; then
+  yum update -y
+  # workaround for https://bugs.launchpad.net/tripleo/+bug/1692899
+  # correct fix is in the review
+  # (https://review.openstack.org/#/c/467248/1/heat-config-docker-cmd/os-refresh-config/configure.d/50-heat-config-docker-cmd)
+  mkdir -p /var/run/heat-config
+  echo "{}" > /var/run/heat-config/heat-config
+  if [[ -f /usr/share/openstack-heat-templates/software-config/elements/heat-config-docker-cmd/os-refresh-config/configure.d/50-heat-config-docker-cmd ]] ; then
+    sed -i 's/return 1/return 0/' /usr/share/openstack-heat-templates/software-config/elements/heat-config-docker-cmd/os-refresh-config/configure.d/50-heat-config-docker-cmd
   fi
-  
-  
-  # add Ceph repos to workaround bug with redhat-lsb-core package
-  # todo: there is enabled ceph repo jewel
-  #yum -y install --enablerepo=extras centos-release-ceph-hammer
-  #sed -i -e 's%gpgcheck=.*%gpgcheck=0%' /etc/yum.repos.d/CentOS-Ceph-Hammer.repo
-  
-  # another hack to avoid 'sudo: require tty' error
-  sed -i -e 's/Defaults[ \t]*requiretty.*/#Defaults    requiretty/g' /etc/sudoers
-  
-  if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION  ]] ; then
-    # Before queens there is RPM based deployement,
-    # so prepare RPM repo for contrail
-    repo_dir='/var/www/html/contrail'
-    mkdir -p $repo_dir
-  else
-    default_contrail_ver=$(ls -1 /root/contrail_packages | grep -o '\([0-9]\+\.\{0,1\}\)\{1,5\}-[0-9]\+' | sort -nr  | head -n 1)
-    CONTRAIL_VERSION=${CONTRAIL_VERSION:-${default_contrail_ver}}
-    repo_dir="/var/www/html/${CONTRAIL_VERSION}"
-    mkdir -p $repo_dir
-    ln -s $repo_dir "${repo_dir}-${OPENSTACK_VERSION}"
+  if [[ -f /usr/libexec/os-refresh-config/configure.d/50-heat-config-docker-cmd ]] ; then
+    sed -i 's/return 1/return 0/' /usr/libexec/os-refresh-config/configure.d/50-heat-config-docker-cmd
   fi
+fi
+
+
+# add Ceph repos to workaround bug with redhat-lsb-core package
+# todo: there is enabled ceph repo jewel
+#yum -y install --enablerepo=extras centos-release-ceph-hammer
+#sed -i -e 's%gpgcheck=.*%gpgcheck=0%' /etc/yum.repos.d/CentOS-Ceph-Hammer.repo
+
+# another hack to avoid 'sudo: require tty' error
+sed -i -e 's/Defaults[ \t]*requiretty.*/#Defaults    requiretty/g' /etc/sudoers
+
+if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION  ]] ; then
+  # Before queens there is RPM based deployement,
+  # so prepare RPM repo for contrail
+  repo_dir='/var/www/html/contrail'
+  mkdir -p $repo_dir
+else
+  default_contrail_ver=$(ls -1 /root/contrail_packages | grep -o '\([0-9]\+\.\{0,1\}\)\{1,5\}-[0-9]\+' | sort -nr  | head -n 1)
+  CONTRAIL_VERSION=${CONTRAIL_VERSION:-${default_contrail_ver}}
+  repo_dir="/var/www/html/${CONTRAIL_VERSION}"
+  mkdir -p $repo_dir
+  ln -s $repo_dir "${repo_dir}-${OPENSTACK_VERSION}"
 fi
 
 # prepare contrail packages
