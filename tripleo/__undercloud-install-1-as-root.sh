@@ -53,7 +53,7 @@ mgmt_ip="192.168.$addr"
 rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 
 # update OS
-yum update -y
+yum update -y --allowerasing
 
 if [[ "$ENVIRONMENT_OS" == 'centos' ]] ; then
   yum install -y epel-release
@@ -62,11 +62,17 @@ fi
 # install utils & ntpd - it is needed for correct work of OS services
 # (particulary neutron services may not work properly)
 # libguestfs-tools - is for virt-customize tool for overcloud image customization - enabling repos
-yum install -y  ntp wget yum-utils screen mc deltarpm createrepo bind-utils sshpass \
-                gcc make python-devel yum-plugin-priorities sshpass libguestfs-tools \
-                libvirt-client \ 
-chkconfig ntpd on
-service ntpd start
+if [[ "${ENVIRONMENT_OS_VERSION:0:1}" == '8' ]] ; then
+   yum install -y chrony wget yum-utils tmux mc createrepo bind-utils sshpass gcc make \
+                  libguestfs-tools libvirt-client	  
+   systemctl start chronyd
+else        	
+   yum install -y  ntp wget yum-utils screen mc deltarpm createrepo bind-utils sshpass \
+                   gcc make python-devel yum-plugin-priorities sshpass libguestfs-tools \
+                   libvirt-client \ 
+   chkconfig ntpd on
+   service ntpd start
+fi
 
 # create stack user
 if ! grep -q 'stack' /etc/passwd ; then
