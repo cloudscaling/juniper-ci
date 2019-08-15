@@ -504,8 +504,10 @@ if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
   fi
 else
   #OSP13
-  # TODO: disable VROUTER_GATEWAY for testing 
+  # disable gateway as it is not needed and can be empty
   sed -i "s/VROUTER_GATEWAY:.*/#VROUTER_GATEWAY: ${prov_ip}/g" $contrail_services_file
+  # enable debug output
+  sed -i "/VROUTER_GATEWAY:.*/a \    LOG_LEVEL: SYS_DEBUG" $contrail_services_file
 fi
 sed -i "s/ControlVirtualInterface:.*/ControlVirtualInterface: ens3/g" $contrail_net_file
 sed -i "s/PublicVirtualInterface:.*/PublicVirtualInterface: ens3/g" $contrail_net_file
