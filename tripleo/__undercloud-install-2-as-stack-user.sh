@@ -85,7 +85,7 @@ parameter_defaults:
     tag_from_label: '{version}-{release}'
   ContainerImageRegistryCredentials:
     registry.redhat.io:
-      ${RHEL_USER}: '${RHEL_PASSWORD}'
+      \${RHEL_USER}: '\${RHEL_PASSWORD}'
 EOF
   source rhel-account
   cat /tmp/containers-prepare-parameter.yaml | envsubst > containers-prepare-parameter.yaml
@@ -144,28 +144,43 @@ function install_images() {
   return $ret
 }
 
-cd ~
-if [ -f /tmp/images.tar ] ; then
-  # but right now script will use previously built images
-  tar -xf /tmp/images.tar
-else
-  mkdir -p images
-  pushd images
 
-  if ! install_images ; then
-    create_images
+if [[ "${ENVIRONMENT_OS_VERSION:0:1}" == '8' ]] ; then
+  source ~/stackrc
+  sudo yum install rhosp-director-images rhosp-director-images-ipa
+  mkdir ~/images
+  cd ~/images
+  for i in /usr/share/rhosp-director-images/overcloud-full-latest-15.0.tar \
+           /usr/share/rhosp-director-images/ironic-python-agent-latest-15.0.tar; 
+    do
+      tar -xvf $i; 
+    done
+  openstack overcloud image upload -- image-path /home/stack/images/
+  openstack image list
+else 
+  cd ~
+  if [ -f /tmp/images.tar ] ; then
+    # but right now script will use previously built images
+    tar -xf /tmp/images.tar
+  else
+    mkdir -p images
+    pushd images
+
+    if ! install_images ; then
+      create_images
+    fi
+    if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+      rhel_customize "overcloud-full.qcow2" 'overcloud'
+    fi
+    popd
+    tar -cf images.tar images
   fi
-  if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-    rhel_customize "overcloud-full.qcow2" 'overcloud'
-  fi
-  popd
-  tar -cf images.tar images
+
+  source ./stackrc
+  cd ~/images
+  openstack overcloud image upload
+  cd ..
 fi
-
-source ./stackrc
-cd ~/images
-openstack overcloud image upload
-cd ..
 
 # update undercloud's network information
 sid=`neutron subnet-list | grep " $prov_ip.0" | awk '{print $2}'`
