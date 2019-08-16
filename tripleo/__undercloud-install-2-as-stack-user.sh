@@ -70,6 +70,29 @@ ipa_otp = "$FREE_IPA_OTP"
 EOF
 fi
 
+if [[ "${ENVIRONMENT_OS_VERSION:0:1}" == '8' ]] ; then
+  #openstack tripleo container image prepare default --local-push-destination --output-env-file containers-prepare-parameter.yaml
+  cat << EOF > /tmp/containers-prepare-parameter.yaml
+parameter_defaults:
+  ContainerImagePrepare:
+  - push_destination: true
+    set:
+      name_prefix: openstack-
+      name_suffix: ''
+      namespace: registry.redhat.io/rhosp-beta
+      neutron_driver: ovn
+      tag: 15.0
+    tag_from_label: '{version}-{release}'
+  ContainerImageRegistryCredentials:
+    registry.redhat.io:
+      ${RHEL_USER}: '${RHEL_PASSWORD}'
+EOF
+  source rhel-account
+  cat /tmp/containers-prepare-parameter.yaml | envsubst > containers-prepare-parameter.yaml
+  sed -i '/\[DEFAULT\]/ a container_images_file = containers-prepare-parameter.yaml' undercloud.conf
+fi  
+
+
 # install undercloud
 openstack undercloud install
 
