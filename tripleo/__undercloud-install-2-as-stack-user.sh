@@ -155,7 +155,7 @@ if [[ "${ENVIRONMENT_OS_VERSION:0:1}" == '8' ]] ; then
     do
       tar -xvf $i; 
     done
-  openstack overcloud image upload -- image-path /home/stack/images/
+  openstack overcloud image upload --image-path /home/stack/images/
   openstack image list
 else 
   cd ~
