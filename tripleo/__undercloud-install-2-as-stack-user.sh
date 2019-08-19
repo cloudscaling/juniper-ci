@@ -147,7 +147,7 @@ function install_images() {
 
 if [[ "${ENVIRONMENT_OS_VERSION:0:1}" == '8' ]] ; then
   source ~/stackrc
-  sudo yum install rhosp-director-images rhosp-director-images-ipa
+  sudo yum -y install rhosp-director-images rhosp-director-images-ipa
   mkdir ~/images
   cd ~/images
   for i in /usr/share/rhosp-director-images/overcloud-full-latest-15.0.tar \
