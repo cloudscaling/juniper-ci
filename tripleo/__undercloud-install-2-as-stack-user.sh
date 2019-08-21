@@ -118,7 +118,7 @@ function create_images() {
   if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
     if [[ "$OPENSTACK_VERSION" == 'stein' ]] ; then
       export OS_YAML="/usr/share/openstack-tripleo-common/image-yaml/overcloud-images-rhel8.yaml"
-      export REG_REPOS='rhel-8-for-x86_64-baseos-rpms rhel-8-for-x86_64-appstream-rpms rhel-8-for-x86_64-highavailability-rpms ansible-2.8-for-rhel-8-x86_64-rpms openstack-beta-for-rhel-8-x86_64-rpms fast-datapath-for-rhel-8-x86_64-rpms'
+      export REG_REPOS='rhel-7-for-x86_64-baseos-rpms rhel-8-for-x86_64-appstream-rpms rhel-8-for-x86_64-highavailability-rpms ansible-2.8-for-rhel-8-x86_64-rpms openstack-beta-for-rhel-8-x86_64-rpms satellite-tools-6.5-for-rhel-8-x86_64-rpms'
     else 	    
       export OS_YAML="/usr/share/openstack-tripleo-common/image-yaml/overcloud-images-rhel7.yaml"
       export REG_REPOS='rhel-7-server-rpms rhel-7-server-extras-rpms rhel-ha-for-rhel-7-server-rpms rhel-7-server-optional-rpms'
