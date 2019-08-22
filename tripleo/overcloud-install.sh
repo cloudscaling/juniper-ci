@@ -1116,14 +1116,15 @@ if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
     # OSP13 doesnt use it, but for opensorce tripleo it is needed...
     docker_opt+=' -e tripleo-heat-templates/environments/docker.yaml'
   fi
+  if [[ "${ENVIRONMENT_OS_VERSION:0:1}" == '7' ]] ; then
+     openstack overcloud container image prepare \
+       --namespace $image_namespace $tag_opts $prefix_opts $tag_from_label_opts \
+       --push-destination ${prov_ip}:8787 \
+       --output-env-file ~/docker_registry.yaml \
+       --output-images-file ~/overcloud_containers.yaml
 
-  openstack overcloud container image prepare \
-    --namespace $image_namespace $tag_opts $prefix_opts $tag_from_label_opts \
-    --push-destination ${prov_ip}:8787 \
-    --output-env-file ~/docker_registry.yaml \
-    --output-images-file ~/overcloud_containers.yaml
-
-  openstack overcloud container image upload --config-file ~/overcloud_containers.yaml
+     openstack overcloud container image upload --config-file ~/overcloud_containers.yaml
+  fi
 fi
 
 rhel_reg_opts=''
