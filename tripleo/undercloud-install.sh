@@ -58,6 +58,10 @@ env_opts+=" CLEAN_ENV=$CLEAN_ENV"
 env_opts+=" FREE_IPA=$FREE_IPA FREE_IPA_OTP=$otp CLOUD_DOMAIN_NAME=$CLOUD_DOMAIN_NAME"
 ssh -T $ssh_opts $ssh_addr "$env_opts /root/__undercloud-install-1-as-root.sh"
 
+#debug output
+echo vbmc status
+vbmc list
+
 #Checking vbmc statuses
 for vm in $(vbmc list -f value -c 'Domain name' -c Status | grep down | awk '{print $1}'); do
     vbmc start ${vm}

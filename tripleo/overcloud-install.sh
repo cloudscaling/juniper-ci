@@ -28,6 +28,11 @@ export PP_PATCHSET=${PP_PATCHSET:-}
 (( VBMC_PORT_BASE_DEFAULT=16000 + NUM*100))
 VBMC_PORT_BASE=${VBMC_PORT_BASE:-${VBMC_PORT_BASE_DEFAULT}}
 
+
+if [[ "${ENVIRONMENT_OS_VERSION:0:1}" == '8' ]] ; then
+   python='python3'
+fi
+
 if [[ -z "$DPDK" ]] ; then
   echo "DPDK is expected"
   exit 1
@@ -218,7 +223,7 @@ EOF
 # check this json (it's optional)
 if [[ "$DEPLOY" != 1 ]] ; then
   curl --silent -O https://raw.githubusercontent.com/rthallisey/clapper/master/instackenv-validator.py
-  python instackenv-validator.py -f instackenv.json
+  $python instackenv-validator.py -f instackenv.json
 fi
 
 source ~/stackrc
@@ -1187,7 +1192,7 @@ set +e
 
 # for queens+ run process script that generates some yamls for TLS
 if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
-  python ~/tripleo-heat-templates/tools/process-templates.py  --safe \
+  $python ~/tripleo-heat-templates/tools/process-templates.py  --safe \
     -r ~/tripleo-heat-templates/roles_data_contrail_aio.yaml \
     -p ~/tripleo-heat-templates/
 fi
