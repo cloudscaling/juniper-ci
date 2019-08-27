@@ -7,7 +7,7 @@ This repository provides scripts for installing TripleO with OpenContrail on hos
 KVM Host (it is usually a jenkins slave)
 - Install packages
       apt-get install -y git qemu-kvm iptables-persistent ufw virtinst uuid-runtime \
-        qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils virt-manager awscli
+        qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils virt-manager awscli python-dev hugepages gcc
 
       curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
       python get-pip.py 
@@ -24,6 +24,8 @@ usermod -aG libvirt jenkins
 usermod -aG docker jenkins
 usermod -aG libvirt-qemu jenkins
 usermod -aG kvm jenkins
+su - jenkins
+ssh-keygen -q
 
 yes | adduser --disabled-password stack
 usermod -aG libvirt stack
@@ -43,6 +45,12 @@ ufw allow from 10.0.0.0/8 to any
 ufw allow from 172.0.0.0/8 to any
 ufw enable
 ```
+- configure hugepages
+```
+put the line into /etc/default/grub
+GRUB_CMDLINE_LINUX="rootdelay=10 default_hugepagesz=1G hugepagesz=1G hugepages=118"
+update-grub
+```
 
 - Allow ssh to skip cert-check and don't save host signatures in the known host file:
       Example of ssh config:
@@ -57,8 +65,8 @@ ufw enable
 
   ```
   For TRIPLEO CI:
-  jenkins ALL=(ALL) NOPASSWD:SETENV: /opt/jenkins/deploy_all.sh
-  jenkins ALL=(ALL) NOPASSWD:SETENV: /opt/jenkins/clean_env.sh
+  jenkins ALL=(ALL) NOPASSWD:SETENV: /opt/jenkins/*.sh
+  jenkins ALL=(ALL) NOPASSWD:SETENV: /opt/jenkins/*.sh
   ```
   These scripts should point to jenkins scripts in a worskace.
   Example:
