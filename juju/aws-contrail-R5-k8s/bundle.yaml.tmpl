@@ -93,6 +93,7 @@ services:
       service_subnets: '10.96.0.0/12'
       docker-registry: "{{ CONTAINER_REGISTRY }}"
       image-tag: "{{ CONTRAIL_VERSION }}"
+      cluster_name: test_cluster
 
   contrail-kubernetes-node:
     series: "{{ SERIES }}"
