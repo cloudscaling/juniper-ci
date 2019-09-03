@@ -385,6 +385,7 @@ export LINUX_DISTR=$LINUX_DISTR
 export LINUX_DISTR_VER=$LINUX_DISTR_VER
 [ -n "${GENERAL_EXTRA_RPMS+x}" ] && export GENERAL_EXTRA_RPMS="$GENERAL_EXTRA_RPMS"
 [ -n "${BASE_EXTRA_RPMS+x}" ] && export BASE_EXTRA_RPMS="$BASE_EXTRA_RPMS"
+export DEPLOYERS_BASE_CONTAINER=${CONTRAIL_REGISTRY}/contrail-general-base:$CONTRAIL_VERSION
 EOF
   # add TPC repo
   cat <<EOF > contrail-container-builder/tpc.repo.template 
