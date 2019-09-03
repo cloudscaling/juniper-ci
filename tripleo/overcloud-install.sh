@@ -375,6 +375,7 @@ else
   fi
   # save for easier debug
   cat <<EOF > ~/build_env
+export CONTRAIL_PARALLEL_BUILD=true
 export OPENSTACK_VERSION=$OPENSTACK_VERSION
 export CONTRAIL_VERSION=$CONTRAIL_VERSION
 export _CONTRAIL_REGISTRY_IP=$_CONTRAIL_REGISTRY_IP
