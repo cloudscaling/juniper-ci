@@ -121,7 +121,7 @@ function run_cloud_machine() {
   juju-add-machine ssh:$image_user@$ip
   mch=`get_machine_by_ip $ip`
   wait_kvm_machine $mch juju-ssh
-  update_apt 
+  update_apt $image_user@$ip
   # apply hostname for machine
   juju-ssh $mch "sudo bash -c 'echo $name > /etc/hostname ; hostname $name'" 2>/dev/null
   # after first boot we must remove cloud-init
