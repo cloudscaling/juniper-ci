@@ -1,5 +1,25 @@
 #!/bin/bash -eE
 
+replace_charts() {
+echo "Applying TungstenFabric compatibility patch"
+
+rm -rf ${AIAB_DIR}/../../../site/${TARGET_SITE}/software/charts/osh/openstack-compute-kit
+rm -rf ${AIAB_DIR}/../../../gloval/sofware/config/versions.yaml
+
+mv ${AIAB_DIR}/tf_charts/bootstrap.yaml ${AIAB_DIR}/../../../site/${TARGET_SITE}/manifests/bootstrap.yaml
+mv ${AIAB_DIR}/tf_charts/common-addresses.yaml ${AIAB_DIR}/../../../site/${TARGET_SITE}/networks/common-addresses.yaml
+mv ${AIAB_DIR}/tf_charts/full-site.yaml  ${AIAB_DIR}/../../../site/${TARGET_SITE}/software/full-site.yaml
+mv ${AIAB_DIR}/tf_charts/genesis.yaml ${AIAB_DIR}/../../../site/${TARGET_SITE}/profiles/genesis.yaml
+
+cp -r  ${AIAB_DIR}/tf_charts/versions.yaml ${AIAB_DIR}/../../../global/software/config/versions.yaml
+cp -r ${AIAB_DIR}/tf_charts/ingress ${AIAB_DIR}/../../../site/${TARGET_SITE}/software/charts/kubernetes/
+cp -r ${AIAB_DIR}/tf_charts/openstack-compute-kit ${AIAB_DIR}/../../../site/${TARGET_SITE}/software/charts/osh/
+cp -r  ${AIAB_DIR}/tf_charts/openstack-keystone ${AIAB_DIR}/../../../site/${TARGET_SITE}/software/charts/osh/
+cp -r  ${AIAB_DIR}/tf_charts/tf ${AIAB_DIR}/../../../site/${TARGET_SITE}/software/charts/
+echo "Charts where  replaced "
+}
+
+
 my_file="$(readlink -e "$0")"
 my_dir="$(dirname $my_file)"
 
@@ -14,6 +34,8 @@ git clone https://opendev.org/airship/shipyard.git airship-shipyard
 sed -i 's/-it/-i/g' airship-pegleg/tools/pegleg.sh
 
 cd ./treasuremap/tools/deployment/aiab
+
+replace_charts
 
 CPU_COUNT=$(grep -c processor /proc/cpuinfo)
 RAM_TOTAL=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
@@ -80,3 +102,7 @@ fi
 #export PROMENADE_IMAGE="quay.io/airshipit/promenade:77073ddd6f1a445deae741afe53d858ba39f0e76"
 
 common/deploy-airship.sh demo
+
+cid=$(docker ps | awk '/k8s_contrail-webui_contrail-webui/{print $1}')
+docker exec -it $cid bash -c "printf \"\nconfig.staticAuth = [];\nconfig.staticAuth[0] = {};\nconfig.staticAuth[0].username = 'admin';\nconfig.staticAuth[0].password = 'contrail123';\nconfig.staticAuth[0].roles = ['cloudAdmin'];\n\" >> /etc/contrail/config.global.js"
+docker exec -it $cid tail -6 /etc/contrail/config.global.js
