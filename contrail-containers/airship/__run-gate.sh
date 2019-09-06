@@ -7,8 +7,8 @@ echo "Applying TungstenFabric compatibility patch"
 #rm -rf ${AIAB_DIR}/../../../gloval/sofware/config/versions.yaml
 
 mv tf_charts/bootstrap.yaml ../../../site/aiab/manifests/bootstrap.yaml
-mv tf_charts/common-addressesIAB_DIR}/../../../site/aiab/networks/common-addresses.yaml
-mv tf_charts/full-siteIAB_DIR}/../../../site/aiab/software/full-site.yaml
+mv tf_charts/common-addresses.yaml  ../../../site/aiab/networks/common-addresses.yaml
+mv tf_charts/full-site.yaml ../../../site/aiab/software/full-site.yaml
 mv tf_charts/genesis.yaml ../../../site/aiab/profiles/genesis.yaml
 mv tf_charts/versions.yaml ../../../global/software/config/versions.yaml
 
