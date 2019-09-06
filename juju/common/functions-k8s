@@ -5,6 +5,9 @@ function check_k8s_cluster() {
   cat <<EOM > $tmpf
 #!/bin/bash -ex
 
+echo "INFO: cluster state"
+kubecctl get all --all-namespaces
+
 echo "INFO: check NS create/delete"
 kubectl create ns jujuns
 sleep 2
