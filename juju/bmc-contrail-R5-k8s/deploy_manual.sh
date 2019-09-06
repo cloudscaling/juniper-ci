@@ -39,6 +39,7 @@ juju-deploy --series $SERIES cs:~containers/etcd --to $cont0 --config channel="3
 
 juju-deploy --series $SERIES cs:~containers/kubernetes-master-696 --to $cont0 \
   --config channel="1.14/stable" \
+  --config enable-metrics="false" \
   --config service-cidr="10.96.0.0/12" \
   --config docker_runtime="custom" \
   --config docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
@@ -132,7 +133,6 @@ juju-add-relation "contrail-kubernetes-node:cni" "kubernetes-worker:cni"
 juju-add-relation "contrail-kubernetes-master:contrail-controller" "contrail-controller:contrail-controller"
 juju-add-relation "contrail-kubernetes-master:kube-api-endpoint" "kubernetes-master:kube-api-endpoint"
 juju-add-relation "contrail-agent:juju-info" "kubernetes-worker:juju-info"
-juju-add-relation "contrail-agent:juju-info" "kubernetes-master:juju-info"
 juju-add-relation "contrail-kubernetes-master:contrail-kubernetes-config" "contrail-kubernetes-node:contrail-kubernetes-config"
 
 post_deploy
