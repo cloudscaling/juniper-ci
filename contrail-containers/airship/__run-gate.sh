@@ -3,19 +3,19 @@
 replace_charts() {
 echo "Applying TungstenFabric compatibility patch"
 
-rm -rf ${AIAB_DIR}/../../../site/${TARGET_SITE}/software/charts/osh/openstack-compute-kit
-rm -rf ${AIAB_DIR}/../../../gloval/sofware/config/versions.yaml
+#rm -rf ${AIAB_DIR}/../../../site/aiab/software/charts/osh/openstack-compute-kit
+#rm -rf ${AIAB_DIR}/../../../gloval/sofware/config/versions.yaml
 
-mv ${AIAB_DIR}/tf_charts/bootstrap.yaml ${AIAB_DIR}/../../../site/${TARGET_SITE}/manifests/bootstrap.yaml
-mv ${AIAB_DIR}/tf_charts/common-addresses.yaml ${AIAB_DIR}/../../../site/${TARGET_SITE}/networks/common-addresses.yaml
-mv ${AIAB_DIR}/tf_charts/full-site.yaml  ${AIAB_DIR}/../../../site/${TARGET_SITE}/software/full-site.yaml
-mv ${AIAB_DIR}/tf_charts/genesis.yaml ${AIAB_DIR}/../../../site/${TARGET_SITE}/profiles/genesis.yaml
+mv tf_charts/bootstrap.yaml ../../../site/aiab/manifests/bootstrap.yaml
+mv tf_charts/common-addressesIAB_DIR}/../../../site/aiab/networks/common-addresses.yaml
+mv tf_charts/full-siteIAB_DIR}/../../../site/aiab/software/full-site.yaml
+mv tf_charts/genesis.yaml ../../../site/aiab/profiles/genesis.yaml
+mv tf_charts/versions.yaml ../../../global/software/config/versions.yaml
 
-cp -r  ${AIAB_DIR}/tf_charts/versions.yaml ${AIAB_DIR}/../../../global/software/config/versions.yaml
-cp -r ${AIAB_DIR}/tf_charts/ingress ${AIAB_DIR}/../../../site/${TARGET_SITE}/software/charts/kubernetes/
-cp -r ${AIAB_DIR}/tf_charts/openstack-compute-kit ${AIAB_DIR}/../../../site/${TARGET_SITE}/software/charts/osh/
-cp -r  ${AIAB_DIR}/tf_charts/openstack-keystone ${AIAB_DIR}/../../../site/${TARGET_SITE}/software/charts/osh/
-cp -r  ${AIAB_DIR}/tf_charts/tf ${AIAB_DIR}/../../../site/${TARGET_SITE}/software/charts/
+cp -r tf_charts/ingress ../../../site/aiab/software/charts/kubernetes/
+cp -r tf_charts/openstack-compute-kit ../../../site/aiab/software/charts/osh/
+cp -r tf_charts/openstack-keystone ../../../site/aiab/software/charts/osh/
+cp -r tf_charts/tf ../../../site/aiab/software/charts/
 echo "Charts where  replaced "
 }
 
