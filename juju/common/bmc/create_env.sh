@@ -89,6 +89,9 @@ function wait_kvm_machine() {
     fi
     sleep 10
   done
+  echo "INFO: change ubuntu repo to near mirror"
+  ssh $image_user@$ip "sudo sed -i -e 's|http://.*archive\.ubuntu\.com|http://fr.archive.ubuntu.com|' /etc/apt/sources.list"
+  ssh $image_user@$ip "sudo apt-get update"
 }
 
 juju_cont_ip="$addr.$juju_cont_idx"
@@ -108,8 +111,6 @@ function run_cloud_machine() {
   run_machine $name 4 $mem $mac_suffix $ip "$addr_vm.$mac_suffix"
   echo "INFO: start machine $name waiting $name $(date)"
   wait_kvm_machine $image_user@$ip
-  echo "INFO: change ubuntu repo to near mirror"
-  ssh $image_user@$ip "sed -i -e 's|http://.*archive\.ubuntu\.com|http://fr.archive.ubuntu.com|' /etc/apt/sources.list"
   echo "INFO: adding machine $name to juju controller $(date)"
   juju-add-machine ssh:$image_user@$ip
   mch=`get_machine_by_ip $ip`
