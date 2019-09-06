@@ -37,7 +37,7 @@ if [[ "$VERSION" == 'ocata' ]]; then
 else
   export KEYSTONE_VERSION=3
 fi
-if [[ "$SERIES" == 'bionic' ]]; then
+if [[ "$SERIES" == 'bionic' && "$VERSION" == 'queens' ]]; then
   export OPENSTACK_ORIGIN="distro"
 else
   export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"

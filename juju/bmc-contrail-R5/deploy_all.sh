@@ -28,7 +28,7 @@ fi
 export JOB_VERSION=R5
 export SERIES="${SERIES:-xenial}"
 export VERSION="${VERSION:-ocata}"
-if [[ "$SERIES" == 'bionic' ]]; then
+if [[ "$SERIES" == 'bionic' && "$VERSION" == 'queens' ]]; then
   export OPENSTACK_ORIGIN="distro"
 else
   export OPENSTACK_ORIGIN="cloud:$SERIES-$VERSION"
