@@ -243,10 +243,6 @@
           defaultha: aio
           slavenode:
             - master
-      - airship-aws-ubuntu16-notf:
-          defaultha: aio
-          slavenode:
-            - master
       - vm-server-centos:
           defaultha: ha
           slavenode:
