@@ -67,11 +67,7 @@ series=`lsb_release -cs`
 do_$series
 
 kernel_version=`uname -r | tr -d '\r'`
-if [[ "$series" == 'bionic' ]]; then
-  dpdk_req="linux-modules-extra-$kernel_version"
-else
-  dpdk_req="linux-image-extra-$kernel_version"
-fi
+dpdk_req="linux-modules-extra-$kernel_version"
 DEBIAN_FRONTEND=noninteractive apt-get -fy install $dpdk_req dpdk apparmor-profiles &>>apt.log
 
 # this should be done for first interface!
