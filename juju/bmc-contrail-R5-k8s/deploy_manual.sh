@@ -48,6 +48,7 @@ juju-expose kubernetes-master
 
 juju-deploy --series $SERIES cs:~containers/kubernetes-worker-550 --to $comp1 \
   --config channel="1.14/stable" \
+  --config ingress="false" \
   --config docker_runtime="custom" \
   --config docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
   --config docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
