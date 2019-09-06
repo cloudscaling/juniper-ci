@@ -13,7 +13,12 @@ case $OS in
   ubuntu)
     SERIES=${SERIES:-xenial}
     BASE_IMAGE_NAME="ubuntu-$SERIES.qcow2"
-    wget -nv https://cloud-images.ubuntu.com/$SERIES/current/$SERIES-server-cloudimg-amd64-disk1.img -O ./$BASE_IMAGE_NAME
+    if [[ "$SERIES" == 'bionic' ]]; then
+      name='bionic-server-cloudimg-amd64.img'
+    else
+      name='$SERIES-server-cloudimg-amd64-disk1.img'
+    fi
+    wget -nv https://cloud-images.ubuntu.com/$SERIES/current/$name -O ./$BASE_IMAGE_NAME
     ;;
   centos)
     BASE_IMAGE_NAME="centos-7_4.qcow2"
