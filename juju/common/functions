@@ -74,7 +74,7 @@ function wait_for_machines() {
     juju-status-tabular &> $WORKSPACE/logs/juju-status-latest
     echo "Waiting for machine: $machine"
     local fail=0
-    while ! output=`juju-ssh $machine "sudo apt-get install -fy joe mc" 2>/dev/null` ; do
+    while ! output=`juju-ssh $machine "uname -a" 2>/dev/null` ; do
       if ((fail >= 60)); then
         echo "ERROR: Machine $machine did not up."
         echo $output
