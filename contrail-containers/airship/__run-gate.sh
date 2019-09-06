@@ -7,7 +7,7 @@ mkdir -p $my_dir/logs
 source "$my_dir/cloudrc"
 
 mkdir -p /root/deploy && cd /root/deploy
-git clone https://github.com/OlegBravo/treasuremap
+git clone https://github.com/OlegBravo/treasuremap --branch tf-on-1.3
 git clone https://opendev.org/airship/pegleg.git airship-pegleg
 git clone https://opendev.org/airship/shipyard.git airship-shipyard
 
