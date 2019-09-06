@@ -18,10 +18,11 @@
             - never
       - choice:
           name: VERSION
-          description: "Version of the OpenStack. ocata -> xenial, queens -> bionic. ocata -> keystone v2, bionic -> keystone v3"
+          description: "Version of the OpenStack. ocata -> xenial, queens/stein -> bionic. ocata -> keystone v2, bionic -> keystone v3"
           choices:
             - ocata
             - queens
+            - stein
       - choice:
           name: DEPLOY_BUNDLE
           description: |
@@ -92,7 +93,7 @@
           # build CONTRAIL_VERSION as a tag for opencontrailnightly
           export CONTRAIL_VERSION="$VERSION-$CONTRAIL_VERSION"
           export SERIES='xenial'
-          if [[ "$VERSION" == "queens" ]] ; then
+          if [[ "$VERSION" == "queens" || "$VERSION" == "stein" ]] ; then
             export SERIES='bionic'
           fi
           ./juniper-ci/juju/aws-contrail-R5/deploy-all.sh deploy-bundle.sh
@@ -136,10 +137,11 @@
             - never
       - choice:
           name: VERSION
-          description: "Version of the OpenStack. ocata -> xenial, queens -> bionic."
+          description: "Version of the OpenStack. ocata -> xenial, queens/stein -> bionic."
           choices:
             - ocata
             - queens
+            - stein
       - choice:
           name: DEPLOY_MODE
           description: |
@@ -211,7 +213,7 @@
           # build CONTRAIL_VERSION as a tag for opencontrailnightly
           export CONTRAIL_VERSION="$VERSION-$CONTRAIL_VERSION"
           export SERIES='xenial'
-          if [[ "$VERSION" == "queens" ]] ; then
+          if [[ "$VERSION" == "queens" || "$VERSION" == "stein" ]] ; then
             export SERIES='bionic'
           fi
           ./juniper-ci/juju/bmc-contrail-R5/deploy_all.sh

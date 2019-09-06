@@ -42,6 +42,7 @@
             - ocata
             - queens
             - rocky
+            - stein
       - string:
           name: K8S_VERSION
           default: "1.12.7"
