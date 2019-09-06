@@ -164,6 +164,7 @@
           regexp: "DESCRIPTION (.*)"
       - shell: |
           #!/bin/bash -e
+          export PATH="/snap/bin:$PATH"
           ./juniper-ci/juju/bmc-contrail-R5-k8s/deploy_all.sh
     publishers:
       - archive:
