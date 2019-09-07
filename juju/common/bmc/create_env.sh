@@ -91,17 +91,9 @@ function wait_kvm_machine() {
   done
 }
 
-function update_apt() {
-  local dest=$1
-  echo "INFO: change ubuntu repo to near mirror"
-  ssh $dest "sudo sed -i -e 's|http://.*archive\.ubuntu\.com|http://fr.archive.ubuntu.com|' /etc/apt/sources.list"
-  ssh $dest "sudo apt-get update"
-}
-
 juju_cont_ip="$addr.$juju_cont_idx"
 run_machine ${job_prefix}-cont 1 2048 $juju_cont_idx $juju_cont_ip
 wait_kvm_machine $image_user@$juju_cont_ip
-update_apt $image_user@$juju_cont_ip
 
 echo "INFO: bootstraping juju controller $(date)"
 juju bootstrap manual/$image_user@$juju_cont_ip $juju_controller_name
@@ -116,12 +108,10 @@ function run_cloud_machine() {
   run_machine $name 4 $mem $mac_suffix $ip "$addr_vm.$mac_suffix"
   echo "INFO: start machine $name waiting $name $(date)"
   wait_kvm_machine $image_user@$ip
-  update_apt $image_user@$ip
   echo "INFO: adding machine $name to juju controller $(date)"
   juju-add-machine ssh:$image_user@$ip
   mch=`get_machine_by_ip $ip`
   wait_kvm_machine $mch juju-ssh
-  update_apt $image_user@$ip
   # apply hostname for machine
   juju-ssh $mch "sudo bash -c 'echo $name > /etc/hostname ; hostname $name'" 2>/dev/null
   # after first boot we must remove cloud-init
