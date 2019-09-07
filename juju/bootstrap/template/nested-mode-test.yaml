@@ -7,7 +7,7 @@ services:
     charm: ../contrail-kubernetes-master
     series: xenial
     options:
-      image-tag: 'master-774'
+      image-tag: 'master-latest'
       nested_mode: true
       cluster_project: "{'domain':'default-domain','project':'$OS_PROJECT_NAME'}"
       cluster_network: "{'domain':'default-domain','project':'$OS_PROJECT_NAME','name':'$networkname'}"
@@ -34,7 +34,7 @@ services:
     series: xenial
     options:
       docker-registry: 'opencontrailnightly'
-      image-tag: 'master-774'
+      image-tag: 'master-latest'
 
 
 # kubernetes

@@ -90,8 +90,6 @@
           regexp: "DESCRIPTION (.*)"
       - shell: |
           #!/bin/bash -e
-          # build CONTRAIL_VERSION as a tag for opencontrailnightly
-          export CONTRAIL_VERSION="$VERSION-$CONTRAIL_VERSION"
           export SERIES='xenial'
           if [[ "$VERSION" == "queens" || "$VERSION" == "stein" ]] ; then
             export SERIES='bionic'
@@ -210,9 +208,7 @@
           regexp: "DESCRIPTION (.*)"
       - shell: |
           #!/bin/bash -e
-          # build CONTRAIL_VERSION as a tag for opencontrailnightly
           export PATH="/snap/bin:$PATH"
-          export CONTRAIL_VERSION="$VERSION-$CONTRAIL_VERSION"
           export SERIES='xenial'
           if [[ "$VERSION" == "queens" || "$VERSION" == "stein" ]] ; then
             export SERIES='bionic'
