@@ -62,8 +62,9 @@
           name: CONTRAIL_VERSION
           description: "Version of Contrail"
           choices:
-            - '5.0'
+            - '1910'
             - '5.1'
+            - '5.0'
             - '4.1'
             - '4.0'
             - '3.2'
