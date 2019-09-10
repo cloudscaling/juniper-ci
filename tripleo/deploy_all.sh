@@ -15,7 +15,7 @@ NUM=${NUM:-0}
 if [[ "$FREE_IPA" == 'false' ]] ; then
   CLOUD_DOMAIN_NAME=${CLOUD_DOMAIN_NAME:-"localdomain"}
 else
-  CLOUD_DOMAIN_NAME=${CLOUD_DOMAIN_NAME:-"my${NUM}domain"}
+  CLOUD_DOMAIN_NAME=${CLOUD_DOMAIN_NAME:-"my${NUM}domain.local"}
 fi
 
 NETWORK_ISOLATION=${NETWORK_ISOLATION:-'single'}

@@ -383,14 +383,14 @@ _update_contrail_packages
 
 # wait udnercloud and register it in redhat if rhel env
 _wait_machine $mgmt_ip
-_prepare_network $mgmt_ip "undercloud.my${NUM}domain"
+_prepare_network $mgmt_ip "undercloud.my${NUM}domain.local"
 _prepare_contrail $mgmt_ip
 _prepare_rhel_account $mgmt_ip
 _prepare_host $mgmt_ip
 
 if [[ "$RHEL_CERT_TEST" == 'true' ]] ; then
   _wait_machine $mgmt_cert_ip
-  _prepare_network $mgmt_cert_ip "cert.my${NUM}domain"
+  _prepare_network $mgmt_cert_ip "cert.my${NUM}domain.local"
   _prepare_rhel_account $mgmt_cert_ip
   _prepare_host $mgmt_cert_ip
 
@@ -414,7 +414,7 @@ iptables -I INPUT 1 -p tcp -m multiport --dports 80,443 -m comment --comment \"h
 yum install -y redhat-certification
 systemctl start httpd
 rhcertd start
-sed -i "s/ALLOWED_HOSTS =.*/ALLOWED_HOSTS = ['myhost.my${NUM}certdomain', '$mgmt_cert_ip', '$prov_cert_ip', 'localhost.localdomain', 'localhost', '127.0.0.1']/" /var/www/rhcert/project/settings.py
+sed -i "s/ALLOWED_HOSTS =.*/ALLOWED_HOSTS = ['myhost.my${NUM}certdomain', 'myhost.my${NUM}certdomain.local', '$mgmt_cert_ip', '$prov_cert_ip', 'localhost.localdomain', 'localhost', '127.0.0.1']/" /var/www/rhcert/project/settings.py
 systemctl restart httpd
 EOF
 
@@ -446,12 +446,12 @@ cd ~
 yum install -y wget
 wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 yum localinstall -y ./epel-release-latest-7.noarch.rpm
-echo Hostname=freeipa.my${NUM}domain >> ~/freeipa-setup.env
+echo Hostname=freeipa.my${NUM}domain.local >> ~/freeipa-setup.env
 echo FreeIPAIP=${prov_subnet}.4 >> ~/freeipa-setup.env
 echo DirectoryManagerPassword=qwe123QWE >> ~/freeipa-setup.env
 echo AdminPassword=qwe123QWE >> ~/freeipa-setup.env
-echo UndercloudFQDN=undercloud.my${NUM}domain >> ~/freeipa-setup.env
-echo CLOUD_DOMAIN_NAME=my${NUM}domain >> ~/freeipa-setup.env
+echo UndercloudFQDN=undercloud.my${NUM}domain.local >> ~/freeipa-setup.env
+echo CLOUD_DOMAIN_NAME=my${NUM}domain.local >> ~/freeipa-setup.env
 echo ENVIRONMENT_OS=$ENVIRONMENT_OS >> ~/freeipa-setup.env
 cp ~/freeipa-setup.env /tmp/freeipa-setup.env
 chmod +x ~/freeipa_setup.sh
