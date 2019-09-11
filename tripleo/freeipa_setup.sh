@@ -43,7 +43,7 @@ yum -q -y remove openstack-dashboard
 
 # Install the needed packages
 yum -q install -y yum-plugin-versionlock
-yum versionlock ipa-server-4.6.4-10.el7_6.3.x86_64 ipa-server-dns-4.6.4-10.el7_6.3.noarch
+yum versionlock ipa-server-4.6.4-10* ipa-server-dns-4.6.4-10* ipa-client-4.6.4-10*
 yum -q install -y ipa-server-4.6.4-10.el7_6.3.x86_64 ipa-server-dns-4.6.4-10.el7_6.3.noarch epel-release rng-tools mod_nss git haveged
 
 
