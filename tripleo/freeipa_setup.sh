@@ -42,8 +42,10 @@ echo "nameserver 8.8.4.4" >> /etc/resolv.conf
 yum -q -y remove openstack-dashboard
 
 # Install the needed packages
-yum -q install -y ipa-server-4.6.4-10.el7_6.3.x86_64 ipa-server-dns-4.6.4-10.el7_6.3.noarch epel-release rng-tools mod_nss git
-yum -q install -y haveged
+yum -q install -y yum-plugin-versionlock
+yum versionlock ipa-server-4.6.4-10.el7_6.3.x86_64 ipa-server-dns-4.6.4-10.el7_6.3.noarch
+yum -q install -y ipa-server-4.6.4-10.el7_6.3.x86_64 ipa-server-dns-4.6.4-10.el7_6.3.noarch epel-release rng-tools mod_nss git haveged
+
 
 # install complicated python deps for novajoin
 # add OpenStack repositories for centos, for rhel it is added in images
