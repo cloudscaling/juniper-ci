@@ -14,9 +14,9 @@
 #
 set -eux
 
-if [ -f "~/freeipa-setup.env" ]; then
+if [ -f ~/freeipa-setup.env ]; then
     source ~/freeipa-setup.env
-elif [ -f "/tmp/freeipa-setup.env" ]; then
+elif [ -f /tmp/freeipa-setup.env ]; then
     source /tmp/freeipa-setup.env
 fi
 
@@ -82,10 +82,10 @@ fi
 # pip install -q virtualenv
 # pip install -q novajoin==1.0.21 oslo.policy==1.33.2
 
-# Prepare hostname
-hostnamectl set-hostname --static $Hostname
+# # Prepare hostname
+# hostnamectl set-hostname --static $Hostname
 
-echo $FreeIPAIP `hostname` | tee -a /etc/hosts
+# echo $FreeIPAIP `hostname` | tee -a /etc/hosts
 
 # Set iptables rules
 cat << EOF > freeipa-iptables-rules.txt
