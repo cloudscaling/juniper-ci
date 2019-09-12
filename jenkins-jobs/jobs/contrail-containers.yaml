@@ -65,7 +65,6 @@
           default-value: '{defaultha}'
       - bool:
           name: USE_FQDN
-          
           description: Use FQDN for services instead of IP-s. It's related not to all jobs.
           default: false
       - text:
@@ -156,11 +155,20 @@
     name: contrail-containers
     project:
       - helm-aws-ubuntu16:
-          defaultha: ha
+          defaultha: nonha
           slavenode:
             - master
       - helm-server-ubuntu16:
-          defaultha: ha
+          defaultha: nonha
+          slavenode:
+            - slave01
+            - slave04
+      - helmold-aws-ubuntu16:
+          defaultha: nonha
+          slavenode:
+            - master
+      - helmold-server-ubuntu16:
+          defaultha: nonha
           slavenode:
             - slave01
             - slave04

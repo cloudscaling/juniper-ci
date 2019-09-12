@@ -1,0 +1,10 @@
+export NET_COUNT=2
+
+if [[ "$HA" == 'ha' ]] ; then
+  export CONT_NODES=3
+else
+  echo "ERROR: Non-HA and AIO deployments are not supported"
+  exit 1
+fi
+
+export COMP_NODES=1

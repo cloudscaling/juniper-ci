@@ -1,0 +1,12 @@
+export NET_COUNT=2
+export NET_BASE_PREFIX=25
+
+if [[ "$HA" == 'ha' ]]; then
+  export CONT_NODES=3
+elif [[ "$HA" == 'nonha' ]]; then
+  export CONT_NODES=1
+else
+  echo "ERROR: AIO deployment is not supported"
+  exit 1
+fi
+export COMP_NODES=2
