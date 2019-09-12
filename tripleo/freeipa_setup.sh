@@ -47,8 +47,11 @@ yum versionlock \
   ipa-server-common-4.6.4-10* \
   ipa-server-dns-4.6.4-10* \
   ipa-client-4.6.4-10* \
-  pki-ca-10.5.9-13* pki-server-10.5.9-13*
+  pki-kra-10.5.9-13* \
+  pki-ca-10.5.9-13* \
+  pki-server-10.5.9-13*
 yum -q install -y \
+  pki-kra-10.5.9-13.el7_6.noarch \
   pki-server-10.5.9-13.el7_6.noarch \
   pki-ca-10.5.9-13.el7_6.noarch \
   ipa-server-4.6.4-10.el7_6.3 \
@@ -70,13 +73,14 @@ else
     echo centos > /etc/yum/vars/contentdir
   fi
 fi
-# install python deps for novajoin, but install instead from pip because we need 1.0.21
-yum deplist python-novajoin | awk '/provider:/ {print $2}' | sort -u | xargs yum -y install
 
-curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
-python get-pip.py
-pip install -q virtualenv
-pip install -q novajoin==1.0.21 oslo.policy==1.33.2
+# # install python deps for novajoin, but install instead from pip because we need 1.0.21
+# yum deplist python-novajoin | awk '/provider:/ {print $2}' | sort -u | xargs yum -y install
+
+# curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+# python get-pip.py
+# pip install -q virtualenv
+# pip install -q novajoin==1.0.21 oslo.policy==1.33.2
 
 # Prepare hostname
 hostnamectl set-hostname --static $Hostname
