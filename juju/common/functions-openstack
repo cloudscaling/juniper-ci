@@ -21,10 +21,7 @@ function create_virtualenv() {
   virtualenv --no-setuptools "$WORKSPACE/.venv"
 
   activate_venv
-  pip install setuptools &> "$WORKSPACE/logs/pip.log"
   pip install python-openstackclient &> "$WORKSPACE/logs/pip.log"
-  # NOTE: version 9.0 always writes debug output if run via openstack
-  pip install "python-novaclient<9.0" &> "$WORKSPACE/logs/pip.log"
   deactivate_venv
 }
 
