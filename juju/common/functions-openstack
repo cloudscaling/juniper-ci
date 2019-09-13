@@ -166,7 +166,7 @@ function create_network() {
   local private_subnet_id=`openstack subnet list --network $private_net_id -f value -c ID`
 
   echo "INFO: Create router"
-  openstack router create p-ext-$netsfx
+  openstack router create p-ext-$netsfx || /bin/true
   local router_id=`openstack router show p-ext-$netsfx -f value -c id`
   openstack router set --external-gateway $public_net_id $router_id
   for i in {1..$MAX_FAIL} ; do
