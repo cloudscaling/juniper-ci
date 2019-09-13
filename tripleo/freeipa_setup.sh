@@ -131,7 +131,9 @@ ipa-server-install -U -r `hostname -d|tr "[a-z]" "[A-Z]"` \
                    -p $DirectoryManagerPassword -a $AdminPassword \
                    --hostname `hostname -f` \
                    --ip-address=$FreeIPAIP \
-                   --setup-dns --auto-forwarders --auto-reverse $FreeIPAExtraArgs
+                   --setup-dns --auto-forwarders --auto-reverse $FreeIPAExtraArgs ; then
+
+#                   --domain `hostname -f | cut -d '.' -f 2,3`
 
 # Authenticate
 echo $AdminPassword | kinit admin

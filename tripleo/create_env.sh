@@ -267,7 +267,7 @@ function _prepare_network() {
   local addr=$1
   local my_host=$2
   local addr_hosts=${3:-${addr}}
-  local short_host=$(echo $my_host | cut -d '.' -f 1,2)
+  local short_host=$(echo $my_host | cut -d '.' -f 1)
   cat <<EOF | $ssh_cmd root@${addr}
 set -x
 echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
