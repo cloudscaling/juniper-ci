@@ -42,21 +42,22 @@ echo "nameserver 8.8.4.4" >> /etc/resolv.conf
 yum -q -y remove openstack-dashboard
 
 # Install the needed packages
-yum -q install -y yum-plugin-versionlock
-yum versionlock \
-  ipa-server-common-4.6.4-10* \
-  ipa-server-dns-4.6.4-10* \
-  ipa-client-4.6.4-10* \
-  pki-kra-10.5.9-13* \
-  pki-ca-10.5.9-13* \
-  pki-server-10.5.9-13*
-yum -q install -y \
-  pki-kra-10.5.9-13.el7_6.noarch \
-  pki-server-10.5.9-13.el7_6.noarch \
-  pki-ca-10.5.9-13.el7_6.noarch \
-  ipa-server-4.6.4-10.el7_6.3 \
-  ipa-server-dns-4.6.4-10.el7_6.3 \
-  epel-release rng-tools mod_nss git haveged
+# yum -q install -y yum-plugin-versionlock
+# yum versionlock \
+#   ipa-server-common-4.6.4-10* \
+#   ipa-server-dns-4.6.4-10* \
+#   ipa-client-4.6.4-10* \
+#   pki-kra-10.5.9-13* \
+#   pki-ca-10.5.9-13* \
+#   pki-server-10.5.9-13*
+# yum -q install -y \
+#   pki-kra-10.5.9-13.el7_6.noarch \
+#   pki-server-10.5.9-13.el7_6.noarch \
+#   pki-ca-10.5.9-13.el7_6.noarch \
+#   ipa-server-4.6.4-10.el7_6.3 \
+#   ipa-server-dns-4.6.4-10.el7_6.3 \
+#   epel-release rng-tools mod_nss git haveged
+yum -q install -y epel-release rng-tools mod_nss git haveged ipa-server ipa-server-dns
 
 # install complicated python deps for novajoin
 # add OpenStack repositories for centos, for rhel it is added in images
