@@ -128,7 +128,7 @@ systemctl start haveged
 rm -f /etc/httpd/conf.d/ssl.conf
 
 # Set up FreeIPA
-ipa-server-install -U -r `hostname -d|tr "[a-z]" "[A-Z]"` \
+ipa-server-install --verbose -U -r `hostname -d|tr "[a-z]" "[A-Z]"` \
                    -p $DirectoryManagerPassword -a $AdminPassword \
                    --hostname `hostname -f` \
                    --ip-address=$FreeIPAIP \
