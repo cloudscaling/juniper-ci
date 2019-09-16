@@ -132,7 +132,7 @@ ipa-server-install -U -r `hostname -d|tr "[a-z]" "[A-Z]"` \
                    -p $DirectoryManagerPassword -a $AdminPassword \
                    --hostname `hostname -f` \
                    --ip-address=$FreeIPAIP \
-                   --setup-dns --auto-forwarders --auto-reverse $FreeIPAExtraArgs ; then
+                   --setup-dns --auto-forwarders --auto-reverse $FreeIPAExtraArgs
 
 #                   --domain `hostname -f | cut -d '.' -f 2,3`
 
