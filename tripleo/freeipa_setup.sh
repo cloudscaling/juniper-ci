@@ -57,23 +57,24 @@ yum -q -y remove openstack-dashboard
 #   ipa-server-4.6.4-10.el7_6.3 \
 #   ipa-server-dns-4.6.4-10.el7_6.3 \
 #   epel-release rng-tools mod_nss git haveged
+yum update -y
 yum -q install -y epel-release rng-tools mod_nss git haveged ipa-server ipa-server-dns
 
 # install complicated python deps for novajoin
 # add OpenStack repositories for centos, for rhel it is added in images
-if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-  yum-config-manager --enable rhelosp-rhel-7-server-opt
-else
-  tripeo_repos=`python -c "import requests;r = requests.get('https://trunk.rdoproject.org/centos7-${OPENSTACK_VERSION}/current'); print r.text " | grep python2-tripleo-repos | awk -F"href=\"" '{print $2}' | awk -F"\"" '{print $1}'`
-  yum install -y https://trunk.rdoproject.org/centos7-${OPENSTACK_VERSION}/current/${tripeo_repos}
-  tripleo-repos -b $OPENSTACK_VERSION current
-  # in new centos a variable is introduced,
-  # so it is needed to have it because  yum repos
-  # started using it.
-  if [[ ! -f  /etc/yum/vars/contentdir ]] ; then
-    echo centos > /etc/yum/vars/contentdir
-  fi
-fi
+# if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+#   yum-config-manager --enable rhelosp-rhel-7-server-opt
+# else
+#   tripeo_repos=`python -c "import requests;r = requests.get('https://trunk.rdoproject.org/centos7-${OPENSTACK_VERSION}/current'); print r.text " | grep python2-tripleo-repos | awk -F"href=\"" '{print $2}' | awk -F"\"" '{print $1}'`
+#   yum install -y https://trunk.rdoproject.org/centos7-${OPENSTACK_VERSION}/current/${tripeo_repos}
+#   tripleo-repos -b $OPENSTACK_VERSION current
+#   # in new centos a variable is introduced,
+#   # so it is needed to have it because  yum repos
+#   # started using it.
+#   if [[ ! -f  /etc/yum/vars/contentdir ]] ; then
+#     echo centos > /etc/yum/vars/contentdir
+#   fi
+# fi
 
 # # install python deps for novajoin, but install instead from pip because we need 1.0.21
 # yum deplist python-novajoin | awk '/provider:/ {print $2}' | sort -u | xargs yum -y install
