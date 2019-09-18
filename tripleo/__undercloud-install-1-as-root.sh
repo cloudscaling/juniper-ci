@@ -53,11 +53,17 @@ mgmt_ip="192.168.$addr"
 rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 
 # update OS
+update_opts='-y'
 if [[ "${ENVIRONMENT_OS_VERSION:0:1}" == '8' ]] ; then
-   yum update -y --allowerasing
-else 
-   yum update -y
+   update_opts+=" --allowerasing"
 fi
+count=1
+while ! yum update $update_opts ; do
+  if (( count > 3 )) ; then
+    break
+  fi
+  (( count+= 1 ))
+done
 
 if [[ "$ENVIRONMENT_OS" == 'centos' ]] ; then
   yum install -y epel-release
