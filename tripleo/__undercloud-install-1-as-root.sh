@@ -52,32 +52,39 @@ mgmt_ip="192.168.$addr"
 # GPG Keys are configured as: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-beta
 rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 
+function run_retry() {
+  local count=1
+  local res=0
+  while ! $@ ; do
+    if (( count > 3 )) ; then
+      break
+      res=1
+    fi
+    (( count+= 1 ))
+  done
+  return $res
+}
+
 # update OS
 update_opts='-y'
 if [[ "${ENVIRONMENT_OS_VERSION:0:1}" == '8' ]] ; then
    update_opts+=" --allowerasing"
 fi
-count=1
-while ! yum update $update_opts ; do
-  if (( count > 3 )) ; then
-    break
-  fi
-  (( count+= 1 ))
-done
+run_retry yum update $update_opts
 
 if [[ "$ENVIRONMENT_OS" == 'centos' ]] ; then
-  yum install -y epel-release
+  run_retry yum install -y epel-release
 fi
 
 # install utils & ntpd - it is needed for correct work of OS services
 # (particulary neutron services may not work properly)
 # libguestfs-tools - is for virt-customize tool for overcloud image customization - enabling repos
 if [[ "${ENVIRONMENT_OS_VERSION:0:1}" == '8' ]] ; then
-   yum install -y chrony wget yum-utils tmux mc createrepo bind-utils sshpass gcc make \
+   run_retry yum install -y chrony wget yum-utils tmux mc createrepo bind-utils sshpass gcc make \
                   libguestfs-tools libvirt-client	  
    systemctl start chronyd
 else        	
-   yum install -y  ntp wget yum-utils screen mc deltarpm createrepo bind-utils sshpass \
+   run_retry yum install -y  ntp wget yum-utils screen mc deltarpm createrepo bind-utils sshpass \
                    gcc make python-devel yum-plugin-priorities sshpass libguestfs-tools \
                    libvirt-client \ 
    chkconfig ntpd on
@@ -120,18 +127,18 @@ chmod 644 /home/stack/.ssh/config
 curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
 
 if [[ "${ENVIRONMENT_OS_VERSION:0:1}" == '8' ]] ; then
-  python3 get-pip.py
-  pip install -q virtualenv
-  yum install -y python3-tripleoclient
+  run_retry python3 get-pip.py
+  run_retry pip install -q virtualenv
+  run_retry yum install -y python3-tripleoclient
 else 
-  python get-pip.py
-  pip install -q virtualenv
+  run_retry python get-pip.py
+  run_retry pip install -q virtualenv
 
   # add OpenStack repositories for centos, for rhel it is added in images
   if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
     echo "INFO: install latest redhat images"
     yum-config-manager --enable rhelosp-rhel-7-server-opt
-    yum install -y rhosp-director-images rhosp-director-images-ipa
+    run_retry yum install -y rhosp-director-images rhosp-director-images-ipa
   else
     tripeo_repos=`python -c "import requests;r = requests.get('https://trunk.rdoproject.org/centos7-${OPENSTACK_VERSION}/current'); print r.text " | grep python2-tripleo-repos | awk -F"href=\"" '{print $2}' | awk -F"\"" '{print $1}'`
     yum install -y https://trunk.rdoproject.org/centos7-${OPENSTACK_VERSION}/current/${tripeo_repos}
@@ -148,11 +155,11 @@ fi
 # install tripleo clients
 #   osp10 has no preinstalled openstack-utils
 if [[ "${ENVIRONMENT_OS_VERSION:0:1}" == '7' ]] ; then
-   yum -y install python-tripleoclient python-rdomanager-oscplugin  openstack-utils
+   run_retry yum -y install python-tripleoclient python-rdomanager-oscplugin  openstack-utils
 fi
 
 if [[ "$OPENSTACK_VERSION" == 'ocata' && "$ENVIRONMENT_OS" == 'centos' ]] ; then
-  yum update -y
+  run_retry yum update -y
   # workaround for https://bugs.launchpad.net/tripleo/+bug/1692899
   # correct fix is in the review
   # (https://review.openstack.org/#/c/467248/1/heat-config-docker-cmd/os-refresh-config/configure.d/50-heat-config-docker-cmd)
@@ -269,15 +276,15 @@ if [[ "$FREE_IPA" == 'true' ]] ; then
   novajoin_ver=$(yum info python-novajoin | awk  '/Version/{print($3)}')
   min_version=$(echo -e "1.0.22\n${novajoin_ver}" | sort  -V | head -n1)
   if [[ "$min_version" == '1.0.22' ]] ; then
-    yum install -y python-novajoin
+    run_retry yum install -y python-novajoin
   else
     # # Pinned versions to avoid conflict with system PyYAML package
     # pip install novajoin==1.0.21 oslo.policy==1.33.2
     # There should be plugins with fixed bug related to limit of nova metadata line limit
-    yum install --enablerepo=rhel-7-server-openstack-14-rpms -y python-novajoin
+    run_retry yum install --enablerepo=rhel-7-server-openstack-14-rpms -y python-novajoin
   fi
 
-  yum install -y ipa-client
+  run_retry yum install -y ipa-client
   if ! grep -q novajoin /etc/passwd ; then
     adduser -M novajoin
   fi
