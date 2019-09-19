@@ -52,8 +52,16 @@ undercloud_hostname = undercloud.my${NUM}domain.local
 discovery_iprange = $prov_ip.150,$prov_ip.170
 subnets = ctlplane-subnet
 inspection_interface = br-ctlplane
+EOF
 
+if [[ "$FREE_IPA" == 'true' ]] ; then
+  cat << EOF >> undercloud.conf
+enable_novajoin = True
+ipa_otp = "$FREE_IPA_OTP"
+EOF
+fi
 
+cat << EOF >> undercloud.conf
 [ctlplane-subnet]
 cidr = $prov_ip.0/24
 dhcp_start = $prov_ip.100
@@ -63,12 +71,6 @@ inspection_iprange = $prov_ip.150,$prov_ip.170
 masquerade = true
 EOF
 
-if [[ "$FREE_IPA" == 'true' ]] ; then
-  cat << EOF >> undercloud.conf
-enable_novajoin = True
-ipa_otp = "$FREE_IPA_OTP"
-EOF
-fi
 
 if [[ "${ENVIRONMENT_OS_VERSION:0:1}" == '8' ]] ; then
   #openstack tripleo container image prepare default --local-push-destination --output-env-file containers-prepare-parameter.yaml
