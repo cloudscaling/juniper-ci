@@ -45,7 +45,7 @@
             - stein
       - string:
           name: K8S_VERSION
-          default: "1.12.7"
+          default: "1.12.9"
           description: "Version of k8s to install if present in job"
       - choice:
           name: AGENT_MODE
