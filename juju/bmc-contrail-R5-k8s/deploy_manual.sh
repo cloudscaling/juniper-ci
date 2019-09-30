@@ -13,6 +13,12 @@ function catch_errors_ce() {
   exit $exit_code
 }
 
+# detect IP-s - place all things to specified interface for now
+control_network_сfg=""
+if [[ -n "$PHYS_INT" ]]; then
+  control_network_cfg="--config control-network=`ip addr show dev $PHYS_INT | awk '/inet /{print $2}'`"
+fi
+
 # version 2
 PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
 
@@ -56,7 +62,7 @@ juju-deploy --series $SERIES cs:~containers/kubernetes-worker-550 --to $comp1 \
   --config docker_runtime_package="docker-ce"
 
 # contrail-kubernetes
-juju-deploy $PLACE/contrail-kubernetes-master --config log-level=SYS_DEBUG --config "service_subnets=10.96.0.0/12"
+juju-deploy $PLACE/contrail-kubernetes-master --config log-level=SYS_DEBUG --config "service_subnets=10.96.0.0/12" $control_network_cfg
 juju-set contrail-kubernetes-master docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
     docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 
@@ -69,17 +75,17 @@ juju-deploy $PLACE/contrail-agent --config log-level=SYS_DEBUG --config physical
 juju-set contrail-kubernetes-node docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
     docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 
-juju-deploy $PLACE/contrail-analytics --config log-level=SYS_DEBUG --to $cont1
+juju-deploy $PLACE/contrail-analytics --config log-level=SYS_DEBUG --to $cont1 $control_network_cfg
 juju-set contrail-analytics docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
     docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 juju-expose contrail-analytics
 
-juju-deploy $PLACE/contrail-analyticsdb --config log-level=SYS_DEBUG --to $cont1
+juju-deploy $PLACE/contrail-analyticsdb --config log-level=SYS_DEBUG --to $cont1 $control_network_cfg
 juju-set contrail-analyticsdb docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
     docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD \
     cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
 
-juju-deploy $PLACE/contrail-controller --config log-level=SYS_DEBUG --to $cont1
+juju-deploy $PLACE/contrail-controller --config log-level=SYS_DEBUG --to $cont1 $control_network_cfg
 juju-set contrail-controller docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
     docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD \
     cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" auth-mode="no-auth"

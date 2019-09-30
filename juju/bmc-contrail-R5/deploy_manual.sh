@@ -13,6 +13,12 @@ function catch_errors_ce() {
   exit $exit_code
 }
 
+# detect IP-s - place all things to specified interface for now
+control_network_сfg=""
+if [[ -n "$PHYS_INT" ]]; then
+  control_network_cfg="--config control-network=`ip addr show dev $PHYS_INT | awk '/inet /{print $2}'`"
+fi
+
 # version 2
 PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
 
@@ -25,7 +31,7 @@ echo "INFO: compute 2: $comp2 / $comp2_ip"
 
 cont0_ip="$addr.$cont_0_idx"
 cont0=`get_machine_by_ip $cont0_ip`
-echo "INFO: controller 0 (OpenStack): $cont0 / $cont0_ip"
+echo "INFO: controller for OpenStack: $cont0 / $cont0_ip"
 
 if [[ "$DEPLOY_MODE" == "one" ]] ; then
   cont1_ip="$cont0_ip"
@@ -34,15 +40,15 @@ else
   cont1_ip="$addr.$cont_1_idx"
   cont1=`get_machine_by_ip $cont1_ip`
 fi
-echo "INFO: controller 1 (Contrail): $cont1 / $cont1_ip"
+echo "INFO: controller for Contrail: $cont1 / $cont1_ip"
 
 if [ "$DEPLOY_MODE" == 'ha' ] ; then
   cont2_ip="$addr.$cont_2_idx"
   cont2=`get_machine_by_ip $cont2_ip`
-  echo "INFO: controller 2 (Contrail): $cont2 / $cont3_ip"
+  echo "INFO: controller 2 for Contrail: $cont2 / $cont3_ip"
   cont3_ip="$addr.$cont_3_idx"
   cont3=`get_machine_by_ip $cont3_ip`
-  echo "INFO: controller 3 (Contrail): $cont3 / $cont3_ip"
+  echo "INFO: controller 3 for Contrail: $cont3 / $cont3_ip"
 fi
 
 ( set -o posix ; set ) > $log_dir/env
@@ -100,12 +106,12 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   controller_params="--config vip=$addr.254 --config haproxy-https-mode=http --config haproxy-http-mode=https"
 fi
 
-juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params --config log-level=SYS_DEBUG
+juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params --config log-level=SYS_DEBUG $control_network_cfg
 juju-expose contrail-controller
 juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
-juju-deploy $PLACE/contrail-analyticsdb --to $cont1 --config log-level=SYS_DEBUG
+juju-deploy $PLACE/contrail-analyticsdb --to $cont1 --config log-level=SYS_DEBUG $control_network_cfg
 juju-set contrail-analyticsdb cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
-juju-deploy $PLACE/contrail-analytics --to $cont1 --config log-level=SYS_DEBUG
+juju-deploy $PLACE/contrail-analytics --to $cont1 --config log-level=SYS_DEBUG $control_network_cfg
 juju-set contrail-analytics docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
 juju-expose contrail-analytics
 
