@@ -18,7 +18,7 @@ function create_virtualenv() {
   rm -rf "$WORKSPACE/.venv"
   echo "INFO: Create venv"
   # latest version of software installs incorrect pkg_resources. installing venv without setuptools workarounds this problem.
-  virtualenv --no-setuptools "$WORKSPACE/.venv"
+  virtualenv "$WORKSPACE/.venv"
 
   activate_venv
   pip install python-openstackclient &> "$WORKSPACE/logs/pip.log"
