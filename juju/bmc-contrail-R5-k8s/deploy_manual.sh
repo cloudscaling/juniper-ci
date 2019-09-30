@@ -15,9 +15,11 @@ function catch_errors_ce() {
 
 # detect IP-s - place all things to specified interface for now
 control_network_cfg=""
+name_resolution_cfg=""
 if [[ "$PHYS_INT" == 'ens4' ]]; then
   # hard-coded definition...
-  control_network_cfg="--config control-network=$addr_vm.0/24 --config local-rabbitmq-hostname-resolution=true"
+  control_network_cfg="--config control-network=$addr_vm.0/24"
+  name_resolution_cfg="--config local-rabbitmq-hostname-resolution=true"
 fi
 
 # version 2
@@ -86,7 +88,7 @@ juju-set contrail-analyticsdb docker-registry=$CONTAINER_REGISTRY image-tag=$CON
     docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD \
     cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
 
-juju-deploy $PLACE/contrail-controller --config log-level=SYS_DEBUG --to $cont1 $control_network_cfg
+juju-deploy $PLACE/contrail-controller --config log-level=SYS_DEBUG --to $cont1 $control_network_cfg $name_resolution_cfg
 juju-set contrail-controller docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION \
     docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD \
     cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" auth-mode="no-auth"
