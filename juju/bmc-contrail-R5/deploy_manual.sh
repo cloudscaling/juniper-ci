@@ -14,7 +14,7 @@ function catch_errors_ce() {
 }
 
 # detect IP-s - place all things to specified interface for now
-control_network_сfg=""
+control_network_cfg=""
 if [[ -n "$PHYS_INT" ]]; then
   control_network_cfg="--config control-network=`ip addr show dev $PHYS_INT | awk '/inet /{print $2}'`"
 fi
