@@ -17,7 +17,7 @@ function catch_errors_ce() {
 control_network_cfg=""
 if [[ "$PHYS_INT" == 'ens4' ]]; then
   # hard-coded definition...
-  control_network_cfg="--config control-network=$addr_vm.0/24"
+  control_network_cfg="--config control-network=$addr_vm.0/24 --config local-rabbitmq-hostname-resolution=true"
 fi
 
 # version 2
