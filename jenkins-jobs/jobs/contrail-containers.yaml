@@ -65,7 +65,7 @@
           default-value: '{defaultha}'
       - bool:
           name: USE_FQDN
-          description: Use FQDN for services instead of IP-s. It's related not to all jobs.
+          description: Use FQDN for services instead of IP-s. It is related not to all jobs.
           default: false
       - text:
           name: PATCHSET_LIST
@@ -102,7 +102,7 @@
       - shell: |
           #!/bin/bash -e
           # build CONTRAIL_VERSION as a tag for opencontrailnightly
-          export CONTRAIL_VERSION="$OPENSTACK_VERSION-$CONTRAIL_VERSION"
+          export CONTRAIL_VERSION="$CONTRAIL_VERSION"
           # only centos images are supported now and thus only one archive with rpm-s is needed
           if [[ "$CONTAINER_REGISTRY" == 'build' ]]; then
             # hardcoded version of archive on S3
