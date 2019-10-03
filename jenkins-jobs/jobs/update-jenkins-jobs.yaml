@@ -25,7 +25,7 @@
     builders:
       - shell: |
           #!/bin/bash -e
-	  echo juniper-ci checkout to ${CI_BRANCH}
+          echo juniper-ci checkout to ${CI_BRANCH}
           if [[ "$CI_BRANCH" != "master" ]]; then
             cd juniper-ci
             git checkout "$CI_BRANCH"
