@@ -15,8 +15,8 @@
           description: "password for the user to access jenkins for update jobs"
       - string:
           name: CI_BRANCH
-	  default: master
-	  description: git branch of repo juniper-ci 
+          default: master
+          description: git branch of repo juniper-ci 
     scm:
       - juniper-ci
       - opendev:
