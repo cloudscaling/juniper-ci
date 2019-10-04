@@ -41,12 +41,14 @@ OPENSTACK_VERSION=$OPENSTACK_VERSION
 CONTROLLER_NODES=$CONTROLLER_NODES
 AGENT_NODES=$AGENT_NODES
 AGENT_MODE=$AGENT_MODE
-K8S_VERSION=$K8S_VERSION
 $ssl_opts
 ANALYTICS_ALARM_ENABLE=True
 ANALYTICS_SNMP_ENABLE=True
 ANALYTICSDB_ENABLE=True
 EOM
+if [[ -n "$K8S_VERSION" ]]; then
+  echo "K8S_VERSION=$K8S_VERSION" >> common.env
+fi
 cat common.env
 kubernetes/setup-k8s.sh $token_opts
 # wait docker because ot is restarted at the end for setup-k8s.sh
