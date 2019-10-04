@@ -1,0 +1,68 @@
+- job:
+    name: Akraino-AWS
+    description: "Deploys Akraino Regional Controller and Treasuremap node in AWS and initiate airship+TF deployment."
+    defaults: global
+    parameters:
+      - node:
+          name: SLAVE_NAME
+          description: "Select slave: one for specific node or multiple for any node."
+          default-slaves:
+            - slave01
+            - slave02
+            - slave03
+            - slave04
+          allowed-slaves:
+            - slave01
+            - slave04
+          ignore-offline-nodes: false
+          allowed-multiselect: false
+      - choice:
+          name: CLEAN_BEFORE
+          choices:
+            - 'false'
+            - 'true'
+            - clean_and_exit
+      - choice:
+          name: CLEAN_ENV
+          choices:
+            - always
+            - on_success
+            - never
+      - string:
+          name: CI_BRANCH
+          default: 'master'
+    scm:
+      - juniper-ci
+    builders:
+      - shell: |
+          #!/bin/bash -e
+          if [[ "$CI_BRANCH" != "master" ]]; then
+            cd juniper-ci
+            git checkout "$CI_BRANCH"
+            cd ..
+          fi
+      - shell: |
+          #!/bin/bash -e
+          if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
+            desc="cleanup"
+          fi
+          echo "DESCRIPTION $desc"
+      - description-setter:
+          regexp: "DESCRIPTION (.*)"
+      - shell: |
+          #!/bin/bash -e
+          cd ./juniper-ci/ansible
+          echo Deploying EC2 hosts
+          ansible-playbook akraino_deploy_ec2_hosts.yaml
+          echo File inventory/akraino was updated
+          cat inventory/akraino
+          echo File vars/akraino.yaml was updated
+          cat vars/akraino.yaml
+          echo Deploying akraino RC
+          ansible-playbook -i inventory/akraino akraino_deploy_rc.yaml
+
+    publishers:
+      - archive:
+          artifacts: 'logs/**'
+          allow-empty: true
+

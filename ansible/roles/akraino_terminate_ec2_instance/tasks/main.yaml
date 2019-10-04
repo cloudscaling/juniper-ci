@@ -1,0 +1,28 @@
+---
+#Removing Akraino EC2 instances
+- ec2_metadata_facts:
+    
+# just show the instance-id
+- debug: msg="{{ hostvars[inventory_hostname]['ansible_ec2_instance_id'] }}"
+
+- name: Terminate EC2 instance "{{ inventory_hostname }}"
+  local_action:
+    module: ec2
+    state: absent
+    region: "{{ region }}"
+    instance_ids: "{{ ansible_ec2_instance_id }}"
+
+- name: Remove the EC2 instance "{{ inventory_hostname }}" from inventory
+  local_action:
+    module: lineinfile
+    path: "{{ hostpath }}"
+    regexp: "{{ inventory_hostname }}"
+    state: absent
+
+- name: Remove the EC2 instance "{{ inventory_hostname }}" from "{{ project_variables }}"
+  local_action:
+    module: lineinfile
+    path: "{{ project_variables }}"
+    regexp: "{{ akraino_group }}"
+    line: "{{ akraino_group }}{{ ': ' }}"
+

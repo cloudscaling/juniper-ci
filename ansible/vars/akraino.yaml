@@ -1,0 +1,12 @@
+region: eu-west-3
+ami: ami-080d4d4c37b0aa206  # Ubuntu Xenial LTS
+vpc_subnet_id: subnet-516d681b
+project_name: akraino
+app_code_user: "ubuntu" # remote user
+private_key_file: akraino-aws-private-key.pem
+hoststring: "ansible_ssh_user=ubuntu ansible_ssh_private_key_file=akraino-aws-private-key.pem ansible_python_interpreter=/usr/bin/python3"
+hostpath: "inventory/akraino"
+
+#Dynamic variables
+rc_host: 
+treasuremap_host: 
