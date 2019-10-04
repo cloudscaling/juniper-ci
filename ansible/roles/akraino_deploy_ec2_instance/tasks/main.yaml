@@ -1,0 +1,79 @@
+
+---
+
+- name: Create security group
+  ec2_group:
+    name: "{{ project_name }}_security_group"
+    description: "{{ project_name }} security group"
+    region: "{{ region }}"
+    rules:
+      - proto: tcp  # ssh
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp  # http
+        from_port: 8080
+        to_port: 8080
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp  # https
+        from_port: 443
+        to_port: 443
+        cidr_ip: 0.0.0.0/0
+    rules_egress:
+      - proto: all
+        cidr_ip: 0.0.0.0/0
+  register: test_firewall
+
+
+- name: Create an EC2 key 
+  ec2_key:
+    name: "{{ project_name }}_key"
+    region: "{{ region }}"
+  register: ec2_key
+
+- name: Save private key
+  copy: content="{{ ec2_key.key.private_key }}" dest="{{ private_key_file }}" mode=0600
+  when: ec2_key.changed
+
+- name: Create a regional controller instance
+  hosts: localhost
+  gather_facts: False
+  ec2:
+     key_name: "{{ project_name }}_key"
+     group: "{{ project_name }}_security_group"
+     instance_type: "{{ instance_type }}"
+     image: "{{ ami }}"
+     wait: true
+     volumes:
+     -  { device_name: '/dev/sda1', volume_type: 'gp2', volume_size: "{{ volume_size }}", delete_on_termination: yes }
+     region: "{{ region }}"
+     vpc_subnet_id: "{{ vpc_subnet_id }}"
+     assign_public_ip: yes
+  register: ec2
+
+- name: Add the newly created EC2 instance(s) to host group
+  local_action: 
+    module: lineinfile
+    path: "{{ hostpath }}"
+    regexp: "{{ item.public_ip }}"
+    insertafter: '\[{{ akraino_group }}\]'
+    line: "{{ item.public_ip }} {{hoststring}}"
+  with_items: "{{ ec2.instances }}"
+
+- name: Add the newly created EC2 instance(s) to group_vars
+  local_action:
+    module: lineinfile
+    path: "{{ project_variables }}"
+    regexp: "{{ akraino_group }}"
+    line: "{{ akraino_group }}{{': '}}{{ item.public_ip }}"
+  with_items: "{{ ec2.instances }}"
+
+- wait_for: 
+    path: "{{ hostpath }}"
+    search_regex: "{{hoststring}}"
+
+- name: Wait for SSH to come up
+  local_action:
+    module: wait_for host={{ item.public_ip }} port=22 delay=10 connect_timeout=5 timeout=1800
+  with_items: '{{ ec2.instances }}'
+

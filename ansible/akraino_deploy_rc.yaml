@@ -1,0 +1,12 @@
+---
+# Deploying Akraino Regional Controller on existing EC2 host
+- hosts: rc_host
+  vars:
+    project_variables: "vars/akraino.yaml"
+  vars_files:
+    - "{{ project_variables }}"
+  become: yes
+  roles:
+  - roles/install_docker_ce
+  - roles/akraino_deploy_rc
+

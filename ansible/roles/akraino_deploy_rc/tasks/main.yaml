@@ -1,0 +1,96 @@
+- name: Clone a git repository 'api-server' into /opt.
+  git:
+    repo: https://gerrit.akraino.org/r/regional_controller/api-server.git
+    version: master
+    dest: /opt/api-server
+
+- name: Change the working directory to /opt/api-server/scripts and run start_arc.sh
+  shell: ./start_arc.sh
+  args:
+    chdir: /opt/api-server/scripts
+
+- name: Clone a git repository 'akraino-tf' into /opt.
+  git:
+    repo: https://github.com/gleb108/akraino-tf.git
+    version: master
+    dest: /opt/akraino-tf
+
+- name: copy {{ private_key_file }} on rc_host 
+  copy:
+    src: "{{ private_key_file }}"
+    dest: /opt/akraino-tf/ssh_key.pem
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: preparing setup-env.sh
+  template:
+    src: setup-env.sh.j2
+    dest: /opt/akraino-tf/setup-env.sh
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+
+- name: running local web-server with screen -d -m python3 -m http.server
+  shell: screen -d -m python3 -m http.server
+  args:
+    chdir: /opt/akraino-tf
+
+- name: generate yaml files 
+  shell: bash -c 'source setup-env.sh; cat objects.yaml.env | envsubst > objects.yaml; cat TF_blueprint.yaml.env | envsubst > TF_blueprint.yaml'
+  args:
+    chdir: /opt/akraino-tf
+
+- name: create objects 
+  shell: bash -c 'source setup-env.sh; /opt/api-server/scripts/rc_loaddata -H $RC_HOST -u $RC_USER -p $RC_PW -A objects.yaml'
+  args:
+    chdir: /opt/akraino-tf
+
+- name: create blueprint
+  shell: bash -c 'source setup-env.sh; /opt/api-server/scripts/rc_cli -H $RC_HOST -u $RC_USER -p $RC_PW blueprint create TF_blueprint.yaml'
+  args:
+    chdir: /opt/akraino-tf
+
+
+- name: extract edgesite_uuid
+  shell: bash -c 'source setup-env.sh; /opt/api-server/scripts/rc_cli -H $RC_HOST -u $RC_USER -p $RC_PW edgesite list | grep TF_Edgesite | cut -f1 -d " "'
+  args:
+    chdir: /opt/akraino-tf
+  register: edgesite_uuid
+
+- set_fact:
+    edgesite_uuid={{ edgesite_uuid.stdout }}
+
+- debug: var=edgesite_uuid  
+
+- name: extract blueprint_uuid
+  shell: bash -c 'source setup-env.sh; /opt/api-server/scripts/rc_cli -H $RC_HOST -u $RC_USER -p $RC_PW blueprint list | grep "TF Edge Cloud" | cut -f1 -d " "'
+  args:
+    chdir: /opt/akraino-tf
+  register: blueprint_uuid
+
+- set_fact:
+    blueprint_uuid={{ blueprint_uuid.stdout }}
+   
+- debug: var=blueprint_uuid   
+
+- name: add new environment variable ESID into setup-env.sh
+  shell: echo "export ESID={{ edgesite_uuid }}" >>setup-env.sh
+  args:
+    chdir: /opt/akraino-tf
+
+- name: add new environment variable BPID into setup-env.sh
+  shell: echo "export BPID={{ blueprint_uuid }}" >>setup-env.sh
+  args:
+    chdir: /opt/akraino-tf
+
+- name: generate POD.yaml file 
+  shell: bash -c 'source setup-env.sh; cat POD.yaml.env | envsubst > POD.yaml'
+  args:
+    chdir: /opt/akraino-tf
+
+- name: create POD
+  shell: bash -c 'source setup-env.sh; /opt/api-server/scripts/rc_cli -H $RC_HOST -u $RC_USER -p $RC_PW pod  create POD.yaml'
+  args:
+    chdir: /opt/akraino-tf
+

@@ -1,0 +1,24 @@
+#Regional Controler (ip address or FQDN)
+export RC_HOST={{ rc_host }}
+#Regional Controler credentials
+export RC_USER=admin
+export RC_PW=admin123
+
+
+#Node for airship remote deployment (ip address or FQDN)
+export NODE={{ treasuremap_host }}
+
+#ssh user for aisrship remote deployment
+export SSH_USER=ubuntu
+#File with private ssh key (public key must be added into the node for auth)
+export SSH_KEY=ssh_key.pem
+
+#web server for downloading scripts and ssh key
+#simpliest way is running "python3 -m http.server" in current directory
+export BASE_URL=http://{{ ansible_eth0.ipv4.address }}:8000
+
+#repo URL and branch for airship with tungstenfabric
+export REPO_URL=https://github.com/OlegBravo/treasuremap
+export REPO_BRANCH=tf-on-1.3
+
+
