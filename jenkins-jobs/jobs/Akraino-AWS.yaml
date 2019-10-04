@@ -2,8 +2,20 @@
     name: Akraino-AWS
     description: "Deploys Akraino Regional Controller and Treasuremap node in AWS and initiate airship+TF deployment."
     defaults: global
-    node: master
     parameters:
+      - node:
+          name: SLAVE_NAME
+          description: "Select slave: one for specific node or multiple for any node."
+          default-slaves:
+            - slave01
+            - slave02
+            - slave03
+            - slave04
+          allowed-slaves:
+            - slave01
+            - slave04
+          ignore-offline-nodes: false
+          allowed-multiselect: false
       - choice:
           name: CLEAN_BEFORE
           choices:
