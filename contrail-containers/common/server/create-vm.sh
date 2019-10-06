@@ -207,7 +207,6 @@ for ip in ${ips[@]} ; do
   # prepare node: set hostname, fill /etc/hosts, configure ssh, configure second iface if needed, install software, reboot
   attach_opt_vols $ip
   cat <<EOF | ssh $SSH_OPTS root@${ip}
-set -x
 hname="node-\$(echo $ip | tr '.' '-')"
 echo \$hname > /etc/hostname
 hostname \$hname
