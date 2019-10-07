@@ -128,6 +128,13 @@
           organization: Juniper
           repo: contrail-charms
           branch: ${CHARMS_BRANCH}
+- scm:
+    name: contrail-charms-org-branch
+    scm:
+      - github-branch:
+          organization: ${CHARMS_REPO_ORG}
+          repo: contrail-charms
+          branch: ${CHARMS_BRANCH}
 
 
 # temporary definition while we use unreleased OpenStack charms

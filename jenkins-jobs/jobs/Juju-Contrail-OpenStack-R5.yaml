@@ -178,6 +178,9 @@
           description: "Deploy Contrail's vrouter in DPDK mode"
           default: false
       - string:
+          name: CHARMS_REPO_ORG
+          default: 'Juniper'
+      - string:
           name: CHARMS_BRANCH
           default: 'R5'
       - string:
@@ -192,7 +195,7 @@
       - string:
           name: DOCKER_PASSWORD
     scm:
-      - juniper-contrail-charms-branch
+      - contrail-charms-org-branch
       - juniper-ci
     builders:
       - shell: |
