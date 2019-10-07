@@ -22,6 +22,8 @@
   - name: Wait until the file /tmp/DEPLOYMENT_COMPLETED is present (it takes a few hours)
     wait_for:
       host: "{{inventory_hostname}}"
+      #timeout - 6h
+      timeout: 21600
       path: /tmp/DEPLOYMENT_COMPLETED
 
   - name: Download deployment log    
