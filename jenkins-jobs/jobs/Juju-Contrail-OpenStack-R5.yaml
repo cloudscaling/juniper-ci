@@ -18,10 +18,11 @@
             - never
       - choice:
           name: VERSION
-          description: "Version of the OpenStack. ocata -> xenial, queens/stein -> bionic. ocata -> keystone v2, bionic -> keystone v3"
+          description: "Version of the OpenStack. ocata -> xenial, queens/rocky/stein -> bionic. ocata -> keystone v2, bionic -> keystone v3"
           choices:
             - ocata
             - queens
+            - rocky
             - stein
       - choice:
           name: DEPLOY_BUNDLE
@@ -91,7 +92,7 @@
       - shell: |
           #!/bin/bash -e
           export SERIES='xenial'
-          if [[ "$VERSION" == "queens" || "$VERSION" == "stein" ]] ; then
+          if [[ "$VERSION" == "queens" || "$VERSION" == "rocky" || "$VERSION" == "stein" ]] ; then
             export SERIES='bionic'
           fi
           ./juniper-ci/juju/aws-contrail-R5/deploy-all.sh deploy-bundle.sh
@@ -135,10 +136,11 @@
             - never
       - choice:
           name: VERSION
-          description: "Version of the OpenStack. ocata -> xenial, queens/stein -> bionic."
+          description: "Version of the OpenStack. ocata -> xenial, queens/rocky/stein -> bionic."
           choices:
             - ocata
             - queens
+            - rocky
             - stein
       - choice:
           name: DEPLOY_MODE
@@ -210,7 +212,7 @@
           #!/bin/bash -e
           export PATH="/snap/bin:$PATH"
           export SERIES='xenial'
-          if [[ "$VERSION" == "queens" || "$VERSION" == "stein" ]] ; then
+          if [[ "$VERSION" == "queens" || "$VERSION" == "rocky" || "$VERSION" == "stein" ]] ; then
             export SERIES='bionic'
           fi
           ./juniper-ci/juju/bmc-contrail-R5/deploy_all.sh
