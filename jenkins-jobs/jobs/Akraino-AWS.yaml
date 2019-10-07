@@ -8,8 +8,6 @@
           description: "Select slave: one for specific node or multiple for any node."
           default-slaves:
             - slave01
-            - slave02
-            - slave03
             - slave04
           allowed-slaves:
             - slave01
@@ -53,13 +51,13 @@
           #!/bin/bash -e
           cd ./juniper-ci/ansible
           echo Deploying EC2 hosts
-          ansible-playbook akraino_deploy_ec2_hosts.yaml
+          ansible-playbook akraino-playbook-step01.yaml
           echo File inventory/akraino was updated
           cat inventory/akraino
           echo File vars/akraino.yaml was updated
           cat vars/akraino.yaml
           echo Deploying akraino RC
-          ansible-playbook -i inventory/akraino akraino_deploy_rc.yaml
+          ansible-playbook -i inventory/akraino akraino-playbook-step02.yaml
 
     publishers:
       - archive:

@@ -1,16 +1,14 @@
 ---
 # Removing security groups and keypair
 - name: Remove security group "{{ project_name }}_security_group"
-  local_action:
-    module: ec2_group
+  ec2_group:
     region: "{{ region }}"
     name: "{{ project_name }}_security_group"
     state: absent
   ignore_errors: yes  
 
 - name: Remove EC2 key "{{ project_name }}_key"
-  local_action:
-    module: ec2_key
+  ec2_key:
     name: "{{ project_name }}_key"
     state: absent
 
@@ -19,3 +17,4 @@
     module: file
     name: "{{ private_key_file }}"
     state: absent
+
