@@ -10,6 +10,7 @@
 - name: Remove EC2 key "{{ project_name }}_key"
   ec2_key:
     name: "{{ project_name }}_key"
+    region: "{{ region }}"
     state: absent
 
 - name: Remove file "{{ private_key_file }}"

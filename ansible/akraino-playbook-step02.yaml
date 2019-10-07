@@ -1,16 +1,4 @@
-# Creating Treasuremap EC2 host
-- hosts: localhost
-  vars: 
-    instance_type: t2.2xlarge
-    volume_size: 300
-    akraino_group: treasuremap_host
-    project_variables: "vars/akraino.yaml"
-  vars_files:
-    - "{{ project_variables }}"
-  connection: local
-  roles:
-    - roles/akraino_deploy_ec2_instance
-
+---
 # Deploying Akraino Regional Controller on existing EC2 host
 - hosts: rc_host
   vars:
