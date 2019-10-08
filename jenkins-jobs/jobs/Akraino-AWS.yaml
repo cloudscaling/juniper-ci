@@ -31,16 +31,15 @@
             cd juniper-ci
             git checkout "$CI_BRANCH"
             cd ..
+            desc="juniper_ci/branch==$CI_BRANCH"
           fi
       - shell: |
           #!/bin/bash -e
           if [[ $CLEAN_BEFORE == 'true' ]] ; then
             rm -rf logs/*
-            desc="cleanup"
+            desc="$desc cleanup"
           fi
           echo "DESCRIPTION $desc"
-      - description-setter:
-          regexp: "DESCRIPTION (.*)"
       - shell: |
           #!/bin/bash -e
           trap 'ansible-playbook -i inventory/akraino akraino-playbook-cleanup.yaml' EXIT
@@ -53,6 +52,8 @@
           cat vars/akraino.yaml
           echo Deploying akraino RC
           ansible-playbook -i inventory/akraino akraino-playbook-step02.yaml
+      - description-setter:
+          regexp: "DESCRIPTION (.*)"
 
     publishers:
       - archive:
