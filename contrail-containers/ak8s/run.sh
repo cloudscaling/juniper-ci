@@ -73,6 +73,11 @@ else
   CONTROL_NODES="${IP2_CONT_01}"
 fi
 
+K8S_VERSION_FULL_STRING=""
+if [[ -n "${K8S_VERSION}" ]]; then
+  K8S_VERSION_FULL_STRING="K8S_VERSION: ${K8S_VERSION}"
+fi
+
 config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
 envsubst <$my_dir/instances.yaml.${HA}.tmpl >$config
 echo "INFO: cloud config ------------------------- $(date)"
