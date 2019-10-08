@@ -35,7 +35,7 @@
       - shell: |
           #!/bin/bash -e
           if [[ $CLEAN_BEFORE == 'true' ]] ; then
-	    rm -rf logs/*
+            rm -rf logs/*
             desc="cleanup"
           fi
           echo "DESCRIPTION $desc"
@@ -43,7 +43,7 @@
           regexp: "DESCRIPTION (.*)"
       - shell: |
           #!/bin/bash -e
-	  trap 'ansible-playbook -i inventory/akraino akraino-playbook-cleanup.yaml' EXIT
+          trap 'ansible-playbook -i inventory/akraino akraino-playbook-cleanup.yaml' EXIT
           cd ./juniper-ci/ansible
           echo Deploying EC2 hosts
           ansible-playbook akraino-playbook-step01.yaml
