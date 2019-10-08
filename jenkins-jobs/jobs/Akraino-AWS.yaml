@@ -17,15 +17,8 @@
       - choice:
           name: CLEAN_BEFORE
           choices:
-            - 'false'
             - 'true'
-            - clean_and_exit
-      - choice:
-          name: CLEAN_ENV
-          choices:
-            - always
-            - on_success
-            - never
+            - 'false'
       - string:
           name: CI_BRANCH
           default: 'master'
@@ -41,7 +34,8 @@
           fi
       - shell: |
           #!/bin/bash -e
-          if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
+          if [[ $CLEAN_BEFORE == 'true' ]] ; then
+	    rm -rf logs/*
             desc="cleanup"
           fi
           echo "DESCRIPTION $desc"
@@ -49,6 +43,7 @@
           regexp: "DESCRIPTION (.*)"
       - shell: |
           #!/bin/bash -e
+	  trap 'ansible-playbook -i inventory/akraino akraino-playbook-cleanup.yaml' EXIT
           cd ./juniper-ci/ansible
           echo Deploying EC2 hosts
           ansible-playbook akraino-playbook-step01.yaml

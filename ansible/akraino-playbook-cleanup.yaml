@@ -29,6 +29,34 @@
   - name: Download deployment log    
     fetch:
       src: /tmp/airship-in-a-bottle.sh.output.log
-      dest: ../../logs/airship-in-a-bottle.output.log      
+      dest: logs/airship-in-a-bottle.output.log      
       flat: true
 
+
+# Deleting Akraino EC2 instances and cleanup inventory and dynamic variables
+
+- hosts: rc_host
+  vars:
+    akraino_group: rc_host
+    project_variables: "vars/akraino.yaml"
+  vars_files:
+    - "{{ project_variables }}"
+  roles:
+  - roles/akraino_terminate_ec2_instance
+
+- hosts: treasuremap_host
+  vars:
+    akraino_group: treasuremap_host
+    project_variables: "vars/akraino.yaml"
+  vars_files:
+    - "{{ project_variables }}"
+  roles:
+  - roles/akraino_terminate_ec2_instance
+
+- hosts: localhost
+  vars:
+    project_variables: "vars/akraino.yaml"
+  vars_files:
+    - "{{ project_variables }}"
+  roles:
+  - roles/akraino_cleanup_ec2
