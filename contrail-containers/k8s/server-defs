@@ -9,6 +9,6 @@ else
   echo "ERROR: AIO deployment is not supported"
   exit 1
 fi
-export COMP_NODES=2
+export COMP_NODES=1
 # overrides
 export CONT_NODE_MEM=8192
