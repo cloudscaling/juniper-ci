@@ -11,8 +11,8 @@
 
 - name: Clone a git repository 'akraino-tf' into /opt.
   git:
-    repo: {{ akraino_repo_url }}
-    version: {{ akraino_repo_branch }}
+    repo: "{{ akraino_repo_url }}"
+    version: "{{ akraino_repo_branch }}"
     dest: /opt/akraino-tf
 
 - name: copy {{ private_key_file }} on rc_host 
@@ -59,7 +59,7 @@
   register: edgesite_uuid
 
 - set_fact:
-    edgesite_uuid={{ edgesite_uuid.stdout }}
+    edgesite_uuid="{{ edgesite_uuid.stdout }}"
 
 - debug: var=edgesite_uuid  
 
@@ -70,7 +70,7 @@
   register: blueprint_uuid
 
 - set_fact:
-    blueprint_uuid={{ blueprint_uuid.stdout }}
+    blueprint_uuid="{{ blueprint_uuid.stdout }}"
    
 - debug: var=blueprint_uuid   
 
