@@ -32,16 +32,14 @@
             git checkout "$CI_BRANCH"
             cd ..
           fi
-          desc="juniper_ci/branch==$CI_BRANCH"
       - shell: |
           #!/bin/bash -e
           if [[ $CLEAN_BEFORE == 'true' ]] ; then
             rm -rf logs/*
-            desc="$desc cleanup"
           fi
-          echo "DESCRIPTION $desc"
       - shell: |
           #!/bin/bash -e
+          echo "DESCRIPTION juniper_ci/branch==$CI_BRANCH CLEAN_BEFORE=$CLEAN_BEFORE"
           trap 'ansible-playbook -i inventory/akraino akraino-playbook-cleanup.yaml' EXIT
           cd ./juniper-ci/ansible
           echo Deploying EC2 hosts
