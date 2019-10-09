@@ -31,8 +31,8 @@
             cd juniper-ci
             git checkout "$CI_BRANCH"
             cd ..
-            desc="juniper_ci/branch==$CI_BRANCH"
           fi
+          desc="juniper_ci/branch==$CI_BRANCH"
       - shell: |
           #!/bin/bash -e
           if [[ $CLEAN_BEFORE == 'true' ]] ; then
