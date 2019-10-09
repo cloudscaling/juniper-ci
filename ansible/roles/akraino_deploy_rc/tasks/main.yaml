@@ -11,8 +11,8 @@
 
 - name: Clone a git repository 'akraino-tf' into /opt.
   git:
-    repo: https://github.com/gleb108/akraino-tf.git
-    version: master
+    repo: {{ akraino_repo_url }}
+    version: {{ akraino_repo_branch }}
     dest: /opt/akraino-tf
 
 - name: copy {{ private_key_file }} on rc_host 
@@ -89,8 +89,35 @@
   args:
     chdir: /opt/akraino-tf
 
+- name: cat POD.yaml
+  shell: cat POD.yaml
+  args:
+    chdir: /opt/akraino-tf
+  register: pod
+
+- debug: msg="{{ pod.stdout }}"  
+
 - name: create POD
   shell: bash -c 'source setup-env.sh; /opt/api-server/scripts/rc_cli -H $RC_HOST -u $RC_USER -p $RC_PW pod  create POD.yaml'
   args:
     chdir: /opt/akraino-tf
+
+- name: extract pod_uuid
+  shell: bash -c 'source setup-env.sh; /opt/api-server/scripts/rc_cli -H $RC_HOST -u $RC_USER -p $RC_PW pod list | grep "{{ blueprint_uuid }}" | cut -f1 -d " "'
+  args:
+    chdir: /opt/akraino-tf
+  register: pod_uuid
+
+- set_fact:
+    pod_uuid={{ pod.stdout }}
+   
+- debug: var=pod_uuid   
+
+- name: create POD
+  shell: bash -c 'source setup-env.sh; /opt/api-server/scripts/rc_cli -H $RC_HOST -u $RC_USER -p $RC_PW pod show {{ pod_uuid }}'
+  args:
+    chdir: /opt/akraino-tf
+  register: pod_show
+
+- debug: msg="{{ pod_show.stdout }}"
 

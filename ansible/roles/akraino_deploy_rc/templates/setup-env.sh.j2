@@ -17,8 +17,8 @@ export SSH_KEY=ssh_key.pem
 #simpliest way is running "python3 -m http.server" in current directory
 export BASE_URL=http://{{ ansible_eth0.ipv4.address }}:8000
 
-#repo URL and branch for airship with tungstenfabric
-export REPO_URL={{ repo_url }}
-export REPO_BRANCH={{ repo_branch }}
+#repo URL and branch for treasuremap with tungstenfabric
+export REPO_URL={{ treasuremap_repo_url }}
+export REPO_BRANCH={{ treasuremap_repo_branch }}
 
 
