@@ -109,7 +109,7 @@
   register: pod_uuid
 
 - set_fact:
-    pod_uuid={{ pod.stdout }}
+    pod_uuid={{ pod_uuid.stdout }}
    
 - debug: var=pod_uuid   
 
