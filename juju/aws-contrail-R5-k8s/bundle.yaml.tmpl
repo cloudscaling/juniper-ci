@@ -93,6 +93,7 @@ services:
       service_subnets: '10.96.0.0/12'
       docker-registry: "{{ CONTAINER_REGISTRY }}"
       image-tag: "{{ CONTRAIL_VERSION }}"
+      docker-registry-insecure: true
       cluster_name: test_cluster
 
   contrail-kubernetes-node:
@@ -102,6 +103,7 @@ services:
       log-level: 'SYS_DEBUG'
       docker-registry: "{{ CONTAINER_REGISTRY }}"
       image-tag: "{{ CONTRAIL_VERSION }}"
+      docker-registry-insecure: true
 
   # contrail
 
@@ -112,6 +114,7 @@ services:
       log-level: 'SYS_DEBUG'
       docker-registry: "{{ CONTAINER_REGISTRY }}"
       image-tag: "{{ CONTRAIL_VERSION }}"
+      docker-registry-insecure: true
 
   contrail-analytics:
     series: "{{ SERIES }}"
@@ -122,6 +125,7 @@ services:
       log-level: 'SYS_DEBUG'
       docker-registry: "{{ CONTAINER_REGISTRY }}"
       image-tag: "{{ CONTRAIL_VERSION }}"
+      docker-registry-insecure: true
     to: {{ contrail_nodes }}
 
   contrail-analyticsdb:
@@ -134,6 +138,7 @@ services:
       log-level: 'SYS_DEBUG'
       docker-registry: "{{ CONTAINER_REGISTRY }}"
       image-tag: "{{ CONTRAIL_VERSION }}"
+      docker-registry-insecure: true
     to: {{ contrail_nodes }}
 
   contrail-controller:
@@ -148,6 +153,7 @@ services:
       log-level: 'SYS_DEBUG'
       docker-registry: "{{ CONTAINER_REGISTRY }}"
       image-tag: "{{ CONTRAIL_VERSION }}"
+      docker-registry-insecure: true
     to: {{ contrail_nodes }}
 
   # misc

@@ -145,6 +145,7 @@ services:
       cassandra-jvm-extra-opts: "-Xms1g -Xmx2g"
       docker-registry: "${CONTAINER_REGISTRY}"
       image-tag: "${CONTRAIL_VERSION}"
+      docker-registry-insecure: true
     expose: true
     to:
       - "5"
@@ -158,6 +159,7 @@ services:
       cassandra-jvm-extra-opts: "-Xms1g -Xmx2g"
       docker-registry: "${CONTAINER_REGISTRY}"
       image-tag: "${CONTRAIL_VERSION}"
+      docker-registry-insecure: true
     expose: true
     to:
       - "4"
@@ -169,6 +171,7 @@ services:
       log-level: "SYS_DEBUG"
       docker-registry: "${CONTAINER_REGISTRY}"
       image-tag: "${CONTRAIL_VERSION}"
+      docker-registry-insecure: true
     expose: true
     to:
       - "5"
@@ -178,6 +181,7 @@ services:
     options:
       docker-registry: "${CONTAINER_REGISTRY}"
       image-tag: "${CONTRAIL_VERSION}"
+      docker-registry-insecure: true
   contrail-agent:
     charm: "${JUJU_REPO}/contrail-agent"
     series: ${SERIES}
@@ -185,6 +189,7 @@ services:
       log-level: "SYS_DEBUG"
       docker-registry: "${CONTAINER_REGISTRY}"
       image-tag: "${CONTRAIL_VERSION}"
+      docker-registry-insecure: true
 
 
 relations:

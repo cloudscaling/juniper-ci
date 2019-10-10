@@ -109,13 +109,15 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   controller_params="--config vip=$addr.254 --config haproxy-https-mode=http --config haproxy-http-mode=https"
 fi
 
-juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params --config log-level=SYS_DEBUG $control_network_cfg $name_resolution_cfg
+docker_opts="--config docker-registry=$CONTAINER_REGISTRY --config image-tag=$CONTRAIL_VERSION --config docker-user=$DOCKER_USERNAME --config docker-password=$DOCKER_PASSWORD --config docker-registry-insecure=true"
+juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params --config log-level=SYS_DEBUG $control_network_cfg $name_resolution_cfg $docker_opts
 juju-expose contrail-controller
-juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
-juju-deploy $PLACE/contrail-analyticsdb --to $cont1 --config log-level=SYS_DEBUG $control_network_cfg
-juju-set contrail-analyticsdb cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
-juju-deploy $PLACE/contrail-analytics --to $cont1 --config log-level=SYS_DEBUG $control_network_cfg
-juju-set contrail-analytics docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
+juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
+
+juju-deploy $PLACE/contrail-analyticsdb --to $cont1 --config log-level=SYS_DEBUG $control_network_cfg $docker_opts
+juju-set contrail-analyticsdb cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
+
+juju-deploy $PLACE/contrail-analytics --to $cont1 --config log-level=SYS_DEBUG $control_network_cfg $docker_opts
 juju-expose contrail-analytics
 
 if [ "$DEPLOY_MODE" == 'ha' ] ; then
@@ -130,10 +132,9 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   juju-add-relation "contrail-controller:https-services" "haproxy"
 fi
 
-juju-deploy $PLACE/contrail-openstack
-juju-set contrail-openstack docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
-juju-deploy $PLACE/contrail-agent --config log-level=SYS_DEBUG
-juju-set contrail-agent physical-interface=$PHYS_INT docker-registry=$CONTAINER_REGISTRY image-tag=$CONTRAIL_VERSION docker-user=$DOCKER_USERNAME docker-password=$DOCKER_PASSWORD
+juju-deploy $PLACE/contrail-openstack $docker_opts
+juju-deploy $PLACE/contrail-agent --config log-level=SYS_DEBUG $docker_opts
+juju-set contrail-agent physical-interface=$PHYS_INT
 if [[ "$USE_DPDK" == "true" ]] ; then
   juju-set contrail-agent dpdk=True dpdk-coremask=1,2 dpdk-main-mempool-size=16384
 fi
