@@ -89,13 +89,13 @@
   args:
     chdir: /opt/akraino-tf
 
-- name: cat POD.yaml
+- name: cat POD.yaml 
   shell: cat POD.yaml
   args:
     chdir: /opt/akraino-tf
   register: pod
 
-- debug: msg="{{ pod.stdout }}"  
+- debug: var=pod.stdout_lines  
 
 - name: create POD
   shell: bash -c 'source setup-env.sh; /opt/api-server/scripts/rc_cli -H $RC_HOST -u $RC_USER -p $RC_PW pod  create POD.yaml'
@@ -109,7 +109,7 @@
   register: pod_uuid
 
 - set_fact:
-    pod_uuid={{ pod_uuid.stdout }}
+    pod_uuid="{{ pod_uuid.stdout }}"
    
 - debug: var=pod_uuid   
 
@@ -119,5 +119,16 @@
     chdir: /opt/akraino-tf
   register: pod_show
 
-- debug: msg="{{ pod_show.stdout }}"
+- debug: var=pod_show.stdout_lines
+
+- name: Waiting for POD activation
+  shell: bash -c 'source setup-env.sh; /opt/api-server/scripts/rc_cli -H $RC_HOST -u $RC_USER -p $RC_PW pod show {{ pod_uuid }} | grep state'
+  args:
+    chdir: /opt/akraino-tf
+  register: pod_state
+  retries: 10
+  delay: 60
+  until: pod_state.stdout.find('ACTIVE') != -1
+
+- debug: msg='POD successfully activated'
 
