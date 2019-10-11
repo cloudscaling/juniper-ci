@@ -121,12 +121,12 @@
 
 - debug: var=pod_show.stdout_lines
 
-- name: Waiting for POD activation
+- name: Waiting for POD activation (15 min)
   shell: bash -c 'source setup-env.sh; /opt/api-server/scripts/rc_cli -H $RC_HOST -u $RC_USER -p $RC_PW pod show {{ pod_uuid }} | grep state'
   args:
     chdir: /opt/akraino-tf
   register: pod_state
-  retries: 10
+  retries: 15
   delay: 60
   until: pod_state.stdout.find('ACTIVE') != -1
 
