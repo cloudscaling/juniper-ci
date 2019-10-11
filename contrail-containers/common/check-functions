@@ -110,7 +110,7 @@ function prepare_for_ssh() {
 
 function get_vm_iface() {
   local iip=$1
-  local if_name=`ssh $ssh_dest sudo vif --list 2>/dev/null| grep -B 1 $iip | awk '/^vif/{print $NF}'`
+  local if_name=`ssh $ssh_dest sudo vif --list 2>/dev/null| grep -B 1 $iip | awk '/^vif/{print $3}'`
   echo $if_name
 }
 
