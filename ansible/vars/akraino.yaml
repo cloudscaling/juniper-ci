@@ -10,7 +10,7 @@ hostpath: "inventory/akraino"
 akraino_repo_url: https://github.com/progmaticlab/akraino-tf.git
 akraino_repo_branch: master
 #treasuremap
-treasuremap_repo_url: https://github.com/progmaticlab/akraino-treasuremap.git
+treasuremap_repo_url: https://github.com/progmaticlab/treasuremap.git
 treasuremap_repo_branch: master
 
 #Dynamic variables
