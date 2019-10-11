@@ -86,7 +86,7 @@ function clone_clean_and_patched_repo() {
   rm -rf "$cad_dir"
   git clone https://review.opencontrail.org/Juniper/$cad "${cad_dir}"
   local patchlist=''
-  if patchlist=`echo "$PATCHSET_LIST" | grep "/$cad "` ; then
+  if patchlist=`echo "$PATCHSET_LIST" | grep "/$cad"` ; then
     pushd $cad_dir >/dev/null
     eval "$patchlist"
     popd >/dev/null
