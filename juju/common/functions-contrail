@@ -55,7 +55,8 @@ function apply_ssl_os() {
     juju-ssh $mch sudo update-ca-certificates
   done
 
-  juju-set keystone "use-https=True"
+  juju-deploy easyrsa easyrsa-keystone --to keystone/0
+  juju-add-relation easyrsa-keystone keystone
 
   local srv="${prefix}-keystone-auth"
   local ssl_config="$ssl_dir/ssl_config_$srv.yaml"
