@@ -69,7 +69,7 @@ function apply_ssl_config() {
   local mch=$1
   local srv=$2
 
-  local addr=`get_machine_ip $mch`
+  local addr=`get_machine_ip $srv`
   echo "INFO: call 'apply_ssl_config_by_addr $mch $srv $addr'"
   apply_ssl_config_by_addr $mch $srv $addr
 }
