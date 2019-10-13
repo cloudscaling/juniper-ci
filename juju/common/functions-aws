@@ -42,7 +42,6 @@ function hack_openstack() {
     # Juju 2.0 registers services with private ips (using new modern tool 'network-get public')
     echo "INFO: HACK: Reconfigure public endpoints for OpenStack $(date)"
 
-    local mchs=("$m2" "$m3" "$m4" "$m5")
     local mch_srvs=('glance' 'keystone' 'nova-cloud-controller' 'neutron-api' 'heat')
     local mch_sets=('0' '0' '0' '0' '0')
     for j in {1..30} ; do
@@ -51,9 +50,8 @@ function hack_openstack() {
         if [[ ${mch_sets[$i]} != '0' ]] ; then
           continue;
         fi
-        local addr_count=`juju machines $juju_model_arg --format json | python -c "import sys; import json; sys.stdout.write(str(len(json.load(sys.stdin)['machines'].get('${mchs[$i]}', {}).get('ip-addresses', []))))"`
-        if [[ $addr_count != '0' ]] ; then
-          local ip=`get-machine-ip-by-number ${mchs[$i]}`
+        local ip=`get_machine_ip ${mch_srvs[$i]}`
+        if [[ -n "$ip" ]]; then
           echo "INFO: Update hostnames of ${mch_srvs[$i]} with IP=$ip"
           juju-set ${mch_srvs[$i]} os-public-hostname=$ip os-admin-hostname=$ip os-internal-hostname=$ip
           mch_sets[$i]='1'
