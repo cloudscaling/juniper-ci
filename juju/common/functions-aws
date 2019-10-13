@@ -43,11 +43,11 @@ function hack_openstack() {
     echo "INFO: HACK: Reconfigure public endpoints for OpenStack $(date)"
 
     local mchs=("$m2" "$m3" "$m4" "$m5")
-    local mch_srvs=('glance' 'keystone' 'nova-cloud-controller' 'neutron-api')
-    local mch_sets=('0' '0' '0' '0')
+    local mch_srvs=('glance' 'keystone' 'nova-cloud-controller' 'neutron-api' 'heat')
+    local mch_sets=('0' '0' '0' '0' '0')
     for j in {1..30} ; do
       echo "INFO: attempt $j"
-      for i in {0..3} ; do
+      for i in {0..4} ; do
         if [[ ${mch_sets[$i]} != '0' ]] ; then
           continue;
         fi
