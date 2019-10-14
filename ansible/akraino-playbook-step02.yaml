@@ -1,0 +1,34 @@
+---
+# Deploying Akraino Regional Controller on existing EC2 host
+- hosts: rc_host
+  vars:
+    project_variables: "vars/akraino.yaml"
+  vars_files:
+    - "{{ project_variables }}"
+  become: yes
+  roles:
+  - roles/install_docker_ce
+  - roles/akraino_deploy_rc
+
+# Waiting for airship deployment is finished and download the log
+
+- hosts: treasuremap_host
+  vars:
+    akraino_group: treasuremap_host
+    project_variables: "vars/akraino.yaml"
+  vars_files:
+    - "{{ project_variables }}"
+  tasks:
+  - name: Wait until the file /tmp/DEPLOYMENT_COMPLETED is present (it takes a few hours)
+    wait_for:
+      host: "{{inventory_hostname}}"
+      #timeout - 6h
+      timeout: 21600
+      path: /tmp/DEPLOYMENT_COMPLETED
+
+  - name: Download deployment log    
+    fetch:
+      src: /tmp/airship-in-a-bottle.sh.output.log
+      dest: ../../logs/airship-in-a-bottle.output.log      
+      flat: true
+

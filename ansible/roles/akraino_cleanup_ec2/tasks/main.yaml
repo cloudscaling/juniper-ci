@@ -1,0 +1,21 @@
+---
+# Removing security groups and keypair
+- name: Remove security group "{{ project_name }}_security_group"
+  ec2_group:
+    region: "{{ region }}"
+    name: "{{ project_name }}_security_group"
+    state: absent
+  ignore_errors: yes  
+
+- name: Remove EC2 key "{{ project_name }}_key"
+  ec2_key:
+    name: "{{ project_name }}_key"
+    region: "{{ region }}"
+    state: absent
+
+- name: Remove file "{{ private_key_file }}"
+  local_action:
+    module: file
+    name: "{{ private_key_file }}"
+    state: absent
+

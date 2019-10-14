@@ -1,0 +1,27 @@
+---
+# Creating Akraino Regional Controller EC2 instances and updating inventory and group_vars
+- hosts: localhost
+  vars: 
+    instance_type: t2.medium
+    volume_size: 8
+    akraino_group: rc_host
+    project_variables: "vars/akraino.yaml"
+  vars_files:
+    - "{{ project_variables }}"
+  connection: local
+  roles:
+    - roles/akraino_deploy_ec2_instance
+
+# Creating Treasuremap EC2 host
+- hosts: localhost
+  vars: 
+    instance_type: t2.2xlarge
+    volume_size: 300
+    akraino_group: treasuremap_host
+    project_variables: "vars/akraino.yaml"
+  vars_files:
+    - "{{ project_variables }}"
+  connection: local
+  roles:
+    - roles/akraino_deploy_ec2_instance
+
