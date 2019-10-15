@@ -44,7 +44,7 @@
           fi
       - shell: |
           #!/bin/bash -e
-          echo "DESCRIPTION juniper_ci/branch==$CI_BRANCH CLEAN_BEFORE=$CLEAN_BEFORE"
+          echo "DESCRIPTION juniper_ci/branch==$CI_BRANCH CLEAN_BEFORE=$CLEAN_BEFORE CLEAN_AWS_AFTER=$CLEAN_AWS_AFTER"
           function aws_cleanup {
             if [[ $CLEAN_AWS_AFTER == 'true' ]] ; then
                ansible-playbook -i inventory/akraino akraino-playbook-cleanup.yaml

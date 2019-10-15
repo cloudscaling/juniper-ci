@@ -16,7 +16,7 @@
 # Creating Treasuremap EC2 host
 - hosts: localhost
   vars: 
-    instance_type: t2.2xlarge
+    instance_type: m5.4xlarge
     volume_size: 300
     akraino_group: treasuremap_host
     spot_price: 0.5
