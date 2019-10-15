@@ -5,6 +5,7 @@
     instance_type: t2.medium
     volume_size: 8
     akraino_group: rc_host
+    spot_price: 0.3
     project_variables: "vars/akraino.yaml"
   vars_files:
     - "{{ project_variables }}"
@@ -18,6 +19,7 @@
     instance_type: t2.2xlarge
     volume_size: 300
     akraino_group: treasuremap_host
+    spot_price: 0.5
     project_variables: "vars/akraino.yaml"
   vars_files:
     - "{{ project_variables }}"

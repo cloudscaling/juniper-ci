@@ -1,6 +1,5 @@
 
 ---
-
 - name: Create security group
   ec2_group:
     name: "{{ project_name }}_security_group"
@@ -35,13 +34,16 @@
   copy: content="{{ ec2_key.key.private_key }}" dest="{{ private_key_file }}" mode=0600
   when: ec2_key.changed
 
-- name: Create a regional controller instance
+- name: Create AWS spot instance "{{ akraino_group }}" (max price="{{ spot_price }}")
   hosts: localhost
   gather_facts: False
   ec2:
      key_name: "{{ project_name }}_key"
      group: "{{ project_name }}_security_group"
      instance_type: "{{ instance_type }}"
+     spot_price:  "{{ spot_price }}"
+     spot_wait_timeout: 180
+     count: 1
      image: "{{ ami }}"
      wait: true
      volumes:

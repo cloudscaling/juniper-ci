@@ -121,14 +121,25 @@
 
 - debug: var=pod_show.stdout_lines
 
-- name: Waiting for POD activation (10 min)
+- name: Waiting for POD status == WORKFLOW (7 min)
   shell: bash -c 'source setup-env.sh; /opt/api-server/scripts/rc_cli -H $RC_HOST -u $RC_USER -p $RC_PW pod show {{ pod_uuid }} | grep state'
   args:
     chdir: /opt/akraino-tf
   register: pod_state
-  retries: 10
+  retries: 7
   delay: 60
   until: pod_state.stdout.find('WORKFLOW') != -1
+
+- debug: msg='POD successfully activated'
+
+- name: Waiting for POD deploying finished (timeout=6h) 
+  shell: bash -c 'source setup-env.sh; /opt/api-server/scripts/rc_cli -H $RC_HOST -u $RC_USER -p $RC_PW pod show {{ pod_uuid }} | grep state'
+  args:
+    chdir: /opt/akraino-tf
+  register: pod_state
+  retries: 36
+  delay: 600
+  until: pod_state.stdout.find('WORKFLOW') > 0
 
 - debug: msg='POD successfully activated'
 
