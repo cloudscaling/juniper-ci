@@ -19,6 +19,11 @@
           choices:
             - 'true'
             - 'false'
+      - choice:
+          name: CLEAN_AWS_AFTER
+          choices:
+            - 'true'
+            - 'false'
       - string:
           name: CI_BRANCH
           default: 'master'
@@ -40,7 +45,12 @@
       - shell: |
           #!/bin/bash -e
           echo "DESCRIPTION juniper_ci/branch==$CI_BRANCH CLEAN_BEFORE=$CLEAN_BEFORE"
-          trap 'ansible-playbook -i inventory/akraino akraino-playbook-cleanup.yaml' EXIT
+          function aws_cleanup {
+            if [[ $CLEAN_AWS_AFTER == 'true' ]] ; then
+               ansible-playbook -i inventory/akraino akraino-playbook-cleanup.yaml
+            fi   
+          }
+          trap aws_cleanup EXIT
           cd ./juniper-ci/ansible
           echo Deploying EC2 hosts
           ansible-playbook akraino-playbook-step01.yaml
