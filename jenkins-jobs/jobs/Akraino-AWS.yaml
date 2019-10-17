@@ -65,13 +65,18 @@
           ansible-playbook -i inventory/akraino akraino-playbook-step02.yaml
           echo =============== Deploying logs to LF Nexus log server ===================
 
+          #Compressing logs
+          for f in logs/*.log; do zip -9 $f.zip $f; done
+
           NEXUS_URL=https://nexus.akraino.org
           SILO=juniper
           JENKINS_HOSTNAME=jenkins.progmaticlab.com
           BUILD_URL="${JENKINS_HOSTNAME}/job/${JOB_NAME}/${BUILD_NUMBER}/"
           NEXUS_PATH="${SILO}/job/${JOB_NAME}/${BUILD_NUMBER}"
 
+          
           lftools --debug deploy logs $NEXUS_URL $NEXUS_PATH $BUILD_URL
+          lftools --debug deploy nexus-zip $NEXUS_URL logs $NEXUS_PATH logs/*.zip
 
           echo =============== Logs uploaded to $NEXUS_URL/content/sites/logs/$NEXUS_PATH ==============
 
