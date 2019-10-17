@@ -63,7 +63,7 @@
           cat vars/akraino.yaml
           echo =============== Deploying akraino RC and start POD deployment ================
           ansible-playbook -i inventory/akraino akraino-playbook-step02.yaml
-	  echo =============== Deploying logs to LF Nexus log server ===================
+          echo =============== Deploying logs to LF Nexus log server ===================
 
           NEXUS_URL=https://nexus.akraino.org
           SILO=juniper
