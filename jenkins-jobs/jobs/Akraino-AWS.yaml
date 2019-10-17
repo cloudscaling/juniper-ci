@@ -48,6 +48,7 @@
           echo "DESCRIPTION juniper_ci/branch==$CI_BRANCH CLEAN_BEFORE=$CLEAN_BEFORE CLEAN_AWS_AFTER=$CLEAN_AWS_AFTER"
           function aws_cleanup {
             if [[ $CLEAN_AWS_AFTER == 'true' ]] ; then
+               cd ${WORKSPACE}/juniper-ci/ansible 
                ansible-playbook -i inventory/akraino akraino-playbook-cleanup.yaml
             fi   
           }
@@ -65,8 +66,10 @@
           ansible-playbook -i inventory/akraino akraino-playbook-step02.yaml
           echo =============== Deploying logs to LF Nexus log server ===================
 
+          cd ${WORKSPACE}
+          echo `pwd` 
           #Compressing logs
-          for f in logs/*.log; do zip -9 $f.zip $f; done
+          for f in logs/*.log; do zip -9 "$f.zip" "$f"; done
 
           NEXUS_URL=https://nexus.akraino.org
           SILO=juniper
