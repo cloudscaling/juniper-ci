@@ -44,22 +44,37 @@
           fi
       - shell: |
           #!/bin/bash -e
+
           echo "DESCRIPTION juniper_ci/branch==$CI_BRANCH CLEAN_BEFORE=$CLEAN_BEFORE CLEAN_AWS_AFTER=$CLEAN_AWS_AFTER"
           function aws_cleanup {
             if [[ $CLEAN_AWS_AFTER == 'true' ]] ; then
                ansible-playbook -i inventory/akraino akraino-playbook-cleanup.yaml
             fi   
           }
+
           trap aws_cleanup EXIT
+
           cd ./juniper-ci/ansible
-          echo Deploying EC2 hosts
+          echo =============== Deploying EC2 hosts ==================
           ansible-playbook akraino-playbook-step01.yaml
-          echo File inventory/akraino was updated
+          echo =============== File inventory/akraino was updated ===============
           cat inventory/akraino
-          echo File vars/akraino.yaml was updated
+          echo =============== File vars/akraino.yaml was updated ===============
           cat vars/akraino.yaml
-          echo Deploying akraino RC
+          echo =============== Deploying akraino RC and start POD deployment ================
           ansible-playbook -i inventory/akraino akraino-playbook-step02.yaml
+	  echo =============== Deploying logs to LF Nexus log server ===================
+
+          NEXUS_URL=https://nexus.akraino.org
+          SILO=juniper
+          JENKINS_HOSTNAME=jenkins.progmaticlab.com
+          BUILD_URL="${JENKINS_HOSTNAME}/job/${JOB_NAME}/${BUILD_NUMBER}/"
+          NEXUS_PATH="${SILO}/job/${JOB_NAME}/${BUILD_NUMBER}"
+
+          lftools --debug deploy logs $NEXUS_URL $NEXUS_PATH $BUILD_URL
+
+          echo =============== Logs uploaded to $NEXUS_URL/content/sites/logs/$NEXUS_PATH ==============
+
       - description-setter:
           regexp: "DESCRIPTION (.*)"
 
