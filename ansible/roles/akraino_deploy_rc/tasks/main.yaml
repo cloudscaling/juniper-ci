@@ -35,6 +35,9 @@
   shell: screen -d -m python3 -m http.server
   args:
     chdir: /opt/akraino-tf
+  register: screen
+  retries: 5
+  until: screen.rc == 0
 
 - name: generate yaml files 
   shell: bash -c 'source setup-env.sh; cat objects.yaml.env | envsubst > objects.yaml; cat TF_blueprint.yaml.env | envsubst > TF_blueprint.yaml'
