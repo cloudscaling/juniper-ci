@@ -78,8 +78,8 @@
           NEXUS_PATH="${SILO}/job/${JOB_NAME}/${BUILD_NUMBER}"
 
           
-          lftools --debug deploy logs $NEXUS_URL $NEXUS_PATH $BUILD_URL
-          lftools --debug deploy nexus-zip $NEXUS_URL logs $NEXUS_PATH logs/*.zip
+          lftools deploy logs $NEXUS_URL $NEXUS_PATH $BUILD_URL
+          lftools deploy nexus-zip $NEXUS_URL logs $NEXUS_PATH logs/*.zip
 
           echo =============== Logs uploaded to $NEXUS_URL/content/sites/logs/$NEXUS_PATH ==============
 
