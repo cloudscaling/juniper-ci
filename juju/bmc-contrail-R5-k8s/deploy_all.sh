@@ -66,8 +66,11 @@ juju-status-tabular
 
 "$my_dir"/deploy_manual.sh
 
-#check it
-#TODO
+SCP_CMD='juju scp'
+SSH_CMD='juju ssh'
+SSH_USER=ubuntu
+kubectl_ip=`get_machine_ip kubernetes-master`
+check_k8s_cluster
 
 $my_dir/../save-logs.sh
 

@@ -4,6 +4,7 @@ function check_k8s_cluster() {
   tmpf=`mktemp`
   cat <<EOM > $tmpf
 #!/bin/bash -ex
+set -o pipefail
 
 echo "INFO: cluster state"
 kubecctl get all --all-namespaces
@@ -35,12 +36,15 @@ helm install --name wordpress --set mariadb.master.persistence.enabled=false --s
 sleep 90
 kubectl get pods
 kubectl get svc wordpress
+if ! kubectl get svc wordpress | awk '/wordpress/{print $3}' | grep -v 'Running' ; then
+  echo "ERROR: wordpress is not up!"
+  exit 1
+fi
 EOM
 
-  # ???
-  $SCP $tmpf ${SSH_USER}@${master_ip}:check_k8s.sh
+  $SCP_CMD $tmpf ${SSH_USER}@${kubectl_ip}:check_k8s.sh
   rm $tmpf
-  $SSH_CMD ${SSH_USER}@${master_ip} "sudo /bin/bash check_k8s.sh"
+  $SSH_CMD ${SSH_USER}@${kubectl_ip} "sudo /bin/bash check_k8s.sh"
 
   # this is needed if we want to enable persistence
   # ? helm repo add nfs-provisioner https://raw.githubusercontent.com/IlyaSemenov/nfs-provisioner-chart/master/repo

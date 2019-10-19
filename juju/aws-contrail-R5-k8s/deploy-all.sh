@@ -80,11 +80,10 @@ function catch_errors() {
 echo "--------------------------------------------- Run deploy script: $inner_script"
 $my_dir/$inner_script $script_params
 
-# TODO: rework this...
-SCP='juju scp'
+SCP_CMD='juju scp'
 SSH_CMD='juju ssh'
 SSH_USER=ubuntu
-master_ip=0
+kubectl_ip=`get_machine_ip kubernetes-master`
 check_k8s_cluster
 
 $my_dir/../save-logs.sh
