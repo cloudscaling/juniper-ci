@@ -80,6 +80,10 @@
           name: BUILD_NUM
           default: "5.1.0-745"
           description: "Build number that is stored on S3 now"
+      - bool:
+          name: DEBUG
+          description: Set 'set -x' option at start
+          default: false
     scm:
       - juniper-ci
     builders:
@@ -100,6 +104,7 @@
           regexp: "DESCRIPTION (.*)"
       - shell: |
           #!/bin/bash -e
+          if [[ "${DEBUG,,}" == "true" ]] ; then set -x ; fi
           # build CONTRAIL_VERSION as a tag for opencontrailnightly
           export CONTRAIL_VERSION="$CONTRAIL_VERSION"
           # only centos images are supported now and thus only one archive with rpm-s is needed

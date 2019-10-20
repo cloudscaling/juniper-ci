@@ -250,15 +250,20 @@ function run_os_checks() {
   openstack server list
   openstack catalog list || keystone catalog || /bin/true
 
-  # check heat
-  echo "INFO: check heat resources"
-  openstack orchestration resource type list | grep ContrailV2
-
   if [[ $ret == 0 ]]; then
     openstack floating ip delete 10.5.0.10 || /bin/true
     openstack floating ip delete 10.5.0.11 || /bin/true
     #delete_network $netsfx
   fi
+
+  # check heat
+  echo "INFO: check heat resources"
+  if ! openstack orchestration resource type list | grep ContrailV2 ; then
+    echo "ERROR: Contrail's heat resouces not found!"
+    openstack orchestration resource type list
+    ret=1
+  fi
+
   deactivate_venv
 
   return $ret

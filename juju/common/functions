@@ -11,6 +11,15 @@ fi
 
 source $fmy_dir/functions-juju$jver
 
+function detect_machines() {
+  m1=`get_machines_index_by_service openstack-dashboard`
+  m2=`get_machines_index_by_service glance`
+  m3=`get_machines_index_by_service keystone`
+  m4=`get_machines_index_by_service nova-cloud-controller`
+  m5=`get_machines_index_by_service neutron-api`
+  m6=`get_machines_index_by_service contrail-controller`
+}
+
 function wait_absence_status_for_services() {
   sleep 10
   check_str=$1
