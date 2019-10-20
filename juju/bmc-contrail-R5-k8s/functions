@@ -6,4 +6,4 @@ source $fcmy_dir/definitions
 source $fcmy_dir/../common/functions
 source $fcmy_dir/../common/functions-bmc
 source $fcmy_dir/../common/functions-contrail
-source $famy_dir/../common/functions-k8s
+source $fcmy_dir/../common/functions-k8s
