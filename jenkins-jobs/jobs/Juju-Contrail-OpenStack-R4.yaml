@@ -2,7 +2,7 @@
     name: Juju-Contrail-OpenStack-AWS
     description: "Deploys cluster(manual) with OpenStack/Contrail and checks it. Can be used for debug purposes."
     defaults: global
-    disabled: true
+    #disabled: true
     node: master
     parameters:
       - choice:
@@ -20,6 +20,7 @@
       - choice:
           name: CONTRAIL_BUILD
           choices:
+            - 4.1.3.0-26
             - 4.1.2.0-16
             - 4.1.1.0-12
             - 4.1.0.0-8
@@ -115,7 +116,7 @@
     name: Juju-Contrail-OpenStack-KVM
     description: 'Contrail+OpenStack on KVM by Juju'
     defaults: global
-    disabled: true
+    #disabled: true
     concurrent: true
     parameters:
       - node:
@@ -144,6 +145,7 @@
       - choice:
           name: CONTRAIL_BUILD
           choices:
+            - 4.1.3.0-26
             - 4.1.2.0-16
             - 4.1.1.0-12
             - 4.1.0.0-8
