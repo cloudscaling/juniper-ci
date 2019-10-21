@@ -1,5 +1,5 @@
 - job:
-    name: Akraino-AWS
+    name: NC-Tungsten_Fabric
     description: "Deploys Akraino Regional Controller and Treasuremap node in AWS and initiate airship+TF deployment."
     defaults: global
     parameters:
