@@ -13,40 +13,6 @@ function catch_errors_ce() {
   exit $exit_code
 }
 
-# it also sets variables with names
-check_containers
-
-# version 2
-PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
-
-repo_ip="$addr.$juju_cont_idx"
-mrepo="$image_user@$repo_ip"
-echo "INFO: Prepare apt-repo on $mrepo"
-scp "$HOME/docker/$packages" "$mrepo:contrail_debs.tgz"
-scp "$my_dir/../common/create-aptrepo.sh" $mrepo:create-aptrepo.sh
-ssh $mrepo ./create-aptrepo.sh $SERIES
-echo "INFO: apt-repo is ready"
-repo_key=`curl -s http://$repo_ip/ubuntu/repo.key`
-repo_key=`echo "$repo_key" | awk '{printf("      %s\r", $0)}'`
-
-# prepare registry for contrail packages
-echo "INFO: Prepare local registry on $mrepo"
-docker_user="docker_user"
-docker_password="docker_password"
-ssh $mrepo mkdir docker_images
-scp $HOME/docker/contrail-* "$mrepo:docker_images/"
-scp "$my_dir/../common/prepare-registry.sh" $mrepo:prepare-registry.sh
-ssh $mrepo ./prepare-registry.sh $repo_ip $docker_user $docker_password
-controller_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-controller-" | grep $CONTRAIL_BUILD | awk '{print $1}'`
-controller_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-controller-" | grep $CONTRAIL_BUILD | awk '{print $2}'`
-analytics_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analytics-" | grep $CONTRAIL_BUILD | awk '{print $1}'`
-analytics_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analytics-" | grep $CONTRAIL_BUILD | awk '{print $2}'`
-analyticsdb_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analyticsdb-" | grep $CONTRAIL_BUILD | awk '{print $1}'`
-analyticsdb_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analyticsdb-" | grep $CONTRAIL_BUILD | awk '{print $2}'`
-echo "Docker controller image: $controller_image_name:$controller_image_tag"
-echo "Docker analytics image: $analytics_image_name:$analytics_image_tag"
-echo "Docker analyticsdb image: $analyticsdb_image_name:$analyticsdb_image_tag"
-
 comp1_ip="$addr.$comp_1_idx"
 comp1=`get_machine_by_ip $comp1_ip`
 echo "INFO: compute 1: $comp1 / $comp1_ip"
@@ -81,11 +47,45 @@ fi
 # downgrade kernel
 
 set -x
-juju-ssh $comp1 "sudo sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy linux-image-4.4.0-116-generic linux-headers-4.4.0-116-generic &> apt.log"
+juju-ssh $comp1 "sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy linux-image-4.4.0-116-generic linux-headers-4.4.0-116-generic &> apt.log"
 juju-ssh $comp1 "sudo sed -i \"s/\$(uname -r)/4.4.0-116-generic/g\" /boot/grub/grub.cfg ; sudo reboot"
-juju-ssh $comp2 "sudo sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy linux-image-4.4.0-116-generic linux-headers-4.4.0-116-generic &> apt.log"
+juju-ssh $comp2 "sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy linux-image-4.4.0-116-generic linux-headers-4.4.0-116-generic &> apt.log"
 juju-ssh $comp2 "sudo sed -i \"s/\$(uname -r)/4.4.0-116-generic/g\" /boot/grub/grub.cfg ; sudo reboot"
 set +x
+
+# it also sets variables with names
+check_containers
+
+# version 2
+PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
+
+repo_ip="$addr.$juju_cont_idx"
+mrepo="$image_user@$repo_ip"
+echo "INFO: Prepare apt-repo on $mrepo"
+scp "$HOME/docker/$packages" "$mrepo:contrail_debs.tgz"
+scp "$my_dir/../common/create-aptrepo.sh" $mrepo:create-aptrepo.sh
+ssh $mrepo ./create-aptrepo.sh $SERIES
+echo "INFO: apt-repo is ready"
+repo_key=`curl -s http://$repo_ip/ubuntu/repo.key`
+repo_key=`echo "$repo_key" | awk '{printf("      %s\r", $0)}'`
+
+# prepare registry for contrail packages
+echo "INFO: Prepare local registry on $mrepo"
+docker_user="docker_user"
+docker_password="docker_password"
+ssh $mrepo mkdir docker_images
+scp $HOME/docker/contrail-* "$mrepo:docker_images/"
+scp "$my_dir/../common/prepare-registry.sh" $mrepo:prepare-registry.sh
+ssh $mrepo ./prepare-registry.sh $repo_ip $docker_user $docker_password
+controller_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-controller-" | grep $CONTRAIL_BUILD | awk '{print $1}'`
+controller_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-controller-" | grep $CONTRAIL_BUILD | awk '{print $2}'`
+analytics_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analytics-" | grep $CONTRAIL_BUILD | awk '{print $1}'`
+analytics_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analytics-" | grep $CONTRAIL_BUILD | awk '{print $2}'`
+analyticsdb_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analyticsdb-" | grep $CONTRAIL_BUILD | awk '{print $1}'`
+analyticsdb_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analyticsdb-" | grep $CONTRAIL_BUILD | awk '{print $2}'`
+echo "Docker controller image: $controller_image_name:$controller_image_tag"
+echo "Docker analytics image: $analytics_image_name:$analytics_image_tag"
+echo "Docker analyticsdb image: $analyticsdb_image_name:$analyticsdb_image_tag"
 
 # OpenStack base
 
