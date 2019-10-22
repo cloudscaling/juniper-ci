@@ -62,13 +62,12 @@ fi
 
 cleanup_computes
 
-juju-ssh $m2 "sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy linux-image-4.4.0-1038-aws linux-headers-4.4.0-1038-aws"
-juju-ssh $m2 "sudo DEBIAN_FRONTEND=noninteractive apt-get purge -fy linux-image-4.4.0-1092-aws linux-image-\$(uname -r)"
-juju-ssh $m2 "sudo reboot"
-
-juju-ssh $m3 "sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy linux-image-4.4.0-1038-aws linux-headers-4.4.0-1038-aws"
-juju-ssh $m3 "sudo DEBIAN_FRONTEND=noninteractive apt-get purge -fy linux-image-4.4.0-1092-aws linux-image-\$(uname -r)"
-juju-ssh $m3 "sudo reboot"
+#juju-ssh $m2 "sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy linux-image-4.4.0-1038-aws linux-headers-4.4.0-1038-aws"
+#juju-ssh $m2 "sudo DEBIAN_FRONTEND=noninteractive apt-get purge -fy linux-image-4.4.0-1092-aws linux-image-\$(uname -r)"
+#juju-ssh $m2 "sudo reboot"
+#juju-ssh $m3 "sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy linux-image-4.4.0-1038-aws linux-headers-4.4.0-1038-aws"
+#juju-ssh $m3 "sudo DEBIAN_FRONTEND=noninteractive apt-get purge -fy linux-image-4.4.0-1092-aws linux-image-\$(uname -r)"
+#juju-ssh $m3 "sudo reboot"
 
 juju-status-tabular
 

@@ -78,6 +78,15 @@ fi
 
 ( set -o posix ; set ) > $log_dir/env
 
+# downgrade kernel
+
+set -x
+juju-ssh $comp1 "sudo sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy linux-image-4.4.0-116-generic linux-headers-4.4.0-116-generic &> apt.log"
+juju-ssh $comp1 "sudo sed -i \"s/\$(uname -r)/4.4.0-116-generic/g\" /boot/grub/grub.cfg ; sudo reboot"
+juju-ssh $comp2 "sudo sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy linux-image-4.4.0-116-generic linux-headers-4.4.0-116-generic &> apt.log"
+juju-ssh $comp2 "sudo sed -i \"s/\$(uname -r)/4.4.0-116-generic/g\" /boot/grub/grub.cfg ; sudo reboot"
+set +x
+
 # OpenStack base
 
 echo "INFO: Deploy all $(date)"
