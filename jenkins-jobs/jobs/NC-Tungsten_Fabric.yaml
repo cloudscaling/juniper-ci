@@ -29,6 +29,19 @@
           default: 'master'
     scm:
       - juniper-ci
+    triggers:
+      - gerrit:
+            trigger-on-change-merged-event: true
+            trigger-on-change-restored-event: true
+            trigger-on-patchset-uploaded-event: true
+            trigger-on-patchset-created-event: true
+            trigger-approval-value: 1
+            projects:
+                - project-compare-type: 'PLAIN'
+                  project-pattern: 'nc/tf'
+                  branch-compare-type: 'PLAIN'
+                  branch-pattern: 'master'
+            server-name: 'gerrit.akraino.org'
     builders:
       - shell: |
           #!/bin/bash -e
@@ -54,7 +67,8 @@
           }
 
           trap aws_cleanup EXIT
-
+          echo =============== Environment variables ==================
+          env
           cd ./juniper-ci/ansible
           echo =============== Deploying EC2 hosts ==================
           ansible-playbook akraino-playbook-step01.yaml
