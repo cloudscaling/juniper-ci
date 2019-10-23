@@ -33,7 +33,6 @@
       - gerrit:
           trigger-on-change-merged-event: true
           trigger-on-change-restored-event: true
-          trigger-on-patchset-uploaded-event: true
           trigger-on-patchset-created-event: true
           trigger-approval-value: 1
           projects:
