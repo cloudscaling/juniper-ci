@@ -51,7 +51,7 @@ for comp in $comp1 $comp2 ; do
   juju-ssh $comp "sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy linux-image-4.4.0-116-generic linux-headers-4.4.0-116-generic &> /dev/null"
   submenu=`juju-ssh $comp1 "grep submenu /boot/grub/grub.cfg" 2>/dev/null | sed "s/.*\(gnulinux-advanced-.*\)'.*/\1/"`
   item=`juju-ssh $comp1 "grep menuentry /boot/grub/grub.cfg" 2>/dev/null | grep '0-116-generic-advanced' | sed "s/.*\(gnulinux-.*\)'.*/\1/"`
-  juju-ssh $comp "sudo sed -i 's/GRUB_DEFAULT=0/GRUB_DEFAULT=\'${submenu}>${item}\'/' /etc/default/grub ; sudo update-grub ; sudo reboot" || /bin/true
+  juju-ssh $comp "sudo sed -i \"s/GRUB_DEFAULT=.*$/GRUB_DEFAULT='${submenu}>${item}'/\" /etc/default/grub ; sudo update-grub ; sudo reboot" || /bin/true
   #juju-ssh $comp 'sudo sed -i "s/$(uname -r)/4.4.0-116-generic/g" /boot/grub/grub.cfg ; sudo reboot' || /bin/true
 done
 set +x
