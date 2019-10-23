@@ -95,6 +95,7 @@ echo "Docker analytics image: $analytics_image_name:$analytics_image_tag"
 echo "Docker analyticsdb image: $analyticsdb_image_name:$analyticsdb_image_tag"
 
 # OpenStack base
+juju status
 
 echo "INFO: Deploy all $(date)"
 juju-deploy cs:$SERIES/ntp
