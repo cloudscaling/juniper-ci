@@ -9,11 +9,18 @@
   args:
     chdir: /opt/api-server/scripts
 
-- name: Clone a git repository 'akraino-tf' into /opt.
+- name: Clone a git repository 'nc/tf' into /opt.
   git:
     repo: "{{ akraino_repo_url }}"
     version: "{{ akraino_repo_branch }}"
     dest: /opt/akraino-tf
+
+- name: Checkout to "{{ gerrit_refspec }}" in repository 'nc/tf'
+  git:
+    repo: "{{ akraino_repo_url }}"
+    dest: /opt/akraino-tf
+    refspec: "{{ gerrit_refspec }}"
+  when: gerrit_refspec|length > 0
 
 - name: copy {{ private_key_file }} on rc_host 
   copy:
@@ -143,6 +150,7 @@
   retries: 36
   delay: 600
   until: pod_state.stdout.find('WORKFLOW') == -1
+  ignore_errors: yes  
 
 - debug: msg='POD workflow is finished'
 
