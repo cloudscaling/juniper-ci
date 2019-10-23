@@ -20,6 +20,7 @@
     repo: "{{ akraino_repo_url }}"
     dest: /opt/akraino-tf
     refspec: "{{ gerrit_refspec }}"
+    version: FETCH_HEAD
   when: gerrit_refspec|length > 0
 
 - name: copy {{ private_key_file }} on rc_host 
