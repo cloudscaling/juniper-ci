@@ -47,17 +47,16 @@ fi
 # downgrade kernel
 
 set -x
-juju-ssh $comp1 "sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy linux-image-4.4.0-116-generic linux-headers-4.4.0-116-generic &> /dev/null"
-juju-ssh $comp1 'sudo sed -i "s/GRUB_DEFAULT=0/GRUB_DEFAULT=4/g" /etc/default/grub ; sudo update-grub ; sudo reboot' || /bin/true
-#juju-ssh $comp1 'sudo sed -i "s/$(uname -r)/4.4.0-116-generic/g" /boot/grub/grub.cfg ; sudo reboot' || /bin/true
-juju-ssh $comp2 "sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy linux-image-4.4.0-116-generic linux-headers-4.4.0-116-generic &> /dev/null"
-juju-ssh $comp2 'sudo sed -i "s/GRUB_DEFAULT=0/GRUB_DEFAULT=4/g" /etc/default/grub ; sudo update-grub ; sudo reboot' || /bin/true
-#juju-ssh $comp2 'sudo sed -i "s/$(uname -r)/4.4.0-116-generic/g" /boot/grub/grub.cfg ; sudo reboot' || /bin/true
+for comp in $comp1 $comp2 ; do
+  juju-ssh $comp "sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy linux-image-4.4.0-116-generic linux-headers-4.4.0-116-generic &> /dev/null"
+  grub_num=`juju-ssh $comp1 "grep  'menuentry.*4\..*-generic' /boot/grub/grub.cfg | awk '{print NR,\$0}' | grep '0-116-generic' | head -1 | awk '{print \$1-1}"`
+  juju-ssh $comp "sudo sed -i 's/GRUB_DEFAULT=0/GRUB_DEFAULT=$grub_num/g' /etc/default/grub ; sudo update-grub ; sudo reboot" || /bin/true
+  #juju-ssh $comp 'sudo sed -i "s/$(uname -r)/4.4.0-116-generic/g" /boot/grub/grub.cfg ; sudo reboot' || /bin/true
+done
 set +x
 echo "INFO: downgraded kernels on compute 1 and 2:"
-wait_kvm_machine $comp1 juju-ssh
+sleep 30
 juju-ssh $comp1 "uname -a"
-wait_kvm_machine $comp2 juju-ssh
 juju-ssh $comp2 "uname -a"
 
 # it also sets variables with names
