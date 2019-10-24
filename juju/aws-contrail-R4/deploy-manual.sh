@@ -65,7 +65,7 @@ cleanup_computes
 # downgrade kernel
 
 set -x
-kernel_minor=1038
+kernel_minor=1049
 for comp in $m2 $m3 ; do
   juju-ssh $comp "sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy linux-image-4.4.0-$kernel_minor-aws linux-headers-4.4.0-$kernel_minor-aws &> /dev/null"
   submenu=`juju-ssh $comp "grep submenu /boot/grub/grub.cfg" 2>/dev/null | sed "s/.*\(gnulinux-advanced-.*\)'.*/\1/"`
