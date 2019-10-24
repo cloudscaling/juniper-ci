@@ -34,7 +34,7 @@ sudo docker run -d --restart=always --name registry_5000\
   registry:2
 docker login -u $docker_user -p $docker_password ${repo_ip}:5000
 
-for ff in `ls ./docker_images/*` ; do
+for ff in `ls -1 ./docker_images/* | grep $CONTRAIL_BUILD` ; do
   echo "Loading $ff"
   res=`docker load -q -i $ff`
   echo "$res"

@@ -83,7 +83,7 @@ docker_password="docker_password"
 ssh $mrepo mkdir docker_images
 scp $HOME/docker/contrail-* "$mrepo:docker_images/"
 scp "$my_dir/../common/prepare-registry.sh" $mrepo:prepare-registry.sh
-ssh $mrepo ./prepare-registry.sh $repo_ip $docker_user $docker_password
+ssh $mrepo "CONTRAIL_BUILD=$CONTRAIL_BUILD ./prepare-registry.sh $repo_ip $docker_user $docker_password"
 controller_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-controller-" | grep $CONTRAIL_BUILD | awk '{print $1}'`
 controller_image_tag=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-controller-" | grep $CONTRAIL_BUILD | awk '{print $2}'`
 analytics_image_name=`ssh $mrepo docker images 2>/dev/null | grep "$repo_ip:5000/contrail-analytics-" | grep $CONTRAIL_BUILD | awk '{print $1}'`
