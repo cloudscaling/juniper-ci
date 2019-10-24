@@ -62,12 +62,21 @@ fi
 
 cleanup_computes
 
-#juju-ssh $m2 "sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy linux-image-4.4.0-1038-aws linux-headers-4.4.0-1038-aws"
-#juju-ssh $m2 "sudo DEBIAN_FRONTEND=noninteractive apt-get purge -fy linux-image-4.4.0-1092-aws linux-image-\$(uname -r)"
-#juju-ssh $m2 "sudo reboot"
-#juju-ssh $m3 "sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy linux-image-4.4.0-1038-aws linux-headers-4.4.0-1038-aws"
-#juju-ssh $m3 "sudo DEBIAN_FRONTEND=noninteractive apt-get purge -fy linux-image-4.4.0-1092-aws linux-image-\$(uname -r)"
-#juju-ssh $m3 "sudo reboot"
+# downgrade kernel
+
+set -x
+kernel_minor=1038
+for comp in $m2 $m3 ; do
+  juju-ssh $comp "sudo DEBIAN_FRONTEND=noninteractive apt-get install -fy linux-image-4.4.0-$kernel_minor-generic linux-headers-4.4.0-$kernel_minor-generic &> /dev/null"
+  submenu=`juju-ssh $comp "grep submenu /boot/grub/grub.cfg" 2>/dev/null | sed "s/.*\(gnulinux-advanced-.*\)'.*/\1/"`
+  item=`juju-ssh $comp "grep menuentry /boot/grub/grub.cfg" 2>/dev/null | grep '0-${kernel_minor}-generic-advanced' | sed "s/.*\(gnulinux-.*\)'.*/\1/"`
+  juju-ssh $comp "sudo sed -i \"s/GRUB_DEFAULT=.*$/GRUB_DEFAULT='${submenu}>${item}'/\" /etc/default/grub ; sudo update-grub ; sudo reboot" || /bin/true
+done
+set +x
+echo "INFO: downgraded kernels on compute 1 and 2:"
+sleep 30
+juju-ssh $m2 "uname -a"
+juju-ssh $m3 "uname -a"
 
 juju-status-tabular
 
