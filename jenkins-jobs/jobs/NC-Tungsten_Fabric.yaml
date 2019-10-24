@@ -42,6 +42,10 @@
                 branch-pattern: 'master'
           server-name: 'gerrit.akraino.org'
           no-name-and-email: true
+          failure-message: "Logs: $NEXUS_URL/content/sites/logs/$NEXUS_PATH"
+          successful-message: "Logs: $NEXUS_URL/content/sites/logs/$NEXUS_PATH"
+          unstable-message: "Logs: $NEXUS_URL/content/sites/logs/$NEXUS_PATH"
+          notbuilt-message: "Logs: $NEXUS_URL/content/sites/logs/$NEXUS_PATH"
     builders:
       - shell: |
           #!/bin/bash -e
