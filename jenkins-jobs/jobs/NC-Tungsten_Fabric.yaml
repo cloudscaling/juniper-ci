@@ -2,6 +2,10 @@
     name: NC-Tungsten_Fabric
     description: "Deploys Akraino Regional Controller and Treasuremap node in AWS and initiate airship+TF deployment."
     defaults: global
+    NEXUS_URL: https://nexus.akraino.org
+    NEXUS_SILO: juniper
+    NEXUS_PATH: '{NEXUS_SILO}/job/{JOB_NAME}/{BUILD_NUMBER}'
+    NEXUS_LOGS_URL: '{NEXUS_URL}/content/sites/logs/{NEXUS_PATH}'
     parameters:
       - node:
           name: SLAVE_NAME
@@ -41,10 +45,8 @@
                 branch-pattern: 'master'
           server-name: 'gerrit.akraino.org'
           no-name-and-email: true
-          failure-message: "Logs: $NEXUS_URL/content/sites/logs/$NEXUS_PATH"
-          successful-message: "Logs: $NEXUS_URL/content/sites/logs/$NEXUS_PATH"
-          unstable-message: "Logs: $NEXUS_URL/content/sites/logs/$NEXUS_PATH"
-          notbuilt-message: "Logs: $NEXUS_URL/content/sites/logs/$NEXUS_PATH"
+          failure-message: 'FAILED.  Logs: {NEXUS_LOGS_URL}'
+          successful-message: 'SUCCESS  Logs: {NEXUS_LOGS_URL}'
     builders:
       - shell: |
           #!/bin/bash -e
@@ -87,17 +89,13 @@
           #Compressing logs
           for f in logs/*.log; do zip -9 "$f.zip" "$f"; done
 
-          NEXUS_URL=https://nexus.akraino.org
-          SILO=juniper
           JENKINS_HOSTNAME=jenkins.progmaticlab.com
           BUILD_URL="${JENKINS_HOSTNAME}/job/${JOB_NAME}/${BUILD_NUMBER}/"
-          NEXUS_PATH="${SILO}/job/${JOB_NAME}/${BUILD_NUMBER}"
-
           
           lftools deploy logs $NEXUS_URL $NEXUS_PATH $BUILD_URL
           lftools deploy nexus-zip $NEXUS_URL logs $NEXUS_PATH logs/*.zip
 
-          echo =============== Logs uploaded to $NEXUS_URL/content/sites/logs/$NEXUS_PATH ==============
+          echo =============== Logs uploaded to $NEXUS_LOGS_URL ==============
 
       - description-setter:
           regexp: "DESCRIPTION (.*)"
