@@ -88,8 +88,8 @@
           for f in logs/*.log; do zip -9 "$f.zip" "$f"; done
 
 
-          NEXUS_PATH: '${AKRAINO_NEXUS_PATH}/${JOB_NAME}/${BUILD_NUMBER}'
-          NEXUS_LOGS_URL: '${AKRAINO_NEXUS_URL}/content/sites/logs/${NEXUS_PATH}'
+          NEXUS_PATH="${AKRAINO_NEXUS_PATH}/${JOB_NAME}/${BUILD_NUMBER}"
+          NEXUS_LOGS_URL="${AKRAINO_NEXUS_URL}/content/sites/logs/${NEXUS_PATH}"
           JENKINS_HOSTNAME=jenkins.progmaticlab.com
           BUILD_URL="${JENKINS_HOSTNAME}/job/${JOB_NAME}/${BUILD_NUMBER}/"
           
