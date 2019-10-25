@@ -256,12 +256,14 @@ function run_os_checks() {
     #delete_network $netsfx
   fi
 
-  # check heat
-  echo "INFO: check heat resources"
-  if ! openstack orchestration resource type list | grep ContrailV2 ; then
-    echo "ERROR: Contrail's heat resouces not found!"
-    openstack orchestration resource type list
-    ret=1
+  if [[ "$JOB_VERSION" == 'R5' ]]; then
+    # check heat
+    echo "INFO: check heat resources"
+    if ! openstack orchestration resource type list | grep ContrailV2 ; then
+      echo "ERROR: Contrail's heat resouces not found!"
+      openstack orchestration resource type list
+      ret=1
+    fi
   fi
 
   deactivate_venv

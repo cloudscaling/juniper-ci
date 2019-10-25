@@ -186,7 +186,7 @@ juju-deploy $PLACE/contrail-agent --config repo_config_cv.yaml
 if [[ "$USE_DPDK" == "true" ]] ; then
   juju-set contrail-agent dpdk=True dpdk-coremask=1,2 dpdk-main-mempool-size=16384
 fi
-juju-set contrail-agent vhost-mtu=1540 physical-interface=$IF2
+juju-set contrail-agent vhost-mtu=1540 physical-interface=$IF1
 
 detect_machines
 wait_for_machines $m1 $m2 $m3 $m4 $m5
