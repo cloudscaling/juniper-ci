@@ -61,7 +61,18 @@ ipa_otp = "$FREE_IPA_OTP"
 EOF
 fi
 
-cat << EOF >> undercloud.conf
+if [[ 'newton|ocata' =~ $OPENSTACK_VERSION ]]; then
+  cat << EOF >> undercloud.conf
+network_cidr = $prov_ip.0/24
+dhcp_start = $prov_ip.100
+dhcp_end = $prov_ip.149
+gateway = $prov_ip.2
+inspection_iprange = $prov_ip.150,$prov_ip.170
+masquerade_network = $prov_ip.0/24
+masquerade = true
+EOF
+else
+  cat << EOF >> undercloud.conf
 [ctlplane-subnet]
 cidr = $prov_ip.0/24
 dhcp_start = $prov_ip.100
@@ -70,7 +81,7 @@ gateway = $prov_ip.2
 inspection_iprange = $prov_ip.150,$prov_ip.170
 masquerade = true
 EOF
-
+fi
 
 if [[ "${ENVIRONMENT_OS_VERSION:0:1}" == '8' ]] ; then
   #openstack tripleo container image prepare default --local-push-destination --output-env-file containers-prepare-parameter.yaml
