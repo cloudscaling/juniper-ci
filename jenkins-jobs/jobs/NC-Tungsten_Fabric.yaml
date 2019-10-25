@@ -2,10 +2,6 @@
     name: NC-Tungsten_Fabric
     description: "Deploys Akraino Regional Controller and Treasuremap node in AWS and initiate airship+TF deployment."
     defaults: global
-    NEXUS_URL: https://nexus.akraino.org
-    NEXUS_SILO: juniper
-    NEXUS_PATH: '${NEXUS_SILO}/job/${JOB_NAME}/${BUILD_NUMBER}'
-    NEXUS_LOGS_URL: '${NEXUS_URL}/content/sites/logs/${NEXUS_PATH}'
     parameters:
       - node:
           name: SLAVE_NAME
@@ -45,8 +41,8 @@
                 branch-pattern: 'master'
           server-name: 'gerrit.akraino.org'
           no-name-and-email: true
-          failure-message: "FAILED.  Logs: ${NEXUS_LOGS_URL}"
-          successful-message: "SUCCESS  Logs: ${NEXUS_LOGS_URL}"
+          failure-message: "FAILED.  Logs: ${AKRAINO_NEXUS_URL}/content/sites/logs/${AKRAINO_NEXUS_PATH}/${JOB_NAME}/${BUILD_NUMBER}"
+          successful-message: "SUCCESS  Logs: ${AKRAINO_NEXUS_URL}/content/sites/logs/${AKRAINO_NEXUS_PATH}/${JOB_NAME}/${BUILD_NUMBER}"
     builders:
       - shell: |
           #!/bin/bash -e
@@ -65,8 +61,6 @@
 
           echo "DESCRIPTION juniper_ci/branch==$CI_BRANCH CLEAN_BEFORE=$CLEAN_BEFORE CLEAN_AWS_AFTER=$CLEAN_AWS_AFTER"
 
-          echo NEXUS_LOGS_URL=$NEXUS_LOGS_URL
-          exit;
 
           function aws_cleanup {
             if [[ $CLEAN_AWS_AFTER == 'true' ]] ; then
@@ -93,11 +87,14 @@
           #Compressing logs
           for f in logs/*.log; do zip -9 "$f.zip" "$f"; done
 
+
+          NEXUS_PATH: '${AKRAINO_NEXUS_PATH}/${JOB_NAME}/${BUILD_NUMBER}'
+          NEXUS_LOGS_URL: '${AKRAINO_NEXUS_URL}/content/sites/logs/${NEXUS_PATH}'
           JENKINS_HOSTNAME=jenkins.progmaticlab.com
           BUILD_URL="${JENKINS_HOSTNAME}/job/${JOB_NAME}/${BUILD_NUMBER}/"
           
-          lftools deploy logs $NEXUS_URL $NEXUS_PATH $BUILD_URL
-          lftools deploy nexus-zip $NEXUS_URL logs $NEXUS_PATH logs/*.zip
+          lftools deploy logs $AKRAINO_NEXUS_URL $NEXUS_PATH $BUILD_URL
+          lftools deploy nexus-zip $AKRAINO_NEXUS_URL logs $NEXUS_PATH logs/*.zip
 
           echo =============== Logs uploaded to $NEXUS_LOGS_URL ==============
 
