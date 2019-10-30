@@ -2,7 +2,7 @@
 
 source "$functions"
 
-if juju show-controller $juju_controller_name ; then
+if timeout 30s juju show-controller $juju_controller_name ; then
   juju-remove-machine 0 --force || /bin/true
   juju-remove-machine 1 --force || /bin/true
   juju-remove-machine 2 --force || /bin/true
