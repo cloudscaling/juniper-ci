@@ -363,7 +363,7 @@ else
   fi
   export _CONTRAIL_REGISTRY_IP=$prov_ip
   export CONTRAIL_REGISTRY="${prov_ip}:8787"
-  export CONTRAIL_TAG="${OPENSTACK_VERSION}-${CONTRAIL_VERSION}"
+  export CONTRAIL_TAG="${CONTRAIL_VERSION}"
   if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
     export LINUX_DISTR=${LINUX_DISTR:-'rhel7'}
     export LINUX_DISTR_VER=${LINUX_DISTR_VER:-'latest'}
