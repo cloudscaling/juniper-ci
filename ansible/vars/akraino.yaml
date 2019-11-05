@@ -1,6 +1,6 @@
 region: eu-central-1
 ami: ami-080d4d4c37b0aa206  # Ubuntu Xenial LTS
-vpc_subnet_id: subnet-516d681b
+vpc_subnet_id: subnet-ece18184
 project_name: akraino
 app_code_user: "ubuntu" # remote user
 private_key_file: akraino-aws-private-key.pem
