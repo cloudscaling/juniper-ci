@@ -1,4 +1,4 @@
-region: eu-west-3
+region: eu-central-1
 ami: ami-080d4d4c37b0aa206  # Ubuntu Xenial LTS
 vpc_subnet_id: subnet-516d681b
 project_name: akraino
