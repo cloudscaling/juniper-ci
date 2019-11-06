@@ -7,11 +7,10 @@
           name: SLAVE_NAME
           description: "Select slave: one for specific node or multiple for any node."
           default-slaves:
-            - slave01
             - slave04
           allowed-slaves:
-            - slave01
             - slave04
+            - slave01
           ignore-offline-nodes: false
           allowed-multiselect: false
       - choice:
