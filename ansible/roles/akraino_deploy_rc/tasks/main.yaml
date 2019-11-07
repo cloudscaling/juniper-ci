@@ -143,12 +143,12 @@
 
 - debug: msg='POD workflow started'
 
-- name: Waiting for POD deploying finished (timeout=6h) 
+- name: Waiting for POD deploying finished (timeout=8h) 
   shell: bash -c 'source setup-env.sh; /opt/api-server/scripts/rc_cli -H $RC_HOST -u $RC_USER -p $RC_PW pod show {{ pod_uuid }} | grep state'
   args:
     chdir: /opt/akraino-tf
   register: pod_state
-  retries: 36
+  retries: 48
   delay: 600
   until: pod_state.stdout.find('WORKFLOW') == -1
   ignore_errors: yes  
