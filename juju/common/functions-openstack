@@ -325,9 +325,15 @@ function _check_instance_ssh_and_metadata() {
   fi
   echo ""
   if ! echo "$output" | grep "$fip" ; then
-    echo "ERROR: Can't find public ip $fip in metadata output:"
+    echo "WARNING: Can't find public ip $fip in metadata output:"
     echo "$output"
-    return 1
+    echo "INFO: check metadata for local ipv4"
+    output=`$SSH_CMD $mch sshpass -p 'cubswin:\)' ssh $ssh_opts cirros@$ip curl -s http://169.254.169.254/latest/meta-data/local-ipv4 2>/dev/null`
+    if [[ -z "$output" ]] ; then
+      echo "WARNING: Can't find local ip-s in metadata output:"
+      echo "$output"
+      return 1
+    fi
   fi
   echo "INFO: Can ssh and get correct metadata for instance by ip $ip"
   return 0

@@ -1,7 +1,3 @@
-config:
-  environment.http_proxy: ""
-  user.network_mode: ""
-  linux.kernel_modules: overlay, nf_nat
 description: Default Juju LXD profile
 devices:
   eth0:
