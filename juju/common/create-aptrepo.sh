@@ -75,7 +75,7 @@ EOF
 echo "INFO: Include all debs: $(date)"
 reprepro includedeb $SERIES /tmp/pkgs/*.deb
 echo "INFO: All debs are included: $(date)"
-reprepro list xenial > $HOME/logs/reprepro.log
+reprepro list $SERIES > $HOME/logs/reprepro.log
 
 cat >apt-repo.conf <<EOF
 Alias /ubuntu/ "/srv/reprepro/ubuntu/"
