@@ -35,6 +35,9 @@
           description: Deploy 3 nodes for kubernetes cluster in case of True
           default: false
       - string:
+          name: CHARMS_REPO_ORG
+          default: 'Juniper'
+      - string:
           name: CHARMS_BRANCH
           default: 'R5'
       - string:
@@ -45,7 +48,7 @@
           default: master-latest
           description: "Tag's suffix for images from opencontrailnightly"
     scm:
-      - juniper-contrail-charms-branch
+      - contrail-charms-org-branch
       - juniper-ci
     builders:
       - shell: |
@@ -127,6 +130,9 @@
             - ens4
             - ens3
       - string:
+          name: CHARMS_REPO_ORG
+          default: 'Juniper'
+      - string:
           name: CHARMS_BRANCH
           default: 'R5'
       - string:
@@ -148,7 +154,7 @@
             - auto
           description: Valid values are "upstream" (Docker PPA), "apt" (Ubuntu archive), "auto" (Ubuntu archive)
     scm:
-      - juniper-contrail-charms-branch
+      - contrail-charms-org-branch
       - juniper-ci
     builders:
       - shell: |
