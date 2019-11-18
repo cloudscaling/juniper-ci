@@ -174,8 +174,8 @@
           name: PHYS_INT
           description: Interface for vhost0. Right now it's passed as a name to vrouter and will be passed as CONTROL_NODES.
           choices:
-            - ens3
             - ens4
+            - ens3
       - bool:
           name: USE_DPDK
           description: "Deploy Contrail's vrouter in DPDK mode"

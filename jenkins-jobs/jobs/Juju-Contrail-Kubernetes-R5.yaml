@@ -124,8 +124,8 @@
           name: PHYS_INT
           description: Interface for vhost0. Right now it's passed as a name to vrouter and will be passed as CONTROL_NODES.
           choices:
-            - ens3
             - ens4
+            - ens3
       - string:
           name: CHARMS_BRANCH
           default: 'R5'

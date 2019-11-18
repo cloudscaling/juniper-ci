@@ -16,11 +16,11 @@ function catch_errors_ce() {
 # detect IP-s - place all things to specified interface for now
 control_network_cfg=""
 name_resolution_cfg=""
-if [[ "$PHYS_INT" == 'ens4' ]]; then
-  # hard-coded definition...
-  control_network_cfg="--config control-network=$addr_vm.0/24"
-  name_resolution_cfg="--config local-rabbitmq-hostname-resolution=true"
-fi
+#if [[ "$PHYS_INT" == 'ens4' ]]; then
+#  # hard-coded definition...
+#  control_network_cfg="--config control-network=$addr_vm.0/24"
+#  name_resolution_cfg="--config local-rabbitmq-hostname-resolution=true"
+#fi
 
 # version 2
 PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
@@ -113,6 +113,7 @@ docker_opts="--config docker-registry=$CONTAINER_REGISTRY --config image-tag=$CO
 juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params --config log-level=SYS_DEBUG $control_network_cfg $name_resolution_cfg $docker_opts
 juju-expose contrail-controller
 juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
+juju-set contrail-controller data-network=$PHYS_INT
 
 juju-deploy $PLACE/contrail-analyticsdb --to $cont1 --config log-level=SYS_DEBUG $control_network_cfg $docker_opts
 juju-set contrail-analyticsdb cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
@@ -134,7 +135,6 @@ fi
 
 juju-deploy $PLACE/contrail-openstack $docker_opts
 juju-deploy $PLACE/contrail-agent --config log-level=SYS_DEBUG $docker_opts
-juju-set contrail-agent physical-interface=$PHYS_INT
 if [[ "$USE_DPDK" == "true" ]] ; then
   juju-set contrail-agent dpdk=True dpdk-coremask=1,2 dpdk-main-mempool-size=16384
 fi
