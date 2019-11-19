@@ -72,7 +72,7 @@ juju-deploy $PLACE/contrail-kubernetes-master --config log-level=SYS_DEBUG --con
 juju-deploy $PLACE/contrail-kubernetes-node --config log-level=SYS_DEBUG $docker_opts
 
 # contrail
-juju-deploy $PLACE/contrail-agent --config log-level=SYS_DEBUG --config physical-interface=$PHYS_INT $docker_opts
+juju-deploy $PLACE/contrail-agent --config log-level=SYS_DEBUG $docker_opts
 
 juju-deploy $PLACE/contrail-analytics --config log-level=SYS_DEBUG --to $cont1 $control_network_cfg $docker_opts
 juju-expose contrail-analytics
