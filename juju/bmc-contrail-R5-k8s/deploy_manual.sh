@@ -16,11 +16,11 @@ function catch_errors_ce() {
 # detect IP-s - place all things to specified interface for now
 control_network_cfg=""
 name_resolution_cfg=""
-# if [[ "$PHYS_INT" == 'ens4' ]]; then
-#   # hard-coded definition...
-#   control_network_cfg="--config control-network=$addr_vm.0/24"
+if [[ "$PHYS_INT" == 'ens4' ]]; then
+  # hard-coded definition...
+  control_network_cfg="--config control-network=$addr_vm.0/24"
 #   name_resolution_cfg="--config local-rabbitmq-hostname-resolution=true"
-# fi
+fi
 
 # version 2
 PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
@@ -63,7 +63,6 @@ juju-deploy --series $SERIES cs:~containers/kubernetes-worker-550 --to $comp1 \
   --config docker_runtime_repo="deb [arch={ARCH}] https://download.docker.com/linux/ubuntu {CODE} stable" \
   --config docker_runtime_key_url="https://download.docker.com/linux/ubuntu/gpg" \
   --config docker_runtime_package="docker-ce"
-
 
 docker_opts="--config docker-registry=$CONTAINER_REGISTRY --config image-tag=$CONTRAIL_VERSION --config docker-user=$DOCKER_USERNAME --config docker-password=$DOCKER_PASSWORD --config docker-registry-insecure=true"
 

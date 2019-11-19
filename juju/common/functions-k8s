@@ -7,7 +7,7 @@ function check_k8s_cluster() {
 set -o pipefail
 
 echo "INFO: cluster state"
-kubecctl get all --all-namespaces
+kubectl get all --all-namespaces
 
 echo "INFO: check NS create/delete"
 kubectl create ns jujuns
