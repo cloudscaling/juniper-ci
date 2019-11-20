@@ -19,7 +19,7 @@ name_resolution_cfg=""
 if [[ "$PHYS_INT" == 'ens4' ]]; then
   # hard-coded definition...
   control_network_cfg="--config control-network=$addr_vm.0/24"
-#   name_resolution_cfg="--config local-rabbitmq-hostname-resolution=true"
+  name_resolution_cfg="--config local-rabbitmq-hostname-resolution=true"
 fi
 
 # version 2
@@ -71,7 +71,7 @@ juju-deploy $PLACE/contrail-kubernetes-master --config log-level=SYS_DEBUG --con
 juju-deploy $PLACE/contrail-kubernetes-node --config log-level=SYS_DEBUG $docker_opts
 
 # contrail
-juju-deploy $PLACE/contrail-agent --config log-level=SYS_DEBUG $docker_opts
+juju-deploy $PLACE/contrail-agent --config log-level=SYS_DEBUG --config physical-interface=$PHYS_INT $docker_opts
 
 juju-deploy $PLACE/contrail-analytics --config log-level=SYS_DEBUG --to $cont1 $control_network_cfg $docker_opts
 juju-expose contrail-analytics
@@ -81,7 +81,6 @@ juju-set contrail-analyticsdb cassandra-minimum-diskgb="4" cassandra-jvm-extra-o
 
 juju-deploy $PLACE/contrail-controller --config log-level=SYS_DEBUG --to $cont1 $control_network_cfg $name_resolution_cfg $docker_opts
 juju-set contrail-controller cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g" auth-mode="no-auth"
-juju-set contrail-controller data-network=$PHYS_INT
 juju-expose contrail-controller
 
 # misc
