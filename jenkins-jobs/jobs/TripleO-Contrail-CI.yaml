@@ -64,10 +64,14 @@
           name: CONTRAIL_VERSION
           description: "Version of Contrail"
           choices:
+            - '1912'
+            - '1911'
             - '1910'
             - '5.1'
             - '5.0'
             - '4.1'
+            - '4.1.3'
+            - '4.1.4'
             - '4.0'
             - '3.2'
       - choice:
