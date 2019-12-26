@@ -24,6 +24,7 @@
             - queens
             - rocky
             - stein
+            - train
       - choice:
           name: DEPLOY_BUNDLE
           description: |
