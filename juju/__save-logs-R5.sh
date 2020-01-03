@@ -10,7 +10,7 @@ fi
 
 rm -f logs.*
 tar -cf logs.tar /var/log/juju 2>/dev/null
-for ldir in "$HOME/logs" '/etc/apache2' '/etc/apt' '/etc/contrail' '/etc/contrailctl' '/etc/neutron' '/etc/nova' '/etc/haproxy' '/var/log/upstart' '/var/log/neutron' '/var/log/nova' '/var/log/contrail' '/etc/keystone' '/var/log/keystone' ; do
+for ldir in "$HOME/logs" '/etc/apache2' '/etc/apt' '/etc/contrail' '/etc/contrailctl' '/etc/neutron' '/etc/nova' '/etc/haproxy' '/var/log/upstart' '/var/log/neutron' '/var/log/nova' '/var/log/contrail' '/etc/keystone' '/var/log/keystone' '/etc/heat' '/var/log/heat' ; do
   if [ -d "$ldir" ] ; then
     tar -rf logs.tar "$ldir" 2>/dev/null
   fi
