@@ -13,24 +13,12 @@
       - password:
           name: PASSWORD
           description: "password for the user to access jenkins for update jobs"
-      - string:
-          name: CI_BRANCH
-          default: master
-          description: git branch of repo juniper-ci
     scm:
       - juniper-ci
       - opendev:
           organization: jjb
           repo: jenkins-job-builder
     builders:
-      - shell: |
-          #!/bin/bash -e
-          echo juniper-ci checkout to ${CI_BRANCH}
-          if [[ "$CI_BRANCH" != "master" ]]; then
-            cd juniper-ci
-            git checkout "$CI_BRANCH"
-            cd ..
-          fi
       - shell: |
           #!/bin/bash -e
           cd jenkins-job-builder
