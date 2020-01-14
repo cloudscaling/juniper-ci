@@ -200,6 +200,9 @@ esac
 
 wait_for_all_machines
 
+echo "INFO: ISSU_TEST deploy second controller"
+run_controller 7 16384 0
+
 echo "INFO: Environment created $(date)"
 
 virsh net-dhcp-leases $nname
