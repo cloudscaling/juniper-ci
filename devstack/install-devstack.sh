@@ -29,7 +29,7 @@ set -ex
 (echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | sudo fdisk /dev/xvdh
 sudo mkfs.ext4 /dev/xvdh1
 sudo mkdir -p /opt/stack
-sudo su -c \"echo '/dev/xvdh1  /opt/stack  auto  defaults,auto  0  0' >> /etc/fstab\"
+sudo bash -c "echo '/dev/xvdh1  /opt/stack  auto  defaults,auto  0  0' >> /etc/fstab"
 sudo mount /opt/stack
 sudo chown \$USER /opt/stack
 cd /opt/stack; git clone https://github.com/openstack/ec2api-tempest-plugin
