@@ -9,6 +9,8 @@ SSH_DEST="ubuntu@$public_ip"
 SSH="ssh -i kp $SSH_OPTS $SSH_DEST"
 SCP="scp -i kp $SSH_OPTS"
 
+rm -f stack.log
+
 while [ $($SSH 'pwd > /dev/null' ; echo $?) != 0 ]; do
   sleep 5
 done
@@ -41,8 +43,9 @@ cd /opt/stack
 git clone https://github.com/openstack/ec2api-tempest-plugin
 git clone https://github.com/openstack-dev/devstack.git
 
-sudo mkdir /var/log/journal
-sudo mkdir /etc/systemd/journald.conf.d
+sudo mkdir /var/log/journal || /bin/true
+sudo mkdir /etc/systemd/journald.conf.d || /bin/true
+sudo rm -f /etc/systemd/journald.conf.d/size.conf
 echo [Journal] | sudo tee /etc/systemd/journald.conf.d/size.conf > /dev/null
 echo SystemMaxUse=1G | sudo tee -a /etc/systemd/journald.conf.d/size.conf > /dev/null
 echo RuntimeMaxUse=1G | sudo tee -a /etc/systemd/journald.conf.d/size.conf > /dev/null
