@@ -8,7 +8,9 @@ VM_TYPE="r4.xlarge"
 # ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-201704
 # IMAGE_ID="ami-618fab04"
 # ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20190406 eu-central-1
-IMAGE_ID="ami-05710338b6a5013d1"
+#IMAGE_ID="ami-05710338b6a5013d1"
+# ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-2020 eu-central-1
+IMAGE_ID="ami-0b418580298265d5c"
 
 function get_value_from_json() {
   local cmd_out=$($1 | jq $2)
