@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 localrcfile=$1
 ENV_FILE="cloudrc"
@@ -25,6 +25,7 @@ done
 
 echo -------------------------------------------------------------------------- $(date)
 cat <<EOF | $SSH
+set -ex
 (echo o; echo n; echo p; echo 1; echo ; echo ; echo w) | sudo fdisk /dev/xvdh
 sudo mkfs.ext4 /dev/xvdh1
 sudo mkdir -p /opt/stack
