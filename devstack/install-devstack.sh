@@ -32,11 +32,13 @@ sudo mkdir -p /opt/stack
 sudo bash -c "echo '/dev/xvdh1  /opt/stack  auto  defaults,auto  0  0' >> /etc/fstab"
 sudo mount /opt/stack
 sudo chown \$USER /opt/stack
-cd /opt/stack; git clone https://github.com/openstack/ec2api-tempest-plugin
 
 sudo sed -i 's/# deb/deb/g' /etc/apt/sources.list
 sudo apt-get -qq update
 sudo DEBIAN_FRONTEND=noninteractive apt-get -fqy install git ebtables bridge-utils
+
+cd /opt/stack
+git clone https://github.com/openstack/ec2api-tempest-plugin
 git clone https://github.com/openstack-dev/devstack.git
 
 sudo mkdir /var/log/journal
@@ -51,9 +53,9 @@ EOF
 echo -------------------------------------------------------------------------- $(date)
 cp $localrcfile localrc
 sed -i "s\^SERVICE_HOST.*$\SERVICE_HOST=$public_ip\m" localrc
-$SCP localrc $SSH_DEST:devstack/localrc
+$SCP localrc $SSH_DEST:/opt/stack/devstack/localrc
 echo "Installing devstack"
-$SSH "cd devstack; ./stack.sh < /dev/null" &> stack.log
+$SSH "cd /opt/stack/devstack; ./stack.sh < /dev/null" &> stack.log
 exit_code=$?
 if [[ $exit_code != 0 ]]; then
   cat stack.log
