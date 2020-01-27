@@ -46,7 +46,7 @@ fi
 #   exit 1
 # fi
 # common_repos+=" rhel-7-server-openstack-${enable_repo}-rpms"
-# #common_repos+=" rhel-7-server-openstack-${enable_repo}-devtools-rpms"
+# common_repos+=" rhel-7-server-openstack-${enable_repo}-devtools-rpms"
 
 # enable_repos_opts=""
 # for i in $common_repos ; do

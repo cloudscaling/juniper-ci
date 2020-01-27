@@ -373,7 +373,7 @@ function rhel_get_repos_for_os() {
      local enable_repo=$(rhel_os2num)
      common_repos+=" rhel-server-rhscl-7-rpms"
      common_repos+=" rhel-7-server-openstack-${enable_repo}-rpms"
-    #  common_repos+=" rhel-7-server-openstack-${enable_repo}-devtools-rpms"
+     common_repos+=" rhel-7-server-openstack-${enable_repo}-devtools-rpms"
     ;; 
     8) 
      local common_repos="rhel-8-for-x86_64-baseos-rpms rhel-8-for-x86_64-appstream-rpms"
