@@ -97,19 +97,6 @@
           repo: tempest
 
 - scm:
-    name: juniper-contrail-charms
-    scm:
-      - github:
-          organization: Juniper
-          repo: contrail-charms
-
-- scm:
-    name: contrail-build-poc
-    scm:
-      - github:
-          organization: progmaticlab
-          repo: contrail-build-poc
-- scm:
     name: contrail-container-builder
     scm:
       - github:
@@ -121,13 +108,6 @@
       - github:
           organization: juniper
           repo: contrail-ansible-deployer
-- scm:
-    name: juniper-contrail-charms-branch
-    scm:
-      - github-branch:
-          organization: Juniper
-          repo: contrail-charms
-          branch: ${CHARMS_BRANCH}
 - scm:
     name: contrail-charms-org-branch
     scm:

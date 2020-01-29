@@ -36,10 +36,10 @@
           default: false
       - string:
           name: CHARMS_REPO_ORG
-          default: 'Juniper'
+          default: 'tungstenfabric'
       - string:
           name: CHARMS_BRANCH
-          default: 'R5'
+          default: 'master'
       - string:
           name: CONTAINER_REGISTRY
           default: opencontrailnightly
@@ -51,13 +51,6 @@
       - contrail-charms-org-branch
       - juniper-ci
     builders:
-      - shell: |
-          #!/bin/bash -e
-          if [[ "$CHARMS_BRANCH" != "master" ]]; then
-            cd contrail-charms
-            git checkout "$CHARMS_BRANCH"
-            cd ..
-          fi
       - shell: |
           #!/bin/bash -e
           if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
@@ -131,10 +124,10 @@
             - ens4
       - string:
           name: CHARMS_REPO_ORG
-          default: 'Juniper'
+          default: 'tungstenfabric'
       - string:
           name: CHARMS_BRANCH
-          default: 'R5'
+          default: 'master'
       - string:
           name: CONTAINER_REGISTRY
           default: opencontrailnightly

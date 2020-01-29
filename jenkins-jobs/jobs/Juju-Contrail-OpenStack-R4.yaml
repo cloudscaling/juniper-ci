@@ -64,24 +64,20 @@
           description: "Use external RabbitMQ"
           default: false
       - string:
+          name: CHARMS_REPO_ORG
+          default: 'Juniper'
+      - string:
           name: CHARMS_BRANCH
-          default: 'master'
+          default: 'R4'
       - bool:
           name: RUN_TEMPEST
           description: "Run neutron tests from tempest"
           default: false
     scm:
-      - juniper-contrail-charms-branch
+      - contrail-charms-org-branch
       - juniper-ci
       - tempest
     builders:
-      - shell: |
-          #!/bin/bash -e
-          if [[ "$CHARMS_BRANCH" != "master" ]]; then
-            cd contrail-charms
-            git checkout "$CHARMS_BRANCH"
-            cd ..
-          fi
       - shell: |
           #!/bin/bash -e
           if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
@@ -186,10 +182,13 @@
           description: "Deploy Contrail's vrouter in DPDK mode"
           default: false
       - string:
+          name: CHARMS_REPO_ORG
+          default: 'Juniper'
+      - string:
           name: CHARMS_BRANCH
-          default: 'master'
+          default: 'R4'
     scm:
-      - juniper-contrail-charms-branch
+      - contrail-charms-org-branch
       - juniper-ci
     builders:
       - shell: |
