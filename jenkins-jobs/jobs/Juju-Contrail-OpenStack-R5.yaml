@@ -138,10 +138,11 @@
           name: VERSION
           description: "Version of the OpenStack. ocata -> xenial, queens/rocky/stein -> bionic."
           choices:
-            - ocata
             - queens
             - rocky
             - stein
+            - train
+            - ocata
       - choice:
           name: DEPLOY_MODE
           description: |
