@@ -113,7 +113,7 @@
     scm:
       - github-branch:
           organization: ${CHARMS_REPO_ORG}
-          repo: contrail-charms
+          repo: ${CHARMS_REPO_NAME}
           branch: ${CHARMS_BRANCH}
 
 

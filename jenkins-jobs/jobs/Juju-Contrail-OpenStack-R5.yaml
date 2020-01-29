@@ -54,6 +54,9 @@
           name: CHARMS_REPO_ORG
           default: 'tungstenfabric'
       - string:
+          name: CHARMS_REPO_NAME
+          default: 'tf-charms'
+      - string:
           name: CHARMS_BRANCH
           default: 'master'
       - string:
@@ -177,6 +180,9 @@
       - string:
           name: CHARMS_REPO_ORG
           default: 'tungstenfabric'
+      - string:
+          name: CHARMS_REPO_NAME
+          default: 'tf-charms'
       - string:
           name: CHARMS_BRANCH
           default: 'master'

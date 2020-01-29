@@ -67,6 +67,9 @@
           name: CHARMS_REPO_ORG
           default: 'Juniper'
       - string:
+          name: CHARMS_REPO_NAME
+          default: 'contrail-charms'
+      - string:
           name: CHARMS_BRANCH
           default: 'R4'
       - bool:
@@ -184,6 +187,9 @@
       - string:
           name: CHARMS_REPO_ORG
           default: 'Juniper'
+      - string:
+          name: CHARMS_REPO_NAME
+          default: 'contrail-charms'
       - string:
           name: CHARMS_BRANCH
           default: 'R4'
