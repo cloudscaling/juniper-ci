@@ -23,7 +23,7 @@ name_resolution_cfg=""
 #fi
 
 # version 2
-PLACE="--series=$SERIES $WORKSPACE/contrail-charms"
+PLACE="--series=$SERIES $WORKSPACE/tf-charms"
 
 comp1_ip="$addr.$comp_1_idx"
 comp1=`get_machine_by_ip $comp1_ip`
