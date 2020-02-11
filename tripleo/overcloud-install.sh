@@ -515,6 +515,10 @@ else
   sed -i "s/VROUTER_GATEWAY:.*/#VROUTER_GATEWAY: ${prov_ip}/g" $contrail_services_file
   # enable debug output
   sed -i "/VROUTER_GATEWAY:.*/a \    LOG_LEVEL: SYS_DEBUG" $contrail_services_file
+
+  # TODO: added just for test
+  sed -i "/VROUTER_GATEWAY:.*/a \    SERVICE_CORE_MASK: 0x03" $contrail_services_file
+  sed -i "/VROUTER_GATEWAY:.*/a \    DPDK_CTRL_THREAD_MASK: 0x0C" $contrail_services_file
 fi
 sed -i "s/ControlVirtualInterface:.*/ControlVirtualInterface: ens3/g" $contrail_net_file
 sed -i "s/PublicVirtualInterface:.*/PublicVirtualInterface: ens3/g" $contrail_net_file
