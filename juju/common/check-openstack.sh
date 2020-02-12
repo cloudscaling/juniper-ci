@@ -1,5 +1,7 @@
 #!/bin/bash -eE
 
+set -x
+
 my_file="${BASH_SOURCE[0]}"
 my_dir="$(dirname $my_file)"
 source "$my_dir/functions"
