@@ -425,7 +425,7 @@ function check_heat() {
   if ! openstack orchestration resource type list | grep ContrailV2 ; then
     echo "ERROR: Contrail's heat resouces not found!"
     openstack orchestration resource type list
-    ret=1
+    return 1
   fi
   cat >$WORKSPACE/ipam.yaml <<EOF
 heat_template_version: 2013-05-23
@@ -446,22 +446,22 @@ resources:
 EOF
 
   local fx=$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 4)
-  if ! openstack stack create -t $WORKSPACE/ipam.yaml/ipam.yaml --parameter ipam_name=testipam teststack-$sfx ; then
+  if ! openstack stack create -t $WORKSPACE/ipam.yaml --parameter ipam_name=testipam teststack-$sfx ; then
     echo "ERROR: Heat resouce creation failed!"
     openstack stack list
-    ret=1
+    return 1
   fi
   sleep 5
   local status
   if ! status=$(openstack stack show teststack-$sfx | awk '/stack_status /{print $4}') ; then
     echo "ERROR: Heat resouce retreiving failed!"
     openstack stack list
-    ret=1
+    return 1
   fi
   if [[ $status != "CREATE_COMPLETE" ]]; then
     echo "ERROR: Heat resouce creation failed!"
     openstack stack show teststack-$sfx
-    ret=1
+    return 1
   fi
   echo "INFO: check heat passed"
 }
