@@ -67,7 +67,7 @@ services:
       region: ${REGION}
     expose: true
     to:
-      - "3"
+      - "5"
   nova-compute:
     charm: "cs:${SERIES}/nova-compute"
     series: ${SERIES}
@@ -126,7 +126,7 @@ services:
       region: ${REGION}
     expose: true
     to:
-      - "5"
+      - "3"
 
   contrail-keystone-auth:
     charm: "${JUJU_REPO}/contrail-keystone-auth"
