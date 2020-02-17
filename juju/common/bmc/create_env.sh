@@ -200,8 +200,10 @@ esac
 
 wait_for_all_machines
 
-echo "INFO: ISSU_TEST deploy second controller"
-run_controller 7 16384 0
+if [[ ${ISSU_VM,,} == 'true' ]]; then
+  echo "INFO: ISSU testing - deploy second controller"
+  run_controller 7 16384 0
+fi
 
 echo "INFO: Environment created $(date)"
 

@@ -198,6 +198,10 @@
           name: DOCKER_USERNAME
       - string:
           name: DOCKER_PASSWORD
+      - bool:
+          name: ISSU_VM
+          description: "Add one more machine for ISSU testing"
+          default: false
     scm:
       - contrail-charms-org-branch
       - juniper-ci
