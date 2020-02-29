@@ -109,15 +109,28 @@ env_opts+=" NETDEV=$NETDEV MGMT_IP=$MGMT_IP PROV_IP=$PROV_IP"
 sudo -u stack $env_opts /home/stack/__undercloud-install-2-as-stack-user.sh
 
 # increase timeouts due to virtual installation
-openstack-config --set /etc/nova/nova.conf DEFAULT rpc_response_timeout 600
-openstack-config --set /etc/nova/nova.conf DEFAULT dhcp_domain $CLOUD_DOMAIN_NAME
-openstack-config --set /etc/nova/nova.conf DEFAULT max_concurrent_builds 4
+if which openstack-config ; then
+  openstack-config --set /etc/nova/nova.conf DEFAULT rpc_response_timeout 600
+  openstack-config --set /etc/nova/nova.conf DEFAULT dhcp_domain $CLOUD_DOMAIN_NAME
+  openstack-config --set /etc/nova/nova.conf DEFAULT max_concurrent_builds 4
 
-openstack-config --set /etc/ironic/ironic.conf DEFAULT rpc_response_timeout 600
-openstack-config --set /etc/ironic/ironic.conf DEFAULT rpc_thread_pool_size 8
+  openstack-config --set /etc/ironic/ironic.conf DEFAULT rpc_response_timeout 600
+  openstack-config --set /etc/ironic/ironic.conf DEFAULT rpc_thread_pool_size 8
 
-openstack-config --set /etc/neutron/neutron.conf DEFAULT  dns_domain $CLOUD_DOMAIN_NAME
-openstack-config --set /etc/neutron/neutron.conf DEFAULT rpc_response_timeout 300
+  openstack-config --set /etc/neutron/neutron.conf DEFAULT  dns_domain $CLOUD_DOMAIN_NAME
+  openstack-config --set /etc/neutron/neutron.conf DEFAULT rpc_response_timeout 300
+
+else
+  sed -i "s/^[#]*rpc_response_timeout[ ]*=.*/rpc_response_timeout=600/g" /etc/nova/nova.conf
+  sed -i "s/^[#]*dhcp_domain[ ]*=.*/dhcp_domain=$CLOUD_DOMAIN_NAME/g" /etc/nova/nova.conf
+  sed -i "s/^[#]*max_concurrent_builds[ ]*=.*/max_concurrent_builds=4/g" /etc/nova/nova.conf
+
+  sed -i "s/^[#]*rpc_response_timeout[ ]*=.*/rpc_response_timeout=600/g" /etc/ironic/ironic.conf
+  sed -i "s/^[#]*rpc_thread_pool_size[ ]*=.*/rpc_thread_pool_size=8/g" /etc/ironic/ironic.conf
+
+  sed -i "s/^[#]*rpc_response_timeout[ ]*=.*/rpc_response_timeout=300/g" /etc/neutron/neutron.conf 
+  sed -i "s/^[#]*dns_domain[ ]*=.*/dns_domain=$CLOUD_DOMAIN_NAME/g" /etc/neutron/neutron.conf 
+fi
 
 # despite the field is depricated it is still important to set it
 # https://bugs.launchpad.net/neutron/+bug/1657814

@@ -351,9 +351,6 @@ function _prepare_host() {
   [ -n "$RHEL_ACTIVATION_KEY" ] && register_opts+=" --activationkey $RHEL_ACTIVATION_KEY"
   set -x
   local attach_opts='--auto'
-  if [[ "$OPENSTACK_VERSION" == 'stein' ]] ; then
-    RHEL_POOL_ID='8a85f99368b9397d01690f03afce5fe4'	   
-  fi	  
   if [[ -n "$RHEL_POOL_ID" ]] ; then
     attach_opts="--pool $RHEL_POOL_ID"
   fi
@@ -377,7 +374,7 @@ echo subscription-manager register ...
 subscription-manager register $register_opts
 set -x
 subscription-manager attach $attach_opts
-subscription-manager repos $repos_opts
+subscription-manager repos $repos_opts || true
 EOF
 }
 
