@@ -140,6 +140,12 @@ else
   sed -i "/^#.*dhcp_domain.*=/a dhcp_domain = ${CLOUD_DOMAIN_NAME}" /etc/neutron/dhcp_agent.ini
 fi
 
-openstack-service restart neutron
-openstack-service restart ironic
-openstack-service restart nova
+if which openstack-service ; then
+  openstack-service restart neutron
+  openstack-service restart ironic
+  openstack-service restart nova
+else
+  for i in $(systemctl list-units --state running | awk '/nova|neutron|ironic/{print($1)}') ; do
+    systemctl restart $i || true
+  done
+fi
