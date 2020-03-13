@@ -78,6 +78,9 @@ juju-status-tabular
 
 "$my_dir"/deploy_manual.sh
 
+export PASSWORD=`juju run --unit keystone/0 leader-get admin_passwd`
+echo "INFO: keystone password is $PASSWORD"
+
 #check it
 $my_dir/../common/check-openstack.sh
 

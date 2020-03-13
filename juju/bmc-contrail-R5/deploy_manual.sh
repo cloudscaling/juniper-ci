@@ -79,7 +79,8 @@ juju-expose glance
 
 juju-deploy cs:$SERIES/keystone --to lxd:$cont0 --config region=$REGION
 # by default preferred-api-version=3 for queens and above and =2 for previous versions
-juju-set keystone "admin-password=$PASSWORD" "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+# "admin-password=$PASSWORD" 
+juju-set keystone "admin-role=admin" "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 juju-expose keystone
 
 juju-deploy cs:$SERIES/heat --to lxd:$cont0 --config region=$REGION
