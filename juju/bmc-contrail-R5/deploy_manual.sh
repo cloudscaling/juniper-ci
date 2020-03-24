@@ -109,16 +109,18 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   controller_params="--config vip=$addr.254 --config haproxy-https-mode=http --config haproxy-http-mode=https"
 fi
 
+cluster_opts="--config min-cluster-size=5"
+
 docker_opts="--config docker-registry=$CONTAINER_REGISTRY --config image-tag=$CONTRAIL_VERSION --config docker-user=$DOCKER_USERNAME --config docker-password=$DOCKER_PASSWORD --config docker-registry-insecure=true"
-juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params --config log-level=SYS_DEBUG $control_network_cfg $name_resolution_cfg $docker_opts
+juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params --config log-level=SYS_DEBUG $control_network_cfg $name_resolution_cfg $docker_opts $cluster_opts
 juju-expose contrail-controller
 juju-set contrail-controller auth-mode=$AAA_MODE cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
 juju-set contrail-controller data-network=$PHYS_INT
 
-juju-deploy $PLACE/contrail-analyticsdb --to $cont1 --config log-level=SYS_DEBUG $control_network_cfg $docker_opts
+juju-deploy $PLACE/contrail-analyticsdb --to $cont1 --config log-level=SYS_DEBUG $control_network_cfg $docker_opts $cluster_opts
 juju-set contrail-analyticsdb cassandra-minimum-diskgb="4" cassandra-jvm-extra-opts="-Xms1g -Xmx2g"
 
-juju-deploy $PLACE/contrail-analytics --to $cont1 --config log-level=SYS_DEBUG $control_network_cfg $docker_opts
+juju-deploy $PLACE/contrail-analytics --to $cont1 --config log-level=SYS_DEBUG $control_network_cfg $docker_opts $cluster_opts
 juju-expose contrail-analytics
 
 if [ "$DEPLOY_MODE" == 'ha' ] ; then
