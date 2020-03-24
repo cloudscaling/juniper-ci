@@ -35,7 +35,7 @@ else
 fi
 export DEPLOY_MODE="${DEPLOY_MODE:-two}"
 export USE_SSL_OS="${USE_SSL_OS:-false}"
-export USE_SSL_CONTRAIL="false"
+export USE_SSL_CONTRAIL=${USE_SSL_CONTRAIL:-"false"}
 export USE_DPDK="${USE_DPDK:-false}"
 export PHYS_INT="${PHYS_INT:-}"
 export AAA_MODE=${AAA_MODE:-rbac}

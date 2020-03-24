@@ -164,6 +164,10 @@
           name: USE_SSL_OS
           description: "Deploy OpenStack with certificates"
           default: false
+      - bool:
+          name: USE_SSL_CONTRAIL
+          description: "Deploy Contrail with certificates"
+          default: false
       - string:
           name: REGION
           description: "OpenStack region to check non default value"
@@ -215,6 +219,7 @@
             if [[ "$USE_SSL_OS" == "true" ]] ; then desc="$desc +SSL_OS" ; fi
             if [[ "$USE_ADDITIONAL_INTERFACE" == "true" ]] ; then desc="$desc +TWO_IFACEs" ; fi
             if [[ "$USE_DPDK" == "true" ]] ; then desc="$desc +DPDK" ; fi
+            if [[ "$USE_SSL_CONTRAIL" == "true" ]] ; then desc="$desc +SSL_C" ; fi
           fi
           echo "DESCRIPTION $desc"
       - description-setter:
