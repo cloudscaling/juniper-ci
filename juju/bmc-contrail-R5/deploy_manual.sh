@@ -109,7 +109,11 @@ if [ "$DEPLOY_MODE" == 'ha' ] ; then
   controller_params="--config vip=$addr.254 --config haproxy-https-mode=http --config haproxy-http-mode=https"
 fi
 
-cluster_opts="--config min-cluster-size=5"
+if [ "$DEPLOY_MODE" == 'ha' ] ; then
+  cluster_opts="--config min-cluster-size=3"
+else
+  cluster_opts="--config min-cluster-size=1"
+fi
 
 docker_opts="--config docker-registry=$CONTAINER_REGISTRY --config image-tag=$CONTRAIL_VERSION --config docker-user=$DOCKER_USERNAME --config docker-password=$DOCKER_PASSWORD --config docker-registry-insecure=true"
 juju-deploy $PLACE/contrail-controller --to $cont1 $controller_params --config log-level=SYS_DEBUG $control_network_cfg $name_resolution_cfg $docker_opts $cluster_opts
