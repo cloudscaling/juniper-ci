@@ -96,6 +96,13 @@ juju-set neutron-api "debug=true" "manage-neutron-plugin-legacy-mode=false" "ope
 juju-set nova-cloud-controller "network-manager=Neutron"
 juju-expose neutron-api
 
+if [[ "$VERSION" == 'train' ]]; then
+  juju-deploy cs:$SERIES/placement --to lxd:$cont0 --config region=$REGION --config "debug=true" --config "openstack-origin=$OPENSTACK_ORIGIN"
+  juju-add-relation placement mysql
+  juju-add-relation placement keystone
+  juju-add-relation placement nova-cloud-controller
+fi
+
 # Contrail
 juju-deploy $PLACE/contrail-keystone-auth --to lxd:$cont1
 
