@@ -21,7 +21,7 @@ function create_virtualenv() {
   virtualenv "$WORKSPACE/.venv"
 
   activate_venv
-  pip install python-openstackclient python-heatclient &> "$WORKSPACE/logs/pip.log"
+  pip install "openstacksdk<0.44" python-openstackclient python-heatclient &> "$WORKSPACE/logs/pip.log"
   deactivate_venv
 }
 
