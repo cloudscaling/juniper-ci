@@ -94,7 +94,7 @@ parameter_defaults:
       name_suffix: ''
       namespace: registry.redhat.io/rhosp-beta
       neutron_driver: ovn
-      tag: 15.0
+      tag: 16.0
     tag_from_label: '{version}-{release}'
   ContainerImageRegistryCredentials:
     registry.redhat.io:
@@ -129,7 +129,7 @@ function create_images() {
 
   local config_opts=''
   if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-    if [[ "$OPENSTACK_VERSION" == 'stein' ]] ; then
+    if [[ "$OPENSTACK_VERSION" == 'train' ]] ; then
       export OS_YAML="/usr/share/openstack-tripleo-common/image-yaml/overcloud-images-rhel8.yaml"
       export REG_REPOS='rhel-7-for-x86_64-baseos-rpms rhel-8-for-x86_64-appstream-rpms rhel-8-for-x86_64-highavailability-rpms ansible-2.8-for-rhel-8-x86_64-rpms openstack-beta-for-rhel-8-x86_64-rpms satellite-tools-6.5-for-rhel-8-x86_64-rpms'
     else 	    

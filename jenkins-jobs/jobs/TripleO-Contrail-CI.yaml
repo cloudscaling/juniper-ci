@@ -60,6 +60,7 @@
             - 'pike'
             - 'rocky'
             - 'stein'
+            - 'train'
       - choice:
           name: CONTRAIL_VERSION
           description: "Version of Contrail"

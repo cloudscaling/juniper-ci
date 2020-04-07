@@ -52,6 +52,7 @@
             - 'mitaka'
             - 'rocky'
             - 'stein'
+            - 'train'
       - choice:
           name: CONTROLLER_COUNT
           description: "Count of OS controllers to deploy"

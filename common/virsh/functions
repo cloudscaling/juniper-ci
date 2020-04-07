@@ -352,6 +352,9 @@ function rhel_os2num() {
     stein)
       enable_repo='15'
       ;;
+    train)
+      enable_repo='16'
+      ;;
     *)
       echo "ERROR: unsupported OS $OPENSTACK_VERSION"
       exit 1
