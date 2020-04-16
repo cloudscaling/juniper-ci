@@ -101,11 +101,12 @@ juju bootstrap manual/$image_user@$juju_cont_ip $juju_controller_name
 function run_cloud_machine() {
   local name=${job_prefix}-$1
   local mac_suffix=$2
-  local mem=$3
-  local ip=$4
+  local cpu=$3
+  local mem=$4
+  local ip=$5
 
   local ip="$addr.$mac_suffix"
-  run_machine $name 4 $mem $mac_suffix $ip "$addr_vm.$mac_suffix"
+  run_machine $name $cpu $mem $mac_suffix $ip "$addr_vm.$mac_suffix"
   echo "INFO: start machine $name waiting $name $(date)"
   wait_kvm_machine $image_user@$ip
   echo "INFO: adding machine $name to juju controller $(date)"
@@ -131,7 +132,7 @@ function run_compute() {
   echo "INFO: creating compute $index (mac suffix $mac_suffix) $(date)"
   local ip="$addr.$mac_suffix"
   local ip2="$addr_vm.$mac_suffix"
-  run_cloud_machine comp-$index $mac_suffix 8192 $ip
+  run_cloud_machine comp-$index $mac_suffix 4 8192 $ip
   mch=`get_machine_by_ip $ip`
 
   echo "INFO: preparing compute $index $(date)"
@@ -143,13 +144,14 @@ function run_compute() {
 
 function run_controller() {
   local index=$1
-  local mem=$2
-  local prepare_for_openstack=$3
+  local cpu=$2
+  local mem=$3
+  local prepare_for_openstack=$4
   local mac_var_name="cont_${index}_idx"
   local mac_suffix=${!mac_var_name}
   echo "INFO: creating controller $index (mac suffix $mac_suffix) $(date)"
   local ip="$addr.$mac_suffix"
-  run_cloud_machine cont-$index $mac_suffix $mem $ip
+  run_cloud_machine cont-$index $mac_suffix $cpu $mem $ip
   mch=`get_machine_by_ip $ip`
 
   echo "INFO: preparing controller $index $(date)"
@@ -180,17 +182,17 @@ done
 
 case "$DEPLOY_MODE" in
   "one")
-    run_controller 0 16384 1
+    run_controller 0 8 16384 1
     ;;
   "two")
-    run_controller 0 8192 1
-    run_controller 1 16384 0
+    run_controller 0 8 16384 1
+    run_controller 1 4 16384 0
     ;;
   "ha")
-    run_controller 0 8192 1
-    run_controller 1 16384 0
-    run_controller 2 16384 0
-    run_controller 3 16384 0
+    run_controller 0 8 16384 1
+    run_controller 1 4 16384 0
+    run_controller 2 4 16384 0
+    run_controller 3 4 16384 0
     ;;
   *)
     echo "ERROR: Invalid mode: $DEPLOY_MODE (must be 'one', 'two' or 'ha')"
@@ -202,7 +204,7 @@ wait_for_all_machines
 
 if [[ ${ISSU_VM,,} == 'true' ]]; then
   echo "INFO: ISSU testing - deploy second controller"
-  run_controller 7 16384 0
+  run_controller 7 4 16384 0
 fi
 
 echo "INFO: Environment created $(date)"
