@@ -45,11 +45,10 @@
           default: 'master'
       - string:
           name: CONTAINER_REGISTRY
-          default: opencontrailnightly
+          default: tungstenfabric
       - string:
           name: CONTRAIL_VERSION
-          default: master-latest
-          description: "Tag's suffix for images from opencontrailnightly"
+          default: latest
     scm:
       - contrail-charms-org-branch
       - juniper-ci
@@ -136,11 +135,10 @@
           default: 'master'
       - string:
           name: CONTAINER_REGISTRY
-          default: opencontrailnightly
+          default: tungstenfabric
       - string:
           name: CONTRAIL_VERSION
-          default: master-latest
-          description: "Tag's suffix for images from opencontrailnightly"
+          default: latest
       - string:
           name: DOCKER_USERNAME
       - string:

@@ -7,12 +7,12 @@ services:
     charm: ../contrail-kubernetes-master
     series: xenial
     options:
-      image-tag: 'master-latest'
+      image-tag: 'latest'
       nested_mode: true
       cluster_project: "{'domain':'default-domain','project':'$OS_PROJECT_NAME'}"
       cluster_network: "{'domain':'default-domain','project':'$OS_PROJECT_NAME','name':'$networkname'}"
       service_subnets: '10.96.0.0/12'
-      docker-registry: 'opencontrailnightly'
+      docker-registry: 'tungstenfabric'
       nested_mode_config: |
         {
         "CONTROLLER_NODES": "$CONTROLLER_NODES",
@@ -33,8 +33,8 @@ services:
     charm: ../contrail-kubernetes-node
     series: xenial
     options:
-      docker-registry: 'opencontrailnightly'
-      image-tag: 'master-latest'
+      docker-registry: 'tungstenfabric'
+      image-tag: 'latest'
 
 
 # kubernetes

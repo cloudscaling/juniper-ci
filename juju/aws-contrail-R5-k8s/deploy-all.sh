@@ -32,8 +32,8 @@ fi
 
 export JOB_VERSION=R5
 export SERIES="${SERIES:-xenial}"
-export CONTAINER_REGISTRY=${CONTAINER_REGISTRY:-"opencontrailnightly"}
-export CONTRAIL_VERSION=${CONTRAIL_VERSION:-"master-latest"}
+export CONTAINER_REGISTRY=${CONTAINER_REGISTRY:-"tungstenfabric"}
+export CONTRAIL_VERSION=${CONTRAIL_VERSION:-"latest"}
 export CONTRAIL_HA=${CONTRAIL_HA:-'false'}
 export KUBERNETES_HA=${KUBERNETES_HA:-'false'}
 

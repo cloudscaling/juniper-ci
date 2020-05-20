@@ -61,11 +61,10 @@
           default: 'master'
       - string:
           name: CONTAINER_REGISTRY
-          default: opencontrailnightly
+          default: tungstenfabric
       - string:
           name: CONTRAIL_VERSION
-          default: master-latest
-          description: "Tag's suffix for images from opencontrailnightly. Prefix is a OPENSTACK_VERSION"
+          default: latest
       - bool:
           name: RUN_TEMPEST
           description: "Run neutron tests from tempest"
@@ -193,11 +192,10 @@
           default: 'master'
       - string:
           name: CONTAINER_REGISTRY
-          default: opencontrailnightly
+          default: tungstenfabric
       - string:
           name: CONTRAIL_VERSION
-          default: master-latest
-          description: "Tag's suffix for images from opencontrailnightly. Prefix is a OPENSTACK_VERSION"
+          default: latest
       - string:
           name: DOCKER_USERNAME
       - string:
