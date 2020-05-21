@@ -69,10 +69,10 @@ juju-set neutron-api "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "neutron-
 juju-set nova-cloud-controller "network-manager=Neutron"
 juju-expose neutron-api
 
-juju-deploy cd:$SERIES/neutron-openvswitch
+juju-deploy cs:$SERIES/neutron-openvswitch
 
-juju-deploy cs:$SERIES/neutron-gateway --to lxd:$cont0 --config "bridge-mappings=physnet1:br-ex" --config "data-port=br-ex:ens3"
-juju-set neutron-gateway "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
+#juju-deploy cs:$SERIES/neutron-gateway --to lxd:$cont0 --config "bridge-mappings=physnet1:br-ex" --config "data-port=br-ex:ens3"
+#juju-set neutron-gateway "debug=true" "openstack-origin=$OPENSTACK_ORIGIN"
 
 if [[ "$VERSION" == 'train' ]]; then
   juju-deploy cs:$SERIES/placement --to lxd:$cont0 --config region=$REGION --config "debug=true" --config "openstack-origin=$OPENSTACK_ORIGIN"
@@ -121,9 +121,9 @@ juju-add-relation "neutron-api:amqp" "rabbitmq-server:amqp"
 juju-add-relation "neutron-openvswitch:neutron-plugin-api" "neutron-api:neutron-plugin-api"
 juju-add-relation "nova-compute:neutron-plugin" "neutron-openvswitch:neutron-plugin"
 juju-add-relation "neutron-openvswitch:amqp" "rabbitmq-server:amqp"
-juju-add-relation "neutron-gateway" "rabbitmq-server:amqp"
-juju-add-relation "neutron-gateway:quantum-network-service" "nova-cloud-controller:quantum-network-service"
-juju-add-relation "neutron-gateway:neutron-plugin-api" "neutron-api:neutron-plugin-api"
+#juju-add-relation "neutron-gateway:amqp" "rabbitmq-server:amqp"
+#juju-add-relation "neutron-gateway:quantum-network-service" "nova-cloud-controller:quantum-network-service"
+#juju-add-relation "neutron-gateway:neutron-plugin-api" "neutron-api:neutron-plugin-api"
 
 post_deploy
 
