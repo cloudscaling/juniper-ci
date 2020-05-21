@@ -1,0 +1,73 @@
+---
+
+- job:
+    name: Juju-OpenStack-KVM
+    description: 'OpenStack on KVM by Juju'
+    defaults: global
+    concurrent: true
+    parameters:
+      - node:
+          name: SLAVE_NAME
+          description: "Select slave: one for specific node or multiple for any node."
+          default-slaves:
+            - slave01
+            - slave04
+          allowed-slaves:
+            - slave01
+            - slave04
+          ignore-offline-nodes: false
+          allowed-multiselect: true
+      - choice:
+          name: CLEAN_BEFORE
+          choices:
+            - 'false'
+            - 'true'
+            - clean_and_exit
+      - choice:
+          name: CLEAN_ENV
+          choices:
+            - always
+            - on_success
+            - never
+      - choice:
+          name: VERSION
+          description: "Version of the OpenStack. ocata -> xenial, queens/rocky/stein -> bionic."
+          choices:
+            - queens
+            - rocky
+            - stein
+            - train
+            - ocata
+      - string:
+          name: REGION
+          description: "OpenStack region to check non default value"
+          default: RegionOne
+      - bool:
+          name: ISSU_VM
+          description: "Add one more machine for ISSU testing"
+          default: false
+    scm:
+      - juniper-ci
+    builders:
+      - shell: |
+          #!/bin/bash -e
+          if [[ $CLEAN_BEFORE == 'clean_and_exit' ]] ; then
+            desc="cleanup"
+          else
+            desc="$SLAVE_NAME $VERSION $REGION"
+          fi
+          echo "DESCRIPTION $desc"
+      - description-setter:
+          regexp: "DESCRIPTION (.*)"
+      - shell: |
+          #!/bin/bash -e
+          export PATH="/snap/bin:$PATH"
+          export SERIES='xenial'
+          if [[ "$VERSION" == "queens" || "$VERSION" == "rocky" || "$VERSION" == "stein" || "$VERSION" == "train" ]] ; then
+            export SERIES='bionic'
+          fi
+          ./juniper-ci/juju/bmc-R5/deploy_all.sh
+    publishers:
+      - archive:
+          artifacts: 'logs/**'
+          allow-empty: 'true'

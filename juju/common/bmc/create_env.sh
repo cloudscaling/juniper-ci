@@ -194,6 +194,9 @@ case "$DEPLOY_MODE" in
     run_controller 2 4 16384 0
     run_controller 3 4 16384 0
     ;;
+  "os")
+    # openstack
+    run_controller 0 8 32768 1
   *)
     echo "ERROR: Invalid mode: $DEPLOY_MODE (must be 'one', 'two' or 'ha')"
     exit 1
