@@ -100,7 +100,7 @@ juju-expose neutron-api
 juju-deploy cs:$SERIES/ceph-mon --to lxd:$cont0
 juju-set ceph-mon "source=$OPENSTACK_ORIGIN" "expected-osd-count=1" "monitor-count=1"
 
-juju-deploy cs:$SERIES/ceph-osd --to lxd:$comp1
+juju-deploy cs:$SERIES/ceph-osd --to $comp1
 juju-add-unit ceph-osd --to $comp2
 juju-set ceph-osd "source=$OPENSTACK_ORIGIN" "osd-devices=/var/lib/ceph/storage"
 
