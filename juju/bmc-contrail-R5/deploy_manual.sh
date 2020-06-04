@@ -98,14 +98,16 @@ juju-expose neutron-api
 
 # Ceph
 juju-deploy cs:$SERIES/ceph-mon --to lxd:$cont0 --config region=$REGION
-juju-add-unit ceph-mon --to $comp1
-juju-add-unit ceph-mon --to $comp2
-juju-set ceph-mon "debug=true" "expected-osd-count=3"
+juju-set ceph-mon "debug=true" "source=$OPENSTACK_ORIGIN" "expected-osd-count=1" "monitor-count=1"
 
-juju-deploy cs:$SERIES/ceph-osd --to lxd:$cont0 --config region=$REGION
-juju-add-unit ceph-osd --to $comp1
+juju-deploy cs:$SERIES/ceph-osd --to lxd:$comp1 --config region=$REGION
 juju-add-unit ceph-osd --to $comp2
-juju-set ceph-osd "debug=true" "osd-devices=/var/lib/ceph/storage"
+juju-set ceph-osd "debug=true" "source=$OPENSTACK_ORIGIN" "osd-devices=/var/lib/ceph/storage"
+
+# cinder
+juju-deploy cs:$SERIES/cinder --to lxd:$cont0 --config region=$REGION
+juju-set cinder "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "block-device=None" "glance-api-version=2"
+juju-deploy cd:$SERIES/cinder-ceph
 
 if [[ "$VERSION" == 'train' ]]; then
   juju-deploy cs:$SERIES/placement --to lxd:$cont0 --config region=$REGION --config "debug=true" --config "openstack-origin=$OPENSTACK_ORIGIN"
@@ -201,6 +203,19 @@ juju-add-relation "nova-cloud-controller:shared-db" "mysql:shared-db"
 juju-add-relation "nova-cloud-controller:amqp" "rabbitmq-server:amqp"
 juju-add-relation "openstack-dashboard:identity-service" "keystone"
 
+juju-add-relation "cinder:image-service" "glance:image-service"
+juju-add-relation "cinder:amqp" "rabbitmq-server:amqp"
+juju-add-relation "cinder:identity-service" "keystone:identity-service"
+juju-add-relation "cinder:shared-db" "mysql:shared-db"
+
+juju-add-relation "cinder:cinder-volume-service" "nova-cloud-controller:cinder-volume-service"
+juju-add-relation "cinder-ceph:storage-backend" "cinder:storage-backend"
+juju-add-relation "ceph-mon:client" "nova-compute:ceph"
+juju-add-relation "nova-compute:ceph-access" "cinder-ceph:ceph-access"
+juju-add-relation "ceph-mon:client" "cinder-ceph:ceph"
+juju-add-relation "ceph-mon:client" "glance:ceph"
+juju-add-relation "ceph-osd:mon" "ceph-mon:osd"
+
 juju-add-relation "neutron-api:shared-db" "mysql:shared-db"
 juju-add-relation "neutron-api:neutron-api" "nova-cloud-controller:neutron-api"
 juju-add-relation "neutron-api:identity-service" "keystone:identity-service"
@@ -223,9 +238,6 @@ juju-add-relation "contrail-openstack" "contrail-controller"
 juju-add-relation "contrail-agent:juju-info" "nova-compute:juju-info"
 juju-add-relation "contrail-agent" "contrail-controller"
 
-juju-add-relation "ceph-osd" "ceph-mon"
-juju-add-relation "glance" "ceph-mon"
-juju-add-relation "nova-compute" "ceph-mon"
 
 post_deploy
 
