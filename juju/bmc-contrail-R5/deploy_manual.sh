@@ -107,7 +107,7 @@ juju-set ceph-osd "source=$OPENSTACK_ORIGIN" "osd-devices=/var/lib/ceph/storage"
 # cinder
 juju-deploy cs:$SERIES/cinder --to lxd:$cont0 --config region=$REGION
 juju-set cinder "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "block-device=None" "glance-api-version=2"
-juju-deploy cd:$SERIES/cinder-ceph
+juju-deploy cs:$SERIES/cinder-ceph
 
 if [[ "$VERSION" == 'train' ]]; then
   juju-deploy cs:$SERIES/placement --to lxd:$cont0 --config region=$REGION --config "debug=true" --config "openstack-origin=$OPENSTACK_ORIGIN"
