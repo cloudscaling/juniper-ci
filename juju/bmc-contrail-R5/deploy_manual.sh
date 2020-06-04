@@ -96,6 +96,17 @@ juju-set neutron-api "debug=true" "manage-neutron-plugin-legacy-mode=false" "ope
 juju-set nova-cloud-controller "network-manager=Neutron"
 juju-expose neutron-api
 
+# Ceph
+juju-deploy cs:$SERIES/ceph-mon --to lxd:$cont0 --config region=$REGION
+juju-add-unit ceph-mon --to $comp1
+juju-add-unit ceph-mon --to $comp2
+juju-set ceph-mon "debug=true" "expected-osd-count=3"
+
+juju-deploy cs:$SERIES/ceph-osd --to lxd:$cont0 --config region=$REGION
+juju-add-unit ceph-osd --to $comp1
+juju-add-unit ceph-osd --to $comp2
+juju-set ceph-osd "debug=true" "osd-devices=/var/lib/ceph/storage"
+
 if [[ "$VERSION" == 'train' ]]; then
   juju-deploy cs:$SERIES/placement --to lxd:$cont0 --config region=$REGION --config "debug=true" --config "openstack-origin=$OPENSTACK_ORIGIN"
   juju-add-relation placement mysql
@@ -211,6 +222,10 @@ juju-add-relation "contrail-openstack" "contrail-controller"
 
 juju-add-relation "contrail-agent:juju-info" "nova-compute:juju-info"
 juju-add-relation "contrail-agent" "contrail-controller"
+
+juju-add-relation "ceph-osd" "ceph-mon"
+juju-add-relation "glance" "ceph-mon"
+juju-add-relation "nova-compute" "ceph-mon"
 
 post_deploy
 
