@@ -97,10 +97,10 @@ juju-set nova-cloud-controller "network-manager=Neutron"
 juju-expose neutron-api
 
 # Ceph
-juju-deploy cs:$SERIES/ceph-mon --to lxd:$cont0 --config region=$REGION
+juju-deploy cs:$SERIES/ceph-mon --to lxd:$cont0
 juju-set ceph-mon "debug=true" "source=$OPENSTACK_ORIGIN" "expected-osd-count=1" "monitor-count=1"
 
-juju-deploy cs:$SERIES/ceph-osd --to lxd:$comp1 --config region=$REGION
+juju-deploy cs:$SERIES/ceph-osd --to lxd:$comp1
 juju-add-unit ceph-osd --to $comp2
 juju-set ceph-osd "debug=true" "source=$OPENSTACK_ORIGIN" "osd-devices=/var/lib/ceph/storage"
 
