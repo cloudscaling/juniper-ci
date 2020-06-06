@@ -37,6 +37,7 @@
           name: ENVIRONMENT_OS_VERSION
           description: "RHEL release version"
           choices:
+            - '7_8'
             - '7_7'
             - '8_0'
       - choice:
