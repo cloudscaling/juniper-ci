@@ -305,7 +305,7 @@ mkdir -p /root/contrail_packages
 mkdir -p /root/contrail_packages/net-snmp
 EOF
   local latest_ver_rpm=`ls ${CONTRAIL_PACKAGES_DIR}/${build_series}contrail-install* -vr  | grep $CONTRAIL_VERSION | grep $OPENSTACK_VERSION | head -n1`
-  scp $ssh_opts $latest_ver_rpm root@${addr}:/root/contrail_packages/
+  [ -n "$latest_ver_rpm" ] && scp $ssh_opts $latest_ver_rpm root@${addr}:/root/contrail_packages/
   # WORKAROUND to bug #1767456
   # TODO: remove net-snmp after fix bug #1767456
   scp -r $ssh_opts /home/jenkins/net-snmp root@${addr}:/root/contrail_packages/
