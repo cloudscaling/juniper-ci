@@ -81,7 +81,6 @@ yum deplist python-novajoin | awk '/provider:/ {print $2}' | sort -u | xargs yum
 
 curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
 python get-pip.py
-pip install -q virtualenv
 pip install -q novajoin==1.0.21 oslo.policy==1.33.2
 
 # # Prepare hostname
