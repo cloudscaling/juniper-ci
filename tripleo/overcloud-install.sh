@@ -16,8 +16,8 @@ if [[ -z "$OPENSTACK_VERSION" ]] ; then
 fi
 
 # TODO: export to job settings
-export CONTRAIL_REGISTRY=${CONTRAIL_REGISTRY:-'opencontrailnightly'}
-export CONTRAIL_TAG=${CONTRAIL_TAG:-'latest'}
+export CONTRAIL_REGISTRY=${CONTRAIL_REGISTRY:-'pnexus.sytes.net:5002'}
+export CONTRAIL_TAG=${CONTRAIL_TAG:-'nightly-master-rhel7'}
 # --
 
 export CCB_PATCHSET=${CCB_PATCHSET-}
@@ -284,6 +284,20 @@ openstack baremetal node list
 git config --global user.name jenkins.progmaticlab
 git config --global user.email jenkins@progmaticlab.com
 
+# starting from 1912 this job cannot build own container, use preabuilt from 
+# TF CI
+if [[ "$CONTRAIL_VERSION" =~ 1912 || "$CONTRAIL_VERSION" =~ 'master' ]] ; then
+  if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
+    echo "ERROR: not supported openstack $OPENSTACK_VERSION for Contrail $CONTRAIL_VERSION"
+    exit -1
+  fi
+  use_tf_ci_artifacts=true
+  export CONTAINER_REGISTRY=${CONTAINER_REGISTRY:-"pnexus.sytes.net:5002"}
+  export CONTRAIL_CONTAINER_TAG=${CONTRAIL_CONTAINER_TAG:-"nightly-master-rhel7"}
+else
+  use_tf_ci_artifacts=false
+fi
+
 # Starting from queens there is no needs to use puppets
 artifact_opts=""
 git_branch_ctp="stable/${OPENSTACK_VERSION}"
@@ -326,55 +340,56 @@ if [[ 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
   upload-swift-artifacts -c contrail-artifacts -f puppet-modules.tgz
   artifact_opts="-e .tripleo/environments/deployment-artifacts.yaml"
 else
-  if [[ ! -d contrail-container-builder ]] ; then
-    git clone -b $git_branch_ccb https://github.com/${git_repo_ccb}/contrail-container-builder
-  else
-    pushd contrail-container-builder
-    git fetch --all
-    git reset --hard origin/$git_branch_ccb
-    popd
-  fi
-  if [[ -n "$CCB_PATCHSET" ]] ; then
-    pushd contrail-container-builder
-    bash -c "$CCB_PATCHSET"
-    popd
-  fi
-  _old_cv=$CONTRAIL_VERSION
-  export CONTRAIL_VERSION=$(ls -1 /var/www/html | grep -o '\([0-9]\+\.\{0,1\}\)\{1,5\}-[0-9]\+' | sort -nr  | head -n 1)
-  if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' || -n "$TPP_PATCHSET" ]] ; then
-    [ ! -d contrail-packages ] && git clone https://github.com/Juniper/contrail-packages
-    pushd contrail-packages
-    rm -rf RPMS openstack
-    # update contrail-tripleo-puppet RPM
-    git clone https://github.com/${git_repo_ctp}/contrail-tripleo-puppet -b $git_branch_ctp openstack/contrail-tripleo-puppet
-    if [[ -n "$TPP_PATCHSET" ]] ; then
-      pushd openstack/contrail-tripleo-puppet
-      bash -c "$TPP_PATCHSET"
+  if [[ "$use_tf_ci_artifacts" != 'true' ]] ; then
+    if [[ ! -d contrail-container-builder ]] ; then
+      git clone -b $git_branch_ccb https://github.com/${git_repo_ccb}/contrail-container-builder
+    else
+      pushd contrail-container-builder
+      git fetch --all
+      git reset --hard origin/$git_branch_ccb
       popd
     fi
-    make rpm-contrail-tripleo-puppet
-    repo_dir="/var/www/html/${CONTRAIL_VERSION}"
-    sudo rm -f $repo_dir/contrail-tripleo-puppet*.rpm
-    sudo cp -f RPMS/noarch/*.rpm $repo_dir
-    pushd $repo_dir
-    sudo createrepo --update -v $repo_dir
-    popd
-    popd
-  fi
-  export _CONTRAIL_REGISTRY_IP=$prov_ip
-  export CONTRAIL_REGISTRY="${prov_ip}:8787"
-  export CONTRAIL_TAG="${CONTRAIL_VERSION}"
-  if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
-    export LINUX_DISTR=${LINUX_DISTR:-'rhel7'}
-    export LINUX_DISTR_VER=${LINUX_DISTR_VER:-'latest'}
-    export GENERAL_EXTRA_RPMS=""
-    export BASE_EXTRA_RPMS=""
-  else
-    export LINUX_DISTR=${LINUX_DISTR:-'centos'}
-    export LINUX_DISTR_VER=${LINUX_DISTR_VER:-'7.4.1708'}
-  fi
-  # save for easier debug
-  cat <<EOF > ~/build_env
+    if [[ -n "$CCB_PATCHSET" ]] ; then
+      pushd contrail-container-builder
+      bash -c "$CCB_PATCHSET"
+      popd
+    fi
+    _old_cv=$CONTRAIL_VERSION
+    export CONTRAIL_VERSION=$(ls -1 /var/www/html | grep -o '\([0-9]\+\.\{0,1\}\)\{1,5\}-[0-9]\+' | sort -nr  | head -n 1)
+    if [[ "$USE_DEVELOPMENT_PUPPETS" == 'true' || -n "$TPP_PATCHSET" ]] ; then
+      [ ! -d contrail-packages ] && git clone https://github.com/Juniper/contrail-packages
+      pushd contrail-packages
+      rm -rf RPMS openstack
+      # update contrail-tripleo-puppet RPM
+      git clone https://github.com/${git_repo_ctp}/contrail-tripleo-puppet -b $git_branch_ctp openstack/contrail-tripleo-puppet
+      if [[ -n "$TPP_PATCHSET" ]] ; then
+        pushd openstack/contrail-tripleo-puppet
+        bash -c "$TPP_PATCHSET"
+        popd
+      fi
+      make rpm-contrail-tripleo-puppet
+      repo_dir="/var/www/html/${CONTRAIL_VERSION}"
+      sudo rm -f $repo_dir/contrail-tripleo-puppet*.rpm
+      sudo cp -f RPMS/noarch/*.rpm $repo_dir
+      pushd $repo_dir
+      sudo createrepo --update -v $repo_dir
+      popd
+      popd
+    fi
+    export _CONTRAIL_REGISTRY_IP=$prov_ip
+    export CONTRAIL_REGISTRY="${prov_ip}:8787"
+    export CONTRAIL_TAG="${CONTRAIL_VERSION}"
+    if [[ "$ENVIRONMENT_OS" == 'rhel' ]] ; then
+      export LINUX_DISTR=${LINUX_DISTR:-'rhel7'}
+      export LINUX_DISTR_VER=${LINUX_DISTR_VER:-'latest'}
+      export GENERAL_EXTRA_RPMS=""
+      export BASE_EXTRA_RPMS=""
+    else
+      export LINUX_DISTR=${LINUX_DISTR:-'centos'}
+      export LINUX_DISTR_VER=${LINUX_DISTR_VER:-'7.4.1708'}
+    fi
+    # save for easier debug
+    cat <<EOF > ~/build_env
 export CONTRAIL_PARALLEL_BUILD=true
 export OPENSTACK_VERSION=$OPENSTACK_VERSION
 export CONTRAIL_VERSION=$CONTRAIL_VERSION
@@ -387,23 +402,24 @@ export LINUX_DISTR_VER=$LINUX_DISTR_VER
 [ -n "${BASE_EXTRA_RPMS+x}" ] && export BASE_EXTRA_RPMS="$BASE_EXTRA_RPMS"
 export DEPLOYERS_BASE_CONTAINER=${CONTRAIL_REGISTRY}/contrail-general-base:$CONTRAIL_VERSION
 EOF
-  # add TPC repo
-  cat <<EOF > contrail-container-builder/tpc.repo.template 
+    # add TPC repo
+    cat <<EOF > contrail-container-builder/tpc.repo.template 
 [tpc]
 name = tpc
 baseurl = http://148.251.5.90/tpc
 enabled = 1
 gpgcheck = 0
 EOF
-  pushd contrail-container-builder/containers
-  if [[ ! 'newton|ocata|pike|queens' =~ $OPENSTACK_VERSION  ]] ; then
-    # starting from rhosp14 no http on undercloud, so install own server for rpms
-    sudo package_root_dir="/var/www/html" ./install-http-server.sh
+    pushd contrail-container-builder/containers
+    if [[ ! 'newton|ocata|pike|queens' =~ $OPENSTACK_VERSION  ]] ; then
+      # starting from rhosp14 no http on undercloud, so install own server for rpms
+      sudo package_root_dir="/var/www/html" ./install-http-server.sh
+    fi
+    # TODO: dont fail build because some containers like vcenter fails in our env
+    ./build.sh || { echo "WARNING: some containers are failed." ; cat ./*.log || true ; }
+    popd
+    CONTRAIL_VERSION=$_old_cv
   fi
-  # TODO: dont fail build because some containers like vcenter fails in our env
-  ./build.sh || { echo "WARNING: some containers are failed." ; cat ./*.log || true ; }
-  popd
-  CONTRAIL_VERSION=$_old_cv
 fi
 
 # prepare tripleo heat templates
@@ -1103,6 +1119,14 @@ contrail_vip_env_opts="-e $contrail_vip_env"
 docker_opts=''
 openstack_ver_specific=''
 if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
+
+  if [[ "${use_tf_ci_artifacts,,}" == 'true' ]] ; then
+    ~/tripleo-heat-templates/tools/contrail/import_contrail_container.sh -i \
+      -r $CONTRAIL_REGISTRY -t $CONTRAIL_TAG \
+      -f ~/contrail_containers.yaml
+     openstack overcloud container image upload --config-file ~/contrail_containers.yaml
+  fi
+
   contrail_vip_env_opts=''
   openstack_ver_specific=' -e tripleo-heat-templates/environments/contrail/contrail-plugins.yaml'
 
