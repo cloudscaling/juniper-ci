@@ -1121,7 +1121,7 @@ openstack_ver_specific=''
 if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
 
   if [[ "${use_tf_ci_artifacts,,}" == 'true' ]] ; then
-    ~/tripleo-heat-templates/tools/contrail/import_contrail_container.sh -i \
+    ~/tripleo-heat-templates/tools/contrail/import_contrail_container.sh -i 1 \
       -r $CONTRAIL_REGISTRY -t $CONTRAIL_TAG \
       -f ~/contrail_containers.yaml
      openstack overcloud container image upload --config-file ~/contrail_containers.yaml
