@@ -1124,7 +1124,8 @@ if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
     ~/tripleo-heat-templates/tools/contrail/import_contrail_container.sh -i 1 \
       -r $CONTRAIL_REGISTRY -t $CONTRAIL_TAG \
       -f ~/contrail_containers.yaml
-     openstack overcloud container image upload --config-file ~/contrail_containers.yaml
+    sed -i "s/push_destination: .*/push_destination: ${prov_ip}:8787/g" ~/contrail_containers.yaml
+    openstack overcloud container image upload --config-file ~/contrail_containers.yaml
   fi
 
   contrail_vip_env_opts=''
