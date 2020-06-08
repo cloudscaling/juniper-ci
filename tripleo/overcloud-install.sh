@@ -1131,7 +1131,7 @@ if [[ ! 'newton|ocata|pike' =~ $OPENSTACK_VERSION ]] ; then
   contrail_vip_env_opts=''
   openstack_ver_specific=' -e tripleo-heat-templates/environments/contrail/contrail-plugins.yaml'
 
-  sed -i "s/.*ContrailRegistry:.*/  ContrailRegistry: $CONTRAIL_REGISTRY/g" $contrail_services_file
+  sed -i "s/.*ContrailRegistry:.*/  ContrailRegistry: ${prov_ip}:8787/g" $contrail_services_file
   sed -i "s/.*ContrailImageTag:.*/  ContrailImageTag: $CONTRAIL_TAG/g" $contrail_services_file
   sed -i "s/.*ContrailRegistryInsecure:.*/  ContrailRegistryInsecure: True/g" $contrail_services_file
   sed -i "s/.*ContrailRegistryCertUrl:.*/  ContrailRegistryCertUrl: ''/g" $contrail_services_file
