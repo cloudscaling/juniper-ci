@@ -76,12 +76,12 @@ echo "INFO: creating environment $(date)"
 "$my_dir"/../common/bmc/create_env.sh
 juju-status-tabular
 
-"$my_dir"/deploy_manual.sh
+#"$my_dir"/deploy_manual.sh
 
 #check it
-$my_dir/../common/check-openstack.sh
+#$my_dir/../common/check-openstack.sh
 
-$my_dir/../save-logs.sh
+#$my_dir/../save-logs.sh
 
 trap - ERR EXIT
 

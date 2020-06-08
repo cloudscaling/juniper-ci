@@ -172,8 +172,8 @@ function run_controller() {
     wait_kvm_machine $mch juju-ssh
   fi
 
-  juju-scp "$my_dir/files/lxd-default.yaml" $mch:lxd-default.yaml 2>/dev/null
-  juju-ssh $mch "cat ./lxd-default.yaml | sudo lxc profile edit default"
+  #juju-scp "$my_dir/files/lxd-default.yaml" $mch:lxd-default.yaml 2>/dev/null
+  #juju-ssh $mch "cat ./lxd-default.yaml | sudo lxc profile edit default"
 }
 
 for ((i=1; i<=comp_count; ++i)); do
