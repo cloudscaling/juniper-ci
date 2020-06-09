@@ -167,7 +167,7 @@ if [[ "$USE_DPDK" == "true" ]] ; then
 fi
 
 detect_machines
-wait_for_machines $m1 $m2 $m3 $m4 $m5
+#wait_for_machines $m1 $m2 $m3 $m4 $m5
 echo "INFO: Apply SSL flag if set $(date)"
 apply_ssl contrail
 
