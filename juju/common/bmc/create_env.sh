@@ -96,7 +96,8 @@ run_machine ${job_prefix}-cont 1 2048 $juju_cont_idx $juju_cont_ip
 wait_kvm_machine $image_user@$juju_cont_ip
 
 echo "INFO: bootstraping juju controller $(date)"
-juju bootstrap manual/$image_user@$juju_cont_ip $juju_controller_name
+juju bootstrap --config container-networking-method=provider manual/$image_user@$juju_cont_ip $juju_controller_name
+# --config fan-config=10.0.0.0/16=252.0.0.0/8 
 
 function run_cloud_machine() {
   local name=${job_prefix}-$1
