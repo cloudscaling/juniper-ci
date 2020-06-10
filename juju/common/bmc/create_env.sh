@@ -96,7 +96,8 @@ run_machine ${job_prefix}-cont 1 2048 $juju_cont_idx $juju_cont_ip
 wait_kvm_machine $image_user@$juju_cont_ip
 
 echo "INFO: bootstraping juju controller $(date)"
-juju bootstrap --config container-networking-method=fan --config fan-config=$addr.0/24=252.0.0.0/8 manual/$image_user@$juju_cont_ip $juju_controller_name
+fan_config="--config container-networking-method=fan --config fan-config=$addr.0/24=252.0.0.0/8"
+juju bootstrap manual/$image_user@$juju_cont_ip $juju_controller_name
 
 function run_cloud_machine() {
   local name=${job_prefix}-$1
@@ -172,8 +173,8 @@ function run_controller() {
     wait_kvm_machine $mch juju-ssh
   fi
 
-  #juju-scp "$my_dir/files/lxd-default.yaml" $mch:lxd-default.yaml 2>/dev/null
-  #juju-ssh $mch "cat ./lxd-default.yaml | sudo lxc profile edit default"
+  juju-scp "$my_dir/files/lxd-default.yaml" $mch:lxd-default.yaml 2>/dev/null
+  juju-ssh $mch "cat ./lxd-default.yaml | sudo lxc profile edit default"
 }
 
 for ((i=1; i<=comp_count; ++i)); do
