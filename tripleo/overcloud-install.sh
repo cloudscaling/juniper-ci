@@ -16,7 +16,7 @@ if [[ -z "$OPENSTACK_VERSION" ]] ; then
 fi
 
 # TODO: export to job settings
-export CONTRAIL_REGISTRY=${CONTRAIL_REGISTRY:-'pnexus.sytes.net:5002'}
+export CONTRAIL_REGISTRY=${CONTRAIL_REGISTRY:-'nexus.jenkins.progmaticlab.com:5002'}
 export CONTRAIL_TAG=${CONTRAIL_TAG:-'nightly-master-rhel7'}
 # --
 
@@ -292,7 +292,7 @@ if [[ "$CONTRAIL_VERSION" =~ 1912 || "$CONTRAIL_VERSION" =~ 'master' ]] ; then
     exit -1
   fi
   use_tf_ci_artifacts=true
-  export CONTAINER_REGISTRY=${CONTAINER_REGISTRY:-"pnexus.sytes.net:5002"}
+  export CONTAINER_REGISTRY=${CONTAINER_REGISTRY:-"nexus.jenkins.progmaticlab.com:5002"}
   export CONTRAIL_CONTAINER_TAG=${CONTRAIL_CONTAINER_TAG:-"nightly-master-rhel7"}
 else
   use_tf_ci_artifacts=false
