@@ -26,7 +26,7 @@
       - choice:
           name: CONTAINER_REGISTRY
           choices:
-            - opencontrailnightly
+            - tungstengfabric
             - build
             - fullbuild
       - string:
@@ -34,8 +34,8 @@
           description: "Aditional environment's variables to use during containers of full build"
       - string:
           name: CONTRAIL_VERSION
-          default: master-latest
-          description: "Tag's suffix for images from opencontrailnightly. Prefix is a OPENSTACK_VERSION"
+          default: latest
+          description: "Tag's suffix for images from tungstenfabric"
       - choice:
           name: OPENSTACK_VERSION
           choices:
