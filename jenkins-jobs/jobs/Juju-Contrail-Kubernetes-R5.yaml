@@ -50,7 +50,7 @@
           name: CONTRAIL_VERSION
           default: latest
     scm:
-      - contrail-charms-org-branch
+      - tf-charms-org-branch
       - juniper-ci
     builders:
       - shell: |
@@ -151,7 +151,7 @@
             - auto
           description: Valid values are "upstream" (Docker PPA), "apt" (Ubuntu archive), "auto" (Ubuntu archive)
     scm:
-      - contrail-charms-org-branch
+      - tf-charms-org-branch
       - juniper-ci
     builders:
       - shell: |

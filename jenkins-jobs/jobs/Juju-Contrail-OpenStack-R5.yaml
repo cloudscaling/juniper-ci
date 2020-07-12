@@ -70,7 +70,7 @@
           description: "Run neutron tests from tempest"
           default: false
     scm:
-      - contrail-charms-org-branch
+      - tf-charms-org-branch
       - juniper-ci
       - tempest
     builders:
@@ -205,7 +205,7 @@
           description: "Add one more machine for ISSU testing"
           default: false
     scm:
-      - contrail-charms-org-branch
+      - tf-charms-org-branch
       - juniper-ci
     builders:
       - shell: |
