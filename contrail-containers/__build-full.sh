@@ -29,7 +29,7 @@ fi
 echo "INFO: Start build $(date)"
 
 git clone https://github.com/tungstenfabric/tf-dev-env.git
-cd contrail-dev-env
+cd tf-dev-env
 
 # hack contrail-dev-env for our configuration/settings.
 # TODO: make all of them configurable

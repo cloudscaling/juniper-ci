@@ -97,19 +97,19 @@
           repo: tempest
 
 - scm:
-    name: contrail-container-builder
+    name: tf-container-builder
     scm:
       - github:
-          organization: juniper
-          repo: contrail-container-builder
+          organization: tungstenfabric
+          repo: tf-container-builder
 - scm:
-    name: contrail-ansible-deployer
+    name: tf-ansible-deployer
     scm:
       - github:
-          organization: juniper
-          repo: contrail-ansible-deployer
+          organization: tungstenfabric
+          repo: tf-ansible-deployer
 - scm:
-    name: contrail-charms-org-branch
+    name: tf-charms-org-branch
     scm:
       - github-branch:
           organization: ${CHARMS_REPO_ORG}

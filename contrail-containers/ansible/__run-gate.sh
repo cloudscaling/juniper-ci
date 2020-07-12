@@ -3,19 +3,19 @@
 mkdir -p /root/.ssh && cp /.ssh/* /root/.ssh/ && chown root:root /root/.ssh
 cd /root
 
-# clone contrail-kolla-ansible by here to avoid problems with new files created under root account
+# clone tf-kolla-ansible by here to avoid problems with new files created under root account
 # clone it to be able to apply patchset
 if [[ -n "$KOLLA_PATCHSET_CMD" ]]; then
   git clone -b contrail/$OPENSTACK_VERSION https://github.com/tungstenfabric/tf-kolla-ansible.git
-  pushd contrail-kolla-ansible
+  pushd tf-kolla-ansible
   /bin/bash -c "$KOLLA_PATCHSET_CMD"
   popd
 fi
 
 function save_logs() {
   mkdir -p /root/logs/kolla
-  cp /root/contrail-kolla-ansible/etc/kolla/globals.yml /root/logs/kolla/
-  cp /root/contrail-kolla-ansible/ansible/host_vars/* /root/logs/kolla/ || /bin/true
+  cp /root/tf-kolla-ansible/etc/kolla/globals.yml /root/logs/kolla/
+  cp /root/tf-kolla-ansible/ansible/host_vars/* /root/logs/kolla/ || /bin/true
   chmod -R a+rw /root/logs/kolla
 }
 
@@ -37,14 +37,14 @@ virt_type=qemu
 EOF
 fi
 
-cd contrail-ansible-deployer
+cd tf-ansible-deployer
 cat >>ansible.cfg <<EOF
 [ssh_connection]
 ssh_args = -o ControlMaster=no
 EOF
-ansible-playbook -v -e orchestrator=openstack -e config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/configure_instances.yml
-ansible-playbook -v -e orchestrator=openstack -e config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/install_openstack.yml
-ansible-playbook -v -e orchestrator=openstack -e config_file=/root/contrail-ansible-deployer/instances.yaml playbooks/install_contrail.yml
+ansible-playbook -v -e orchestrator=openstack -e config_file=/root/tf-ansible-deployer/instances.yaml playbooks/configure_instances.yml
+ansible-playbook -v -e orchestrator=openstack -e config_file=/root/tf-ansible-deployer/instances.yaml playbooks/install_openstack.yml
+ansible-playbook -v -e orchestrator=openstack -e config_file=/root/tf-ansible-deployer/instances.yaml playbooks/install_contrail.yml
 
 trap - ERR
 save_logs

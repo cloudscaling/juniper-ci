@@ -45,7 +45,7 @@ fi
 source "$my_dir/../common/${HOST}/${ENVIRONMENT_OS}"
 
 prepare_image centos-soft
-clone_clean_and_patched_repo contrail-ansible-deployer
+clone_clean_and_patched_repo tf-ansible-deployer
 
 IP_VM_01=`echo $nodes_cont_ips | cut -d ' ' -f 1`
 IP_VM_04=`echo $nodes_comp_ips | cut -d ' ' -f 1`
@@ -96,19 +96,19 @@ else
   VIRT_TYPE=kvm
 fi
 
-config=$WORKSPACE/contrail-ansible-deployer/instances.yaml
+config=$WORKSPACE/tf-ansible-deployer/instances.yaml
 envsubst <$my_dir/instances.yaml.${HA}.tmpl >$config
 echo "INFO: cloud config ------------------------- $(date)"
 cat $config
 cp $config $WORKSPACE/logs/
 $SCP $config ${SSH_USER}@${master_ip}:
 
-if echo "$PATCHSET_LIST" | grep -q "/contrail-kolla-ansible " ; then
-  patchset=`echo "$PATCHSET_LIST" | grep "/contrail-kolla-ansible "`
+if echo "$PATCHSET_LIST" | grep -q "/tf-kolla-ansible " ; then
+  patchset=`echo "$PATCHSET_LIST" | grep "/tf-kolla-ansible "`
 fi
 
 mkdir -p $WORKSPACE/logs/deployer
-volumes="-v $WORKSPACE/contrail-ansible-deployer:/root/contrail-ansible-deployer"
+volumes="-v $WORKSPACE/tf-ansible-deployer:/root/tf-ansible-deployer"
 volumes+=" -v $HOME/.ssh:/.ssh"
 volumes+=" -v $WORKSPACE/logs/deployer:/root/logs"
 volumes+=" -v $my_dir/__run-gate.sh:/root/run-gate.sh"
