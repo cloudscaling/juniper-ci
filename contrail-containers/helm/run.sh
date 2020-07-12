@@ -50,7 +50,7 @@ for ip in $nodes_ips ; do
 
   echo "INFO: clone helm repos to node $ip"
   $SSH_CMD $SSH_USER@$ip "sudo mkdir -p /opt && sudo chown $SSH_USER /opt"
-  for repo in 'progmaticlab/openstack-helm' 'openstack/openstack-helm-infra' 'juniper/contrail-helm-deployer' ; do
+  for repo in 'openstack/openstack-helm' 'openstack/openstack-helm-infra' 'tungstenfabric/tf-helm-deployer' ; do
     org='Juniper'
     $SSH_CMD $SSH_USER@$ip "git clone https://github.com/$org/${repo}.git /opt/$repo"
     if echo "$PATCHSET_LIST" | grep -q "/${repo} " ; then

@@ -28,7 +28,7 @@ fi
 
 echo "INFO: Start build $(date)"
 
-git clone https://github.com/Juniper/contrail-dev-env.git
+git clone https://github.com/tungstenfabric/tf-dev-env.git
 cd contrail-dev-env
 
 # hack contrail-dev-env for our configuration/settings.
@@ -67,8 +67,8 @@ for repoc in \`find . | grep ".git/config\$" | grep -v "\.repo"\` ; do
   fi
 done
 
-ccb_dir=/root/src/review.opencontrail.org/Juniper/contrail-container-builder
-[ -d \${ccb_dir} ] || git clone https://github.com/Juniper/contrail-container-builder \${ccb_dir}
+ccb_dir=/root/src/review.opencontrail.org/tungstenfabric/tf-container-builder
+[ -d \${ccb_dir} ] || git clone https://github.com/tungstenfabric/tf-container-builder \${ccb_dir}
 if patchlist=\`grep "/contrail-container-builder " /root/patches\` ; then
   pushd \$ccb_dir >/dev/nul
   eval "\$patchlist"
