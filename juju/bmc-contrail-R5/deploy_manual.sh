@@ -97,17 +97,18 @@ juju-set nova-cloud-controller "network-manager=Neutron"
 juju-expose neutron-api
 
 # Ceph
-juju-deploy cs:$SERIES/ceph-mon --to lxd:$cont0
-juju-set ceph-mon "source=$OPENSTACK_ORIGIN" "expected-osd-count=1" "monitor-count=1"
+#juju-deploy cs:$SERIES/ceph-mon --to lxd:$cont0
+#juju-set ceph-mon "source=$OPENSTACK_ORIGIN" "expected-osd-count=1" "monitor-count=1"
 
-juju-deploy cs:$SERIES/ceph-osd --to $comp1
-juju-add-unit ceph-osd --to $comp2
-juju-set ceph-osd "source=$OPENSTACK_ORIGIN" "osd-devices=/var/lib/ceph/storage"
+#juju-deploy cs:$SERIES/ceph-osd --to $comp1
+#juju-add-unit ceph-osd --to $comp2
+#juju-add-unit ceph-osd --to $cont0
+#juju-set ceph-osd "source=$OPENSTACK_ORIGIN" "osd-devices=/var/lib/ceph/storage"
 
 # cinder
-juju-deploy cs:$SERIES/cinder --to lxd:$cont0 --config region=$REGION
-juju-set cinder "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "block-device=None" "glance-api-version=2"
-juju-deploy cs:$SERIES/cinder-ceph
+#juju-deploy cs:$SERIES/cinder --to lxd:$cont0 --config region=$REGION
+#juju-set cinder "debug=true" "openstack-origin=$OPENSTACK_ORIGIN" "block-device=None" "glance-api-version=2"
+#juju-deploy cs:$SERIES/cinder-ceph
 
 if [[ "$VERSION" == 'train' ]]; then
   juju-deploy cs:$SERIES/placement --to lxd:$cont0 --config region=$REGION --config "debug=true" --config "openstack-origin=$OPENSTACK_ORIGIN"
@@ -208,13 +209,13 @@ juju-add-relation "cinder:amqp" "rabbitmq-server:amqp"
 juju-add-relation "cinder:identity-service" "keystone:identity-service"
 juju-add-relation "cinder:shared-db" "mysql:shared-db"
 
-juju-add-relation "cinder:cinder-volume-service" "nova-cloud-controller:cinder-volume-service"
-juju-add-relation "cinder-ceph:storage-backend" "cinder:storage-backend"
-juju-add-relation "ceph-mon:client" "nova-compute:ceph"
-juju-add-relation "nova-compute:ceph-access" "cinder-ceph:ceph-access"
-juju-add-relation "ceph-mon:client" "cinder-ceph:ceph"
-juju-add-relation "ceph-mon:client" "glance:ceph"
-juju-add-relation "ceph-osd:mon" "ceph-mon:osd"
+#juju-add-relation "cinder:cinder-volume-service" "nova-cloud-controller:cinder-volume-service"
+#juju-add-relation "cinder-ceph:storage-backend" "cinder:storage-backend"
+#juju-add-relation "ceph-mon:client" "nova-compute:ceph"
+#juju-add-relation "nova-compute:ceph-access" "cinder-ceph:ceph-access"
+#juju-add-relation "ceph-mon:client" "cinder-ceph:ceph"
+#juju-add-relation "ceph-mon:client" "glance:ceph"
+#juju-add-relation "ceph-osd:mon" "ceph-mon:osd"
 
 juju-add-relation "neutron-api:shared-db" "mysql:shared-db"
 juju-add-relation "neutron-api:neutron-api" "nova-cloud-controller:neutron-api"
