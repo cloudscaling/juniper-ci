@@ -17,9 +17,10 @@ mac_base_vm='52:54:13:11:00'
 # juju controller
 juju_cont_idx='99'
 # openstack compute
-comp_count=2
+comp_count=3
 comp_1_idx='30'
 comp_2_idx='31'
+comp_3_idx='32'
 # openstack components (controllers + rabbit + db)
 cont_0_idx='10'
 # contrail controllers

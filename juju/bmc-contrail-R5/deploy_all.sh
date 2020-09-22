@@ -75,6 +75,7 @@ env|sort
 echo "INFO: creating environment $(date)"
 "$my_dir"/../common/bmc/create_env.sh
 juju-status-tabular
+exit 0
 
 "$my_dir"/deploy_manual.sh
 
