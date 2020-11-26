@@ -16,10 +16,10 @@
 # Creating Treasuremap EC2 host
 - hosts: localhost
   vars: 
-    instance_type: m5.8xlarge
+    instance_type: m5.4xlarge
     volume_size: 300
     akraino_group: treasuremap_host
-    spot_price: 1.792
+    spot_price: 0.9
     project_variables: "vars/akraino.yaml"
   vars_files:
     - "{{ project_variables }}"
