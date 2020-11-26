@@ -19,7 +19,7 @@
     instance_type: m5.8xlarge
     volume_size: 300
     akraino_group: treasuremap_host
-    spot_price: 0.5
+    spot_price: 1.792
     project_variables: "vars/akraino.yaml"
   vars_files:
     - "{{ project_variables }}"
